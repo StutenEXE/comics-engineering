@@ -1,0 +1,94 @@
+@startuml
+
+package Relational {
+    class User {
+        *id: id
+        email: text
+        password: hash
+        created_at: datetime
+        modified_at: datetime
+    }
+
+    class Book {
+        *id: id
+        name: text
+        desc: longtext
+        number: number
+        created_at: datetime
+        modified_at: datetime
+    }
+
+    class Edition {
+        *id: id
+        -publisher_id: id
+        -book_id: id
+        isbn: text
+        ean: text
+        url: text
+        img_url: text
+        created_at: datetime
+        modified_at: datetime
+    }
+    note top: isbn and ean treated, no "-"
+
+    class Series {
+        *id: id
+        name: text
+        ongoing: boolean
+        oneshot: boolean
+        nvolumes: text
+        created_at: datetime
+        modified_at: datetime
+    }
+    note top: number can be null
+
+    class Publisher {
+        *id: id
+        name: text
+        created_at: datetime
+        modified_at: datetime
+    }
+	
+	class BookOwnership {
+        - *user_id: id
+        - *book_id: id
+        read: boolean
+        gift: boolean
+        buy_price: float
+        date: datetime
+    }
+    note top: composed pkey
+
+    class Wishlist {
+        - *user_id: id
+        - *book_id: id
+    }
+    note top: composed pkey
+}
+
+package NonRelational {
+    class Book {
+        *id: id
+        retail_prices: [
+            { source: text, price: float, date: datetime }
+        ]
+        second_hand_prices: [
+            { source: text, price: float, date: datetime }
+        ]
+    }
+}
+
+BookOwnership "*" --> "1" Relational.Book
+BookOwnership "*" --> "1" User
+
+Wishlist "*" --> "1" Relational.Book
+Wishlist "*" --> "1" User
+
+Edition "*" --> "1" Relational.Book
+Edition "*" --> "1" Publisher
+
+Relational.Book "*" --> "1" Series
+
+Relational.Book ..> NonRelational.Book
+
+@enduml
