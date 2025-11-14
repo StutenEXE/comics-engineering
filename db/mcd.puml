@@ -1,6 +1,6 @@
-@startuml
+@startuml mcd comics engineering
 
-package Relational {
+package comics_db {
     class User {
         *id: id
         email: text
@@ -22,6 +22,7 @@ package Relational {
         *id: id
         -publisher_id: id
         -book_id: id
+        -added_by: id
         isbn: text
         ean: text
         url: text
@@ -66,7 +67,7 @@ package Relational {
     note top: composed pkey
 }
 
-package NonRelational {
+package comics_prices_db {
     class Book {
         *id: id
         retail_prices: [
@@ -78,17 +79,18 @@ package NonRelational {
     }
 }
 
-BookOwnership "*" --> "1" Relational.Book
+BookOwnership "*" --> "1" comics_db.Book
 BookOwnership "*" --> "1" User
 
-Wishlist "*" --> "1" Relational.Book
+Wishlist "*" --> "1" comics_db.Book
 Wishlist "*" --> "1" User
 
-Edition "*" --> "1" Relational.Book
+Edition "*" --> "1" comics_db.Book
 Edition "*" --> "1" Publisher
+Edition "*" --> "1" User
 
-Relational.Book "*" --> "1" Series
+comics_db.Book "*" --> "1" Series
 
-Relational.Book ..> NonRelational.Book
+comics_db.Book ..> comics_prices_db.Book
 
 @enduml
