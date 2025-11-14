@@ -3,6 +3,7 @@
 package comics_db {
     class Users {
         *id: id
+        name: text
         email: text
         password: hash
         created_at: datetime
