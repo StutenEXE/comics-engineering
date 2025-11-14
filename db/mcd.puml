@@ -1,7 +1,7 @@
 @startuml mcd comics engineering
 
 package comics_db {
-    class User {
+    class Users {
         *id: id
         email: text
         password: hash
@@ -9,7 +9,7 @@ package comics_db {
         modified_at: datetime
     }
 
-    class Book {
+    class Books {
         *id: id
         name: text
         desc: longtext
@@ -18,7 +18,7 @@ package comics_db {
         modified_at: datetime
     }
 
-    class Edition {
+    class Editions {
         *id: id
         -publisher_id: id
         -book_id: id
@@ -43,7 +43,7 @@ package comics_db {
     }
     note top: number can be null
 
-    class Publisher {
+    class Publishers {
         *id: id
         name: text
         created_at: datetime
@@ -79,18 +79,18 @@ package comics_prices_db {
     }
 }
 
-BookOwnership "*" --> "1" comics_db.Book
-BookOwnership "*" --> "1" User
+BookOwnership "*" --> "1" comics_db.Books
+BookOwnership "*" --> "1" Users
 
-Wishlist "*" --> "1" comics_db.Book
-Wishlist "*" --> "1" User
+Wishlist "*" --> "1" comics_db.Books
+Wishlist "*" --> "1" Users
 
-Edition "*" --> "1" comics_db.Book
-Edition "*" --> "1" Publisher
-Edition "*" --> "1" User
+Editions "*" --> "1" comics_db.Books
+Editions "*" --> "1" Publishers
+Editions "*" --> "1" Users
 
-comics_db.Book "*" --> "1" Series
+comics_db.Books "*" --> "1" Series
 
-comics_db.Book ..> comics_prices_db.Book
+comics_db.Books ..> comics_prices_db.Book
 
 @enduml

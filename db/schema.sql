@@ -1,7 +1,7 @@
 -- Schema generated from db/mcd.puml (and manually edited)
 
 -- Users
-CREATE TABLE IF NOT EXISTS "user" (
+CREATE TABLE IF NOT EXISTS users (
 	id SERIAL PRIMARY KEY,
 	email TEXT NOT NULL UNIQUE,
 	password TEXT NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS "user" (
 );
 
 -- Publishers
-CREATE TABLE IF NOT EXISTS publisher (
+CREATE TABLE IF NOT EXISTS publishers (
 	id SERIAL PRIMARY KEY,
 	name TEXT NOT NULL UNIQUE,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS publisher (
 );
 
 -- Serie
-CREATE TABLE IF NOT EXISTS serie (
+CREATE TABLE IF NOT EXISTS series (
 	id SERIAL PRIMARY KEY,
 	name TEXT NOT NULL,
 	ongoing BOOLEAN NOT NULL DEFAULT FALSE,
@@ -29,22 +29,22 @@ CREATE TABLE IF NOT EXISTS serie (
 );
 
 -- Books (relational)
-CREATE TABLE IF NOT EXISTS book (
+CREATE TABLE IF NOT EXISTS books (
 	id SERIAL PRIMARY KEY,
 	name TEXT NOT NULL,
 	"desc" TEXT,
 	number INTEGER,
-	series_id BIGINT REFERENCES serie(id) ON DELETE SET NULL,
+	series_id BIGINT REFERENCES series(id) ON DELETE SET NULL,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	modified_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Editions
-CREATE TABLE IF NOT EXISTS edition (
+CREATE TABLE IF NOT EXISTS editions (
 	id SERIAL PRIMARY KEY,
-	publisher_id BIGINT REFERENCES publisher(id) ON DELETE SET NULL,
-	book_id BIGINT NOT NULL REFERENCES book(id) ON DELETE CASCADE,
-	added_by BIGINT REFERENCES "user"(id) ON DELETE SET NULL,
+	publisher_id BIGINT REFERENCES publishers(id) ON DELETE SET NULL,
+	book_id BIGINT NOT NULL REFERENCES books(id) ON DELETE CASCADE,
+	added_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
 	isbn VARCHAR(20),
 	ean VARCHAR(20),
 	url TEXT,
@@ -52,13 +52,11 @@ CREATE TABLE IF NOT EXISTS edition (
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	modified_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_edition_isbn ON edition(isbn);
-CREATE INDEX IF NOT EXISTS idx_edition_ean ON edition(ean);
 
 -- Book ownership (composed primary key)
 CREATE TABLE IF NOT EXISTS book_ownership (
-	user_id INT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
-	book_id INT NOT NULL REFERENCES book(id) ON DELETE CASCADE,
+	user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	book_id INT NOT NULL REFERENCES books(id) ON DELETE CASCADE,
 	read BOOLEAN NOT NULL DEFAULT FALSE,
 	gift BOOLEAN NOT NULL DEFAULT FALSE,
 	buy_price NUMERIC(10,2),
@@ -68,7 +66,7 @@ CREATE TABLE IF NOT EXISTS book_ownership (
 
 -- Wishlist (composed primary key)
 CREATE TABLE IF NOT EXISTS wishlist (
-	user_id INT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
-	book_id INT NOT NULL REFERENCES book(id) ON DELETE CASCADE,
+	user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	book_id INT NOT NULL REFERENCES books(id) ON DELETE CASCADE,
 	PRIMARY KEY (user_id, book_id)
 );
