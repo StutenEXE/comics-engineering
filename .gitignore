@@ -1,5 +1,5 @@
 # Ignore environment files and VSCode settings
-.env
+backend/src/comics-backend/.env
 .vscode/
 
 # Backend
