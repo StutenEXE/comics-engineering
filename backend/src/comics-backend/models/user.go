@@ -9,16 +9,18 @@ type User struct {
 	Password string `json:"-"`
 }
 
-func GetUserByEmail(email string) *User {
+func GetUserByEmail(email string) (*User, error) {
 	user := &User{}
 	query := "SELECT id, username, email, password FROM users WHERE email=$1"
 	row := database.PgDb.QueryRow(query, email)
 	if err := row.Err(); err != nil {
-		return nil
+		return nil, err
 	}
 	row.Scan(&user.ID, &user.Username, &user.Email, &user.Password)
-
-	return user
+	if user.Username == "" {
+		return nil, nil // User not found
+	}
+	return user, nil
 }
 
 func (u *User) CreateUserInDatabase() error {
