@@ -13,11 +13,22 @@ import (
 )
 
 func main() {
+	// Setup logging
+	logFile, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("Failed to open log file: %v", err)
+	}
+	defer logFile.Close()
+
+	log.SetOutput(logFile)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+	log.Println("Application started")
+
 	// Initialize env variables
 	if err := godotenv.Load(".env"); err != nil {
 		log.Println("no .env file found (that's OK in production)")
 	}
-	log.Println("Env variables loaded")
 
 	// Initialize Redis
 	redisURL := os.Getenv("COMICS_REDIS_URL")
@@ -51,5 +62,6 @@ func main() {
 
 	}
 
+	// Start server
 	r.Run(":8080")
 }

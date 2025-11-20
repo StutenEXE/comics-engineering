@@ -11,24 +11,24 @@ func CreateUserService(c *gin.Context) {
 	// Post form data
 	var user *models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.AbortWithStatusJSON(400, gin.H{"error": "invalid request"})
+		utils.ReturnErrorMessage(c, 400, "invalid request", err)
 		return
 	}
 	// If email already exists
 	existingUser, err := models.GetUserByEmail(user.Email)
 	if err != nil {
-		c.AbortWithStatusJSON(500, gin.H{"error": "internal error"})
+		utils.ReturnErrorMessage(c, 500, "internal error", err)
 		return
 	}
 	// Email already in use
 	if existingUser != nil {
-		c.AbortWithStatusJSON(409, gin.H{"error": "email already in use"})
+		utils.ReturnErrorMessage(c, 409, "email already in use", nil)
 		return
 	}
 	// Hash password
 	hashedPwd, err := utils.HashPassword(user.Password)
 	if err != nil {
-		c.AbortWithStatusJSON(500, gin.H{"error": "internal error"})
+		utils.ReturnErrorMessage(c, 500, "internal error", err)
 		return
 	}
 	// Insert into database
@@ -39,7 +39,7 @@ func CreateUserService(c *gin.Context) {
 	}
 	err = user.CreateUserInDatabase()
 	if err != nil {
-		c.AbortWithStatusJSON(500, gin.H{"error": "database error", "user": user})
+		utils.ReturnErrorMessage(c, 500, "database error", err)
 		return
 	}
 	// Authenticate user
@@ -49,7 +49,7 @@ func CreateUserService(c *gin.Context) {
 	// Respond with user data
 	userResp, err := user.ConvertToUserResponse()
 	if err != nil {
-		c.AbortWithStatusJSON(500, gin.H{"error": "internal error"})
+		utils.ReturnErrorMessage(c, 500, "internal error", err)
 		return
 	}
 	c.JSON(200, gin.H{"user": userResp})
@@ -62,23 +62,23 @@ func LoginService(c *gin.Context) {
 		Password string `json:"password"`
 	}
 	if err := c.ShouldBindJSON(&loginData); err != nil {
-		c.AbortWithStatusJSON(400, gin.H{"error": "invalid request"})
+		utils.ReturnErrorMessage(c, 400, "invalid request", err)
 		return
 	}
 	// Database lookup
 	user, err := models.GetUserByEmail(loginData.Email)
 	if err != nil {
-		c.AbortWithStatusJSON(500, gin.H{"error": "internal error"})
+		utils.ReturnErrorMessage(c, 500, "internal error", err)
 		return
 	}
 	// No user found
 	if user == nil {
-		c.AbortWithStatusJSON(401, gin.H{"error": "invalid credentials"})
+		utils.ReturnErrorMessage(c, 401, "invalid credentials", nil)
 		return
 	}
 	// Check password
 	if !utils.CheckPassword(user.Password, loginData.Password) {
-		c.AbortWithStatusJSON(401, gin.H{"error": "invalid credentials"})
+		utils.ReturnErrorMessage(c, 401, "invalid credentials", nil)
 		return
 	}
 	// Authenticate user
@@ -86,7 +86,7 @@ func LoginService(c *gin.Context) {
 	user.Password = "" // Hide password (should not be sent back anyway but just in case)
 	userResp, err := user.ConvertToUserResponse()
 	if err != nil {
-		c.AbortWithStatusJSON(500, gin.H{"error": "internal error"})
+		utils.ReturnErrorMessage(c, 500, "internal error", err)
 		return
 	}
 	c.JSON(200, gin.H{"user": userResp})
