@@ -17,6 +17,7 @@ func main() {
 	if err := godotenv.Load(".env"); err != nil {
 		log.Println("no .env file found (that's OK in production)")
 	}
+	log.Println("Env variables loaded")
 
 	// Initialize Redis
 	redisURL := os.Getenv("COMICS_REDIS_URL")

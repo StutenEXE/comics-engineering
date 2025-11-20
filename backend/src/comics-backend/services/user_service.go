@@ -46,7 +46,13 @@ func CreateUserService(c *gin.Context) {
 	middleware.CreateSession(c, user)
 	// Hide password (even though it's not sent back)
 	user.Password = ""
-	c.JSON(200, gin.H{"user": user})
+	// Respond with user data
+	userResp, err := user.ConvertToUserResponse()
+	if err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"error": "internal error"})
+		return
+	}
+	c.JSON(200, gin.H{"user": userResp})
 }
 
 func LoginService(c *gin.Context) {
@@ -77,6 +83,11 @@ func LoginService(c *gin.Context) {
 	}
 	// Authenticate user
 	middleware.CreateSession(c, user)
-	user.Password = "" // Hide password
-	c.JSON(200, gin.H{"user": user})
+	user.Password = "" // Hide password (should not be sent back anyway but just in case)
+	userResp, err := user.ConvertToUserResponse()
+	if err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"error": "internal error"})
+		return
+	}
+	c.JSON(200, gin.H{"user": userResp})
 }
