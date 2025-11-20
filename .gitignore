@@ -1,6 +1,7 @@
 # Ignore environment files and VSCode settings
 .vscode/
 backend/src/comics-backend/.env
+backend/src/comics-backend/app.log
 
 # Backend
 ## Go binaries for programs and plugins

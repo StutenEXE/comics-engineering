@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/StutenEXE/comics-backend/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 )
@@ -14,29 +15,29 @@ func SessionAuth() gin.HandlerFunc {
 		// Read session cookie
 		cookie, err := c.Cookie("session_id")
 		if err != nil || cookie == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing session"})
+			utils.ReturnErrorMessage(c, http.StatusUnauthorized, "missing session", err)
 			return
 		}
 		sessionKey := SessionPrefix + cookie
 		// Fetch session from Redis
 		sessionJSON, err := redisClient.Get(c, sessionKey).Result()
 		if err == redis.Nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid session"})
+			utils.ReturnErrorMessage(c, http.StatusUnauthorized, "invalid session", err)
 			return
 		} else if err != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "redis error"})
+			utils.ReturnErrorMessage(c, http.StatusInternalServerError, "redis error", err)
 			return
 		}
 		// Deserialize session
 		var session Session
 		if err := json.Unmarshal([]byte(sessionJSON), &session); err != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "bad session data"})
+			utils.ReturnErrorMessage(c, http.StatusInternalServerError, "bad session data", err)
 			return
 		}
 		// Check session expiration
 		if time.Now().After(session.ExpiresAt) {
 			redisClient.Del(c, sessionKey)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "session expired"})
+			utils.ReturnErrorMessage(c, http.StatusUnauthorized, "session expired", nil)
 			return
 		}
 		// Extend session expiration by 30 minutes
