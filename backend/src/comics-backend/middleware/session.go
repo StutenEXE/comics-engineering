@@ -23,7 +23,7 @@ func CreateSessionKey() string {
 	return SessionPrefix + sessionID
 }
 
-func CreateSession(c *gin.Context, user *models.User) {
+func CreateSession(c *gin.Context, user *models.UserWithPassword) {
 	session := &Session{
 		UserID:    fmt.Sprint(user.ID),
 		Roles:     []string{"user"},

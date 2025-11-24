@@ -11,7 +11,7 @@ import (
 
 func CreateUserService(c *gin.Context) {
 	// Post form data
-	var user *models.User
+	var user *models.UserWithPassword
 	if err := c.ShouldBindJSON(&user); err != nil {
 		utils.ReturnErrorMessage(c, http.StatusBadRequest, "invalid request", err)
 		return
@@ -34,7 +34,7 @@ func CreateUserService(c *gin.Context) {
 		return
 	}
 	// Insert into database
-	user = &models.User{
+	user = &models.UserWithPassword{
 		Username: user.Username,
 		Email:    user.Email,
 		Password: hashedPwd,
@@ -49,7 +49,7 @@ func CreateUserService(c *gin.Context) {
 	// Hide password (even though it's not sent back)
 	user.Password = ""
 	// Respond with user data
-	userResp, err := user.ConvertToUserResponse()
+	userResp, err := user.ConvertToUser()
 	if err != nil {
 		utils.ReturnErrorMessage(c, http.StatusInternalServerError, "internal error", err)
 		return
@@ -86,7 +86,7 @@ func LoginService(c *gin.Context) {
 	// Authenticate user
 	middleware.CreateSession(c, user)
 	user.Password = "" // Hide password (should not be sent back anyway but just in case)
-	userResp, err := user.ConvertToUserResponse()
+	userResp, err := user.ConvertToUser()
 	if err != nil {
 		utils.ReturnErrorMessage(c, http.StatusInternalServerError, "internal error", err)
 		return

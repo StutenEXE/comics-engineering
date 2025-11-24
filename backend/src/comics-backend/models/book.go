@@ -2,17 +2,62 @@ package models
 
 import "github.com/StutenEXE/comics-backend/database"
 
+type BookRow struct {
+	ID         int64
+	Name       string
+	Desc       string
+	Number     int
+	SeriesID   int64
+	CreatedAt  string
+	ModifiedAt string
+	UserID     int64
+}
+
 type Book struct {
-	ID       int64  `json:"id"`
-	Name     string `json:"name"`
-	Desc     string `json:"desc"`
-	Number   int    `json:"number"`
-	SeriesID int64  `json:"series_id"`
+	ID         int64  `json:"id"`
+	Name       string `json:"name"`
+	Desc       string `json:"desc"`
+	Number     int    `json:"number"`
+	Serie      *Serie `json:"serie"`
+	CreatedAt  string `json:"created_at"`
+	ModifiedAt string `json:"modified_at"`
+	AddedBy    *User  `json:"added_by"`
+}
+
+func instBookFromRow(row *BookRow) (*Book, error) {
+	serie, err := GetSerieByID(row.SeriesID)
+	if err != nil {
+		return nil, err
+	}
+	user, err := GetUserByID(row.UserID)
+	if err != nil {
+		return nil, err
+	}
+	book := &Book{
+		ID:         row.ID,
+		Name:       row.Name,
+		Desc:       row.Desc,
+		Number:     row.Number,
+		Serie:      serie,
+		CreatedAt:  row.CreatedAt,
+		ModifiedAt: row.ModifiedAt,
+		AddedBy:    user,
+	}
+	return book, nil
 }
 
 func (b *Book) CreateBookInDatabase() error {
 	query := "INSERT INTO books (name, desc, number, series_id) VALUES ($1, $2, $3, $4) RETURNING id"
-	err := database.PgDb.QueryRow(query, b.Name, b.Desc, b.Number, b.SeriesID).Scan(&b.ID)
+	err := database.PgDb.QueryRow(query, b.Name, b.Desc, b.Number, b.Serie.ID).Scan(&b.ID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (b *Book) UpdateBookInDatabase() error {
+	query := "UPDATE books SET name=$1, desc=$2, number=$3, series_id=$4, modified_at=now() WHERE id=$5"
+	_, err := database.PgDb.Exec(query, b.Name, b.Desc, b.Number, b.Serie.ID, b.ID)
 	if err != nil {
 		return err
 	}
@@ -20,21 +65,22 @@ func (b *Book) CreateBookInDatabase() error {
 }
 
 func GetBookByID(bookID int64) (*Book, error) {
-	book := &Book{}
-	query := "SELECT id, name, desc, number, series_id FROM books WHERE id=$1"
+	bookRow := &BookRow{}
+	query := "SELECT id, name, desc, number, series_id, created_at, modified_at FROM books WHERE id=$1"
 	row := database.PgDb.QueryRow(query, bookID)
 	if err := row.Err(); err != nil {
 		return nil, err
 	}
-	row.Scan(&book.ID, &book.Name, &book.Desc, &book.Number, &book.SeriesID)
-	if book.Name == "" {
+	row.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.SeriesID, &bookRow.CreatedAt,
+		&bookRow.ModifiedAt)
+	if bookRow.Name == "" {
 		return nil, nil // Book not found
 	}
-	return book, nil
+	return instBookFromRow(bookRow)
 }
 
 func GetBooksBySeriesID(seriesID int64) ([]*Book, error) {
-	query := "SELECT id, name, desc, number, series_id FROM books WHERE series_id=$1"
+	query := "SELECT id, name, desc, number, series_id, created_at, modified_at FROM books WHERE series_id=$1"
 	rows, err := database.PgDb.Query(query, seriesID)
 	if err != nil {
 		return nil, err
@@ -43,8 +89,61 @@ func GetBooksBySeriesID(seriesID int64) ([]*Book, error) {
 
 	var books []*Book
 	for rows.Next() {
-		book := &Book{}
-		if err := rows.Scan(&book.ID, &book.Name, &book.Desc, &book.Number, &book.SeriesID); err != nil {
+		bookRow := &BookRow{}
+		if err := rows.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.SeriesID, &bookRow.CreatedAt, &bookRow.ModifiedAt); err != nil {
+			return nil, err
+		}
+		book, err := instBookFromRow(bookRow)
+		if err != nil {
+			return nil, err
+		}
+		books = append(books, book)
+	}
+	return books, nil
+}
+
+func GetLatestBooks(from int, limit int) ([]*Book, error) {
+	query := "SELECT id, name, desc, number, series_id, created_at, modified_at FROM books ORDER BY created_at DESC OFFSET $1 LIMIT $2"
+	rows, err := database.PgDb.Query(query, from, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var books []*Book
+	for rows.Next() {
+		bookRow := &BookRow{}
+		if err := rows.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.SeriesID, &bookRow.CreatedAt, &bookRow.ModifiedAt); err != nil {
+			return nil, err
+		}
+		book, err := instBookFromRow(bookRow)
+		if err != nil {
+			return nil, err
+		}
+		books = append(books, book)
+	}
+	return books, nil
+}
+
+func GetBooksFromWishlist(userID int64) ([]*Book, error) {
+	query := `SELECT b.id, b.name, b.desc, b.number, b.series_id, b.created_at, b.modified_at
+			  FROM books b
+			  INNER JOIN wishlist w ON b.id = w.book_id
+			  WHERE w.user_id = $1`
+	rows, err := database.PgDb.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var books []*Book
+	for rows.Next() {
+		bookRow := &BookRow{}
+		if err := rows.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.SeriesID, &bookRow.CreatedAt, &bookRow.ModifiedAt); err != nil {
+			return nil, err
+		}
+		book, err := instBookFromRow(bookRow)
+		if err != nil {
 			return nil, err
 		}
 		books = append(books, book)

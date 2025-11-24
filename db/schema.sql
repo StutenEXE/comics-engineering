@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS publishers (
 -- Serie
 CREATE TABLE IF NOT EXISTS series (
 	id SERIAL PRIMARY KEY,
+	added_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
 	name TEXT NOT NULL,
 	ongoing BOOLEAN NOT NULL DEFAULT FALSE,
 	oneshot BOOLEAN NOT NULL DEFAULT FALSE,
@@ -32,6 +33,7 @@ CREATE TABLE IF NOT EXISTS series (
 -- Books (relational)
 CREATE TABLE IF NOT EXISTS books (
 	id SERIAL PRIMARY KEY,
+	added_by BIGINT REFERENCES users(id) ON DELETE SET null,
 	name TEXT NOT NULL,
 	"desc" TEXT,
 	number INTEGER,
@@ -54,15 +56,15 @@ CREATE TABLE IF NOT EXISTS editions (
 	modified_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Book ownership (composed primary key)
-CREATE TABLE IF NOT EXISTS book_ownership (
+-- Edition ownership (not composed primary key if edition is deleted)
+CREATE TABLE IF NOT EXISTS edition_ownership (
+	id SERIAL PRIMARY KEY,
 	user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-	book_id INT NOT NULL REFERENCES books(id) ON DELETE CASCADE,
+	edition_id INT NOT NULL REFERENCES editions(id) ON DELETE SET NULL,
 	read BOOLEAN NOT NULL DEFAULT FALSE,
 	gift BOOLEAN NOT NULL DEFAULT FALSE,
 	buy_price NUMERIC(10,2),
-	date TIMESTAMPTZ,
-	PRIMARY KEY (user_id, book_id)
+	date TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Wishlist (composed primary key)
