@@ -13,19 +13,51 @@ type BookRow struct {
 	UserID     int64
 }
 
-type Book struct {
+/*
+Simplified book to avoid infinite loop calls
+
+Example : Serie has multiple Book and Book has a Serie. So Serie will instantiate Books who will instatiate Series etc...
+*/
+type SimpleBook struct {
 	ID         int64  `json:"id"`
 	Name       string `json:"name"`
 	Desc       string `json:"desc"`
 	Number     int    `json:"number"`
-	Serie      *Serie `json:"serie"`
 	CreatedAt  string `json:"created_at"`
 	ModifiedAt string `json:"modified_at"`
 	AddedBy    *User  `json:"added_by"`
 }
 
+type Book struct {
+	ID         int64        `json:"id"`
+	Name       string       `json:"name"`
+	Desc       string       `json:"desc"`
+	Number     int          `json:"number"`
+	Serie      *SimpleSerie `json:"serie"`
+	CreatedAt  string       `json:"created_at"`
+	ModifiedAt string       `json:"modified_at"`
+	AddedBy    *User        `json:"added_by"`
+}
+
+func instSimpleBookFromRow(row *BookRow) (*Book, error) {
+	user, err := GetUserByID(row.UserID)
+	if err != nil {
+		return nil, err
+	}
+	book := &Book{
+		ID:         row.ID,
+		Name:       row.Name,
+		Desc:       row.Desc,
+		Number:     row.Number,
+		CreatedAt:  row.CreatedAt,
+		ModifiedAt: row.ModifiedAt,
+		AddedBy:    user,
+	}
+	return book, nil
+}
+
 func instBookFromRow(row *BookRow) (*Book, error) {
-	serie, err := GetSerieByID(row.SeriesID)
+	serie, err := GetSimpSerieByID(row.SeriesID)
 	if err != nil {
 		return nil, err
 	}
@@ -103,14 +135,14 @@ func GetBooksBySeriesID(seriesID int64) ([]*Book, error) {
 }
 
 func GetLatestBooks(from int, limit int) ([]*Book, error) {
-	query := "SELECT id, name, desc, number, series_id, created_at, modified_at FROM books ORDER BY created_at DESC OFFSET $1 LIMIT $2"
+	query := "SELECT id, name, \"desc\", number, series_id, created_at, modified_at FROM books ORDER BY created_at DESC OFFSET $1 LIMIT $2"
 	rows, err := database.PgDb.Query(query, from, limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var books []*Book
+	books := []*Book{}
 	for rows.Next() {
 		bookRow := &BookRow{}
 		if err := rows.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.SeriesID, &bookRow.CreatedAt, &bookRow.ModifiedAt); err != nil {

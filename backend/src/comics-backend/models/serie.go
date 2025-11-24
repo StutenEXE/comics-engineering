@@ -13,6 +13,22 @@ type SerieRow struct {
 	UserID     int64
 }
 
+/*
+Simplified serie to avoid infinite loop calls
+
+Example : Book has a Serie and Serie has Books so Book will instantiate Serie who will instatiate Books etc...
+*/
+type SimpleSerie struct {
+	ID         int64  `json:"id"`
+	Name       string `json:"name"`
+	Ongoing    bool   `json:"ongoing"`
+	Oneshot    bool   `json:"oneshot"`
+	Nvolumes   int    `json:"nvolumes"`
+	CreatedAt  string `json:"created_at"`
+	ModifiedAt string `json:"modified_at"`
+	AddedBy    *User  `json:"added_by"`
+}
+
 type Serie struct {
 	ID         int64  `json:"id"`
 	Name       string `json:"name"`
@@ -24,7 +40,25 @@ type Serie struct {
 	AddedBy    *User  `json:"added_by"`
 }
 
-func instSeriesFromRow(row *SerieRow) (*Serie, error) {
+func instSimpleSerieFromRow(row *SerieRow) (*SimpleSerie, error) {
+	user, err := GetUserByID(row.UserID)
+	if err != nil {
+		return nil, err
+	}
+	serie := &SimpleSerie{
+		ID:         row.ID,
+		Name:       row.Name,
+		Ongoing:    row.Ongoing,
+		Oneshot:    row.Oneshot,
+		Nvolumes:   row.Nvolumes,
+		CreatedAt:  row.CreatedAt,
+		ModifiedAt: row.ModifiedAt,
+		AddedBy:    user,
+	}
+	return serie, nil
+}
+
+func instSerieFromRow(row *SerieRow) (*Serie, error) {
 	user, err := GetUserByID(row.UserID)
 	if err != nil {
 		return nil, err
@@ -42,7 +76,7 @@ func instSeriesFromRow(row *SerieRow) (*Serie, error) {
 	return serie, nil
 }
 
-func GetSerieByID(serieID int64) (*Serie, error) {
+func GetSimpSerieByID(serieID int64) (*SimpleSerie, error) {
 	serieRow := &SerieRow{}
 	query := "SELECT id, name, ongoing, oneshot, nvolumes, created_at, updated_at, user_id FROM series WHERE id=$1"
 	row := database.PgDb.QueryRow(query, serieID)
@@ -54,5 +88,5 @@ func GetSerieByID(serieID int64) (*Serie, error) {
 	if serieRow.Name == "" {
 		return nil, nil // Serie not found
 	}
-	return instSeriesFromRow(serieRow)
+	return instSimpleSerieFromRow(serieRow)
 }
