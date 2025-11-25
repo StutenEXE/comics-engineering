@@ -22,7 +22,7 @@ func startRouter() {
 	}
 
 	// Setup protected routes
-	protected := r.Group("/api/comics/pr")
+	protected := r.Group("/api/comics/prv")
 	protected.Use(middleware.SessionAuth())
 	{
 

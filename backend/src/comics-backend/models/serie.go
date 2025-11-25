@@ -81,7 +81,7 @@ func instSerieFromRow(row *SerieRow) (*Serie, error) {
 
 func GetSimpSerieByID(serieID int64) (*SimpleSerie, error) {
 	serieRow := &SerieRow{}
-	query := "SELECT id, name, ongoing, oneshot, nvolumes, created_at, updated_at, user_id FROM series WHERE id=$1"
+	query := "SELECT id, name, ongoing, oneshot, nvolumes, created_at, modified_at, added_by FROM series WHERE id=$1"
 	row := database.PgDb.QueryRow(query, serieID)
 	if err := row.Err(); err != nil {
 		return nil, err
