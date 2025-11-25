@@ -112,7 +112,7 @@ func GetBookByID(bookID int64) (*Book, error) {
 }
 
 func GetSimpleBooksBySeriesID(seriesID int64) ([]*SimpleBook, error) {
-	query := "SELECT id, name, desc, number, series_id, created_at, modified_at FROM books WHERE series_id=$1"
+	query := "SELECT id, name, desc, number, series_id, created_at, modified_at, added_by FROM books WHERE series_id=$1"
 	rows, err := database.PgDb.Query(query, seriesID)
 	if err != nil {
 		return nil, err
@@ -122,7 +122,7 @@ func GetSimpleBooksBySeriesID(seriesID int64) ([]*SimpleBook, error) {
 	var books []*SimpleBook
 	for rows.Next() {
 		bookRow := &BookRow{}
-		if err := rows.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.SeriesID, &bookRow.CreatedAt, &bookRow.ModifiedAt); err != nil {
+		if err := rows.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.SeriesID, &bookRow.CreatedAt, &bookRow.ModifiedAt, &bookRow.UserID); err != nil {
 			return nil, err
 		}
 		book, err := instSimpleBookFromRow(bookRow)
@@ -135,7 +135,7 @@ func GetSimpleBooksBySeriesID(seriesID int64) ([]*SimpleBook, error) {
 }
 
 func GetLatestBooks(from int, limit int) ([]*Book, error) {
-	query := "SELECT id, name, \"desc\", number, series_id, created_at, modified_at FROM books ORDER BY created_at DESC OFFSET $1 LIMIT $2"
+	query := "SELECT id, name, \"desc\", number, series_id, created_at, modified_at, added_by FROM books ORDER BY created_at DESC OFFSET $1 LIMIT $2"
 	rows, err := database.PgDb.Query(query, from, limit)
 	if err != nil {
 		return nil, err
@@ -145,7 +145,7 @@ func GetLatestBooks(from int, limit int) ([]*Book, error) {
 	books := []*Book{}
 	for rows.Next() {
 		bookRow := &BookRow{}
-		if err := rows.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.SeriesID, &bookRow.CreatedAt, &bookRow.ModifiedAt); err != nil {
+		if err := rows.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.SeriesID, &bookRow.CreatedAt, &bookRow.ModifiedAt, &bookRow.UserID); err != nil {
 			return nil, err
 		}
 		book, err := instBookFromRow(bookRow)
@@ -158,7 +158,7 @@ func GetLatestBooks(from int, limit int) ([]*Book, error) {
 }
 
 func GetBooksFromWishlist(userID int64) ([]*Book, error) {
-	query := `SELECT b.id, b.name, b.desc, b.number, b.series_id, b.created_at, b.modified_at
+	query := `SELECT b.id, b.name, b.desc, b.number, b.series_id, b.created_at, b.modified_at, b.added_by
 			  FROM books b
 			  INNER JOIN wishlist w ON b.id = w.book_id
 			  WHERE w.user_id = $1`
@@ -171,7 +171,7 @@ func GetBooksFromWishlist(userID int64) ([]*Book, error) {
 	var books []*Book
 	for rows.Next() {
 		bookRow := &BookRow{}
-		if err := rows.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.SeriesID, &bookRow.CreatedAt, &bookRow.ModifiedAt); err != nil {
+		if err := rows.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.SeriesID, &bookRow.CreatedAt, &bookRow.ModifiedAt, &bookRow.UserID); err != nil {
 			return nil, err
 		}
 		book, err := instBookFromRow(bookRow)
