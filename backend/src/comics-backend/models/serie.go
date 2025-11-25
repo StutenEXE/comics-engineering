@@ -30,14 +30,15 @@ type SimpleSerie struct {
 }
 
 type Serie struct {
-	ID         int64  `json:"id"`
-	Name       string `json:"name"`
-	Ongoing    bool   `json:"ongoing"`
-	Oneshot    bool   `json:"oneshot"`
-	Nvolumes   int    `json:"nvolumes"`
-	CreatedAt  string `json:"created_at"`
-	ModifiedAt string `json:"modified_at"`
-	AddedBy    *User  `json:"added_by"`
+	ID         int64         `json:"id"`
+	Name       string        `json:"name"`
+	Ongoing    bool          `json:"ongoing"`
+	Oneshot    bool          `json:"oneshot"`
+	Nvolumes   int           `json:"nvolumes"`
+	Books      []*SimpleBook `json:"books"`
+	CreatedAt  string        `json:"created_at"`
+	ModifiedAt string        `json:"modified_at"`
+	AddedBy    *User         `json:"added_by"`
 }
 
 func instSimpleSerieFromRow(row *SerieRow) (*SimpleSerie, error) {
@@ -63,12 +64,14 @@ func instSerieFromRow(row *SerieRow) (*Serie, error) {
 	if err != nil {
 		return nil, err
 	}
+	books, err := GetSimpleBooksBySeriesID(row.ID)
 	serie := &Serie{
 		ID:         row.ID,
 		Name:       row.Name,
 		Ongoing:    row.Ongoing,
 		Oneshot:    row.Oneshot,
 		Nvolumes:   row.Nvolumes,
+		Books:      books,
 		CreatedAt:  row.CreatedAt,
 		ModifiedAt: row.ModifiedAt,
 		AddedBy:    user,

@@ -39,12 +39,12 @@ type Book struct {
 	AddedBy    *User        `json:"added_by"`
 }
 
-func instSimpleBookFromRow(row *BookRow) (*Book, error) {
+func instSimpleBookFromRow(row *BookRow) (*SimpleBook, error) {
 	user, err := GetUserByID(row.UserID)
 	if err != nil {
 		return nil, err
 	}
-	book := &Book{
+	book := &SimpleBook{
 		ID:         row.ID,
 		Name:       row.Name,
 		Desc:       row.Desc,
@@ -111,7 +111,7 @@ func GetBookByID(bookID int64) (*Book, error) {
 	return instBookFromRow(bookRow)
 }
 
-func GetBooksBySeriesID(seriesID int64) ([]*Book, error) {
+func GetSimpleBooksBySeriesID(seriesID int64) ([]*SimpleBook, error) {
 	query := "SELECT id, name, desc, number, series_id, created_at, modified_at FROM books WHERE series_id=$1"
 	rows, err := database.PgDb.Query(query, seriesID)
 	if err != nil {
@@ -119,13 +119,13 @@ func GetBooksBySeriesID(seriesID int64) ([]*Book, error) {
 	}
 	defer rows.Close()
 
-	var books []*Book
+	var books []*SimpleBook
 	for rows.Next() {
 		bookRow := &BookRow{}
 		if err := rows.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.SeriesID, &bookRow.CreatedAt, &bookRow.ModifiedAt); err != nil {
 			return nil, err
 		}
-		book, err := instBookFromRow(bookRow)
+		book, err := instSimpleBookFromRow(bookRow)
 		if err != nil {
 			return nil, err
 		}
