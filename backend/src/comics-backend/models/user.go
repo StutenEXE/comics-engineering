@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/StutenEXE/comics-backend/database"
 )
@@ -12,16 +13,27 @@ type UserWithPassword struct {
 	Username   string `json:"username"`
 	Email      string `json:"email"`
 	Password   string `json:"password"`
-	CreatedAt  string `json:"created_at"`
-	ModifiedAt string `json:"modified_at"`
+	CreatedAt  string `json:"createdAt"`
+	ModifiedAt string `json:"modifiedAt"`
 }
 
 type User struct {
 	ID         int64  `json:"id"`
 	Username   string `json:"username"`
 	Email      string `json:"email"`
-	CreatedAt  string `json:"created_at"`
-	ModifiedAt string `json:"modified_at"`
+	CreatedAt  string `json:"createdAt"`
+	ModifiedAt string `json:"modifiedAt"`
+}
+
+/*
+The order of the requested elements is the following:
+id, username, email, created_at, modified_at
+*/
+func getQueryFieldsForUser(prefix string) string {
+	if prefix != "" {
+		prefix = prefix + "."
+	}
+	return fmt.Sprintf("%sid, %susername, %semail, %screated_at, %smodified_at", prefix, prefix, prefix, prefix, prefix)
 }
 
 func (u *UserWithPassword) CreateUserInDatabase() error {
@@ -49,7 +61,7 @@ func (u *UserWithPassword) ConvertToUser() (*User, error) {
 
 func GetUserByID(userID int64) (*User, error) {
 	user := &User{}
-	query := "SELECT id, username, email, created_at, modified_at FROM users WHERE id=$1"
+	query := fmt.Sprintf("SELECT %s FROM users WHERE id=$1", getQueryFieldsForUser(""))
 	row := database.PgDb.QueryRow(query, userID)
 	if err := row.Err(); err != nil {
 		return nil, err
@@ -63,7 +75,7 @@ func GetUserByID(userID int64) (*User, error) {
 
 func GetUserByEmail(email string) (*UserWithPassword, error) {
 	user := &UserWithPassword{}
-	query := "SELECT id, username, email, password, created_at, modified_at FROM users WHERE email=$1"
+	query := fmt.Sprintf("SELECT %s FROM users WHERE email=$1", getQueryFieldsForUser(""))
 	row := database.PgDb.QueryRow(query, email)
 	if err := row.Err(); err != nil {
 		return nil, err
