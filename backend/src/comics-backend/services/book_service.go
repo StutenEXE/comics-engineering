@@ -31,5 +31,7 @@ func GetLatestBooks(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"books": books})
+	c.JSON(http.StatusOK, gin.H{
+		"books": books,
+	})
 }

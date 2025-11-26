@@ -26,6 +26,8 @@ CREATE TABLE IF NOT EXISTS series (
 	ongoing BOOLEAN NOT NULL DEFAULT FALSE,
 	oneshot BOOLEAN NOT NULL DEFAULT FALSE,
 	nvolumes TEXT,
+	vo_start TIMESTAMPTZ,
+	vo_end TIMESTAMPTZ,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	modified_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -37,6 +39,7 @@ CREATE TABLE IF NOT EXISTS books (
 	name TEXT NOT NULL,
 	"desc" TEXT,
 	number INTEGER,
+	vo_content TEXT,
 	series_id BIGINT REFERENCES series(id) ON DELETE SET NULL,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	modified_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -52,6 +55,7 @@ CREATE TABLE IF NOT EXISTS editions (
 	ean VARCHAR(20),
 	url TEXT,
 	img_url TEXT,
+	parution_date TIMESTAMPTZ,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	modified_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );

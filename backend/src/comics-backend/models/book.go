@@ -1,12 +1,18 @@
 package models
 
-import "github.com/StutenEXE/comics-backend/database"
+import (
+	"database/sql"
+	"fmt"
+
+	"github.com/StutenEXE/comics-backend/database"
+)
 
 type BookRow struct {
 	ID         int64
 	Name       string
 	Desc       string
 	Number     int
+	VoContent  string
 	SeriesID   int64
 	CreatedAt  string
 	ModifiedAt string
@@ -23,20 +29,65 @@ type SimpleBook struct {
 	Name       string `json:"name"`
 	Desc       string `json:"desc"`
 	Number     int    `json:"number"`
-	CreatedAt  string `json:"created_at"`
-	ModifiedAt string `json:"modified_at"`
-	AddedBy    *User  `json:"added_by"`
+	VoContent  string `json:"voContent"`
+	CreatedAt  string `json:"createdAt"`
+	ModifiedAt string `json:"modifiedAt"`
+	AddedBy    *User  `json:"addedBy"`
 }
 
 type Book struct {
-	ID         int64        `json:"id"`
-	Name       string       `json:"name"`
-	Desc       string       `json:"desc"`
-	Number     int          `json:"number"`
-	Serie      *SimpleSerie `json:"serie"`
-	CreatedAt  string       `json:"created_at"`
-	ModifiedAt string       `json:"modified_at"`
-	AddedBy    *User        `json:"added_by"`
+	ID         int64            `json:"id"`
+	Name       string           `json:"name"`
+	Desc       string           `json:"desc"`
+	Number     int              `json:"number"`
+	VoContent  string           `json:"voContent"`
+	Serie      *SimpleSerie     `json:"serie"`
+	Editions   []*SimpleEdition `json:"editions"`
+	CreatedAt  string           `json:"createdAt"`
+	ModifiedAt string           `json:"modifiedAt"`
+	AddedBy    *User            `json:"addedBy"`
+}
+
+/*
+The order of the requested elements is the following:
+id, name, desc, number, vo_content, series_id, created_at, modified_at, added_by
+*/
+func getQueryFieldsForBook(prefix string) string {
+	if prefix != "" {
+		prefix = prefix + "."
+	}
+	return fmt.Sprintf("%sid, %sname, %s\"desc\", %snumber, %svo_content, %sseries_id, %screated_at, %smodified_at, %sadded_by",
+		prefix, prefix, prefix, prefix, prefix, prefix, prefix, prefix, prefix)
+}
+
+/*
+Helper function to extract a BookRow from sql.Row
+Row must contain the fields in the order defined in getQueryFieldsForBook
+*/
+func getBookRowFromRow(row *sql.Row) (*BookRow, error) {
+	bookRow := &BookRow{}
+	if err := row.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.VoContent,
+		&bookRow.SeriesID, &bookRow.CreatedAt, &bookRow.ModifiedAt, &bookRow.UserID); err != nil {
+		return nil, err
+	}
+	return bookRow, nil
+}
+
+/*
+Helper function to extract BookRow slices from sql.Rows
+Rows must contain the fields in the order defined in getQueryFieldsForBook
+*/
+func getBookRowsFromRows(rows *sql.Rows) ([]*BookRow, error) {
+	var bookRows []*BookRow
+	for rows.Next() {
+		bookRow := &BookRow{}
+		if err := rows.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.VoContent,
+			&bookRow.SeriesID, &bookRow.CreatedAt, &bookRow.ModifiedAt, &bookRow.UserID); err != nil {
+			return nil, err
+		}
+		bookRows = append(bookRows, bookRow)
+	}
+	return bookRows, nil
 }
 
 func instSimpleBookFromRow(row *BookRow) (*SimpleBook, error) {
@@ -49,6 +100,7 @@ func instSimpleBookFromRow(row *BookRow) (*SimpleBook, error) {
 		Name:       row.Name,
 		Desc:       row.Desc,
 		Number:     row.Number,
+		VoContent:  row.VoContent,
 		CreatedAt:  row.CreatedAt,
 		ModifiedAt: row.ModifiedAt,
 		AddedBy:    user,
@@ -61,6 +113,10 @@ func instBookFromRow(row *BookRow) (*Book, error) {
 	if err != nil {
 		return nil, err
 	}
+	editions, err := GetSimpleEditionsByBookID(row.ID)
+	if err != nil {
+		return nil, err
+	}
 	user, err := GetUserByID(row.UserID)
 	if err != nil {
 		return nil, err
@@ -70,7 +126,9 @@ func instBookFromRow(row *BookRow) (*Book, error) {
 		Name:       row.Name,
 		Desc:       row.Desc,
 		Number:     row.Number,
+		VoContent:  row.VoContent,
 		Serie:      serie,
+		Editions:   editions,
 		CreatedAt:  row.CreatedAt,
 		ModifiedAt: row.ModifiedAt,
 		AddedBy:    user,
@@ -79,8 +137,8 @@ func instBookFromRow(row *BookRow) (*Book, error) {
 }
 
 func (b *Book) CreateBookInDatabase() error {
-	query := "INSERT INTO books (name, desc, number, series_id) VALUES ($1, $2, $3, $4) RETURNING id"
-	err := database.PgDb.QueryRow(query, b.Name, b.Desc, b.Number, b.Serie.ID).Scan(&b.ID)
+	query := "INSERT INTO books (name, desc, number, vo_content, series_id) VALUES ($1, $2, $3, $4, $5) RETURNING id"
+	err := database.PgDb.QueryRow(query, b.Name, b.Desc, b.Number, b.VoContent, b.Serie.ID).Scan(&b.ID)
 	if err != nil {
 		return err
 	}
@@ -88,8 +146,8 @@ func (b *Book) CreateBookInDatabase() error {
 }
 
 func (b *Book) UpdateBookInDatabase() error {
-	query := "UPDATE books SET name=$1, desc=$2, number=$3, series_id=$4, modified_at=now() WHERE id=$5"
-	_, err := database.PgDb.Exec(query, b.Name, b.Desc, b.Number, b.Serie.ID, b.ID)
+	query := "UPDATE books SET name=$1, desc=$2, number=$3, vo_content=$4, series_id=$5, modified_at=now() WHERE id=$6"
+	_, err := database.PgDb.Exec(query, b.Name, b.Desc, b.Number, b.VoContent, b.Serie.ID, b.ID)
 	if err != nil {
 		return err
 	}
@@ -98,21 +156,34 @@ func (b *Book) UpdateBookInDatabase() error {
 
 func GetBookByID(bookID int64) (*Book, error) {
 	bookRow := &BookRow{}
-	query := "SELECT id, name, desc, number, series_id, created_at, modified_at FROM books WHERE id=$1"
+	query := fmt.Sprintf("SELECT %s FROM books WHERE id=$1", getQueryFieldsForBook(""))
 	row := database.PgDb.QueryRow(query, bookID)
 	if err := row.Err(); err != nil {
 		return nil, err
 	}
-	row.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.SeriesID, &bookRow.CreatedAt,
-		&bookRow.ModifiedAt)
-	if bookRow.Name == "" {
-		return nil, nil // Book not found
+	bookRow, err := getBookRowFromRow(row)
+	if err != nil {
+		return nil, err
 	}
 	return instBookFromRow(bookRow)
 }
 
+func GetSimpleBookByID(bookID int64) (*SimpleBook, error) {
+	bookRow := &BookRow{}
+	query := fmt.Sprintf("SELECT %s FROM books WHERE id=$1", getQueryFieldsForBook(""))
+	row := database.PgDb.QueryRow(query, bookID)
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+	bookRow, err := getBookRowFromRow(row)
+	if err != nil {
+		return nil, err
+	}
+	return instSimpleBookFromRow(bookRow)
+}
+
 func GetSimpleBooksBySeriesID(seriesID int64) ([]*SimpleBook, error) {
-	query := "SELECT id, name, desc, number, series_id, created_at, modified_at, added_by FROM books WHERE series_id=$1"
+	query := fmt.Sprintf("SELECT %s FROM books WHERE series_id=$1", getQueryFieldsForBook(""))
 	rows, err := database.PgDb.Query(query, seriesID)
 	if err != nil {
 		return nil, err
@@ -120,11 +191,8 @@ func GetSimpleBooksBySeriesID(seriesID int64) ([]*SimpleBook, error) {
 	defer rows.Close()
 
 	var books []*SimpleBook
-	for rows.Next() {
-		bookRow := &BookRow{}
-		if err := rows.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.SeriesID, &bookRow.CreatedAt, &bookRow.ModifiedAt, &bookRow.UserID); err != nil {
-			return nil, err
-		}
+	bookRows, err := getBookRowsFromRows(rows)
+	for _, bookRow := range bookRows {
 		book, err := instSimpleBookFromRow(bookRow)
 		if err != nil {
 			return nil, err
@@ -135,7 +203,7 @@ func GetSimpleBooksBySeriesID(seriesID int64) ([]*SimpleBook, error) {
 }
 
 func GetLatestBooks(from int, limit int) ([]*Book, error) {
-	query := "SELECT id, name, \"desc\", number, series_id, created_at, modified_at, added_by FROM books ORDER BY created_at DESC OFFSET $1 LIMIT $2"
+	query := fmt.Sprintf("SELECT %s FROM books ORDER BY created_at DESC OFFSET $1 LIMIT $2", getQueryFieldsForBook(""))
 	rows, err := database.PgDb.Query(query, from, limit)
 	if err != nil {
 		return nil, err
@@ -143,11 +211,11 @@ func GetLatestBooks(from int, limit int) ([]*Book, error) {
 	defer rows.Close()
 
 	books := []*Book{}
-	for rows.Next() {
-		bookRow := &BookRow{}
-		if err := rows.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.SeriesID, &bookRow.CreatedAt, &bookRow.ModifiedAt, &bookRow.UserID); err != nil {
-			return nil, err
-		}
+	bookRows, err := getBookRowsFromRows(rows)
+	if err != nil {
+		return nil, err
+	}
+	for _, bookRow := range bookRows {
 		book, err := instBookFromRow(bookRow)
 		if err != nil {
 			return nil, err
@@ -158,10 +226,9 @@ func GetLatestBooks(from int, limit int) ([]*Book, error) {
 }
 
 func GetBooksFromWishlist(userID int64) ([]*Book, error) {
-	query := `SELECT b.id, b.name, b.desc, b.number, b.series_id, b.created_at, b.modified_at, b.added_by
-			  FROM books b
+	query := fmt.Sprintf(`SELECT %s FROM books b
 			  INNER JOIN wishlist w ON b.id = w.book_id
-			  WHERE w.user_id = $1`
+			  WHERE w.user_id = $1`, getQueryFieldsForBook("b"))
 	rows, err := database.PgDb.Query(query, userID)
 	if err != nil {
 		return nil, err
@@ -169,11 +236,11 @@ func GetBooksFromWishlist(userID int64) ([]*Book, error) {
 	defer rows.Close()
 
 	var books []*Book
-	for rows.Next() {
-		bookRow := &BookRow{}
-		if err := rows.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.SeriesID, &bookRow.CreatedAt, &bookRow.ModifiedAt, &bookRow.UserID); err != nil {
-			return nil, err
-		}
+	bookRows, err := getBookRowsFromRows(rows)
+	if err != nil {
+		return nil, err
+	}
+	for _, bookRow := range bookRows {
 		book, err := instBookFromRow(bookRow)
 		if err != nil {
 			return nil, err
