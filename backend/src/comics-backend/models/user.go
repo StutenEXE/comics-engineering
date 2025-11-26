@@ -12,16 +12,16 @@ type UserWithPassword struct {
 	Username   string `json:"username"`
 	Email      string `json:"email"`
 	Password   string `json:"password"`
-	CreatedAt  string `json:"created_at"`
-	ModifiedAt string `json:"modified_at"`
+	CreatedAt  string `json:"createdAt"`
+	ModifiedAt string `json:"modifiedAt"`
 }
 
 type User struct {
 	ID         int64  `json:"id"`
 	Username   string `json:"username"`
 	Email      string `json:"email"`
-	CreatedAt  string `json:"created_at"`
-	ModifiedAt string `json:"modified_at"`
+	CreatedAt  string `json:"createdAt"`
+	ModifiedAt string `json:"modifiedAt"`
 }
 
 func (u *UserWithPassword) CreateUserInDatabase() error {

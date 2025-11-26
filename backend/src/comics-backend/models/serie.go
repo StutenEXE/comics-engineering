@@ -24,9 +24,9 @@ type SimpleSerie struct {
 	Ongoing    bool   `json:"ongoing"`
 	Oneshot    bool   `json:"oneshot"`
 	Nvolumes   int    `json:"nvolumes"`
-	CreatedAt  string `json:"created_at"`
-	ModifiedAt string `json:"modified_at"`
-	AddedBy    *User  `json:"added_by"`
+	CreatedAt  string `json:"createdAt"`
+	ModifiedAt string `json:"modifiedAt"`
+	AddedBy    *User  `json:"addedBy"`
 }
 
 type Serie struct {
@@ -36,9 +36,9 @@ type Serie struct {
 	Oneshot    bool          `json:"oneshot"`
 	Nvolumes   int           `json:"nvolumes"`
 	Books      []*SimpleBook `json:"books"`
-	CreatedAt  string        `json:"created_at"`
-	ModifiedAt string        `json:"modified_at"`
-	AddedBy    *User         `json:"added_by"`
+	CreatedAt  string        `json:"createdAt"`
+	ModifiedAt string        `json:"modifiedAt"`
+	AddedBy    *User         `json:"addedBy"`
 }
 
 func instSimpleSerieFromRow(row *SerieRow) (*SimpleSerie, error) {

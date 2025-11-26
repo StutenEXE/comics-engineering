@@ -23,9 +23,9 @@ type SimpleBook struct {
 	Name       string `json:"name"`
 	Desc       string `json:"desc"`
 	Number     int    `json:"number"`
-	CreatedAt  string `json:"created_at"`
-	ModifiedAt string `json:"modified_at"`
-	AddedBy    *User  `json:"added_by"`
+	CreatedAt  string `json:"createdAt"`
+	ModifiedAt string `json:"modifiedAt"`
+	AddedBy    *User  `json:"addedBy"`
 }
 
 type Book struct {
@@ -34,9 +34,9 @@ type Book struct {
 	Desc       string       `json:"desc"`
 	Number     int          `json:"number"`
 	Serie      *SimpleSerie `json:"serie"`
-	CreatedAt  string       `json:"created_at"`
-	ModifiedAt string       `json:"modified_at"`
-	AddedBy    *User        `json:"added_by"`
+	CreatedAt  string       `json:"createdAt"`
+	ModifiedAt string       `json:"modifiedAt"`
+	AddedBy    *User        `json:"addedBy"`
 }
 
 func instSimpleBookFromRow(row *BookRow) (*SimpleBook, error) {
