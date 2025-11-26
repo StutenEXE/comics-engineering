@@ -17,6 +17,7 @@ package comics_db {
         name: text
         desc: longtext
         number: number
+        vo_content: longtext
         created_at: datetime
         modified_at: datetime
     }
@@ -30,6 +31,7 @@ package comics_db {
         ean: text
         url: text
         img_url: text
+        parution_date: datetime
         created_at: datetime
         modified_at: datetime
     }
@@ -42,6 +44,8 @@ package comics_db {
         ongoing: boolean
         oneshot: boolean
         nvolumes: text
+        vo_start: datetime
+        vo_end: datetime
         created_at: datetime
         modified_at: datetime
     }
