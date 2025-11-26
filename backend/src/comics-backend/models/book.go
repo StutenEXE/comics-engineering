@@ -36,15 +36,16 @@ type SimpleBook struct {
 }
 
 type Book struct {
-	ID         int64        `json:"id"`
-	Name       string       `json:"name"`
-	Desc       string       `json:"desc"`
-	Number     int          `json:"number"`
-	VoContent  string       `json:"voContent"`
-	Serie      *SimpleSerie `json:"serie"`
-	CreatedAt  string       `json:"createdAt"`
-	ModifiedAt string       `json:"modifiedAt"`
-	AddedBy    *User        `json:"addedBy"`
+	ID         int64            `json:"id"`
+	Name       string           `json:"name"`
+	Desc       string           `json:"desc"`
+	Number     int              `json:"number"`
+	VoContent  string           `json:"voContent"`
+	Serie      *SimpleSerie     `json:"serie"`
+	Editions   []*SimpleEdition `json:"editions"`
+	CreatedAt  string           `json:"createdAt"`
+	ModifiedAt string           `json:"modifiedAt"`
+	AddedBy    *User            `json:"addedBy"`
 }
 
 /*
@@ -112,6 +113,10 @@ func instBookFromRow(row *BookRow) (*Book, error) {
 	if err != nil {
 		return nil, err
 	}
+	editions, err := GetSimpleEditionsByBookID(row.ID)
+	if err != nil {
+		return nil, err
+	}
 	user, err := GetUserByID(row.UserID)
 	if err != nil {
 		return nil, err
@@ -123,6 +128,7 @@ func instBookFromRow(row *BookRow) (*Book, error) {
 		Number:     row.Number,
 		VoContent:  row.VoContent,
 		Serie:      serie,
+		Editions:   editions,
 		CreatedAt:  row.CreatedAt,
 		ModifiedAt: row.ModifiedAt,
 		AddedBy:    user,
@@ -160,6 +166,20 @@ func GetBookByID(bookID int64) (*Book, error) {
 		return nil, err
 	}
 	return instBookFromRow(bookRow)
+}
+
+func GetSimpleBookByID(bookID int64) (*SimpleBook, error) {
+	bookRow := &BookRow{}
+	query := fmt.Sprintf("SELECT %s FROM books WHERE id=$1", getQueryFieldsForBook(""))
+	row := database.PgDb.QueryRow(query, bookID)
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+	bookRow, err := getBookRowFromRow(row)
+	if err != nil {
+		return nil, err
+	}
+	return instSimpleBookFromRow(bookRow)
 }
 
 func GetSimpleBooksBySeriesID(seriesID int64) ([]*SimpleBook, error) {

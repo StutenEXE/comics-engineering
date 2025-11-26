@@ -54,7 +54,7 @@ type Serie struct {
 
 /*
 The order of the requested elements is the following:
-id, name, ongoing, oneshot, nvolumes, created_at, modified_at, added_by
+id, name, ongoing, oneshot, nvolumes, vo_start, vo_end, created_at, modified_at, added_by
 */
 func getQueryFieldsForSerie(prefix string) string {
 	if prefix != "" {

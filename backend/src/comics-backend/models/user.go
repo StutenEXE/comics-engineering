@@ -25,6 +25,10 @@ type User struct {
 	ModifiedAt string `json:"modifiedAt"`
 }
 
+/*
+The order of the requested elements is the following:
+id, username, email, created_at, modified_at
+*/
 func getQueryFieldsForUser(prefix string) string {
 	if prefix != "" {
 		prefix = prefix + "."
