@@ -1,6 +1,10 @@
 package models
 
-import "github.com/StutenEXE/comics-backend/database"
+import (
+	"fmt"
+
+	"github.com/StutenEXE/comics-backend/database"
+)
 
 type BookRow struct {
 	ID         int64
@@ -37,6 +41,18 @@ type Book struct {
 	CreatedAt  string       `json:"createdAt"`
 	ModifiedAt string       `json:"modifiedAt"`
 	AddedBy    *User        `json:"addedBy"`
+}
+
+/*
+The order of the requested elements is the following:
+id, name, desc, number, series_id, created_at, modified_at, added_by
+*/
+func getQueryFieldsForBook(prefix string) string {
+	if prefix != "" {
+		prefix = prefix + "."
+	}
+	return fmt.Sprintf("%sid, %sname, %s\"desc\", %snumber, %sseries_id, %screated_at, %smodified_at, %sadded_by",
+		prefix, prefix, prefix, prefix, prefix, prefix, prefix, prefix)
 }
 
 func instSimpleBookFromRow(row *BookRow) (*SimpleBook, error) {
@@ -98,7 +114,7 @@ func (b *Book) UpdateBookInDatabase() error {
 
 func GetBookByID(bookID int64) (*Book, error) {
 	bookRow := &BookRow{}
-	query := "SELECT id, name, desc, number, series_id, created_at, modified_at FROM books WHERE id=$1"
+	query := fmt.Sprintf("SELECT %s FROM books WHERE id=$1", getQueryFieldsForBook(""))
 	row := database.PgDb.QueryRow(query, bookID)
 	if err := row.Err(); err != nil {
 		return nil, err
@@ -112,7 +128,7 @@ func GetBookByID(bookID int64) (*Book, error) {
 }
 
 func GetSimpleBooksBySeriesID(seriesID int64) ([]*SimpleBook, error) {
-	query := "SELECT id, name, desc, number, series_id, created_at, modified_at, added_by FROM books WHERE series_id=$1"
+	query := fmt.Sprintf("SELECT %s FROM books WHERE series_id=$1", getQueryFieldsForBook(""))
 	rows, err := database.PgDb.Query(query, seriesID)
 	if err != nil {
 		return nil, err
@@ -135,7 +151,7 @@ func GetSimpleBooksBySeriesID(seriesID int64) ([]*SimpleBook, error) {
 }
 
 func GetLatestBooks(from int, limit int) ([]*Book, error) {
-	query := "SELECT id, name, \"desc\", number, series_id, created_at, modified_at, added_by FROM books ORDER BY created_at DESC OFFSET $1 LIMIT $2"
+	query := fmt.Sprintf("SELECT %s FROM books ORDER BY created_at DESC OFFSET $1 LIMIT $2", getQueryFieldsForBook(""))
 	rows, err := database.PgDb.Query(query, from, limit)
 	if err != nil {
 		return nil, err
@@ -158,10 +174,9 @@ func GetLatestBooks(from int, limit int) ([]*Book, error) {
 }
 
 func GetBooksFromWishlist(userID int64) ([]*Book, error) {
-	query := `SELECT b.id, b.name, b.desc, b.number, b.series_id, b.created_at, b.modified_at, b.added_by
-			  FROM books b
+	query := fmt.Sprintf(`SELECT %s FROM books b
 			  INNER JOIN wishlist w ON b.id = w.book_id
-			  WHERE w.user_id = $1`
+			  WHERE w.user_id = $1`, getQueryFieldsForBook("b"))
 	rows, err := database.PgDb.Query(query, userID)
 	if err != nil {
 		return nil, err

@@ -1,6 +1,10 @@
 package models
 
-import "github.com/StutenEXE/comics-backend/database"
+import (
+	"fmt"
+
+	"github.com/StutenEXE/comics-backend/database"
+)
 
 type SerieRow struct {
 	ID         int64
@@ -39,6 +43,14 @@ type Serie struct {
 	CreatedAt  string        `json:"createdAt"`
 	ModifiedAt string        `json:"modifiedAt"`
 	AddedBy    *User         `json:"addedBy"`
+}
+
+func getQueryFieldsForSerie(prefix string) string {
+	if prefix != "" {
+		prefix = prefix + "."
+	}
+	return fmt.Sprintf("%sid, %sname, %songoing, %soneshot, %snvolumes, %screated_at, %smodified_at, %sadded_by",
+		prefix, prefix, prefix, prefix, prefix, prefix, prefix, prefix)
 }
 
 func instSimpleSerieFromRow(row *SerieRow) (*SimpleSerie, error) {
@@ -81,7 +93,7 @@ func instSerieFromRow(row *SerieRow) (*Serie, error) {
 
 func GetSimpSerieByID(serieID int64) (*SimpleSerie, error) {
 	serieRow := &SerieRow{}
-	query := "SELECT id, name, ongoing, oneshot, nvolumes, created_at, modified_at, added_by FROM series WHERE id=$1"
+	query := fmt.Sprintf("SELECT %s FROM series WHERE id=$1", getQueryFieldsForSerie(""))
 	row := database.PgDb.QueryRow(query, serieID)
 	if err := row.Err(); err != nil {
 		return nil, err
