@@ -39,7 +39,7 @@ export function Welcome() {
                 {books.map((book) => (
                   <li key={book.id} className="border p-4 rounded-lg">
                     <h2 className="text-xl font-bold">{book.name}</h2>
-                    <h4 className="text-md italic">Series: {book.serie.name} (#{book.number})</h4>
+                    <h4 className="text-md italic">Series: {book.serie?.name} (#{book.number})</h4>
                     <p className="text-gray-600">{book.desc}</p>
                     <p className="text-sm text-gray-500">Added on: {book.createdAt.toLocaleDateString("fr")} by {book.addedBy?.username}</p>
                   </li>

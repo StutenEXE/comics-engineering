@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type { Book } from "~/models/book";
+import { parseDataToBook, type Book } from "~/models/book";
 import type { SignupData, User, UserCredentials } from "~/models/user";
 
 //////////// PUBLIC API ////////////
@@ -19,15 +19,11 @@ export const publicApi = createApi({
     signup: build.mutation<{ user: User }, SignupData>({
       query: (data) => ({ url: '/signup', method: 'POST', body: data }),
     }),
-    // Latest books endpoint
+    // Latest books endpoint (reuse parseDateLikeFields)
     latestBooks: build.query<{ books: Book[] }, { from: number; limit: number }>({
       query: ({ from, limit }) => ({ url: `/books/latest?from=${from}&limit=${limit}`, method: 'GET' }),
-      transformResponse: (reps: {books: Book[]}) => ({
-          books: reps.books.map(book => ({
-            ...book,
-            createdAt: new Date(book.createdAt),
-            modifiedAt:new Date(book.modifiedAt),
-          })),
+      transformResponse: (reps: { books: Book[] }) => ({
+        books: reps.books.map((book) => parseDataToBook(book)),
       }),
     }),
   }),

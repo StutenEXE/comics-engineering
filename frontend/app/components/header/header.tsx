@@ -9,7 +9,7 @@ export function Header() {
                     <ul className="flex space-x-4">
                         <li><a href="/" className="hover:underline">Home</a></li>
                         <li><a href="/books" className="hover:underline">Books</a></li>
-                        <li><a href="/publishers" className="hover:underline">My collection</a></li>
+                        <li><a href="/collection" className="hover:underline">My collection</a></li>
                         <li><a href="/profile" className="hover:underline">My profile</a></li>
                     </ul>
                 </nav>
