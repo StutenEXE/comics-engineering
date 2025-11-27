@@ -1,6 +1,4 @@
-import { API_PUB_BASE_URL, postRequest } from "~/services/api";
-
-export type User = {
+export interface User {
     id: string;
     username: string;
     email: string;
@@ -8,12 +6,13 @@ export type User = {
     updatedAt: Date;
 }
 
-export async function signUp(data: Partial<User>): Promise<User> {
-    const SIGNUP_URL = API_PUB_BASE_URL + "/signup";
-    return postRequest<User>(SIGNUP_URL, data);
+export interface UserCredentials {
+  email: string;
+  password: string;
 }
 
-export async function logIn(data: Partial<User>): Promise<User> {
-    const LOGIN_URL = API_PUB_BASE_URL + "/login";
-    return postRequest<User>(LOGIN_URL, data);
+export interface SignupData {
+  username: string;
+  email: string;
+  password: string;
 }

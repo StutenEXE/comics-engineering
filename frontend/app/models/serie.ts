@@ -1,7 +1,7 @@
 import type { Book } from "./book"
 import type { User } from "./user"
 
-export type Serie = {
+export interface Serie {
     id: string,
     name: string,
     ongoing: boolean,

@@ -1,6 +1,6 @@
 import type { Edition } from "./edition"
 
-export type Publisher = {
+export interface Publisher {
     id: number,
     name: string,
     editions: Partial<Edition>[],

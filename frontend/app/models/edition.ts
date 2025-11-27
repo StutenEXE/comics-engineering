@@ -2,7 +2,7 @@ import type { Book } from "./book"
 import type { Publisher } from "./publisher"
 import type { User } from "./user"
 
-export type Edition = {
+export interface Edition {
     id: number,
     isbn: string,
     ean: string,

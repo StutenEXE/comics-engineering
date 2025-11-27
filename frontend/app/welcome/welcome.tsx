@@ -1,26 +1,25 @@
-import { requestLatestBookUpdates, type Book } from "~/models/book";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useLatestBooksQuery } from "~/store/services/api";
+
+const BOOKS_PER_PAGE = 3;
 
 export function Welcome() {
-  const [books, setBooks] = useState<Book[]>([]);
-  const [numBooks, setNumBooks] = useState(0);
+  const [page, setPage] = useState(0);
+  
+  // Calculate from and to based on current page
+  const from = page * BOOKS_PER_PAGE;
+  
+  // Fetch books for current page
+  const { data, isLoading, error } = useLatestBooksQuery({ from, limit: BOOKS_PER_PAGE });
+  const books = data?.books ?? [];
 
-  useEffect(() => {
-    let isMounted = true;
-    requestLatestBookUpdates(numBooks, 10)
-      .then((newBooks) => {
-        console.log("Fetched latest books:", newBooks);
-        if (!isMounted) return;
-        setBooks(newBooks);
-        setNumBooks(newBooks.length);
-      })
-      .catch((err) => {
-        console.error("Failed fetching latest books:", err);
-      });
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const handleNextPage = () => {
+    setPage((prev) => prev + 1);
+  };
+
+  const handlePreviousPage = () => {
+    setPage((prev) => Math.max(0, prev - 1));
+  };
 
   return (
     <main className="flex items-center justify-center pt-16 pb-4">
@@ -28,18 +27,48 @@ export function Welcome() {
         <header className="flex flex-col items-center gap-9">
           <h1>Latest book updates</h1>
         </header>
+        
+        {isLoading && <p className="text-gray-500">Loading books...</p>}
+        
+        {error && <p className="text-red-500">Error loading books</p>}
+        
         <div>
-          <ul className="flex flex-col gap-4">
-            {books.map((book) => (
-              <li key={book.id} className="border p-4 rounded-lg">
-                <h2 className="text-xl font-bold">{book.name}</h2>
-                <h4 className="text-md italic">Series: {book.serie.name} (#{book.number})</h4>
-                <p className="text-gray-600">{book.desc}</p>
-                <p className="text-sm text-gray-500">Added on: {book.createdAt?.toLocaleDateString("fr")} by {book.addedBy?.username}</p>
-              </li>
-            ))}
-          </ul>
+          {books.length > 0 ? (
+            <>
+              <ul className="flex flex-col gap-4">
+                {books.map((book) => (
+                  <li key={book.id} className="border p-4 rounded-lg">
+                    <h2 className="text-xl font-bold">{book.name}</h2>
+                    <h4 className="text-md italic">Series: {book.serie.name} (#{book.number})</h4>
+                    <p className="text-gray-600">{book.desc}</p>
+                    <p className="text-sm text-gray-500">Added on: {book.createdAt.toLocaleDateString("fr")} by {book.addedBy?.username}</p>
+                  </li>
+                ))}
+              </ul>
 
+              <div className="flex gap-4 justify-center mt-8">
+                <button
+                  onClick={handlePreviousPage}
+                  disabled={page === 0}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:bg-gray-400 hover:bg-blue-600 transition"
+                >
+                  Previous
+                </button>
+                <span className="flex items-center px-4 py-2">
+                  Page {page + 1}
+                </span>
+                <button
+                  onClick={handleNextPage}
+                  disabled={books.length < BOOKS_PER_PAGE}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:bg-gray-400 hover:bg-blue-600 transition"
+                >
+                  Next
+                </button>
+              </div>
+            </>
+          ) : (
+            !isLoading && <p className="text-gray-500">No books found</p>
+          )}
         </div>
       </div>
     </main>
