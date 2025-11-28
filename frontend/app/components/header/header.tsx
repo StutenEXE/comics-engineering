@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '~/store/store';
 import { LoginForm } from '../forms/loginForm';
 import { useState } from 'react';
+import { SignupForm } from '../forms/signupForm';
 
 export function Header() {
     const { isAuthenticated, user } = useSelector((state: RootState) => state.user);
@@ -26,7 +27,12 @@ export function Header() {
     return (
         <header className="w-full bg-gray-800 text-white p-4">
             <div className="container mx-auto flex justify-between items-center">
-                <h1 className="text-2xl font-bold">Comics Engineering</h1>
+                <div className="flex items-center gap-4">
+                    <h1 className="text-2xl font-bold">Comics Engineering</h1>
+                    {isAuthenticated && (
+                        <p>Welcome, {user?.username}!</p>
+                    )}
+                </div>
                 <nav>
                     <ul className="flex space-x-4">
                         <li><a href="/" className="hover:underline">Home</a></li>
@@ -35,7 +41,6 @@ export function Header() {
                             <>
                                 <li><a href="/collection" className="hover:underline">My collection</a></li>
                                 <li><a href="/profile" className="hover:underline">My profile</a></li>
-                                <li className="text-sm text-gray-300">Welcome, {user?.username}</li>
                             </>
                         ) : (
                             <>
@@ -52,6 +57,12 @@ export function Header() {
                     <LoginForm
                         onDone={() => setIsLoginOpen(false)}
                         onCancel={() => setIsLoginOpen(false)}
+                    />
+                )}
+                { isSignupOpen && (
+                    <SignupForm
+                        onDone={() => setIsSignupOpen(false)}
+                        onCancel={() => setIsSignupOpen(false)}
                     />
                 )}
             </section>
