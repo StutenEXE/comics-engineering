@@ -8,7 +8,9 @@ export const store = configureStore({
     [publicApi.reducerPath]: publicApi.reducer,
     [privateApi.reducerPath]: privateApi.reducer,
   },
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(publicApi.middleware, privateApi.middleware),
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware({
+    serializableCheck: false,
+  }).concat(publicApi.middleware, privateApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -10,6 +10,7 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 import { Header } from "./components/header/header";
+import { ToastProvider } from "./components/toast/toast";
 import { Provider } from 'react-redux';
 import { store } from './store/store';
 
@@ -47,12 +48,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <Provider store={store}>
-      <div className="wrapper">
-        <Header />
-        <main className="main-content">
-          <Outlet />
-        </main>
-      </div>
+      <ToastProvider>
+        <div className="wrapper">
+          <Header />
+          <main className="main-content">
+            <Outlet />
+          </main>
+        </div>
+      </ToastProvider>
     </Provider>
   );
 }
