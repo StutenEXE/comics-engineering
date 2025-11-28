@@ -36,6 +36,17 @@ func getQueryFieldsForUser(prefix string) string {
 	return fmt.Sprintf("%sid, %susername, %semail, %screated_at, %smodified_at", prefix, prefix, prefix, prefix, prefix)
 }
 
+/*
+The order of the requested elements is the following:
+id, username, email, created_at, modified_at
+*/
+func getQueryFieldsForUserPassword(prefix string) string {
+	if prefix != "" {
+		prefix = prefix + "."
+	}
+	return fmt.Sprintf("%sid, %susername, %semail, %spassword, %screated_at, %smodified_at", prefix, prefix, prefix, prefix, prefix, prefix)
+}
+
 func (u *UserWithPassword) CreateUserInDatabase() error {
 	query := "INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id"
 	err := database.PgDb.QueryRow(query, u.Username, u.Email, u.Password).Scan(&u.ID)
@@ -75,12 +86,13 @@ func GetUserByID(userID int64) (*User, error) {
 
 func GetUserByEmail(email string) (*UserWithPassword, error) {
 	user := &UserWithPassword{}
-	query := fmt.Sprintf("SELECT %s FROM users WHERE email=$1", getQueryFieldsForUser(""))
+	query := fmt.Sprintf("SELECT %s FROM users WHERE email=$1", getQueryFieldsForUserPassword(""))
 	row := database.PgDb.QueryRow(query, email)
 	if err := row.Err(); err != nil {
 		return nil, err
 	}
 	row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.CreatedAt, &user.ModifiedAt)
+	// fmt.Printf("Retrieved user : %v", user)
 	if user.Username == "" {
 		return nil, nil // User not found
 	}
