@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { BookCard } from "~/components/cards/BookCard";
 import { useLatestBooksQuery } from "~/store/services/api";
 
 const BOOKS_PER_PAGE = 3;
@@ -32,17 +33,12 @@ export function Landing() {
         
         {error && <p className="text-red-500">Error loading books</p>}
         
-        <div>
+        <div className="flex flex-col items-center">
           {books.length > 0 ? (
             <>
-              <ul className="flex flex-col gap-4">
+              <ul className="flex gap-4">
                 {books.map((book) => (
-                  <li key={book.id} className="border p-4 rounded-lg">
-                    <h2 className="text-xl font-bold">{book.name}</h2>
-                    <h4 className="text-md italic">Series: {book.serie?.name} (#{book.number})</h4>
-                    <p className="text-gray-600">{book.desc}</p>
-                    <p className="text-sm text-gray-500">Added on: {book.createdAt.toLocaleDateString("fr")} by {book.addedBy?.username}</p>
-                  </li>
+                  <BookCard key={book.id} book={book} />
                 ))}
               </ul>
 
