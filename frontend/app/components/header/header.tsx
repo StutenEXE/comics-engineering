@@ -23,7 +23,6 @@ export function Header() {
         setIsSignupOpen(true);
     }
 
-    
     return (
         <header className="w-full bg-gray-800 text-white p-4">
             <div className="container mx-auto flex justify-between items-center">
