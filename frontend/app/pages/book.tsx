@@ -1,4 +1,4 @@
-import type { Route } from "./+types/home";
+import type { Route } from "../+types/root";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -7,10 +7,13 @@ export function meta({ params }: Route.MetaArgs) {
   ];
 }
 
-export default function BookRouting({ params }: { params : { id: number}}) {
+export default function BookPage({ params }: { params : { id: number}}) {
+  
+  
+  
   return (
-    <div>
-        Book id : {params.id}
-    </div>
+    <main>
+
+    </main>
   );
 }

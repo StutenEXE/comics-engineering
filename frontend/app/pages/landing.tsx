@@ -2,10 +2,19 @@ import { useEffect, useState } from "react";
 import { BookCard } from "~/components/cards/BookCard";
 import { useToast } from "~/components/toast/toast";
 import { useLatestBooksQuery } from "~/store/services/api";
+import type { Route } from "../+types/root";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Know Your Stash" },
+    { name: "description", content: "Welcome to Know Your Stash !" },
+  ];
+}
+
 
 const BOOKS_PER_PAGE = 3;
 
-export function LandingPage() {
+export default function LandingPage() {
   const [page, setPage] = useState(0);
   
   // Calculate from and to based on current page
@@ -25,6 +34,9 @@ export function LandingPage() {
 
   const toast = useToast()
   useEffect(() => {
+    if (error === undefined || error === null) {
+      return
+    }
     toast.error("Error while loading books")
   }, [error])
 
@@ -53,7 +65,8 @@ export function LandingPage() {
             <button
               onClick={handlePreviousPage}
               disabled={page === 0}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:bg-gray-400 hover:bg-blue-600 transition"
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg cursor-pointer 
+              disabled:cursor-not-allowed disabled:bg-gray-400 hover:bg-blue-600 transition"
             >
               Previous
             </button>
@@ -63,7 +76,8 @@ export function LandingPage() {
             <button
               onClick={handleNextPage}
               disabled={books.length < BOOKS_PER_PAGE}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:bg-gray-400 hover:bg-blue-600 transition"
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg cursor-pointer 
+              disabled:cursor-not-allowed disabled:bg-gray-400 hover:bg-blue-600 transition"
             >
               Next
             </button>

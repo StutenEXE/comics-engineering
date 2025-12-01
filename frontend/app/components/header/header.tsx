@@ -27,7 +27,12 @@ export function Header() {
         <header className="w-full bg-gray-800 text-white p-4">
             <div className="container mx-auto flex justify-between items-center">
                 <div className="flex items-center gap-4">
-                    <h1 className="text-2xl font-bold">Comics Engineering</h1>
+                    <img src="/kystash-logo.png" alt="logo" className="w-20"/>
+                    <h1 className="text-2xl font-bold">
+                        <span className="text-yellow-300">K</span>now&nbsp; 
+                        <span className="text-yellow-300">Y</span>our&nbsp;
+                        <span className="text-yellow-300">S</span>tash
+                    </h1>
                     {isAuthenticated && (
                         <p>Welcome, {user?.username}!</p>
                     )}
