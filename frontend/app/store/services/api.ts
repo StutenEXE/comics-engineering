@@ -19,17 +19,30 @@ export const publicApi = createApi({
     signup: build.mutation<{ user: User }, SignupData>({
       query: (data) => ({ url: '/signup', method: 'POST', body: data }),
     }),
+
+    /****************
+     * BOOKS
+     ****************/
+    // Get book by id
+    bookById: build.query<{ book: Book }, { id: number }>({
+      query: ({ id }) => ({ url: `/book?id=${id}`, method: 'GET' }),
+      transformResponse: (resp: { book: Book }) => ({
+        book: parseDataToBook(resp.book),
+      }),
+    }),
     // Latest books endpoint (reuse parseDateLikeFields)
     latestBooks: build.query<{ books: Book[] }, { from: number; limit: number }>({
-      query: ({ from, limit }) => ({ url: `/books/latest?from=${from}&limit=${limit}`, method: 'GET' }),
-      transformResponse: (reps: { books: Book[] }) => ({
-        books: reps.books.map((book) => parseDataToBook(book)),
+      query: ({ from, limit }) => ({ url: `/books/latest`, method: 'GET', params: { from, limit } }),
+      transformResponse: (resp: { books: Book[] }) => ({
+        books: resp.books.map((book) => parseDataToBook(book)),
       }),
     }),
   }),
 });
 
-export const { useLoginMutation, useSignupMutation, useLatestBooksQuery } = publicApi;
+export const { useLoginMutation, useSignupMutation, 
+  useBookByIdQuery, useLatestBooksQuery } 
+  = publicApi;
 
 //////////// PRIVATE API ////////////
 
