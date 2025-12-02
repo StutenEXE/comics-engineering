@@ -21,7 +21,7 @@ export default function LandingPage() {
   const from = page * BOOKS_PER_PAGE;
   
   // Fetch books for current page
-  const { data, isLoading, error } = useLatestBooksQuery({ from, limit: BOOKS_PER_PAGE });
+  const { data, error, isFetching } = useLatestBooksQuery({ from, limit: BOOKS_PER_PAGE });
   const books = data?.books ?? [];
 
   const handleNextPage = () => {
@@ -46,20 +46,21 @@ export default function LandingPage() {
         <header className="flex flex-col items-center gap-9">
           <h1 className="text-xl">Latest additions our library</h1>
         </header>
-        
-        {isLoading && <p className="text-gray-500">Loading books...</p>}
+
+        {isFetching && <p className="text-gray-500">Loading books...</p>}
         
         <div className="flex flex-col items-center">
-          {books.length > 0 ? (
+          {(!isFetching && books.length > 0) ? (
             <>
               <ul className="flex gap-4">
                 {books.map((book) => (
-                  <BookCard key={book.id} book={book} />
+                  <BookCard className="w-50 border rounded-lg p-2" 
+                    key={book.id} book={book} />
                 ))}
               </ul>
             </>
           ) : (
-            !isLoading && <p className="text-gray-500">No books found</p>
+            !isFetching && <p className="text-gray-500">No books found</p>
           )}
           <div className="flex gap-4 justify-center mt-8">
             <button

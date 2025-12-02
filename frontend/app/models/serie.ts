@@ -7,7 +7,7 @@ export interface Serie {
     ongoing: boolean,
     oneshot: boolean,
     nvolumes: number,
-    books: Partial<Book>[],
+    books: Book[],
     createdAt: Date,
     modifiedAt: Date,
     addedBy: User

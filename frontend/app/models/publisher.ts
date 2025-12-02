@@ -3,7 +3,7 @@ import { parseDataToEdition, type Edition } from "./edition"
 export interface Publisher {
     id: number,
     name: string,
-    editions: Partial<Edition>[],
+    editions: Edition[],
     createdAt: Date,
     modifiedAt: Date
 }
