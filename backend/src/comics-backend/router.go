@@ -35,6 +35,7 @@ func startRouter() {
 		public.POST("/login", services.LoginService)
 		public.POST("/signup", services.CreateUserService)
 		// Book services
+		public.GET("/book", services.GetBookByID)
 		public.GET("/books/latest", services.GetLatestBooks)
 
 	}

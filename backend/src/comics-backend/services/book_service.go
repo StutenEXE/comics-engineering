@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/StutenEXE/comics-backend/models"
@@ -33,5 +34,28 @@ func GetLatestBooks(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"books": books,
+	})
+}
+
+func GetBookByID(c *gin.Context) {
+	type BookByIDRequest struct {
+		ID int64 `form:"id"`
+	}
+	// GET form data
+	var req BookByIDRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		utils.ReturnErrorMessage(c, http.StatusBadRequest, "invalid request", err)
+		return
+	}
+
+	book, err := models.GetBookByID(req.ID)
+	if err != nil {
+		errmsg := fmt.Sprintf("failed to get book (id=%d)", req.ID)
+		utils.ReturnErrorMessage(c, http.StatusInternalServerError, errmsg, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"book": book,
 	})
 }
