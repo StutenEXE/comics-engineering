@@ -54,7 +54,8 @@ export default function LandingPage() {
             <>
               <ul className="flex gap-4">
                 {books.map((book) => (
-                  <BookCard key={book.id} book={book} />
+                  <BookCard className="w-50 border rounded-lg p-2" 
+                    key={book.id} book={book} />
                 ))}
               </ul>
             </>

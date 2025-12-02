@@ -9,9 +9,9 @@ export interface Book {
 	desc: string,
 	number: number,
 	voContent: string,
-	serie: Partial<Serie> | null,
-	editions: Partial<Edition>[],
-	issues: Partial<Issue>[],
+	serie: Serie | null,
+	editions: Edition[],
+	issues: Issue[],
 	createdAt: Date,
 	modifiedAt: Date,
 	addedBy: User
@@ -27,7 +27,7 @@ export function parseDataToBook(data: Record<string, any>): Book {
 		voContent: data.voContent,
 		serie: data.serie ? parseDataToSerie(data.serie) : null,
 		editions: data.editions?.map((ed: Record<string, any>) => parseDataToEdition(ed)) ?? [],
-		issues: data.editions?.map((ed: Record<string, any>) => parseDataToIssue(ed)) ?? [],
+		issues: data.issues?.map((is: Record<string, any>) => parseDataToIssue(is)) ?? [],
 		createdAt: new Date(data.createdAt),
 		modifiedAt: new Date(data.modifiedAt),
 		addedBy: parseDataToUser(data.addedBy)

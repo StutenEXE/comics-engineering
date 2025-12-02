@@ -1,11 +1,13 @@
 import { useCallback, useState } from "react";
+import { Link } from "react-router";
 import type { Book } from "~/models/book";
 
 type BookCardProps = {
     book: Book;
+    className?: string;
 };
 
-export function BookCard({book}: BookCardProps) {
+export function BookCard({book, className}: BookCardProps) {
     const [index, setIndex] = useState(0);
     const editions = book.editions ?? [];
 
@@ -18,32 +20,20 @@ export function BookCard({book}: BookCardProps) {
     }, [editions.length]);
     
     return (
-        <div className="w-50 border p-2 rounded-lg flex flex-col items-center justify-between">
-            <div className="p-1 flex-shrink-0">
-                <img
-                    src={book.editions[0].imgUrl}
-                    alt={book.name}
-                    className="w-full h-full object-cover rounded"
-                />
+        <Link to={`/book/${book.id}`}>
+            <div className={`flex flex-col items-center justify-between ${className}`}>
+                <div className="p-1 flex-shrink-0">
+                    <img
+                        src={book.editions[0].imgUrl}
+                        alt={book.name}
+                        className="w-full h-full object-cover rounded"
+                    />
+                </div>
+                <div className="flex flex-col items-center">
+                    <h3 className="font-semibold">{book.name}</h3>
+                    <h4 className="text-sm italic">{book.serie?.name} (#{book.number})</h4>
+                </div>
             </div>
-            <div className="flex flex-col items-center">
-                <h3 className="text- font-semibold">{book.name}</h3>
-                <h4 className="text-sm italic">{book.serie?.name} (#{book.number})</h4>
-
-                {/* <p className="mt-2 whitespace-pre-line text-lg font-bold">Description :</p>
-                <p> {book.desc}</p>
-
-                <p className="mt-2 whitespace-pre-line text-lg font-bold">Content :</p>
-                <p>{book.voContent}</p> */}
-
-
-                {/* <p className="mt-6 text-xs">
-                    Added by <b>{book.addedBy?.username}</b> the <b>{book.createdAt.toLocaleDateString("fr")}</b>
-                </p>
-                <p className="text-xs">
-                    Last modification : <b>{book.modifiedAt.toLocaleDateString("fr")}</b>
-                </p> */}
-            </div>
-        </div>
+        </Link>
     );
 }

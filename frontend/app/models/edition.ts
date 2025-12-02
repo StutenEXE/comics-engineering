@@ -8,8 +8,8 @@ export interface Edition {
     ean: string,
     imgUrl: string,
     parutionDate: Date,
-    publisher: Partial<Publisher> | null,
-    book: Partial<Book> | null,
+    publisher: Publisher | null,
+    book: Book | null,
     createdAt: Date,
     modifiedAt: Date,
     addedBy: User

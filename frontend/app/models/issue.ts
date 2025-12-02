@@ -7,8 +7,8 @@ export interface Issue {
     name: string,
     number: number,
     parutionDate: Date,
-    issueSerie: Partial<IssueSerie> | null,
-    books: Partial<Book>[]
+    issueSerie: IssueSerie | null,
+    books: Book[]
     createdAt: Date,
     modifiedAt: Date,
     addedBy: User
@@ -20,7 +20,7 @@ export function parseDataToIssue(data: Record<string, any>): Issue {
         id: data.id,
         name: data.name,
         number: data.number,
-        parutionDate: data.parutionDate,
+        parutionDate: new Date(data.parutionDate),
         issueSerie: data.issueSerie ? parseDataToIssueSerie(data.issueSerie) : null,
         books: data.books?.map((bk: Record<string, any>) => parseDataToBook(bk)) ?? [],
         createdAt: new Date(data.createdAt),

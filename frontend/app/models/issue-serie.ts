@@ -7,7 +7,7 @@ export interface IssueSerie {
     desc: string,
     voStart: Date,
     voEnd: Date | null,
-    issues: Partial<Issue>[]
+    issues: Issue[]
     createdAt: Date,
     modifiedAt: Date,
     addedBy: User
