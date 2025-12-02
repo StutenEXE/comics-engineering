@@ -1,30 +1,32 @@
-import { API_PUB_BASE_URL, getRequest } from "~/services/api";
-import type { Serie } from "./serie"
-import type { User } from "./user"
+import { parseDataToSerie, type Serie } from "./serie"
+import { parseDataToUser, type User } from "./user"
+import { parseDataToEdition, type Edition } from "./edition";
 
-export type Book = {
+export interface Book {
  	id: number,
 	name: string,
 	desc: string,
 	number: number,
-	serie: Partial<Serie>,
+	voContent: string,
+	serie: Partial<Serie> | null,
+	editions: Partial<Edition>[],
 	createdAt: Date,
 	modifiedAt: Date,
 	addedBy: User
 }
 
-export async function requestLatestBookUpdates(from: number, limit: number): Promise<Book[]> {
-    const BOOKS_URL = API_PUB_BASE_URL + "/books/latest";
-	const raw = await getRequest<Record<string, any>[]>(BOOKS_URL, { from, limit });
-	const books: Book[] = raw.map(item => ({
-		id: item.id,
-		name: item.name,
-		desc: item.desc,
-		number: item.number,
-		serie: item.serie,
-		createdAt: new Date(item.createdAt),
-		modifiedAt: new Date(item.modifiedAt),
-		addedBy: item.addedBy
-	}));
-    return books;
+// Utility function to transform the api data to an instance of Book
+export function parseDataToBook(data: Record<string, any>): Book {
+	return {
+		id: data.id,
+		name: data.name,
+		desc: data.desc,
+		number: data.number,
+		voContent: data.voContent,
+		serie: data.serie ? parseDataToSerie(data.serie) : null,
+		editions: data.editions?.map((ed: Record<string, any>) => parseDataToEdition(ed)) ?? [],
+		createdAt: new Date(data.createdAt),
+		modifiedAt: new Date(data.modifiedAt),
+		addedBy: parseDataToUser(data.addedBy)
+	}
 }

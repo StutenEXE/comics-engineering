@@ -9,6 +9,10 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { Header } from "./components/header/header";
+import { ToastProvider } from "./components/toast/toast";
+import { Provider } from 'react-redux';
+import { store } from './store/store';
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -33,7 +37,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        {children} 
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -42,7 +46,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <Provider store={store}>
+      <ToastProvider>
+        <div className="wrapper">
+          <Header />
+          <main className="main-content">
+            <Outlet />
+          </main>
+        </div>
+      </ToastProvider>
+    </Provider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

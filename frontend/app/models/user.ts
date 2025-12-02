@@ -1,6 +1,4 @@
-import { API_PUB_BASE_URL, postRequest } from "~/services/api";
-
-export type User = {
+export interface User {
     id: string;
     username: string;
     email: string;
@@ -8,12 +6,24 @@ export type User = {
     updatedAt: Date;
 }
 
-export async function signUp(data: Partial<User>): Promise<User> {
-    const SIGNUP_URL = API_PUB_BASE_URL + "/signup";
-    return postRequest<User>(SIGNUP_URL, data);
+// Utility function to transform the api data to an instance of User
+export function parseDataToUser(data: Record<string, any>): User {
+    return {
+        id: data.id,
+        username: data.username,
+        email: data.email,
+        createdAt: new Date(data.createdAt),
+        updatedAt: new Date(data.updatedAt)
+    }
 }
 
-export async function logIn(data: Partial<User>): Promise<User> {
-    const LOGIN_URL = API_PUB_BASE_URL + "/login";
-    return postRequest<User>(LOGIN_URL, data);
+export interface UserCredentials {
+  email: string;
+  password: string;
+}
+
+export interface SignupData {
+  username: string;
+  email: string;
+  password: string;
 }
