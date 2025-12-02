@@ -10,6 +10,28 @@ package comics_db {
         modified_at: datetime
     }
 
+    class IssueSeries {
+        *id: id
+        -added_by: id
+        name: text
+        desc: longtext
+        vo_start: datetime
+        vo_end: datetime
+        created_at: datetime
+        modified_at: datetime
+    }
+
+    class Issues {
+        *id: id
+        -series_id: id
+        -added_by: id
+        name: text
+        number: number
+        parution_date: datetime
+        created_at: datetime
+        modified_at: datetime
+    }
+
     class Books {
         *id: id
         -series_id: id
@@ -86,6 +108,13 @@ package comics_prices_db {
         ]
     }
 }
+
+IssueSeries "*" --> "1" Users
+
+Issues "*" --> "1" IssueSeries
+Issues "*" --> "1" Users 
+
+Books "*" --> "*" Issues
 
 EditionOwnership "*" --> "1" Editions
 EditionOwnership "*" --> "1" Users

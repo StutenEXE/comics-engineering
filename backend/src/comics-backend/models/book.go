@@ -13,7 +13,7 @@ type BookRow struct {
 	Desc       string
 	Number     int
 	VoContent  string
-	SeriesID   int64
+	SerieID    int64
 	CreatedAt  string
 	ModifiedAt string
 	UserID     int64
@@ -43,6 +43,7 @@ type Book struct {
 	VoContent  string           `json:"voContent"`
 	Serie      *SimpleSerie     `json:"serie"`
 	Editions   []*SimpleEdition `json:"editions"`
+	Issues     []*SimpleIssue   `json:"issues"`
 	CreatedAt  string           `json:"createdAt"`
 	ModifiedAt string           `json:"modifiedAt"`
 	AddedBy    *User            `json:"addedBy"`
@@ -67,7 +68,7 @@ Row must contain the fields in the order defined in getQueryFieldsForBook
 func getBookRowFromRow(row *sql.Row) (*BookRow, error) {
 	bookRow := &BookRow{}
 	if err := row.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.VoContent,
-		&bookRow.SeriesID, &bookRow.CreatedAt, &bookRow.ModifiedAt, &bookRow.UserID); err != nil {
+		&bookRow.SerieID, &bookRow.CreatedAt, &bookRow.ModifiedAt, &bookRow.UserID); err != nil {
 		return nil, err
 	}
 	return bookRow, nil
@@ -82,7 +83,7 @@ func getBookRowsFromRows(rows *sql.Rows) ([]*BookRow, error) {
 	for rows.Next() {
 		bookRow := &BookRow{}
 		if err := rows.Scan(&bookRow.ID, &bookRow.Name, &bookRow.Desc, &bookRow.Number, &bookRow.VoContent,
-			&bookRow.SeriesID, &bookRow.CreatedAt, &bookRow.ModifiedAt, &bookRow.UserID); err != nil {
+			&bookRow.SerieID, &bookRow.CreatedAt, &bookRow.ModifiedAt, &bookRow.UserID); err != nil {
 			return nil, err
 		}
 		bookRows = append(bookRows, bookRow)
@@ -109,11 +110,15 @@ func instSimpleBookFromRow(row *BookRow) (*SimpleBook, error) {
 }
 
 func instBookFromRow(row *BookRow) (*Book, error) {
-	serie, err := GetSimpSerieByID(row.SeriesID)
+	serie, err := GetSimpleSerieByID(row.SerieID)
 	if err != nil {
 		return nil, err
 	}
 	editions, err := GetSimpleEditionsByBookID(row.ID)
+	if err != nil {
+		return nil, err
+	}
+	issues, err := GetSimpleIssuesByBookID(row.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -129,6 +134,7 @@ func instBookFromRow(row *BookRow) (*Book, error) {
 		VoContent:  row.VoContent,
 		Serie:      serie,
 		Editions:   editions,
+		Issues:     issues,
 		CreatedAt:  row.CreatedAt,
 		ModifiedAt: row.ModifiedAt,
 		AddedBy:    user,
@@ -190,7 +196,29 @@ func GetSimpleBooksBySeriesID(seriesID int64) ([]*SimpleBook, error) {
 	}
 	defer rows.Close()
 
-	var books []*SimpleBook
+	books := []*SimpleBook{}
+	bookRows, err := getBookRowsFromRows(rows)
+	for _, bookRow := range bookRows {
+		book, err := instSimpleBookFromRow(bookRow)
+		if err != nil {
+			return nil, err
+		}
+		books = append(books, book)
+	}
+	return books, nil
+}
+
+func GetSimpleBooksByIssueID(issueID int64) ([]*SimpleBook, error) {
+	query := fmt.Sprintf(`SELECT %s FROM books b 
+		INNER JOIN books_issues bi ON b.id=bi.book_id 
+		WHERE bi.issue_id=$1`, getQueryFieldsForBook("b"))
+	rows, err := database.PgDb.Query(query, issueID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	books := []*SimpleBook{}
 	bookRows, err := getBookRowsFromRows(rows)
 	for _, bookRow := range bookRows {
 		book, err := instSimpleBookFromRow(bookRow)

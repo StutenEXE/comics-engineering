@@ -130,7 +130,7 @@ func instSerieFromRow(row *SerieRow) (*Serie, error) {
 	return serie, nil
 }
 
-func GetSimpSerieByID(serieID int64) (*SimpleSerie, error) {
+func GetSimpleSerieByID(serieID int64) (*SimpleSerie, error) {
 	serieRow := &SerieRow{}
 	query := fmt.Sprintf("SELECT %s FROM series WHERE id=$1", getQueryFieldsForSerie(""))
 	row := database.PgDb.QueryRow(query, serieID)
