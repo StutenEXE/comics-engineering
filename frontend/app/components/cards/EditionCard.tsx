@@ -19,7 +19,7 @@ export function EditionCard({edition, className}: EditionCardProps) {
                         className="w-full h-full object-cover rounded"
                     />
                 </div>
-                <div className="p-1 flex flex-col items-center">
+                <div className="flex flex-col items-center">
                     <h3 className="text-sm font-semibold">{edition.publisher?.name}</h3>
                     <h4 className="text-sm italic">{edition.parutionDate.toLocaleDateString("fr")}</h4>
                 </div>
