@@ -9,6 +9,29 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func GetBookByID(c *gin.Context) {
+	type BookByIDRequest struct {
+		ID int64 `form:"id"`
+	}
+	// GET form data
+	var req BookByIDRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		utils.ReturnErrorMessage(c, http.StatusBadRequest, "invalid request", err)
+		return
+	}
+
+	book, err := models.GetBookByID(req.ID, false, false, false)
+	if err != nil {
+		errmsg := fmt.Sprintf("book not found (id=%d)", req.ID)
+		utils.ReturnErrorMessage(c, http.StatusNotFound, errmsg, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"book": book,
+	})
+}
+
 func GetLatestBooks(c *gin.Context) {
 	type LatestBooksRequest struct {
 		From  int `form:"from"`
@@ -34,28 +57,5 @@ func GetLatestBooks(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"books": books,
-	})
-}
-
-func GetBookByID(c *gin.Context) {
-	type BookByIDRequest struct {
-		ID int64 `form:"id"`
-	}
-	// GET form data
-	var req BookByIDRequest
-	if err := c.ShouldBindQuery(&req); err != nil {
-		utils.ReturnErrorMessage(c, http.StatusBadRequest, "invalid request", err)
-		return
-	}
-
-	book, err := models.GetBookByID(req.ID, false, false, false)
-	if err != nil {
-		errmsg := fmt.Sprintf("failed to get book (id=%d)", req.ID)
-		utils.ReturnErrorMessage(c, http.StatusInternalServerError, errmsg, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"book": book,
 	})
 }
