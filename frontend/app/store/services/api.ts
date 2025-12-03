@@ -2,6 +2,7 @@ import type { SerializedError } from "@reduxjs/toolkit";
 import { createApi, fetchBaseQuery, type FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import { parseDataToBook, type Book } from "~/models/book";
 import { parseDataToEdition, type Edition } from "~/models/edition";
+import { parseDataToIssue, type Issue } from "~/models/issue";
 import type { SignupData, User, UserCredentials } from "~/models/user";
 import { createError, type Error } from "~/utils/error";
 
@@ -51,12 +52,24 @@ export const publicApi = createApi({
         edition: parseDataToEdition(resp.edition),
       }),
     }),
+
+    /****************
+     * ISSUES
+     ****************/
+    // Get issue by id
+    issueById: build.query<{ issue: Issue }, { id: number }>({
+      query: ({ id }) => ({ url: "/issue", method: 'GET', params: { id } }),
+      transformResponse: (resp: { issue: Issue }) => ({
+        issue: parseDataToIssue(resp.issue),
+      }),
+    }),
   }),
 });
 
 export const { useLoginMutation, useSignupMutation, 
   useBookByIdQuery, useLatestBooksQuery,
-  useEditionByIdQuery } 
+  useEditionByIdQuery,
+  useIssueByIdQuery } 
   = publicApi;
 
 //////////// PRIVATE API ////////////

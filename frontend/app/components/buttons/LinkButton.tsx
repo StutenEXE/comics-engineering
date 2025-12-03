@@ -1,7 +1,13 @@
+import { Link } from "react-router";
 import { GenericButton, type ButtonProps } from "./GenericButton";
 
-export function LinkButton({ onClick, disabled, children, className }: ButtonProps) {
+interface LinkButtonProps extends ButtonProps {
+    path: string;
+};
+
+export function LinkButton({ path, onClick, disabled, children, className }:  LinkButtonProps) {
     return (
+      <Link to={path}>
         <GenericButton
               onClick={onClick}
               disabled={disabled}
@@ -9,5 +15,6 @@ export function LinkButton({ onClick, disabled, children, className }: ButtonPro
             >
               {children}
         </GenericButton>
+      </Link>
     )
 }

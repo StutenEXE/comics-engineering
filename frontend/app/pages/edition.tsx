@@ -1,8 +1,6 @@
 import { useEditionByIdQuery } from "~/store/services/api";
 import type { Route } from "../+types/root";
 import { createError } from "~/utils/error";
-import { GenericButton } from "~/components/buttons/GenericButton";
-import { useNavigate } from "react-router";
 import { LinkButton } from "~/components/buttons/LinkButton";
 
 export function meta({ params }: Route.MetaArgs) {
@@ -17,15 +15,6 @@ export default function EditionPage({ params }: { params : { id: number}}) {
   const { data, isLoading, error } = useEditionByIdQuery({ id: params.id });
   const edition = data?.edition ?? null;
   const err = createError(error)
-
-  const navigate = useNavigate()
-  const gotoBook = () => {
-    navigate(`/book/${edition?.book?.id}`);
-  }
-
-  const gotoPublisher = () => {
-    navigate(`/publisher/${edition?.publisher?.id}`);
-  }
 
   return (
     <main className="flex flex-col items-center pt-8">
@@ -94,6 +83,12 @@ export default function EditionPage({ params }: { params : { id: number}}) {
                   </p>
                 </div>
                 <div className="flex gap-2 items-center">
+                  <h3 className="text-xl text-gray-200 font-semibold">Parution date :</h3>
+                  <p className="text-xl text-gray-200">
+                    {edition?.parutionDate.toLocaleDateString("fr")}
+                  </p>
+                </div>
+                <div className="flex gap-2 items-center">
                   <h3 className="text-xl text-gray-200 font-semibold">Price :</h3>
                   <p className="text-xl text-gray-200">
                     {edition?.price} €
@@ -104,14 +99,14 @@ export default function EditionPage({ params }: { params : { id: number}}) {
           </div>
         </div>
         <div className="mt-4 flex gap-4">
-            <LinkButton 
-                onClick={gotoBook}
+            <LinkButton
+                path={`/book/${edition?.book?.id}`}
                 disabled={isLoading}
             >
                 Go to book
             </LinkButton>
-            <LinkButton 
-                onClick={gotoPublisher}
+            <LinkButton
+                path={`/publisher/${edition?.publisher?.id}`}
                 disabled={isLoading}
             >
                 Go to publisher

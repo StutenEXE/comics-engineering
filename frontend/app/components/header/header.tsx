@@ -1,11 +1,9 @@
-
-
+import { Link } from 'react-router'
 import { useSelector } from 'react-redux';
 import type { RootState } from '~/store/store';
 import { LoginForm } from '../forms/loginForm';
 import { useState } from 'react';
 import { SignupForm } from '../forms/signupForm';
-import { useNavigate } from 'react-router';
 
 export function Header() {
     const { isAuthenticated, user } = useSelector((state: RootState) => state.user);
@@ -13,15 +11,6 @@ export function Header() {
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     // Handles signup modal state
     const [isSignupOpen, setIsSignupOpen] = useState(false);
-
-    const navigate = useNavigate();
-    const gotoHome = () => {
-        navigate("/")
-    }
-
-    const gotoBooks = () => {
-        navigate("/books")
-    }
 
     const openLoginModal = () => {
         setIsSignupOpen(false);
@@ -49,12 +38,12 @@ export function Header() {
                 </div>
                 <nav>
                     <ul className="flex space-x-4">
-                        <li><a onClick={gotoHome} className="hover:underline cursor-pointer">Home</a></li>
-                        <li><a onClick={gotoBooks} className="hover:underline cursor-pointer">Books</a></li>
+                        <li><Link to="/" className="hover:underline cursor-pointer">Home</Link></li>
+                        <li><Link to="books" className="hover:underline cursor-pointer">Books</Link></li>
                         {isAuthenticated ? (
                             <>
-                                <li><a href="/collection" className="hover:underline">My collection</a></li>
-                                <li><a href="/profile" className="hover:underline">My profile</a></li>
+                                <li><Link to="/collection" className="hover:underline">My collection</Link></li>
+                                <li><Link to="/profile" className="hover:underline">My profile</Link></li>
                             </>
                         ) : (
                             <>

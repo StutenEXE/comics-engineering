@@ -1,6 +1,6 @@
 import type { MouseEventHandler, ReactNode } from "react";
 
-export type ButtonProps = {
+export interface ButtonProps {
     onClick?: MouseEventHandler,
     disabled?: boolean,
     className?: string,

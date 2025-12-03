@@ -66,8 +66,6 @@ export default function BookPage({ params }: { params : { id: number}}) {
                   <h3 className="text-xl text-gray-200 font-semibold">Editions :</h3>
                   <div className="flex gap-2 p-2 border border-gray-500 rounded-lg overflow-hidden snap-x snap-proximity">
                     {  book?.editions?.map((ed) => {
-                      let completeEd = {...ed}
-                      completeEd.book = book
                       return (
                         <EditionCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
                           key={ed.id} edition={ed} /> 

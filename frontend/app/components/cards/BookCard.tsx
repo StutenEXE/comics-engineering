@@ -29,7 +29,7 @@ export function BookCard({book, className}: BookCardProps) {
                         className="w-full h-full object-cover rounded"
                     />
                 </div>
-                <div className="flex flex-col items-center">
+                <div className="p-1 flex flex-col items-center">
                     <h3 className="font-semibold">{book.name}</h3>
                     <h4 className="text-sm italic">{book.serie?.name} (#{book.number})</h4>
                 </div>
