@@ -51,8 +51,10 @@ package comics_db {
         -added_by: id
         isbn: text
         ean: text
+        price: float
         url: text
         img_url: text
+        cover_type: text
         parution_date: datetime
         created_at: datetime
         modified_at: datetime
