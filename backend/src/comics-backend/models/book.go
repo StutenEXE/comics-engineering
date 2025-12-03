@@ -19,34 +19,18 @@ type BookRow struct {
 	UserID     int64
 }
 
-/*
-Simplified book to avoid infinite loop calls
-
-Example : Serie has multiple Book and Book has a Serie. So Serie will instantiate Books who will instatiate Series etc...
-*/
-type SimpleBook struct {
-	ID         int64  `json:"id"`
-	Name       string `json:"name"`
-	Desc       string `json:"desc"`
-	Number     int    `json:"number"`
-	VoContent  string `json:"voContent"`
-	CreatedAt  string `json:"createdAt"`
-	ModifiedAt string `json:"modifiedAt"`
-	AddedBy    *User  `json:"addedBy"`
-}
-
 type Book struct {
-	ID         int64            `json:"id"`
-	Name       string           `json:"name"`
-	Desc       string           `json:"desc"`
-	Number     int              `json:"number"`
-	VoContent  string           `json:"voContent"`
-	Serie      *SimpleSerie     `json:"serie"`
-	Editions   []*SimpleEdition `json:"editions"`
-	Issues     []*SimpleIssue   `json:"issues"`
-	CreatedAt  string           `json:"createdAt"`
-	ModifiedAt string           `json:"modifiedAt"`
-	AddedBy    *User            `json:"addedBy"`
+	ID         int64      `json:"id"`
+	Name       string     `json:"name"`
+	Desc       string     `json:"desc"`
+	Number     int        `json:"number"`
+	VoContent  string     `json:"voContent"`
+	Serie      *Serie     `json:"serie"`
+	Editions   []*Edition `json:"editions"`
+	Issues     []*Issue   `json:"issues"`
+	CreatedAt  string     `json:"createdAt"`
+	ModifiedAt string     `json:"modifiedAt"`
+	AddedBy    *User      `json:"addedBy"`
 }
 
 /*
@@ -91,40 +75,34 @@ func getBookRowsFromRows(rows *sql.Rows) ([]*BookRow, error) {
 	return bookRows, nil
 }
 
-func instSimpleBookFromRow(row *BookRow) (*SimpleBook, error) {
+func instBookFromRow(row *BookRow, skipSerie, skipEditions, skipIssues bool) (*Book, error) {
 	user, err := GetUserByID(row.UserID)
 	if err != nil {
 		return nil, err
 	}
-	book := &SimpleBook{
-		ID:         row.ID,
-		Name:       row.Name,
-		Desc:       row.Desc,
-		Number:     row.Number,
-		VoContent:  row.VoContent,
-		CreatedAt:  row.CreatedAt,
-		ModifiedAt: row.ModifiedAt,
-		AddedBy:    user,
+	var serie *Serie = nil
+	if !skipSerie {
+		// Skipping books to avoid infinite loops
+		serie, err = GetSerieByID(row.SerieID, true)
+		if err != nil {
+			return nil, err
+		}
 	}
-	return book, nil
-}
-
-func instBookFromRow(row *BookRow) (*Book, error) {
-	serie, err := GetSimpleSerieByID(row.SerieID)
-	if err != nil {
-		return nil, err
+	editions := []*Edition{}
+	if !skipEditions {
+		// Skipping books to avoid infinite loops
+		editions, err = GetEditionsByBookID(row.ID, false, true)
+		if err != nil {
+			return nil, err
+		}
 	}
-	editions, err := GetSimpleEditionsByBookID(row.ID)
-	if err != nil {
-		return nil, err
-	}
-	issues, err := GetSimpleIssuesByBookID(row.ID)
-	if err != nil {
-		return nil, err
-	}
-	user, err := GetUserByID(row.UserID)
-	if err != nil {
-		return nil, err
+	issues := []*Issue{}
+	if !skipIssues {
+		// Skipping books to avoid infinite loops
+		issues, err = GetIssuesByBookID(row.ID, false, true)
+		if err != nil {
+			return nil, err
+		}
 	}
 	book := &Book{
 		ID:         row.ID,
@@ -160,7 +138,7 @@ func (b *Book) UpdateBookInDatabase() error {
 	return nil
 }
 
-func GetBookByID(bookID int64) (*Book, error) {
+func GetBookByID(bookID int64, skipSerie, skipEditions, skipIssues bool) (*Book, error) {
 	bookRow := &BookRow{}
 	query := fmt.Sprintf("SELECT %s FROM books WHERE id=$1", getQueryFieldsForBook(""))
 	row := database.PgDb.QueryRow(query, bookID)
@@ -171,24 +149,10 @@ func GetBookByID(bookID int64) (*Book, error) {
 	if err != nil {
 		return nil, err
 	}
-	return instBookFromRow(bookRow)
+	return instBookFromRow(bookRow, skipSerie, skipEditions, skipIssues)
 }
 
-func GetSimpleBookByID(bookID int64) (*SimpleBook, error) {
-	bookRow := &BookRow{}
-	query := fmt.Sprintf("SELECT %s FROM books WHERE id=$1", getQueryFieldsForBook(""))
-	row := database.PgDb.QueryRow(query, bookID)
-	if err := row.Err(); err != nil {
-		return nil, err
-	}
-	bookRow, err := getBookRowFromRow(row)
-	if err != nil {
-		return nil, err
-	}
-	return instSimpleBookFromRow(bookRow)
-}
-
-func GetSimpleBooksBySeriesID(seriesID int64) ([]*SimpleBook, error) {
+func GetBooksBySeriesID(seriesID int64, skipSerie, skipEditions, skipIssues bool) ([]*Book, error) {
 	query := fmt.Sprintf("SELECT %s FROM books WHERE series_id=$1", getQueryFieldsForBook(""))
 	rows, err := database.PgDb.Query(query, seriesID)
 	if err != nil {
@@ -196,10 +160,10 @@ func GetSimpleBooksBySeriesID(seriesID int64) ([]*SimpleBook, error) {
 	}
 	defer rows.Close()
 
-	books := []*SimpleBook{}
+	books := []*Book{}
 	bookRows, err := getBookRowsFromRows(rows)
 	for _, bookRow := range bookRows {
-		book, err := instSimpleBookFromRow(bookRow)
+		book, err := instBookFromRow(bookRow, skipSerie, skipEditions, skipIssues)
 		if err != nil {
 			return nil, err
 		}
@@ -208,7 +172,7 @@ func GetSimpleBooksBySeriesID(seriesID int64) ([]*SimpleBook, error) {
 	return books, nil
 }
 
-func GetSimpleBooksByIssueID(issueID int64) ([]*SimpleBook, error) {
+func GetBooksByIssueID(issueID int64, skipSerie, skipEditions, skipIssues bool) ([]*Book, error) {
 	query := fmt.Sprintf(`SELECT %s FROM books b 
 		INNER JOIN books_issues bi ON b.id=bi.book_id 
 		WHERE bi.issue_id=$1`, getQueryFieldsForBook("b"))
@@ -218,10 +182,10 @@ func GetSimpleBooksByIssueID(issueID int64) ([]*SimpleBook, error) {
 	}
 	defer rows.Close()
 
-	books := []*SimpleBook{}
+	books := []*Book{}
 	bookRows, err := getBookRowsFromRows(rows)
 	for _, bookRow := range bookRows {
-		book, err := instSimpleBookFromRow(bookRow)
+		book, err := instBookFromRow(bookRow, skipSerie, skipEditions, skipIssues)
 		if err != nil {
 			return nil, err
 		}
@@ -230,7 +194,7 @@ func GetSimpleBooksByIssueID(issueID int64) ([]*SimpleBook, error) {
 	return books, nil
 }
 
-func GetLatestBooks(from int, limit int) ([]*Book, error) {
+func GetLatestBooks(from int, limit int, skipSerie, skipEditions, skipIssues bool) ([]*Book, error) {
 	query := fmt.Sprintf("SELECT %s FROM books ORDER BY created_at DESC OFFSET $1 LIMIT $2", getQueryFieldsForBook(""))
 	rows, err := database.PgDb.Query(query, from, limit)
 	if err != nil {
@@ -244,7 +208,7 @@ func GetLatestBooks(from int, limit int) ([]*Book, error) {
 		return nil, err
 	}
 	for _, bookRow := range bookRows {
-		book, err := instBookFromRow(bookRow)
+		book, err := instBookFromRow(bookRow, skipSerie, skipEditions, skipIssues)
 		if err != nil {
 			return nil, err
 		}
@@ -253,7 +217,7 @@ func GetLatestBooks(from int, limit int) ([]*Book, error) {
 	return books, nil
 }
 
-func GetBooksFromWishlist(userID int64) ([]*Book, error) {
+func GetBooksFromWishlist(userID int64, skipSerie, skipEditions, skipIssues bool) ([]*Book, error) {
 	query := fmt.Sprintf(`SELECT %s FROM books b
 			  INNER JOIN wishlist w ON b.id = w.book_id
 			  WHERE w.user_id = $1`, getQueryFieldsForBook("b"))
@@ -269,7 +233,7 @@ func GetBooksFromWishlist(userID int64) ([]*Book, error) {
 		return nil, err
 	}
 	for _, bookRow := range bookRows {
-		book, err := instBookFromRow(bookRow)
+		book, err := instBookFromRow(bookRow, skipSerie, skipEditions, skipIssues)
 		if err != nil {
 			return nil, err
 		}

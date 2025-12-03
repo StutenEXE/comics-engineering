@@ -20,36 +20,18 @@ type SerieRow struct {
 	UserID     int64
 }
 
-/*
-Simplified serie to avoid infinite loop calls
-
-Example : Book has a Serie and Serie has Books so Book will instantiate Serie who will instatiate Books etc...
-*/
-type SimpleSerie struct {
-	ID         int64  `json:"id"`
-	Name       string `json:"name"`
-	Ongoing    bool   `json:"ongoing"`
-	Oneshot    bool   `json:"oneshot"`
-	Nvolumes   int    `json:"nvolumes"`
-	VoStart    string `json:"voStart"`
-	VoEnd      string `json:"voEnd"`
-	CreatedAt  string `json:"createdAt"`
-	ModifiedAt string `json:"modifiedAt"`
-	AddedBy    *User  `json:"addedBy"`
-}
-
 type Serie struct {
-	ID         int64         `json:"id"`
-	Name       string        `json:"name"`
-	Ongoing    bool          `json:"ongoing"`
-	Oneshot    bool          `json:"oneshot"`
-	Nvolumes   int           `json:"nvolumes"`
-	VoStart    string        `json:"voStart"`
-	VoEnd      string        `json:"voEnd"`
-	Books      []*SimpleBook `json:"books"`
-	CreatedAt  string        `json:"createdAt"`
-	ModifiedAt string        `json:"modifiedAt"`
-	AddedBy    *User         `json:"addedBy"`
+	ID         int64   `json:"id"`
+	Name       string  `json:"name"`
+	Ongoing    bool    `json:"ongoing"`
+	Oneshot    bool    `json:"oneshot"`
+	Nvolumes   int     `json:"nvolumes"`
+	VoStart    string  `json:"voStart"`
+	VoEnd      string  `json:"voEnd"`
+	Books      []*Book `json:"books"`
+	CreatedAt  string  `json:"createdAt"`
+	ModifiedAt string  `json:"modifiedAt"`
+	AddedBy    *User   `json:"addedBy"`
 }
 
 /*
@@ -92,30 +74,18 @@ func getSerieRowsFromRows(rows *sql.Rows) ([]*SerieRow, error) {
 	return serieRows, nil
 }
 
-func instSimpleSerieFromRow(row *SerieRow) (*SimpleSerie, error) {
+func instSerieFromRow(row *SerieRow, skipBooks bool) (*Serie, error) {
 	user, err := GetUserByID(row.UserID)
 	if err != nil {
 		return nil, err
 	}
-	serie := &SimpleSerie{
-		ID:         row.ID,
-		Name:       row.Name,
-		Ongoing:    row.Ongoing,
-		Oneshot:    row.Oneshot,
-		Nvolumes:   row.Nvolumes,
-		CreatedAt:  row.CreatedAt,
-		ModifiedAt: row.ModifiedAt,
-		AddedBy:    user,
+	books := []*Book{}
+	if !skipBooks {
+		books, err = GetBooksBySeriesID(row.ID, true, false, false)
+		if err != nil {
+			return nil, err
+		}
 	}
-	return serie, nil
-}
-
-func instSerieFromRow(row *SerieRow) (*Serie, error) {
-	user, err := GetUserByID(row.UserID)
-	if err != nil {
-		return nil, err
-	}
-	books, err := GetSimpleBooksBySeriesID(row.ID)
 	serie := &Serie{
 		ID:         row.ID,
 		Name:       row.Name,
@@ -130,7 +100,7 @@ func instSerieFromRow(row *SerieRow) (*Serie, error) {
 	return serie, nil
 }
 
-func GetSimpleSerieByID(serieID int64) (*SimpleSerie, error) {
+func GetSerieByID(serieID int64, skipBooks bool) (*Serie, error) {
 	serieRow := &SerieRow{}
 	query := fmt.Sprintf("SELECT %s FROM series WHERE id=$1", getQueryFieldsForSerie(""))
 	row := database.PgDb.QueryRow(query, serieID)
@@ -141,5 +111,5 @@ func GetSimpleSerieByID(serieID int64) (*SimpleSerie, error) {
 	if err != nil {
 		return nil, err
 	}
-	return instSimpleSerieFromRow(serieRow)
+	return instSerieFromRow(serieRow, skipBooks)
 }

@@ -18,32 +18,16 @@ type IssueSerieRow struct {
 	UserID     int64
 }
 
-/*
-Simplified issue serie to avoid infinite loop calls
-
-Example : Issue has an IssueSerie and IssueSerie has Issues so Issue will instantiate IssueSerie who will instatiate Issues etc...
-*/
-type SimpleIssueSerie struct {
-	ID         int64  `json:"id"`
-	Name       string `json:"name"`
-	Desc       string `json:"desc"`
-	VoStart    string `json:"voStart"`
-	VoEnd      string `json:"voEnd"`
-	CreatedAt  string `json:"createdAt"`
-	ModifiedAt string `json:"modifiedAt"`
-	AddedBy    *User  `json:"addedBy"`
-}
-
 type IssueSerie struct {
-	ID         int64          `json:"id"`
-	Name       string         `json:"name"`
-	Desc       string         `json:"desc"`
-	VoStart    string         `json:"voStart"`
-	VoEnd      string         `json:"voEnd"`
-	Issues     []*SimpleIssue `json:"issues"`
-	CreatedAt  string         `json:"createdAt"`
-	ModifiedAt string         `json:"modifiedAt"`
-	AddedBy    *User          `json:"addedBy"`
+	ID         int64    `json:"id"`
+	Name       string   `json:"name"`
+	Desc       string   `json:"desc"`
+	VoStart    string   `json:"voStart"`
+	VoEnd      string   `json:"voEnd"`
+	Issues     []*Issue `json:"issues"`
+	CreatedAt  string   `json:"createdAt"`
+	ModifiedAt string   `json:"modifiedAt"`
+	AddedBy    *User    `json:"addedBy"`
 }
 
 /*
@@ -60,7 +44,7 @@ func getQueryFieldsForIssueSerie(prefix string) string {
 
 func getIssueSerieRowFromRow(row *sql.Row) (*IssueSerieRow, error) {
 	serieRow := &IssueSerieRow{}
-	err := row.Scan(&serieRow.ID, &serieRow.Name, serieRow.Desc, &serieRow.VoStart, &serieRow.VoEnd,
+	err := row.Scan(&serieRow.ID, &serieRow.Name, &serieRow.Desc, &serieRow.VoStart, &serieRow.VoEnd,
 		&serieRow.CreatedAt, &serieRow.ModifiedAt, &serieRow.UserID)
 	if err != nil {
 		return nil, err
@@ -68,30 +52,19 @@ func getIssueSerieRowFromRow(row *sql.Row) (*IssueSerieRow, error) {
 	return serieRow, nil
 }
 
-func instSimpleIssueSerieFromRow(row *IssueSerieRow) (*SimpleIssueSerie, error) {
+func instIssueSerieFromRow(row *IssueSerieRow, skipIssues bool) (*IssueSerie, error) {
 	user, err := GetUserByID(row.UserID)
 	if err != nil {
 		return nil, err
 	}
-	serie := &SimpleIssueSerie{
-		ID:         row.ID,
-		Name:       row.Name,
-		Desc:       row.Desc,
-		VoStart:    row.VoStart,
-		VoEnd:      row.VoEnd,
-		CreatedAt:  row.CreatedAt,
-		ModifiedAt: row.ModifiedAt,
-		AddedBy:    user,
+	issues := []*Issue{}
+	if !skipIssues {
+		// Skipping issue series to avoid infinite loops
+		issues, err = GetIssuesByIssueSerieID(row.ID, true, false)
+		if err != nil {
+			return nil, err
+		}
 	}
-	return serie, nil
-}
-
-func instIssueSerieFromRow(row *IssueSerieRow) (*IssueSerie, error) {
-	user, err := GetUserByID(row.UserID)
-	if err != nil {
-		return nil, err
-	}
-	issues, err := GetSimpleIssuesByIssueSerieID(row.ID)
 	serie := &IssueSerie{
 		ID:         row.ID,
 		Name:       row.Name,
@@ -106,7 +79,7 @@ func instIssueSerieFromRow(row *IssueSerieRow) (*IssueSerie, error) {
 	return serie, nil
 }
 
-func GetSimpleIssueSerieByID(serieID int64) (*SimpleIssueSerie, error) {
+func GetIssueSerieByID(serieID int64, skipIssues bool) (*IssueSerie, error) {
 	serieRow := &IssueSerieRow{}
 	query := fmt.Sprintf("SELECT %s FROM issue_series WHERE id=$1", getQueryFieldsForIssueSerie(""))
 	row := database.PgDb.QueryRow(query, serieID)
@@ -117,5 +90,5 @@ func GetSimpleIssueSerieByID(serieID int64) (*SimpleIssueSerie, error) {
 	if err != nil {
 		return nil, err
 	}
-	return instSimpleIssueSerieFromRow(serieRow)
+	return instIssueSerieFromRow(serieRow, skipIssues)
 }
