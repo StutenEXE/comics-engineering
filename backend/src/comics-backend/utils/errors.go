@@ -8,9 +8,9 @@ import (
 )
 
 func ReturnErrorMessage(c *gin.Context, code int, msg string, err error) {
-	if code == http.StatusInternalServerError {
+	if code == http.StatusInternalServerError || code == http.StatusNotFound {
 		// Log the error internally
-		log.Printf("Internal error: %v", err)
+		log.Printf("Error %v: %v", code, err)
 	}
 	c.AbortWithStatusJSON(code, gin.H{"error": msg})
 }

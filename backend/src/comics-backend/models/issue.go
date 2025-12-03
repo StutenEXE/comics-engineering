@@ -43,8 +43,8 @@ func getQueryFieldsForIssue(prefix string) string {
 }
 
 /*
-Helper function to extract BookRow slices from sql.Rows
-Rows must contain the fields in the order defined in getQueryFieldsForBook
+Helper function to extract IsseRow slices from sql.Rows
+Rows must contain the fields in the order defined in getQueryFieldsForIssue
 */
 func getIssueRowsFromRows(rows *sql.Rows) ([]*IssueRow, error) {
 	var issueRows []*IssueRow
@@ -57,6 +57,19 @@ func getIssueRowsFromRows(rows *sql.Rows) ([]*IssueRow, error) {
 		issueRows = append(issueRows, issueRow)
 	}
 	return issueRows, nil
+}
+
+/*
+Helper function to extract an IsseRow from sql.Row
+Rows must contain the fields in the order defined in getQueryFieldsForIssue
+*/
+func getIssueRowFromRow(rows *sql.Row) (*IssueRow, error) {
+	issueRow := &IssueRow{}
+	if err := rows.Scan(&issueRow.ID, &issueRow.Name, &issueRow.Number, &issueRow.ParutionDate,
+		&issueRow.IssueSerieID, &issueRow.CreatedAt, &issueRow.ModifiedAt, &issueRow.UserID); err != nil {
+		return nil, err
+	}
+	return issueRow, nil
 }
 
 func instIssueFromRow(row *IssueRow, skipIssueSerie, skipBooks bool) (*Issue, error) {
@@ -92,6 +105,20 @@ func instIssueFromRow(row *IssueRow, skipIssueSerie, skipBooks bool) (*Issue, er
 		AddedBy:      user,
 	}
 	return issue, nil
+}
+
+func GetIssueByID(bookID int64, skipIssueSerie, skipBooks bool) (*Issue, error) {
+	issueRow := &IssueRow{}
+	query := fmt.Sprintf("SELECT %s FROM issues WHERE id=$1", getQueryFieldsForIssue(""))
+	row := database.PgDb.QueryRow(query, bookID)
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+	issueRow, err := getIssueRowFromRow(row)
+	if err != nil {
+		return nil, err
+	}
+	return instIssueFromRow(issueRow, skipIssueSerie, skipBooks)
 }
 
 func GetIssuesByIssueSerieID(seriesID int64, skipIssueSerie, skipBooks bool) ([]*Issue, error) {
