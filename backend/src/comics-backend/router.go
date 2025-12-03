@@ -39,6 +39,8 @@ func startRouter() {
 		public.GET("/books/latest", services.GetLatestBooks)
 		// Edition services
 		public.GET("/edition", services.GetEditionByID)
+		// Issue services
+		public.GET("/issue", services.GetIssueByID)
 	}
 
 	// Setup protected routes
