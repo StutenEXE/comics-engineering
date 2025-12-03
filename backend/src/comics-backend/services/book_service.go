@@ -26,7 +26,7 @@ func GetLatestBooks(c *gin.Context) {
 		return
 	}
 
-	books, err := models.GetLatestBooks(req.From, req.Limit)
+	books, err := models.GetLatestBooks(req.From, req.Limit, false, false, false)
 	if err != nil {
 		utils.ReturnErrorMessage(c, http.StatusInternalServerError, "failed to get latest books", err)
 		return
@@ -48,7 +48,7 @@ func GetBookByID(c *gin.Context) {
 		return
 	}
 
-	book, err := models.GetBookByID(req.ID)
+	book, err := models.GetBookByID(req.ID, false, false, false)
 	if err != nil {
 		errmsg := fmt.Sprintf("failed to get book (id=%d)", req.ID)
 		utils.ReturnErrorMessage(c, http.StatusInternalServerError, errmsg, err)

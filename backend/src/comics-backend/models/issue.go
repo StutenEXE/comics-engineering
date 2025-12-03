@@ -18,31 +18,16 @@ type IssueRow struct {
 	UserID       int64
 }
 
-/*
-Simplified issue to avoid infinite loop calls
-
-Example : Books can have multiple Issues and Issues can have multiple Books. So Books will instantiate Issues who will instatiate Books etc...
-*/
-type SimpleIssue struct {
-	ID           int64  `json:"id"`
-	Name         string `json:"name"`
-	Number       int    `json:"number"`
-	ParutionDate string `json:"parutionDate"`
-	CreatedAt    string `json:"createdAt"`
-	ModifiedAt   string `json:"modifiedAt"`
-	AddedBy      *User  `json:"addedBy"`
-}
-
 type Issue struct {
-	ID           int64             `json:"id"`
-	Name         string            `json:"name"`
-	Number       int               `json:"number"`
-	ParutionDate string            `json:"parutionDate"`
-	IssueSerie   *SimpleIssueSerie `json:"issueSerie"`
-	Books        []*SimpleBook     `json:"books"`
-	CreatedAt    string            `json:"createdAt"`
-	ModifiedAt   string            `json:"modifiedAt"`
-	AddedBy      *User             `json:"addedBy"`
+	ID           int64       `json:"id"`
+	Name         string      `json:"name"`
+	Number       int         `json:"number"`
+	ParutionDate string      `json:"parutionDate"`
+	IssueSerie   *IssueSerie `json:"issueSerie"`
+	Books        []*Book     `json:"books"`
+	CreatedAt    string      `json:"createdAt"`
+	ModifiedAt   string      `json:"modifiedAt"`
+	AddedBy      *User       `json:"addedBy"`
 }
 
 /*
@@ -74,35 +59,26 @@ func getIssueRowsFromRows(rows *sql.Rows) ([]*IssueRow, error) {
 	return issueRows, nil
 }
 
-func instSimpleIssueFromRow(row *IssueRow) (*SimpleIssue, error) {
+func instIssueFromRow(row *IssueRow, skipIssueSerie, skipBooks bool) (*Issue, error) {
 	user, err := GetUserByID(row.UserID)
 	if err != nil {
 		return nil, err
 	}
-	book := &SimpleIssue{
-		ID:           row.ID,
-		Name:         row.Name,
-		Number:       row.Number,
-		ParutionDate: row.ParutionDate,
-		CreatedAt:    row.CreatedAt,
-		ModifiedAt:   row.ModifiedAt,
-		AddedBy:      user,
+	var serie *IssueSerie = nil
+	if !skipIssueSerie {
+		// Skipping issues to avoid infinite loops
+		serie, err = GetIssueSerieByID(row.IssueSerieID, true)
+		if err != nil {
+			return nil, err
+		}
 	}
-	return book, nil
-}
-
-func instIssueFromRow(row *IssueRow) (*Issue, error) {
-	serie, err := GetSimpleIssueSerieByID(row.IssueSerieID)
-	if err != nil {
-		return nil, err
-	}
-	books, err := GetSimpleBooksByIssueID(row.ID)
-	if err != nil {
-		return nil, err
-	}
-	user, err := GetUserByID(row.UserID)
-	if err != nil {
-		return nil, err
+	books := []*Book{}
+	if !skipBooks {
+		// Skipping issues to avoid infinite loops
+		books, err = GetBooksByIssueID(row.ID, false, false, true)
+		if err != nil {
+			return nil, err
+		}
 	}
 	issue := &Issue{
 		ID:           row.ID,
@@ -118,7 +94,7 @@ func instIssueFromRow(row *IssueRow) (*Issue, error) {
 	return issue, nil
 }
 
-func GetSimpleIssuesByIssueSerieID(seriesID int64) ([]*SimpleIssue, error) {
+func GetIssuesByIssueSerieID(seriesID int64, skipIssueSerie, skipBooks bool) ([]*Issue, error) {
 	query := fmt.Sprintf("SELECT %s FROM issues WHERE series_id=$1", getQueryFieldsForIssue(""))
 	rows, err := database.PgDb.Query(query, seriesID)
 	if err != nil {
@@ -126,10 +102,10 @@ func GetSimpleIssuesByIssueSerieID(seriesID int64) ([]*SimpleIssue, error) {
 	}
 	defer rows.Close()
 
-	issues := []*SimpleIssue{}
+	issues := []*Issue{}
 	issueRows, err := getIssueRowsFromRows(rows)
 	for _, issueRow := range issueRows {
-		issue, err := instSimpleIssueFromRow(issueRow)
+		issue, err := instIssueFromRow(issueRow, skipIssueSerie, skipBooks)
 		if err != nil {
 			return nil, err
 		}
@@ -138,7 +114,7 @@ func GetSimpleIssuesByIssueSerieID(seriesID int64) ([]*SimpleIssue, error) {
 	return issues, nil
 }
 
-func GetSimpleIssuesByBookID(bookID int64) ([]*SimpleIssue, error) {
+func GetIssuesByBookID(bookID int64, skipSerie, skipBooks bool) ([]*Issue, error) {
 	query := fmt.Sprintf(`SELECT %s FROM issues i 
 	INNER JOIN books_issues bi ON i.id=bi.issue_id 
 	WHERE bi.book_id=$1
@@ -149,10 +125,10 @@ func GetSimpleIssuesByBookID(bookID int64) ([]*SimpleIssue, error) {
 	}
 	defer rows.Close()
 
-	issues := []*SimpleIssue{}
+	issues := []*Issue{}
 	issueRows, err := getIssueRowsFromRows(rows)
 	for _, issueRow := range issueRows {
-		issue, err := instSimpleIssueFromRow(issueRow)
+		issue, err := instIssueFromRow(issueRow, skipSerie, skipBooks)
 		if err != nil {
 			return nil, err
 		}
