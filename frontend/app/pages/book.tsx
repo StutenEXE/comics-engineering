@@ -2,6 +2,7 @@ import { useBookByIdQuery } from "~/store/services/api";
 import type { Route } from "../+types/root";
 import { EditionCard } from "~/components/cards/EditionCard";
 import { IssueCard } from "~/components/cards/IssueCard";
+import { createError } from "~/utils/error";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -12,8 +13,11 @@ export function meta({ params }: Route.MetaArgs) {
 
 export default function BookPage({ params }: { params : { id: number}}) {
   
-  const { data, isLoading: isBookLoading, error } = useBookByIdQuery({ id: params.id });
+  const { data, isLoading, error } = useBookByIdQuery({ id: params.id });
   const book = data?.book ?? null;
+  const err = createError(error)
+
+
 
   return (
     <main className="flex flex-col items-center pt-8">
@@ -23,11 +27,20 @@ export default function BookPage({ params }: { params : { id: number}}) {
             <img src={book?.editions[0].imgUrl ?? "/placeholder.jpg" } alt={book?.name ?? "placeholder"} />
           </div>
           <div className="w-3/5 border-l pl-6 flex flex-col gap-4">
-            { isBookLoading ? (
+            { isLoading && (
               <div className="flex items-center justify-center">
                   <h1 className="text-3xl text-gray-500">Loading book...</h1>
               </div>
-            ) : (
+            )}
+            { err && (
+              <div className="flex flex-col items-center justify-center">
+                  <h1 className="text-3xl text-gray-500">Error while fetching book</h1>
+                  <h3 className="text-xl text-red-400">
+                    [Code: {err.status}] { err.error }
+                  </h3> 
+              </div>
+            )}
+            { (!isLoading && !error) && (
               <>
                 <div>
                   <h1 className="text-3xl font-bold">{book?.name}</h1>
@@ -56,18 +69,19 @@ export default function BookPage({ params }: { params : { id: number}}) {
                       let completeEd = {...ed}
                       completeEd.book = book
                       return (
-                        <EditionCard className="w-25 snap-center border-gray-700 pb-1 rounded-sm" 
+                        <EditionCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
                           key={ed.id} edition={ed} /> 
                       )
-                    }) }
+                    })
+                  }
                   </div>
                 </div>
                 <div className="flex gap-2 flex-col">
                   <h3 className="text-xl text-gray-200 font-semibold">Issues :</h3>
-                  <div className="flex flex-col gap-2 p-2 border border-gray-500 rounded-lg overflow-hidden snap-y snap-proximity">
+                  <div className="flex flex-col gap-0 p-2 border border-gray-500 rounded-lg overflow-hidden snap-y snap-proximity">
                     {  book?.issues?.map((is) => {
                       return (
-                        <IssueCard className="w-25 snap-center border-gray-700 hover:bg-gray-700 pb-1 rounded-sm" 
+                        <IssueCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
                           key={is.id} issue={is} /> 
                       )
                     }) }
@@ -77,9 +91,6 @@ export default function BookPage({ params }: { params : { id: number}}) {
             )}
           </div>
         </div>
-        {/* { book && (
-            
-          ) } */}
       </div>
     </main>
   );

@@ -3,6 +3,7 @@ import { BookCard } from "~/components/cards/BookCard";
 import { useToast } from "~/components/toast/toast";
 import { useLatestBooksQuery } from "~/store/services/api";
 import type { Route } from "../+types/root";
+import { GenericButton } from "~/components/buttons/GenericButton";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -63,25 +64,21 @@ export default function LandingPage() {
             !isFetching && <p className="text-gray-500">No books found</p>
           )}
           <div className="flex gap-4 justify-center mt-8">
-            <button
+            <GenericButton
               onClick={handlePreviousPage}
               disabled={page === 0}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg cursor-pointer 
-              disabled:cursor-not-allowed disabled:bg-gray-400 hover:bg-blue-600 transition"
             >
               Previous
-            </button>
+            </GenericButton>
             <span className="flex items-center px-4 py-2">
               Page {page + 1}
             </span>
-            <button
+            <GenericButton
               onClick={handleNextPage}
               disabled={books.length < BOOKS_PER_PAGE}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg cursor-pointer 
-              disabled:cursor-not-allowed disabled:bg-gray-400 hover:bg-blue-600 transition"
             >
               Next
-            </button>
+            </GenericButton>
           </div>
 
         </div>
