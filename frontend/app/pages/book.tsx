@@ -3,6 +3,7 @@ import type { Route } from "../+types/root";
 import { EditionCard } from "~/components/cards/EditionCard";
 import { IssueCard } from "~/components/cards/IssueCard";
 import { createError } from "~/utils/error";
+import { compareDates } from "~/utils/date";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -64,25 +65,30 @@ export default function BookPage({ params }: { params : { id: number}}) {
                 </div>
                 <div className="flex gap-2 flex-col">
                   <h3 className="text-xl text-gray-200 font-semibold">Editions :</h3>
-                  <div className="flex gap-2 p-2 border border-gray-500 rounded-lg overflow-hidden snap-x snap-proximity">
-                    {  book?.editions?.map((ed) => {
+                  <div className="flex gap-2 p-2 border border-gray-500 rounded-lg overflow-x-scroll snap-x snap-proximity">
+                    {  book?.editions && book.editions
+                      // Sort in descending order (latest edition first)
+                      .sort((bk1, bk2) => compareDates(bk2.parutionDate, bk2.parutionDate))
+                      .map((ed) => {
                       return (
                         <EditionCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
                           key={ed.id} edition={ed} /> 
                       )
-                    })
-                  }
+                    }) }
                   </div>
                 </div>
                 <div className="flex gap-2 flex-col">
                   <h3 className="text-xl text-gray-200 font-semibold">Issues :</h3>
-                  <div className="flex flex-col gap-0 p-2 border border-gray-500 rounded-lg overflow-hidden snap-y snap-proximity">
-                    {  book?.issues?.map((is) => {
-                      return (
-                        <IssueCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
-                          key={is.id} issue={is} /> 
-                      )
-                    }) }
+                  <div className="max-h-40 flex flex-col gap-0 p-2 border border-gray-500 rounded-lg overflow-y-scroll snap-y snap-proximity">
+                    { book?.issues && [...book.issues]
+                      // Sort in ascending order (oldest issue first)
+                      .sort((is1, is2) => compareDates(is1.parutionDate, is2.parutionDate))
+                      .map((is) => {
+                        return (
+                          <IssueCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
+                            key={is.id} issue={is} /> 
+                        )
+                      }) }
                   </div>
                 </div>
               </>
