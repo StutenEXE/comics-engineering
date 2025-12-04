@@ -1,26 +1,26 @@
 package models
 
 import (
-	"database/sql"
 	"fmt"
 
 	"github.com/StutenEXE/comics-backend/database"
+	"github.com/StutenEXE/comics-backend/utils"
 )
 
 type EditionRow struct {
-	ID           int64
-	Isbn         string
-	Ean          string
-	Price        float64
-	URL          string
-	ImgUrl       string
-	CoverType    string
-	ParutionDate string
-	PublisherId  int64
-	BookID       int64
-	CreatedAt    string
-	ModifiedAt   string
-	UserID       int64
+	ID           int64   `db:"id"`
+	Isbn         string  `db:"isbn"`
+	Ean          string  `db:"ean"`
+	Price        float64 `db:"price"`
+	URL          string  `db:"url"`
+	ImgUrl       string  `db:"img_url"`
+	CoverType    string  `db:"cover_type"`
+	ParutionDate string  `db:"parution_date"`
+	PublisherId  int64   `db:"publisher_id"`
+	BookID       int64   `db:"book_id"`
+	CreatedAt    string  `db:"created_at"`
+	ModifiedAt   string  `db:"modified_at"`
+	UserID       int64   `db:"added_by"`
 }
 
 type Edition struct {
@@ -37,50 +37,6 @@ type Edition struct {
 	CreatedAt    string     `json:"createdAt"`
 	ModifiedAt   string     `json:"modifiedAt"`
 	AddedBy      *User      `json:"addedBy"`
-}
-
-/*
-The order of the requested elements is the following:
-id, isbn, ean, price, url, img_url, cover_type, parution_date, publisher_id, book_id, created_at, modified_at, added_by
-*/
-func getQueryFieldsForEdition(prefix string) string {
-	if prefix != "" {
-		prefix = prefix + "."
-	}
-	return fmt.Sprintf("%sid, %sisbn, %sean, %sprice, %surl, %simg_url, %scover_type, %sparution_date, %spublisher_id, %sbook_id, %screated_at, %smodified_at, %sadded_by",
-		prefix, prefix, prefix, prefix, prefix, prefix, prefix, prefix, prefix, prefix, prefix, prefix, prefix)
-}
-
-/*
-Helper function to extract a EditionRow from sql.Row
-Row must contain the fields in the order defined in getQueryFieldsForEdition
-*/
-func getEditionRowFromRow(row *sql.Row) (*EditionRow, error) {
-	editionRow := &EditionRow{}
-	if err := row.Scan(&editionRow.ID, &editionRow.Isbn, &editionRow.Ean, &editionRow.Price, &editionRow.URL, &editionRow.ImgUrl,
-		&editionRow.CoverType, &editionRow.ParutionDate, &editionRow.PublisherId, &editionRow.BookID, &editionRow.CreatedAt,
-		&editionRow.ModifiedAt, &editionRow.UserID); err != nil {
-		return nil, err
-	}
-	return editionRow, nil
-}
-
-/*
-Helper function to extract EditionRow slices from sql.Rows
-Rows must contain the fields in the order defined in getQueryFieldsForEdition
-*/
-func getEditionRowsFromRows(rows *sql.Rows) ([]*EditionRow, error) {
-	var editionRows []*EditionRow
-	for rows.Next() {
-		editionRow := &EditionRow{}
-		if err := rows.Scan(&editionRow.ID, &editionRow.Isbn, &editionRow.Ean, &editionRow.Price, &editionRow.URL, &editionRow.ImgUrl,
-			&editionRow.CoverType, &editionRow.ParutionDate, &editionRow.PublisherId, &editionRow.BookID, &editionRow.CreatedAt,
-			&editionRow.ModifiedAt, &editionRow.UserID); err != nil {
-			return nil, err
-		}
-		editionRows = append(editionRows, editionRow)
-	}
-	return editionRows, nil
 }
 
 func instEditionFromRow(row *EditionRow, skipPublisher, skipBook bool) (*Edition, error) {
@@ -122,32 +78,31 @@ func instEditionFromRow(row *EditionRow, skipPublisher, skipBook bool) (*Edition
 	return edition, nil
 }
 
-func GetEditionByID(editionID int64, skipPublisher, skipBook bool) (*Edition, error) {
-	editionRow := &EditionRow{}
-	query := fmt.Sprintf("SELECT %s FROM editions WHERE id=$1", getQueryFieldsForEdition(""))
-	row := database.PgDb.QueryRow(query, editionID)
+func getEdition(query string, params []any, skipPublisher, skipBook bool) (*Edition, error) {
+	row := database.PgDb.QueryRow(query, params...)
 	if err := row.Err(); err != nil {
 		return nil, err
 	}
-	editionRow, err := getEditionRowFromRow(row)
-	if err != nil {
+	editionRow := &EditionRow{}
+	if err := utils.SqlRowToStruct(row, editionRow); err != nil {
 		return nil, err
 	}
 	return instEditionFromRow(editionRow, skipPublisher, skipBook)
 }
 
-func GetEditionsByBookID(bookID int64, skipPublisher, skipBook bool) ([]*Edition, error) {
-	query := fmt.Sprintf("SELECT %s FROM editions WHERE book_id=$1", getQueryFieldsForEdition(""))
-	rows, err := database.PgDb.Query(query, bookID)
+func getEditionList(query string, params []any, skipPublisher, skipBook bool) ([]*Edition, error) {
+	rows, err := database.PgDb.Query(query, params...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	editionRows, err := getEditionRowsFromRows(rows)
+
+	editionRows := []*EditionRow{}
+	err = utils.SqlRowsToStructList(rows, &editionRows)
 	if err != nil {
 		return nil, err
 	}
-	var editions []*Edition
+	editions := []*Edition{}
 	for _, editionRow := range editionRows {
 		edition, err := instEditionFromRow(editionRow, skipPublisher, skipBook)
 		if err != nil {
@@ -158,24 +113,17 @@ func GetEditionsByBookID(bookID int64, skipPublisher, skipBook bool) ([]*Edition
 	return editions, nil
 }
 
-func GetEditionsByPublisherID(bookID int64, skipPublisher, skipBook bool) ([]*Edition, error) {
-	query := fmt.Sprintf("SELECT %s FROM editions WHERE publisher_id=$1", getQueryFieldsForEdition(""))
-	rows, err := database.PgDb.Query(query, bookID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	editionRows, err := getEditionRowsFromRows(rows)
-	if err != nil {
-		return nil, err
-	}
-	var editions []*Edition
-	for _, editionRow := range editionRows {
-		edition, err := instEditionFromRow(editionRow, skipPublisher, skipBook)
-		if err != nil {
-			return nil, err
-		}
-		editions = append(editions, edition)
-	}
-	return editions, nil
+func GetEditionByID(editionID int64, skipPublisher, skipBook bool) (*Edition, error) {
+	query := fmt.Sprintf("SELECT %s FROM editions WHERE id=$1", utils.GetSelectQueryFields[EditionRow](""))
+	return getEdition(query, []any{editionID}, skipPublisher, skipBook)
+}
+
+func GetEditionsByBookID(bookID int64, skipPublisher, skipBook bool) ([]*Edition, error) {
+	query := fmt.Sprintf("SELECT %s FROM editions WHERE book_id=$1", utils.GetSelectQueryFields[EditionRow](""))
+	return getEditionList(query, []any{bookID}, skipPublisher, skipBook)
+}
+
+func GetEditionsByPublisherID(publisherID int64, skipPublisher, skipBook bool) ([]*Edition, error) {
+	query := fmt.Sprintf("SELECT %s FROM editions WHERE publisher_id=$1", utils.GetSelectQueryFields[EditionRow](""))
+	return getEditionList(query, []any{publisherID}, skipPublisher, skipBook)
 }

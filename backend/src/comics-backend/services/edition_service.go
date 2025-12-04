@@ -1,6 +1,7 @@
 package services
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 
@@ -21,9 +22,12 @@ func GetEditionByID(c *gin.Context) {
 	}
 
 	edition, err := models.GetEditionByID(req.ID, false, false)
-	if err != nil {
+	if err != nil && err == sql.ErrNoRows {
 		errmsg := fmt.Sprintf("edition not found (id=%d)", req.ID)
 		utils.ReturnErrorMessage(c, http.StatusNotFound, errmsg, err)
+		return
+	} else if err != nil {
+		utils.ReturnErrorMessage(c, http.StatusInternalServerError, "internal error", err)
 		return
 	}
 
