@@ -30,8 +30,8 @@ export function BookCard({book, className}: BookCardProps) {
                     />
                 </div>
                 <div className="flex flex-col items-center">
-                    <h3 className="font-semibold">{book.name}</h3>
-                    <h4 className="text-sm italic">{book.serie?.name} (#{book.number})</h4>
+                    <h3 className="font-semibold text-center text-sm">{book.name}</h3>
+                    <h4 className="text-center sm:text-sm italic">{book.serie?.name} (#{book.number})</h4>
                 </div>
             </div>
         </Link>
