@@ -10,20 +10,20 @@ import (
 type IssueSerieRow struct {
 	ID         int64
 	Name       string
-	Desc       string
+	Desc       sql.NullString
 	VoStart    string
-	VoEnd      string
+	VoEnd      sql.NullString
 	CreatedAt  string
 	ModifiedAt string
-	UserID     int64
+	AddedBy    int64
 }
 
 type IssueSerie struct {
 	ID         int64    `json:"id"`
 	Name       string   `json:"name"`
-	Desc       string   `json:"desc"`
+	Desc       *string  `json:"desc"`
 	VoStart    string   `json:"voStart"`
-	VoEnd      string   `json:"voEnd"`
+	VoEnd      *string  `json:"voEnd"`
 	Issues     []*Issue `json:"issues"`
 	CreatedAt  string   `json:"createdAt"`
 	ModifiedAt string   `json:"modifiedAt"`
@@ -45,7 +45,7 @@ func getQueryFieldsForIssueSerie(prefix string) string {
 func getIssueSerieRowFromRow(row *sql.Row) (*IssueSerieRow, error) {
 	serieRow := &IssueSerieRow{}
 	err := row.Scan(&serieRow.ID, &serieRow.Name, &serieRow.Desc, &serieRow.VoStart, &serieRow.VoEnd,
-		&serieRow.CreatedAt, &serieRow.ModifiedAt, &serieRow.UserID)
+		&serieRow.CreatedAt, &serieRow.ModifiedAt, &serieRow.AddedBy)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func getIssueSerieRowFromRow(row *sql.Row) (*IssueSerieRow, error) {
 }
 
 func instIssueSerieFromRow(row *IssueSerieRow, skipIssues bool) (*IssueSerie, error) {
-	user, err := GetUserByID(row.UserID)
+	user, err := GetUserByID(row.AddedBy)
 	if err != nil {
 		return nil, err
 	}
@@ -65,12 +65,21 @@ func instIssueSerieFromRow(row *IssueSerieRow, skipIssues bool) (*IssueSerie, er
 			return nil, err
 		}
 	}
+	// Handle nullable values
+	var desc *string = nil
+	if row.Desc.Valid {
+		desc = &row.Desc.String
+	}
+	var voEnd *string = nil
+	if row.VoEnd.Valid {
+		desc = &row.VoEnd.String
+	}
 	serie := &IssueSerie{
 		ID:         row.ID,
 		Name:       row.Name,
-		Desc:       row.Desc,
+		Desc:       desc,
 		VoStart:    row.VoStart,
-		VoEnd:      row.VoEnd,
+		VoEnd:      voEnd,
 		Issues:     issues,
 		CreatedAt:  row.CreatedAt,
 		ModifiedAt: row.ModifiedAt,
