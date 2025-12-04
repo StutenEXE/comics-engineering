@@ -1,6 +1,10 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import type { SerializedError } from "@reduxjs/toolkit";
+import { createApi, fetchBaseQuery, type FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import { parseDataToBook, type Book } from "~/models/book";
+import { parseDataToEdition, type Edition } from "~/models/edition";
+import { parseDataToIssue, type Issue } from "~/models/issue";
 import type { SignupData, User, UserCredentials } from "~/models/user";
+import { createError, type Error } from "~/utils/error";
 
 //////////// PUBLIC API ////////////
 
@@ -25,23 +29,47 @@ export const publicApi = createApi({
      ****************/
     // Get book by id
     bookById: build.query<{ book: Book }, { id: number }>({
-      query: ({ id }) => ({ url: `/book?id=${id}`, method: 'GET' }),
+      query: ({ id }) => ({ url: "/book", method: 'GET', params: { id } }),
       transformResponse: (resp: { book: Book }) => ({
         book: parseDataToBook(resp.book),
       }),
     }),
     // Latest books endpoint (reuse parseDateLikeFields)
     latestBooks: build.query<{ books: Book[] }, { from: number; limit: number }>({
-      query: ({ from, limit }) => ({ url: `/books/latest`, method: 'GET', params: { from, limit } }),
+      query: ({ from, limit }) => ({ url: "/books/latest", method: 'GET', params: { from, limit } }),
       transformResponse: (resp: { books: Book[] }) => ({
         books: resp.books.map((book) => parseDataToBook(book)),
+      }),
+    }),
+
+    /****************
+     * EDITIONS
+     ****************/
+    // Get edition by id
+    editionById: build.query<{ edition: Edition }, { id: number }>({
+      query: ({ id }) => ({ url: "/edition", method: 'GET', params: { id } }),
+      transformResponse: (resp: { edition: Edition }) => ({
+        edition: parseDataToEdition(resp.edition),
+      }),
+    }),
+
+    /****************
+     * ISSUES
+     ****************/
+    // Get issue by id
+    issueById: build.query<{ issue: Issue }, { id: number }>({
+      query: ({ id }) => ({ url: "/issue", method: 'GET', params: { id } }),
+      transformResponse: (resp: { issue: Issue }) => ({
+        issue: parseDataToIssue(resp.issue),
       }),
     }),
   }),
 });
 
 export const { useLoginMutation, useSignupMutation, 
-  useBookByIdQuery, useLatestBooksQuery } 
+  useBookByIdQuery, useLatestBooksQuery,
+  useEditionByIdQuery,
+  useIssueByIdQuery } 
   = publicApi;
 
 //////////// PRIVATE API ////////////

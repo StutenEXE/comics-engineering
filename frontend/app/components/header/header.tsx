@@ -1,5 +1,4 @@
-
-
+import { Link } from 'react-router'
 import { useSelector } from 'react-redux';
 import type { RootState } from '~/store/store';
 import { LoginForm } from '../forms/loginForm';
@@ -39,12 +38,12 @@ export function Header() {
                 </div>
                 <nav>
                     <ul className="flex space-x-4">
-                        <li><a href="/" className="hover:underline">Home</a></li>
-                        <li><a href="/books" className="hover:underline">Books</a></li>
+                        <li><Link to="/" className="hover:underline cursor-pointer">Home</Link></li>
+                        <li><Link to="books" className="hover:underline cursor-pointer">Books</Link></li>
                         {isAuthenticated ? (
                             <>
-                                <li><a href="/collection" className="hover:underline">My collection</a></li>
-                                <li><a href="/profile" className="hover:underline">My profile</a></li>
+                                <li><Link to="/collection" className="hover:underline">My collection</Link></li>
+                                <li><Link to="/profile" className="hover:underline">My profile</Link></li>
                             </>
                         ) : (
                             <>

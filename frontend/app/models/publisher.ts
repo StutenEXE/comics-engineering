@@ -10,7 +10,6 @@ export interface Publisher {
 
 // Utility function to transform the api data to an instance of Publisher
 export function parseDataToPublisher(data: Record<string, any>): Publisher {
-    console.log("Parsing publisher data:", data);
     return {
         id: data.id,
         name: data.name,
