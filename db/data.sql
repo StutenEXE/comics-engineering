@@ -17,11 +17,24 @@ INSERT INTO editions (isbn, ean, price, url, img_url, cover_type, parution_date,
     ('', '9791026819707', 18.5, 'https://www.urban-comics.com/nightwing-infinite-tome-1/', 'https://bdi.dlpdomain.com/album/9791026819707/couv/M385x862/nightwing-infinite-tome-1.jpg', 'Hardcover', '2022-02-25T00:00:00Z', 1, 4, 1);
 
 INSERT INTO issue_series(added_by, "name", "desc", vo_start, vo_end) VALUES
-    (1, 'Dark Knights: Metal Vol 1', 'Dark Knights: Metal event monthly parution', '2017-10-01T00:00:00Z', '2018-05-01T00:00:00Z');
+    (1, 'Dark Knights: Metal Vol 1', 'Dark Knights: Metal event monthly parution', '2017-10-01T00:00:00Z', '2018-05-01T00:00:00Z')
+    (1, 'Dark Days: The Forge', 'Dark Knights: Metal prequel and oneshot', '2017-08-01T00:00:00Z', '2018-08-01T00:00:00Z'),
+    (1, 'Dark Days: The Casting', 'Dark Knights: Metal prequel and oneshot', '2017-09-01T00:00:00Z', '2018-09-01T00:00:00Z'),
+    (1, 'Teen Titans Vol 6', 'Teen Titans serie from 2016', '2016-12-01T00:00:00Z', '2021-01-01T00:00:00Z'),
+    (1, 'Nightwing Vol 4', 'Nightwing serie from 2016', '2016-09-01T00:00:00Z', null),
+    (1, 'Suicide Squad Vol 5', 'Suicide Squad serie from 2016', '2016-10-01T00:00:00Z', '2019-03-01T00:00:00Z'),
+    (1, 'Green Arrow Vol 6', 'Green Arrow serie from 2016', '2016-08-01T00:00:00Z', '2019-05-01T00:00:00Z');
 
 INSERT INTO issues(series_id, added_by, "name", "number", parution_date) VALUES 
     (1, 1, 'Dark Knights: Metal (2017) #1', 1, '2017-08-16T00:00:00Z'),
-    (1, 1, 'Dark Knights: Metal (2017) #2', 2, '2017-09-13T00:00:00Z');
+    (1, 1, 'Dark Knights: Metal (2017) #2', 2, '2017-09-13T00:00:00Z'),
+    (2, 1, 'Dark Days: The Forge (2017) #1', 1, '2017-06-14T00:00:00Z'),
+    (3, 1, 'Dark Days: The Casting (2017) #1', 1, '2017-07-12T00:00:00Z'),
+    (4, 1, 'Teen Titans (2016) #12', 12, '2017-09-13T00:00:00Z'),
+    (5, 1, 'Nightwing (2016) #29', 29, '2017-09-20T00:00:00Z'),
+    (6, 1, 'Suicide Squad (2016) #26', 26, '2017-09-27T00:00:00Z'),
+    (7, 1, 'Green Arrow (2016) #32', 26, '2017-10-04T00:00:00Z');
 
 INSERT INTO books_issues(book_id, issue_id) VALUES
-    (1, 1), (1, 2);
+    -- Batman metal T1
+    (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8);
