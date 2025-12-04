@@ -1,17 +1,17 @@
 package models
 
 import (
-	"database/sql"
 	"fmt"
 
 	"github.com/StutenEXE/comics-backend/database"
+	"github.com/StutenEXE/comics-backend/utils"
 )
 
 type PublisherRow struct {
-	ID         int64
-	Name       string
-	CreatedAt  string
-	ModifiedAt string
+	ID         int64  `db:"id"`
+	Name       string `db:"name"`
+	CreatedAt  string `db:"created_at"`
+	ModifiedAt string `db:"modified_at"`
 }
 
 type Publisher struct {
@@ -21,46 +21,6 @@ type Publisher struct {
 	CreatedAt  string     `json:"createdAt"`
 	ModifiedAt string     `json:"modifiedAt"`
 }
-
-/*
-The order of the requested elements is the following:
-id, name, created_at, modified_at
-*/
-func getQueryFieldsForPublisher(prefix string) string {
-	if prefix != "" {
-		prefix = prefix + "."
-	}
-	return fmt.Sprintf("%sid, %sname, %screated_at, %smodified_at",
-		prefix, prefix, prefix, prefix)
-}
-
-/*
-Helper function to extract a EditionRow from sql.Row
-Row must contain the fields in the order defined in getQueryFieldsForPublisher
-*/
-func getPublisherRowFromRow(row *sql.Row) (*PublisherRow, error) {
-	publisherRow := &PublisherRow{}
-	if err := row.Scan(&publisherRow.ID, &publisherRow.Name, &publisherRow.CreatedAt, &publisherRow.ModifiedAt); err != nil {
-		return nil, err
-	}
-	return publisherRow, nil
-}
-
-/*
-Helper function to extract EditionRow slices from sql.Rows
-Rows must contain the fields in the order defined in getQueryFieldsForPublisher
-// */
-// func getPublisherRowsFromRows(rows *sql.Rows) ([]*PublisherRow, error) {
-// 	var publisherRows []*PublisherRow
-// 	for rows.Next() {
-// 		publisherRow := &PublisherRow{}
-// 		if err := rows.Scan(&publisherRow.ID, &publisherRow.name, &publisherRow.createdAt, &publisherRow.modifiedAt); err != nil {
-// 			return nil, err
-// 		}
-// 		publisherRows = append(publisherRows, publisherRow)
-// 	}
-// 	return publisherRows, nil
-// }
 
 func instPublisherFromRow(row *PublisherRow, skipEditions bool) (*Publisher, error) {
 	var err error
@@ -82,12 +42,42 @@ func instPublisherFromRow(row *PublisherRow, skipEditions bool) (*Publisher, err
 	return publisher, nil
 }
 
-func GetPublisherByID(publisherID int64, skipEditions bool) (*Publisher, error) {
-	query := fmt.Sprintf("SELECT %s FROM publishers WHERE id=$1", getQueryFieldsForPublisher(""))
-	row := database.PgDb.QueryRow(query, publisherID)
-	publisherRow, err := getPublisherRowFromRow(row)
-	if err != nil {
+func getPublisher(query string, params []any, skipEditions bool) (*Publisher, error) {
+	row := database.PgDb.QueryRow(query, params...)
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+	publisherRow := &PublisherRow{}
+	if err := utils.SqlRowToStruct(row, publisherRow); err != nil {
 		return nil, err
 	}
 	return instPublisherFromRow(publisherRow, skipEditions)
+}
+
+func getPublisherList(query string, params []any, skipEditions bool) ([]*Publisher, error) {
+	rows, err := database.PgDb.Query(query, params...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	publisherRows := []*PublisherRow{}
+	err = utils.SqlRowsToStructList(rows, &publisherRows)
+	if err != nil {
+		return nil, err
+	}
+	publishers := []*Publisher{}
+	for _, publisherRow := range publisherRows {
+		publisher, err := instPublisherFromRow(publisherRow, skipEditions)
+		if err != nil {
+			return nil, err
+		}
+		publishers = append(publishers, publisher)
+	}
+	return publishers, nil
+}
+
+func GetPublisherByID(publisherID int64, skipEditions bool) (*Publisher, error) {
+	query := fmt.Sprintf("SELECT %s FROM publishers WHERE id=$1", utils.GetSelectQueryFields[PublisherRow](""))
+	return getPublisher(query, []any{publisherID}, skipEditions)
 }

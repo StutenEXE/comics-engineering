@@ -92,7 +92,6 @@ func GetUserByEmail(email string) (*UserWithPassword, error) {
 		return nil, err
 	}
 	row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.CreatedAt, &user.ModifiedAt)
-	// fmt.Printf("Retrieved user : %v", user)
 	if user.Username == "" {
 		return nil, nil // User not found
 	}

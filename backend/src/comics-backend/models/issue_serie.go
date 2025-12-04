@@ -5,17 +5,18 @@ import (
 	"fmt"
 
 	"github.com/StutenEXE/comics-backend/database"
+	"github.com/StutenEXE/comics-backend/utils"
 )
 
 type IssueSerieRow struct {
-	ID         int64
-	Name       string
-	Desc       sql.NullString
-	VoStart    string
-	VoEnd      sql.NullString
-	CreatedAt  string
-	ModifiedAt string
-	AddedBy    int64
+	ID         int64          `db:"id"`
+	Name       string         `db:"name"`
+	Desc       sql.NullString `db:"desc"`
+	VoStart    string         `db:"vo_start"`
+	VoEnd      sql.NullString `db:"vo_end"`
+	CreatedAt  string         `db:"created_at"`
+	ModifiedAt string         `db:"modified_at"`
+	UserID     int64          `db:"added_by"`
 }
 
 type IssueSerie struct {
@@ -30,30 +31,8 @@ type IssueSerie struct {
 	AddedBy    *User    `json:"addedBy"`
 }
 
-/*
-The order of the requested elements is the following:
-id, name, desc, vo_start, vo_end, created_at, modified_at, added_by
-*/
-func getQueryFieldsForIssueSerie(prefix string) string {
-	if prefix != "" {
-		prefix = prefix + "."
-	}
-	return fmt.Sprintf("%sid, %sname, %s\"desc\", %svo_start, %svo_end, %screated_at, %smodified_at, %sadded_by",
-		prefix, prefix, prefix, prefix, prefix, prefix, prefix, prefix)
-}
-
-func getIssueSerieRowFromRow(row *sql.Row) (*IssueSerieRow, error) {
-	serieRow := &IssueSerieRow{}
-	err := row.Scan(&serieRow.ID, &serieRow.Name, &serieRow.Desc, &serieRow.VoStart, &serieRow.VoEnd,
-		&serieRow.CreatedAt, &serieRow.ModifiedAt, &serieRow.AddedBy)
-	if err != nil {
-		return nil, err
-	}
-	return serieRow, nil
-}
-
 func instIssueSerieFromRow(row *IssueSerieRow, skipIssues bool) (*IssueSerie, error) {
-	user, err := GetUserByID(row.AddedBy)
+	user, err := GetUserByID(row.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -88,16 +67,42 @@ func instIssueSerieFromRow(row *IssueSerieRow, skipIssues bool) (*IssueSerie, er
 	return serie, nil
 }
 
-func GetIssueSerieByID(serieID int64, skipIssues bool) (*IssueSerie, error) {
-	serieRow := &IssueSerieRow{}
-	query := fmt.Sprintf("SELECT %s FROM issue_series WHERE id=$1", getQueryFieldsForIssueSerie(""))
-	row := database.PgDb.QueryRow(query, serieID)
+func getIssueSerie(query string, params []any, skipIssues bool) (*IssueSerie, error) {
+	row := database.PgDb.QueryRow(query, params...)
 	if err := row.Err(); err != nil {
 		return nil, err
 	}
-	serieRow, err := getIssueSerieRowFromRow(row)
+	issueSerieRow := &IssueSerieRow{}
+	if err := utils.SqlRowToStruct(row, issueSerieRow); err != nil {
+		return nil, err
+	}
+	return instIssueSerieFromRow(issueSerieRow, skipIssues)
+}
+
+func getIssueSerieList(query string, params []any, skipIssues bool) ([]*IssueSerie, error) {
+	rows, err := database.PgDb.Query(query, params...)
 	if err != nil {
 		return nil, err
 	}
-	return instIssueSerieFromRow(serieRow, skipIssues)
+	defer rows.Close()
+
+	issueSerieRows := []*IssueSerieRow{}
+	err = utils.SqlRowsToStructList(rows, &issueSerieRows)
+	if err != nil {
+		return nil, err
+	}
+	issueSeries := []*IssueSerie{}
+	for _, issueSerieRow := range issueSerieRows {
+		issueSerie, err := instIssueSerieFromRow(issueSerieRow, skipIssues)
+		if err != nil {
+			return nil, err
+		}
+		issueSeries = append(issueSeries, issueSerie)
+	}
+	return issueSeries, nil
+}
+
+func GetIssueSerieByID(serieID int64, skipIssues bool) (*IssueSerie, error) {
+	query := fmt.Sprintf("SELECT %s FROM issue_series WHERE id=$1", utils.GetSelectQueryFields[IssueSerieRow](""))
+	return getIssueSerie(query, []any{serieID}, skipIssues)
 }

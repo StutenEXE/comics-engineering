@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/StutenEXE/comics-backend/middleware"
@@ -84,7 +83,6 @@ func LoginService(c *gin.Context) {
 		utils.ReturnErrorMessage(c, http.StatusUnauthorized, "invalid credentials", nil)
 		return
 	}
-	fmt.Printf("\n%v\n", loginData)
 	// Authenticate user
 	middleware.CreateSession(c, user)
 	user.Password = "" // Hide password (should not be sent back anyway but just in case)
