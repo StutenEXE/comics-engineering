@@ -1,10 +1,22 @@
 
-export function compareDates(a: Date, b: Date) {
+export function compareDates(a: Date, b: Date): number {
     return a.getTime() - b.getTime()
 }
 
-export function dateToVerboseDateString(lang: string, date: Date | undefined) {
-    if (date === undefined) {
+export function dateToMonthYearString(lang: string, date: Date | undefined | null): string {
+    if (date === undefined || date === null) {
+        return ""
+    } 
+    return date.toLocaleDateString(lang, {
+        weekday: undefined,
+        year: "numeric",
+        month: "long",
+        day: undefined
+    })
+}
+
+export function dateToVerboseDateString(lang: string, date: Date | undefined | null): string {
+    if (date === undefined || date === null) {
         return ""
     } 
     return date.toLocaleDateString(lang, {

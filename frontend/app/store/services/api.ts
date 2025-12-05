@@ -3,11 +3,15 @@ import { createApi, fetchBaseQuery, type FetchBaseQueryError } from "@reduxjs/to
 import { parseDataToBook, type Book } from "~/models/book";
 import { parseDataToEdition, type Edition } from "~/models/edition";
 import { parseDataToIssue, type Issue } from "~/models/issue";
+import { parseDataToIssueSerie, type IssueSerie } from "~/models/issue-serie";
+import { parseDataToPublisher, type Publisher } from "~/models/publisher";
+import { parseDataToSerie, type Serie } from "~/models/serie";
 import type { SignupData, User, UserCredentials } from "~/models/user";
 import { createError, type Error } from "~/utils/error";
 
+////////////////////////////////////
 //////////// PUBLIC API ////////////
-
+////////////////////////////////////
 export const API_PUB_BASE_URL = "http://localhost:8080/api/comics/pub";
 
 // RTK Query service for public API endpoints
@@ -54,6 +58,17 @@ export const publicApi = createApi({
     }),
 
     /****************
+     * ISSUE SERIES
+     ****************/
+    // Get issue serie by id
+    issueSerieById: build.query<{ issueSerie: IssueSerie }, { id: number }>({
+      query: ({ id }) => ({ url: "/issueserie", method: 'GET', params: { id } }),
+      transformResponse: (resp: { issueSerie: IssueSerie }) => ({
+        issueSerie: parseDataToIssueSerie(resp.issueSerie),
+      }),
+    }),
+
+    /****************
      * ISSUES
      ****************/
     // Get issue by id
@@ -63,16 +78,46 @@ export const publicApi = createApi({
         issue: parseDataToIssue(resp.issue),
       }),
     }),
+
+    /****************
+     * PUBLISHER
+     ****************/
+    // Get publisher by id
+    publisherById: build.query<{ publisher: Publisher }, { id: number }>({
+      query: ({ id }) => ({ url: "/publisher", method: 'GET', params: { id } }),
+      transformResponse: (resp: { publisher: Publisher }) => ({
+        publisher: parseDataToPublisher(resp.publisher),
+      }),
+    }),
+
+    /****************
+     * SERIES
+     ****************/
+    // Get issue by id
+    serieById: build.query<{ serie: Serie }, { id: number }>({
+      query: ({ id }) => ({ url: "/serie", method: 'GET', params: { id } }),
+      transformResponse: (resp: { serie: Serie }) => ({
+        serie: parseDataToSerie(resp.serie),
+      }),
+    }),
   }),
 });
 
-export const { useLoginMutation, useSignupMutation, 
+export const { 
+  useLoginMutation, useSignupMutation, 
   useBookByIdQuery, useLatestBooksQuery,
   useEditionByIdQuery,
-  useIssueByIdQuery } 
+  useIssueSerieByIdQuery,
+  useIssueByIdQuery,
+  usePublisherByIdQuery,
+  useSerieByIdQuery
+ } 
   = publicApi;
 
+
+////////////////////////////////////
 //////////// PRIVATE API ////////////
+////////////////////////////////////
 
 export const API_PVT_BASE_URL = "http://localhost:8080/api/comics/pvt";
 

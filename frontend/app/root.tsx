@@ -9,7 +9,7 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import { Header } from "./components/header/header";
+import { Header } from "./components/headers/header";
 import { ToastProvider } from "./components/toast/toast";
 import { Provider } from 'react-redux';
 import { store } from './store/store';
