@@ -51,7 +51,7 @@ func instIssueSerieFromRow(row *IssueSerieRow, skipIssues bool) (*IssueSerie, er
 	}
 	var voEnd *string = nil
 	if row.VoEnd.Valid {
-		desc = &row.VoEnd.String
+		voEnd = &row.VoEnd.String
 	}
 	serie := &IssueSerie{
 		ID:         row.ID,
