@@ -55,7 +55,7 @@ export default function LandingPage() {
             <>
               <ul className="flex gap-4">
                 {books.map((book) => (
-                  <BookCard className="w-50 border rounded-lg p-2" 
+                  <BookCard className="w-50 border rounded-lg p-2 hover:bg-gray-700" 
                     key={book.id} book={book} />
                 ))}
               </ul>
