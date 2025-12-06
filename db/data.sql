@@ -18,8 +18,8 @@ INSERT INTO editions (isbn, ean, price, url, img_url, cover_type, parution_date,
 
 INSERT INTO issue_series(added_by, "name", "desc", vo_start, vo_end) VALUES
     (1, 'Dark Knights: Metal Vol 1', 'Dark Knights: Metal event monthly parution', '2017-10-01T00:00:00Z', '2018-05-01T00:00:00Z')
-    (1, 'Dark Days: The Forge', 'Dark Knights: Metal prequel and oneshot', '2017-08-01T00:00:00Z', '2018-08-01T00:00:00Z'),
-    (1, 'Dark Days: The Casting', 'Dark Knights: Metal prequel and oneshot', '2017-09-01T00:00:00Z', '2018-09-01T00:00:00Z'),
+    (1, 'Dark Days: The Forge', 'Dark Knights: Metal prequel and oneshot', '2017-08-01T00:00:00Z', '2017-08-01T00:00:00Z'),
+    (1, 'Dark Days: The Casting', 'Dark Knights: Metal prequel and oneshot', '2017-09-01T00:00:00Z', '2017-09-01T00:00:00Z'),
     (1, 'Teen Titans Vol 6', 'Teen Titans serie from 2016', '2016-12-01T00:00:00Z', '2021-01-01T00:00:00Z'),
     (1, 'Nightwing Vol 4', 'Nightwing serie from 2016', '2016-09-01T00:00:00Z', null),
     (1, 'Suicide Squad Vol 5', 'Suicide Squad serie from 2016', '2016-10-01T00:00:00Z', '2019-03-01T00:00:00Z'),
