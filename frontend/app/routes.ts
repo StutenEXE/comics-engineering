@@ -4,5 +4,6 @@ export default [
 	index("pages/landing.tsx"),
     route("book/:id", "pages/book.tsx"),
     route("edition/:id", "pages/edition.tsx"),
+    route("issue_serie/:id", "pages/issue-serie.tsx"),
     route("issue/:id", "pages/issue.tsx"),
 ] satisfies RouteConfig;
