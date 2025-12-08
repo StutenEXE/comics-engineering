@@ -69,7 +69,7 @@ export default function BookPage({ params }: { params : { id: number}}) {
                 .sort((is1, is2) => compareDates(is1.parutionDate, is2.parutionDate))
                 .map((is) => {
                   return (
-                    <IssueCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
+                    <IssueCard className="w-25 text-md snap-center hover:bg-gray-700 pb-1 rounded-sm" 
                       key={is.id} issue={is} /> 
                   )
                 }) }

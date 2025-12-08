@@ -21,9 +21,9 @@ export function parseDataToIssueSerie(data: Record<string, any>): IssueSerie {
         desc: data.desc,
         voStart: new Date(data.voStart),
         voEnd: data.voEnd ? new Date(data.voEnd) : null, 
-        issues: data.issues?.map((i: Record<string, any>) => parseDataToIssue(i)) ?? [],
+        issues: data.issues?.map((i: Record<string, any>) =>  parseDataToIssue(i)) ?? [],
         createdAt: new Date(data.createdAt),
         modifiedAt: new Date(data.modifiedAt),
-        addedBy: parseDataToUser(data.addedBy)
+        addedBy: parseDataToUser(data.addedBy)  
     }
 }

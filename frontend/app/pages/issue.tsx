@@ -8,6 +8,7 @@ import { LinkButton } from "~/components/buttons/LinkButton";
 import { dateToVerboseDateString } from "~/utils/date";
 import { PageHeaderComponent } from "~/components/headers/pageHeader";
 import { PageTemplate } from "~/components/templates/pageTemplate";
+import { buildIssueShortName } from "~/models/issue";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -41,7 +42,7 @@ export default function IssuePage({ params }: { params : { id: number}}) {
       )}
       { (!isLoading && !error) && (
         <>
-          <PageHeaderComponent title={issue?.name} subtitle={issue?.issueSerie?.name} 
+          <PageHeaderComponent title={buildIssueShortName(issue)} subtitle={issue?.name} 
               createdAt={issue?.createdAt} modifiedAt={issue?.modifiedAt} addedBy={issue?.addedBy?.username} />
           <div className="flex gap-2 items-center">
             <h3 className="text-xl text-gray-200 font-semibold">Parution date :</h3>

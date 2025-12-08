@@ -65,9 +65,14 @@ export default function IssueSeriePage({ params }: { params : { id: number}}) {
                 // Sort in ascending order (oldest issue first)
                 .sort((is1, is2) => compareDates(is1.parutionDate, is2.parutionDate))
                 .map((is) => {
+                  // Since issueSerie is read-only, it's children are too 
+                  const is2 = {
+                    ...is,
+                    issueSerie: {...issueSerie}
+                  }
                   return (
                     <IssueCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
-                      key={is.id} issue={is} /> 
+                      key={is2.id} issue={is2} /> 
                   )
                 }) }
             </div>
