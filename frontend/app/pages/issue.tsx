@@ -1,15 +1,12 @@
 import { useIssueByIdQuery } from "~/store/services/api";
 import type { Route } from "../+types/root";
-import { EditionCard } from "~/components/cards/EditionCard";
-import { IssueCard } from "~/components/cards/IssueCard";
 import { createError } from "~/utils/error";
-import { BookCard } from "~/components/cards/BookCard";
-import { LinkButton } from "~/components/buttons/LinkButton";
 import { dateToMonthYearString, dateToVerboseDateString } from "~/utils/date";
 import { PageHeaderComponent } from "~/components/headers/PageHeader";
 import { PageTemplate } from "~/components/templates/PageTemplate";
 import { buildIssueShortName } from "~/models/issue";
 import { BookList } from "~/components/lists/BookList";
+import type { Link } from "~/components/lists/LinkButtonList";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -24,8 +21,12 @@ export default function IssuePage({ params }: { params : { id: number}}) {
   const issue = data?.issue ?? null;
   const err = createError(error)
 
+  const links: Link[] = [
+    { name: "Go to issue serie", path: `/issue_serie/${issue?.issueSerie?.id}`, disabled: isLoading },
+  ]
+
   return (
-    <PageTemplate>
+    <PageTemplate links={links}>
       { isLoading && (
         <div className="flex items-center justify-center">
             <h1 className="text-3xl text-gray-500">Loading issue...</h1>
@@ -42,7 +43,9 @@ export default function IssuePage({ params }: { params : { id: number}}) {
       { (!isLoading && !error) && (
         <>
           <PageHeaderComponent headerTitle="Issue" title={buildIssueShortName(issue)} subtitle={issue?.name} 
-              createdAt={issue?.createdAt} modifiedAt={issue?.modifiedAt} addedBy={issue?.addedBy?.username} />
+            createdAt={issue?.createdAt} modifiedAt={issue?.modifiedAt} addedBy={issue?.addedBy?.username} 
+            links={links}
+          />
           <div className="flex gap-2 items-center">
             <h3 className="text-xl text-gray-200 font-semibold">Parution date :</h3>
             <p className="text-xl text-gray-200">
@@ -75,14 +78,6 @@ export default function IssuePage({ params }: { params : { id: number}}) {
           </div>
         </>
       )}
-      <div className="mt-4 flex gap-4">
-        <LinkButton
-            path={`/issue_serie/${issue?.issueSerie?.id}`}
-            disabled={isLoading}
-        >
-            Go to issue serie
-        </LinkButton>
-      </div>
     </PageTemplate>
   );
 }

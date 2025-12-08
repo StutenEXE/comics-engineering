@@ -4,6 +4,7 @@ import { createError } from "~/utils/error";
 import { LinkButton } from "~/components/buttons/LinkButton";
 import { PageTemplate } from "~/components/templates/PageTemplate";
 import { PageHeaderComponent } from "~/components/headers/PageHeader";
+import type { Link } from "~/components/lists/LinkButtonList";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -18,8 +19,13 @@ export default function EditionPage({ params }: { params : { id: number}}) {
   const edition = data?.edition ?? null;
   const err = createError(error)
 
+  const links: Link[] = [
+    { name: "Go to book", path: `/book/${edition?.book?.id}`, disabled: isLoading },
+    { name: "Go to publisher", path: `/publisher/${edition?.publisher?.id}`, disabled: isLoading },
+  ]
+
   return (
-    <PageTemplate hasImg={true} imgUrl={edition?.imgUrl} imgAlt={edition?.book?.name}>  
+    <PageTemplate hasImg={true} imgUrl={edition?.imgUrl} imgAlt={edition?.book?.name} links={links}>  
       { isLoading && (
         <div className="flex items-center justify-center">
             <h1 className="text-3xl text-gray-500">Loading edition...</h1>
@@ -37,7 +43,9 @@ export default function EditionPage({ params }: { params : { id: number}}) {
         <>
           <PageHeaderComponent headerTitle="Edition" title={edition?.book?.name} 
             subtitle={`${edition?.book?.serie?.name}  (#${edition?.book?.number}/${edition?.book?.serie?.nvolumes})`} 
-            createdAt={edition?.createdAt} modifiedAt={edition?.modifiedAt} addedBy={edition?.addedBy?.username} />
+            createdAt={edition?.createdAt} modifiedAt={edition?.modifiedAt} addedBy={edition?.addedBy?.username} 
+            links={links}
+          />
           <div className="flex gap-2 items-center">
             <h3 className="text-xl text-gray-200 font-semibold">EAN :</h3>
             <p className="text-xl text-gray-200">
@@ -82,20 +90,6 @@ export default function EditionPage({ params }: { params : { id: number}}) {
           </div>
         </>
       )}
-      <div className="mt-4 flex gap-4">
-          <LinkButton
-              path={`/book/${edition?.book?.id}`}
-              disabled={isLoading}
-          >
-              Go to book
-          </LinkButton>
-          <LinkButton
-              path={`/publisher/${edition?.publisher?.id}`}
-              disabled={isLoading}
-          >
-              Go to publisher
-          </LinkButton>
-      </div>
     </PageTemplate>
   );
 }

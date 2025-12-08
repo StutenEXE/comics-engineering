@@ -1,5 +1,6 @@
 import { BookCard } from "../cards/BookCard";
 import type { Book } from "~/models/book";
+import { GenericList } from "./GenericList";
 
 
 interface BookListProps {
@@ -9,17 +10,21 @@ interface BookListProps {
 }
 
 export function BookList({ bookList, descOrder, className }: BookListProps) {
+    const mapper = (bk: Book) =>  (
+        <BookCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
+           key={bk.id} book={bk} /> 
+    )
+
+    const list = !bookList ? [] : [...bookList]
+
     return(
-        <div className={`flex gap-2 p-2 overflow-hidden snap-x snap-proximity ${className}`}>
-            { // Copy to not rearrange original list  
-            bookList && [...bookList]
-                .map((bk) => {
-                    return (
-                        <BookCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
-                        key={bk.id} book={bk} /> 
-                    )
-                })
-            }
-        </div>
+        <>
+            <GenericList 
+                list={list} 
+                emptyMsg="No books linked"
+                elemGenerator={mapper}
+                className={className}
+            />
+        </>
     )
 }
