@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/StutenEXE/comics-backend/database"
@@ -8,21 +9,29 @@ import (
 )
 
 type IssueRow struct {
-	ID           int64  `db:"id"`
-	Name         string `db:"name"`
-	Number       int    `db:"number"`
-	ParutionDate string `db:"parution_date"`
-	IssueSerieID int64  `db:"series_id"`
-	CreatedAt    string `db:"created_at"`
-	ModifiedAt   string `db:"modified_at"`
-	UserID       int64  `db:"added_by"`
+	ID           int64          `db:"id"`
+	Name         string         `db:"name"`
+	Number       int            `db:"number"`
+	CoverDate    string         `db:"cover_date"`
+	ParutionDate string         `db:"parution_date"`
+	IsAnnual     bool           `db:"is_annual"`
+	HasBackup    bool           `db:"has_backup"`
+	BackupName   sql.NullString `db:"backup_name"`
+	IssueSerieID int64          `db:"series_id"`
+	CreatedAt    string         `db:"created_at"`
+	ModifiedAt   string         `db:"modified_at"`
+	UserID       int64          `db:"added_by"`
 }
 
 type Issue struct {
 	ID           int64       `json:"id"`
 	Name         string      `json:"name"`
 	Number       int         `json:"number"`
+	CoverDate    string      `json:"coverDate"`
 	ParutionDate string      `json:"parutionDate"`
+	IsAnnual     bool        `json:"isAnnual"`
+	HasBackup    bool        `json:"hasBackup"`
+	BackupName   *string     `json:"backupName"`
 	IssueSerie   *IssueSerie `json:"issueSerie"`
 	Books        []*Book     `json:"books"`
 	CreatedAt    string      `json:"createdAt"`
@@ -51,11 +60,20 @@ func instIssueFromRow(row *IssueRow, skipIssueSerie, skipBooks bool) (*Issue, er
 			return nil, err
 		}
 	}
+	// Handle nullable values
+	var backupName *string = nil
+	if row.BackupName.Valid {
+		backupName = &row.BackupName.String
+	}
 	issue := &Issue{
 		ID:           row.ID,
 		Name:         row.Name,
 		Number:       row.Number,
+		CoverDate:    row.CoverDate,
 		ParutionDate: row.ParutionDate,
+		IsAnnual:     row.IsAnnual,
+		HasBackup:    row.HasBackup,
+		BackupName:   backupName,
 		IssueSerie:   serie,
 		Books:        books,
 		CreatedAt:    row.CreatedAt,

@@ -27,7 +27,11 @@ package comics_db {
         -added_by: id
         name: text
         number: number
+        cover_date: datetime
         parution_date: datetime
+        is_annual: boolean
+        has_backup: boolean
+        backup_name: text
         created_at: datetime
         modified_at: datetime
     }
