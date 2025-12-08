@@ -7,8 +7,8 @@ import { IssueCard } from "~/components/cards/IssueCard";
 import type { Book } from "~/models/book";
 import { PageHeaderComponent } from "~/components/headers/PageHeader";
 import { PageTemplate } from "~/components/templates/PageTemplate";
-import { IssueList } from "~/components/lists/IssueList";
-import { BookList } from "~/components/lists/BookList";
+import { IssueList } from "~/components/lists/issuelists/IssueList";
+import { BookList } from "~/components/lists/booklists/BookList";
 
 export function meta({ params }: Route.MetaArgs) {
   return [

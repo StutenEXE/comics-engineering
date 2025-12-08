@@ -1,4 +1,3 @@
-import type { SerializedError } from "@reduxjs/toolkit";
 import { createApi, fetchBaseQuery, type FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import { parseDataToBook, type Book } from "~/models/book";
 import { parseDataToEdition, type Edition } from "~/models/edition";
@@ -7,7 +6,6 @@ import { parseDataToIssueSerie, type IssueSerie } from "~/models/issue-serie";
 import { parseDataToPublisher, type Publisher } from "~/models/publisher";
 import { parseDataToSerie, type Serie } from "~/models/serie";
 import type { SignupData, User, UserCredentials } from "~/models/user";
-import { createError, type Error } from "~/utils/error";
 
 ////////////////////////////////////
 //////////// PUBLIC API ////////////
@@ -33,9 +31,16 @@ export const publicApi = createApi({
      ****************/
     // Get book by id
     bookById: build.query<{ book: Book }, { id: number }>({
-      query: ({ id }) => ({ url: "/book", method: 'GET', params: { id } }),
+      query: ({ id }) => ({ url: "/books", method: 'GET', params: { id } }),
       transformResponse: (resp: { book: Book }) => ({
         book: parseDataToBook(resp.book),
+      }),
+    }),
+    // Get book by serie id
+    bookBySerieId: build.query<{ books: Book[] }, { id: number }>({
+      query: ({ id }) => ({ url: "/books/serie", method: 'GET', params: { id } }),
+      transformResponse: (resp: { books: Book[] }) => ({
+        books: resp.books.map((book) => parseDataToBook(book)),
       }),
     }),
     // Latest books endpoint (reuse parseDateLikeFields)
@@ -51,7 +56,7 @@ export const publicApi = createApi({
      ****************/
     // Get edition by id
     editionById: build.query<{ edition: Edition }, { id: number }>({
-      query: ({ id }) => ({ url: "/edition", method: 'GET', params: { id } }),
+      query: ({ id }) => ({ url: "/editions", method: 'GET', params: { id } }),
       transformResponse: (resp: { edition: Edition }) => ({
         edition: parseDataToEdition(resp.edition),
       }),
@@ -62,7 +67,7 @@ export const publicApi = createApi({
      ****************/
     // Get issue serie by id
     issueSerieById: build.query<{ issueSerie: IssueSerie }, { id: number }>({
-      query: ({ id }) => ({ url: "/issueserie", method: 'GET', params: { id } }),
+      query: ({ id }) => ({ url: "/issueseries", method: 'GET', params: { id } }),
       transformResponse: (resp: { issueSerie: IssueSerie }) => ({
         issueSerie: parseDataToIssueSerie(resp.issueSerie),
       }),
@@ -73,9 +78,16 @@ export const publicApi = createApi({
      ****************/
     // Get issue by id
     issueById: build.query<{ issue: Issue }, { id: number }>({
-      query: ({ id }) => ({ url: "/issue", method: 'GET', params: { id } }),
+      query: ({ id }) => ({ url: "/issues", method: 'GET', params: { id } }),
       transformResponse: (resp: { issue: Issue }) => ({
         issue: parseDataToIssue(resp.issue),
+      }),
+    }),
+    // Get issue by book id
+    issueByBookId: build.query<{ issues: Issue[] }, { id: number }>({
+      query: ({ id }) => ({ url: "/issues/book", method: 'GET', params: { id } }),
+      transformResponse: (resp: { issues: Issue[] }) => ({
+        issues: resp.issues.map((issue) => parseDataToIssue(issue)),
       }),
     }),
 
@@ -84,7 +96,7 @@ export const publicApi = createApi({
      ****************/
     // Get publisher by id
     publisherById: build.query<{ publisher: Publisher }, { id: number }>({
-      query: ({ id }) => ({ url: "/publisher", method: 'GET', params: { id } }),
+      query: ({ id }) => ({ url: "/publishers", method: 'GET', params: { id } }),
       transformResponse: (resp: { publisher: Publisher }) => ({
         publisher: parseDataToPublisher(resp.publisher),
       }),
@@ -95,7 +107,7 @@ export const publicApi = createApi({
      ****************/
     // Get issue by id
     serieById: build.query<{ serie: Serie }, { id: number }>({
-      query: ({ id }) => ({ url: "/serie", method: 'GET', params: { id } }),
+      query: ({ id }) => ({ url: "/series", method: 'GET', params: { id } }),
       transformResponse: (resp: { serie: Serie }) => ({
         serie: parseDataToSerie(resp.serie),
       }),
@@ -105,10 +117,10 @@ export const publicApi = createApi({
 
 export const { 
   useLoginMutation, useSignupMutation, 
-  useBookByIdQuery, useLatestBooksQuery,
+  useBookByIdQuery, useBookBySerieIdQuery, useLatestBooksQuery,
   useEditionByIdQuery,
   useIssueSerieByIdQuery,
-  useIssueByIdQuery,
+  useIssueByIdQuery, useIssueByBookIdQuery,
   usePublisherByIdQuery,
   useSerieByIdQuery
  } 

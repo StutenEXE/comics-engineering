@@ -5,7 +5,7 @@ import { dateToMonthYearString, dateToVerboseDateString } from "~/utils/date";
 import { PageHeaderComponent } from "~/components/headers/PageHeader";
 import { PageTemplate } from "~/components/templates/PageTemplate";
 import { buildIssueShortName } from "~/models/issue";
-import { BookList } from "~/components/lists/BookList";
+import { BookList } from "~/components/lists/booklists/BookList";
 import type { Link } from "~/components/lists/LinkButtonList";
 
 export function meta({ params }: Route.MetaArgs) {

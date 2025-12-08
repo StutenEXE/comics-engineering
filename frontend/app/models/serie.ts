@@ -2,7 +2,7 @@ import { parseDataToBook, type Book } from "./book"
 import { parseDataToUser, type User } from "./user"
 
 export interface Serie {
-    id: string,
+    id: number,
     name: string,
     ongoing: boolean,
     oneshot: boolean,

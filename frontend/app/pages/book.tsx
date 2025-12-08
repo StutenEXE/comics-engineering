@@ -3,10 +3,13 @@ import type { Route } from "../+types/root";
 import { createError } from "~/utils/error";
 import { PageHeaderComponent } from "~/components/headers/PageHeader";
 import { PageTemplate } from "~/components/templates/PageTemplate";
-import { IssueList } from "~/components/lists/IssueList";
-import { BookList } from "~/components/lists/BookList";
+import { IssueList } from "~/components/lists/issuelists/IssueList";
+import { BookList } from "~/components/lists/booklists/BookList";
 import { EditionList } from "~/components/lists/EditionList";
 import type { Link } from "~/components/lists/LinkButtonList";
+import type { Book } from "~/models/book";
+import { BookListBySerieId } from "~/components/lists/booklists/BookListBySerieId";
+import { IssueListByBookId } from "~/components/lists/issuelists/IssueListByBookId";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -55,11 +58,13 @@ export default function BookPage({ params }: { params : { id: number}}) {
           </div>
           <div className="flex gap-2 flex-col">
             <h3 className="text-xl text-gray-200 font-semibold">From the same serie :</h3>
-            <BookList bookList={book?.serie?.books.filter(bk => bk.id !== book?.id)} className="border border-gray-500 rounded-lg"/>
+            {/* <BookList bookList={book?.otherBooks.filter((bk) => bk.id !== book.id)} className="border border-gray-500 rounded-lg"/> */}
+            <BookListBySerieId serieId={book?.serie?.id} toIgnore={book}  className="border border-gray-500 rounded-lg" />
           </div>
           <div className="flex gap-2 flex-col">
             <h3 className="text-xl text-gray-200 font-semibold">Issues :</h3>
-              <IssueList issueList={book?.issues} className="border border-gray-500 rounded-lg" />
+            {/* <IssueList issueList={book?.issues} className="border border-gray-500 rounded-lg" /> */}
+            <IssueListByBookId bookId={book?.id} className="border border-gray-500 rounded-lg" />
           </div>
           <div className="flex gap-2 flex-col">
             <h3 className="text-xl text-gray-200 font-semibold">Editions :</h3>
