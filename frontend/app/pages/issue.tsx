@@ -5,7 +5,7 @@ import { IssueCard } from "~/components/cards/IssueCard";
 import { createError } from "~/utils/error";
 import { BookCard } from "~/components/cards/BookCard";
 import { LinkButton } from "~/components/buttons/LinkButton";
-import { dateToVerboseDateString } from "~/utils/date";
+import { dateToMonthYearString, dateToVerboseDateString } from "~/utils/date";
 import { PageHeaderComponent } from "~/components/headers/pageHeader";
 import { PageTemplate } from "~/components/templates/pageTemplate";
 import { buildIssueShortName } from "~/models/issue";
@@ -50,6 +50,26 @@ export default function IssuePage({ params }: { params : { id: number}}) {
               {dateToVerboseDateString("en-EN", issue?.parutionDate)}
             </p>
           </div>
+          <div className="flex gap-2 items-center">
+            <h3 className="text-xl text-gray-200 font-semibold">Cover date :</h3>
+            <p className="text-xl text-gray-200">
+              {dateToMonthYearString("en-EN", issue?.coverDate)}
+            </p>
+          </div>
+          <div className="flex gap-2 items-center">
+            <h3 className="text-xl text-gray-200 font-semibold">Story :</h3>
+            <p className="text-xl text-gray-200">
+              {issue?.name}
+            </p>
+          </div>
+          { issue?.hasBackup && (
+            <div className="flex gap-2 items-center">
+              <h3 className="text-xl text-gray-200 font-semibold">Backup story :</h3>
+              <p className="text-xl text-gray-200">
+                {issue?.backupName}
+              </p>
+            </div>
+          )}
           <div className="flex gap-2 flex-col">
             <h3 className="text-xl text-gray-200 font-semibold">Books :</h3>
             <div className="flex gap-2 p-2 border border-gray-500 rounded-lg overflow-hidden snap-x snap-proximity">

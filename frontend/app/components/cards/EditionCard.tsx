@@ -3,12 +3,14 @@ import { Link } from "react-router";
 import type { Edition } from "~/models/edition";
 
 type EditionCardProps = {
-    edition: Edition;
+    edition: Edition | undefined | null;
     className?: string;
 };
 
 export function EditionCard({edition, className}: EditionCardProps) {
-    
+    if (!edition) {
+        return
+    }
     return (
         <Link to={`/edition/${edition.id}`}>
             <div className={`flex flex-col items-center justify-between ${className}`}>

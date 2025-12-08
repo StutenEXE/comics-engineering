@@ -7,6 +7,7 @@ import { IssueCard } from "~/components/cards/IssueCard";
 import type { Book } from "~/models/book";
 import { PageHeaderComponent } from "~/components/headers/pageHeader";
 import { PageTemplate } from "~/components/templates/pageTemplate";
+import { IssueList } from "~/components/lists/IssueList";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -60,24 +61,16 @@ export default function IssueSeriePage({ params }: { params : { id: number}}) {
           </div>
           <div className="flex gap-2 flex-col">
             <h3 className="text-xl text-gray-200 font-semibold">Issues :</h3>
-            <div className="max-h-40 flex flex-col gap-0 p-2 border border-gray-500 rounded-lg overflow-y-scroll snap-y snap-proximity">
-              { issueSerie?.issues && [...issueSerie.issues]
-                // Sort in ascending order (oldest issue first)
-                .sort((is1, is2) => compareDates(is1.parutionDate, is2.parutionDate))
-                .map((is) => {
-                  // Since issueSerie is read-only, it's children are too 
-                  const is2 = {
+              <IssueList issueList={
+                issueSerie?.issues.map((is) => {
+                  // Since issueSerie is read-only, it's children are too,  nd we need to have a defined issueSerie here
+                  // it is not sent back by the API (infinite loops in this case)
+                  return {
                     ...is,
                     issueSerie: {...issueSerie}
                   }
-                  return (
-                    <IssueCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
-                      key={is2.id} issue={is2} /> 
-                  )
-                }) }
-            </div>
+              })} className="border border-gray-500 rounded-lg"/>
           </div>
-
           <div className="flex gap-2 flex-col">
             <h3 className="text-xl text-gray-200 font-semibold">Books :</h3>
             <div className="flex gap-2 p-2 border border-gray-500 rounded-lg overflow-hidden snap-x snap-proximity">
