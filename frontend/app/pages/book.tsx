@@ -3,8 +3,8 @@ import type { Route } from "../+types/root";
 import { EditionCard } from "~/components/cards/EditionCard";
 import { createError } from "~/utils/error";
 import { compareDates } from "~/utils/date";
-import { PageHeaderComponent } from "~/components/headers/pageHeader";
-import { PageTemplate } from "~/components/templates/pageTemplate";
+import { PageHeaderComponent } from "~/components/headers/PageHeader";
+import { PageTemplate } from "~/components/templates/PageTemplate";
 import { IssueList } from "~/components/lists/IssueList";
 import { BookList } from "~/components/lists/BookList";
 import { EditionList } from "~/components/lists/EditionList";
@@ -41,7 +41,7 @@ export default function BookPage({ params }: { params : { id: number}}) {
       )}
       { (!isLoading && !error) && (
         <>
-          <PageHeaderComponent title={book?.name} subtitle={`${book?.serie?.name} (#${book?.number}/${book?.serie?.nvolumes})`} 
+          <PageHeaderComponent headerTitle="Book" title={book?.name} subtitle={`${book?.serie?.name} (#${book?.number}/${book?.serie?.nvolumes})`} 
             createdAt={book?.createdAt} modifiedAt={book?.modifiedAt} addedBy={book?.addedBy?.username} />
           <div className="flex flex-col gap-2">
             <h3 className="text-xl text-gray-200 font-semibold">Description :</h3>

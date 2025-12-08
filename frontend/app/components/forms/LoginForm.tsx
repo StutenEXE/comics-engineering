@@ -1,50 +1,41 @@
-import type { SignupData } from "~/models/user";
-import { useSignupMutation } from "~/store/services/api";
+import type { UserCredentials } from "~/models/user";
+import { useLoginMutation } from "~/store/services/api";
 import { setUser } from "~/store/slices/userSlice";
 import { store } from "~/store/store";
-import { useToast } from "../toast/toast";
+import { useToast } from "../toast/Toast";
 
-type SignupFormProps = {
+type LoginFormProps = {
     onDone?: () => void;
     onCancel?: () => void;
 };
 
-export function SignupForm({ onDone, onCancel }: SignupFormProps) {
-    const [signup] = useSignupMutation();
+export function LoginForm({ onDone, onCancel }: LoginFormProps) {
+    const [login] = useLoginMutation();
     const toast = useToast();
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
-        const username = formData.get("username");
         const email = formData.get("email");
         const password = formData.get("password");
 
-        if (!username || !email || !password 
-            || username === "" || email === "" || password === ""
-        ) {
-            toast.error("All fields are required");
-            return;
-        }   
-
-        const data: SignupData = {
-            username: username as string,
-            email: email as string,
-            password: password as string,
+        const credentials: UserCredentials = {
+            email: typeof email === "string" ? email : "",
+            password: typeof password === "string" ? password : "",
         };
 
-        if (!data.email || !data.password || !data.username) return;
+        if (!credentials.email || !credentials.password) return;
 
         // Perform login mutation
-        signup(data).unwrap()
+        login(credentials).unwrap()
             .then((response) => {
                 store.dispatch(setUser(response.user));
-                toast.success("Signup successful");
+                toast.success("Login successful");
                 // Execute onDone callback if provided
                 if (onDone) onDone();
             })
             .catch((error) => {
-                const msg = error.data?.error || 'Invalid data';
+                const msg = error.data?.error || 'Invalid email or password';
                 toast.error(String(msg));
             });
         
@@ -60,18 +51,7 @@ export function SignupForm({ onDone, onCancel }: SignupFormProps) {
             onSubmit={handleSubmit}
             className="max-w-md mx-auto mt-8 p-6 border border-gray-300 rounded-lg shadow-md bg-black"
         >
-            <h2 className="text-2xl font-bold mb-6 text-center">Sign Up for an Account</h2>
-            <div className="mb-4">
-                <label htmlFor="username" className="block font-semibold mb-2">Username</label>
-                <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter your username"
-                    required
-                />
-            </div>
+            <h2 className="text-2xl font-bold mb-6 text-center">Login to Your Account</h2>
             <div className="mb-4">
                 <label htmlFor="email" className="block font-semibold mb-2">Email</label>
                 <input
@@ -89,7 +69,6 @@ export function SignupForm({ onDone, onCancel }: SignupFormProps) {
                     type="password"
                     id="password"
                     name="password"
-                    minLength={8}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter your password"
                     required

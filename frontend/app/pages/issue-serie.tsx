@@ -5,8 +5,8 @@ import { BookCard } from "~/components/cards/BookCard";
 import { compareDates, dateToMonthYearString, dateToVerboseDateString } from "~/utils/date";
 import { IssueCard } from "~/components/cards/IssueCard";
 import type { Book } from "~/models/book";
-import { PageHeaderComponent } from "~/components/headers/pageHeader";
-import { PageTemplate } from "~/components/templates/pageTemplate";
+import { PageHeaderComponent } from "~/components/headers/PageHeader";
+import { PageTemplate } from "~/components/templates/PageTemplate";
 import { IssueList } from "~/components/lists/IssueList";
 import { BookList } from "~/components/lists/BookList";
 
@@ -54,7 +54,7 @@ export default function IssueSeriePage({ params }: { params : { id: number}}) {
       )}
       { (!isLoading && !error) && (
         <>
-          <PageHeaderComponent title={issueSerie?.name} subtitle={subtitle} 
+          <PageHeaderComponent headerTitle="Issue Serie" title={issueSerie?.name} subtitle={subtitle} 
             createdAt={issueSerie?.createdAt} modifiedAt={issueSerie?.modifiedAt} addedBy={issueSerie?.addedBy?.username} />
           <div className="flex flex-col gap-2">
             <h3 className="text-xl text-gray-200 font-semibold">Description :</h3>

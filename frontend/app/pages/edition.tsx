@@ -2,8 +2,8 @@ import { useEditionByIdQuery } from "~/store/services/api";
 import type { Route } from "../+types/root";
 import { createError } from "~/utils/error";
 import { LinkButton } from "~/components/buttons/LinkButton";
-import { PageTemplate } from "~/components/templates/pageTemplate";
-import { PageHeaderComponent } from "~/components/headers/pageHeader";
+import { PageTemplate } from "~/components/templates/PageTemplate";
+import { PageHeaderComponent } from "~/components/headers/PageHeader";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -35,7 +35,7 @@ export default function EditionPage({ params }: { params : { id: number}}) {
       )}
       { (!isLoading && !error) && (
         <>
-          <PageHeaderComponent title={edition?.book?.name} 
+          <PageHeaderComponent headerTitle="Edition" title={edition?.book?.name} 
             subtitle={`${edition?.book?.serie?.name}  (#${edition?.book?.number}/${edition?.book?.serie?.nvolumes})`} 
             createdAt={edition?.createdAt} modifiedAt={edition?.modifiedAt} addedBy={edition?.addedBy?.username} />
           <div className="flex gap-2 items-center">

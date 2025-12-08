@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BookCard } from "~/components/cards/BookCard";
-import { useToast } from "~/components/toast/toast";
+import { useToast } from "~/components/toast/Toast";
 import { useLatestBooksQuery } from "~/store/services/api";
 import type { Route } from "../+types/root";
 import { GenericButton } from "~/components/buttons/GenericButton";
