@@ -3,10 +3,10 @@ INSERT INTO series (added_by, "name", ongoing, oneshot, nvolumes, vo_start, vo_e
     (1, 'Nightwing Infinite', false, false, 1,'2021-05-01T00:00:00Z', '2024-12-01T00:00:00Z');
 
 INSERT INTO books (series_id, added_by, "name", "desc", "number", vo_content) VALUES
-    (1, 1, 'Batman Metal Volume 1', 'The first volume of Batman Metal', 1, 'Content of Batman Metal Volume 1'),
-    (1, 1, 'Batman Metal Volume 2', 'The second volume of Batman Metal', 2, 'Content of Batman Metal Volume 2'),
-    (1, 1, 'Batman Metal Volume 3', 'The third volume of Batman Metal', 3, 'Content of Batman Metal Volume 3'),
-    (2, 1, 'Nightwing Infinite', 'A special issue of Nightwing Infinite', 1, 'Content of Nightwing Infinite');
+    (1, 1, 'La Forge', 'The first volume of Batman Metal', 1, 'Content of Batman Metal Volume 1'),
+    (1, 1, 'Les Chevaliers Noirs', 'The second volume of Batman Metal', 2, 'Content of Batman Metal Volume 2'),
+    (1, 1, 'Matière Hurlante', 'The third volume of Batman Metal', 3, 'Content of Batman Metal Volume 3'),
+    (2, 1, 'Le Saut dans la Lumière', 'A special issue of Nightwing Infinite', 1, 'Content of Nightwing Infinite');
 
 INSERT INTO publishers (name) VALUES('Urban Comics');
 
@@ -17,23 +17,23 @@ INSERT INTO editions (isbn, ean, price, url, img_url, cover_type, parution_date,
     ('', '9791026819707', 18.5, 'https://www.urban-comics.com/nightwing-infinite-tome-1/', 'https://bdi.dlpdomain.com/album/9791026819707/couv/M385x862/nightwing-infinite-tome-1.jpg', 'Hardcover', '2022-02-25T00:00:00Z', 1, 4, 1);
 
 INSERT INTO issue_series(added_by, "name", "desc", vo_start, vo_end) VALUES
-    (1, 'Dark Knights: Metal Vol 1', 'Dark Knights: Metal event monthly parution', '2017-10-01T00:00:00Z', '2018-05-01T00:00:00Z')
+    (1, 'Dark Knights: Metal (Volume 1)', 'Dark Knights: Metal event monthly parution', '2017-10-01T00:00:00Z', '2018-05-01T00:00:00Z'),
     (1, 'Dark Days: The Forge', 'Dark Knights: Metal prequel and oneshot', '2017-08-01T00:00:00Z', '2017-08-01T00:00:00Z'),
     (1, 'Dark Days: The Casting', 'Dark Knights: Metal prequel and oneshot', '2017-09-01T00:00:00Z', '2017-09-01T00:00:00Z'),
-    (1, 'Teen Titans Vol 6', 'Teen Titans serie from 2016', '2016-12-01T00:00:00Z', '2021-01-01T00:00:00Z'),
-    (1, 'Nightwing Vol 4', 'Nightwing serie from 2016', '2016-09-01T00:00:00Z', null),
-    (1, 'Suicide Squad Vol 5', 'Suicide Squad serie from 2016', '2016-10-01T00:00:00Z', '2019-03-01T00:00:00Z'),
-    (1, 'Green Arrow Vol 6', 'Green Arrow serie from 2016', '2016-08-01T00:00:00Z', '2019-05-01T00:00:00Z');
+    (1, 'Teen Titans (Volume 6)', 'Teen Titans serie from 2016', '2016-12-01T00:00:00Z', '2021-01-01T00:00:00Z'),
+    (1, 'Nightwing (Volume 4)', 'Nightwing serie from 2016', '2016-09-01T00:00:00Z', null),
+    (1, 'Suicide Squad (Volume 5)', 'Suicide Squad serie from 2016', '2016-10-01T00:00:00Z', '2019-03-01T00:00:00Z'),
+    (1, 'Green Arrow (Volume 6)', 'Green Arrow serie from 2016', '2016-08-01T00:00:00Z', '2019-05-01T00:00:00Z');
 
-INSERT INTO issues(series_id, added_by, "name", "number", parution_date) VALUES 
-    (1, 1, 'Dark Knights: Metal (2017) #1', 1, '2017-08-16T00:00:00Z'),
-    (1, 1, 'Dark Knights: Metal (2017) #2', 2, '2017-09-13T00:00:00Z'),
-    (2, 1, 'Dark Days: The Forge (2017) #1', 1, '2017-06-14T00:00:00Z'),
-    (3, 1, 'Dark Days: The Casting (2017) #1', 1, '2017-07-12T00:00:00Z'),
-    (4, 1, 'Teen Titans (2016) #12', 12, '2017-09-13T00:00:00Z'),
-    (5, 1, 'Nightwing (2016) #29', 29, '2017-09-20T00:00:00Z'),
-    (6, 1, 'Suicide Squad (2016) #26', 26, '2017-09-27T00:00:00Z'),
-    (7, 1, 'Green Arrow (2016) #32', 26, '2017-10-04T00:00:00Z');
+INSERT INTO issues(series_id, added_by, "name", "number", cover_date, parution_date, is_annual, has_backup, backup_name) VALUES 
+    (1, 1, 'Dark Knights: Metal #1', 1, '2017-10-01T00:00:00Z', '2017-08-16T00:00:00Z', false, false, null),
+    (1, 1, 'Dark Knights: Metal #2', 2, '2017-11-01T00:00:00Z', '2017-09-13T00:00:00Z', false, false, null),
+    (2, 1, 'Dark Days: The Forge', 1, '2017-08-01T00:00:00Z', '2017-06-14T00:00:00Z', FALSE, FALSE, null),
+    (3, 1, 'Dark Days: The Casting', 1, '2017-09-01T00:00:00Z', '2017-07-12T00:00:00Z', false, false, null),
+    (4, 1, 'Gotham Resistance, Part 1: The Riddler''s Labyrinth', 12, '2017-11-01T00:00:00Z', '2017-09-13T00:00:00Z', false, false, null),
+    (5, 1, 'Gotham Resistance, Part 2: A Ring of Ice and Fear', 29, '2017-11-01T00:00:00Z', '2017-09-20T00:00:00Z', false, false, null),
+    (6, 1, 'Gotham Resistance, Part 3: Welcome to the Jungle', 26, '2017-11-01T00:00:00Z', '2017-09-27T00:00:00Z', false, false, null),
+    (7, 1, 'Gotham Resistance, Finale', 26, '2017-12-01T00:00:00Z', '2017-10-04T00:00:00Z', false, false, null);
 
 INSERT INTO books_issues(book_id, issue_id) VALUES
     -- Batman metal T1
