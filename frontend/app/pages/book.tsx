@@ -6,6 +6,8 @@ import { compareDates } from "~/utils/date";
 import { PageHeaderComponent } from "~/components/headers/pageHeader";
 import { PageTemplate } from "~/components/templates/pageTemplate";
 import { IssueList } from "~/components/lists/IssueList";
+import { BookList } from "~/components/lists/BookList";
+import { EditionList } from "~/components/lists/EditionList";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -49,17 +51,7 @@ export default function BookPage({ params }: { params : { id: number}}) {
           </div>
           <div className="flex gap-2 flex-col">
             <h3 className="text-xl text-gray-200 font-semibold">Editions :</h3>
-            <div className="flex gap-2 p-2 border border-gray-500 rounded-lg overflow-x-scroll snap-x snap-proximity">
-              {  book?.editions && book.editions
-                // Sort in descending order (latest edition first)
-                .sort((bk1, bk2) => compareDates(bk2.parutionDate, bk1.parutionDate))
-                .map((ed) => {
-                return (
-                  <EditionCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
-                    key={ed.id} edition={ed} /> 
-                )
-              }) }
-            </div>
+            <EditionList editionList={book?.editions} className="border border-gray-500 rounded-lg"/>
           </div>
           <div className="flex gap-2 flex-col">
             <h3 className="text-xl text-gray-200 font-semibold">Issues :</h3>

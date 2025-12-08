@@ -8,6 +8,7 @@ import type { Book } from "~/models/book";
 import { PageHeaderComponent } from "~/components/headers/pageHeader";
 import { PageTemplate } from "~/components/templates/pageTemplate";
 import { IssueList } from "~/components/lists/IssueList";
+import { BookList } from "~/components/lists/BookList";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -22,8 +23,10 @@ export default function IssueSeriePage({ params }: { params : { id: number}}) {
   const issueSerie = data?.issueSerie ?? null;
   const err = createError(error)
 
-  
+  // Remove duplicate books by id
+  const ids = new Set();
   const books: Book[] | undefined = issueSerie?.issues.flatMap(is => is.books)
+    .filter(({ id }) => !ids.has(id) && ids.add(id))
 
   let subtitle = dateToMonthYearString("en-EN", issueSerie?.voStart)
   if (!issueSerie?.voEnd) { subtitle += " - Present" }
@@ -73,15 +76,7 @@ export default function IssueSeriePage({ params }: { params : { id: number}}) {
           </div>
           <div className="flex gap-2 flex-col">
             <h3 className="text-xl text-gray-200 font-semibold">Books :</h3>
-            <div className="flex gap-2 p-2 border border-gray-500 rounded-lg overflow-hidden snap-x snap-proximity">
-              {  books?.map((bk) => {
-                return (
-                  <BookCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
-                    key={bk.id} book={bk} /> 
-                )
-              })
-            }
-            </div>
+            <BookList bookList={books} className="border border-gray-500 rounded-lg"/>
           </div>
         </>
       )}
