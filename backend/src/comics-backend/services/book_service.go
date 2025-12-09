@@ -35,15 +35,6 @@ func GetBookByID(c *gin.Context) {
 		return
 	}
 
-	// book.Serie.Books, err = models.GetBooksBySerieID(book.Serie.ID, false, false, false)
-	// if err != nil && err == sql.ErrNoRows {
-	// 	errmsg := fmt.Sprintf("book not found for serie (id=%d)", req.ID)
-	// 	utils.ReturnErrorMessage(c, http.StatusNotFound, errmsg, err)
-	// 	return
-	// } else if err != nil {
-	// 	utils.ReturnErrorMessage(c, http.StatusInternalServerError, "internal error", err)
-	// 	return
-	// }
 	c.JSON(http.StatusOK, gin.H{
 		"book": book,
 	})
