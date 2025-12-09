@@ -12,7 +12,11 @@ import (
 
 func GetBookByID(c *gin.Context) {
 	type BookByIDRequest struct {
-		ID int64 `form:"id"`
+		ID           int64 `form:"id"`
+		withSerie    bool  `form:"withSerie"`
+		withEditions bool  `form:"withEdition"`
+		withIssues   bool  `form:"withIssues"`
+		withUser     bool  `form:"withUser"`
 	}
 	// GET form data
 	var req BookByIDRequest
@@ -21,7 +25,7 @@ func GetBookByID(c *gin.Context) {
 		return
 	}
 
-	book, err := models.GetBookByID(req.ID, false, false, false)
+	book, err := models.GetBookByID(req.ID, req.withSerie, req.withEditions, req.withIssues, req.withUser)
 	if err != nil && err == sql.ErrNoRows {
 		errmsg := fmt.Sprintf("book not found (id=%d)", req.ID)
 		utils.ReturnErrorMessage(c, http.StatusNotFound, errmsg, err)
@@ -31,15 +35,58 @@ func GetBookByID(c *gin.Context) {
 		return
 	}
 
+	// book.Serie.Books, err = models.GetBooksBySerieID(book.Serie.ID, false, false, false)
+	// if err != nil && err == sql.ErrNoRows {
+	// 	errmsg := fmt.Sprintf("book not found for serie (id=%d)", req.ID)
+	// 	utils.ReturnErrorMessage(c, http.StatusNotFound, errmsg, err)
+	// 	return
+	// } else if err != nil {
+	// 	utils.ReturnErrorMessage(c, http.StatusInternalServerError, "internal error", err)
+	// 	return
+	// }
 	c.JSON(http.StatusOK, gin.H{
 		"book": book,
 	})
 }
 
+func GetBooksBySerieID(c *gin.Context) {
+	type BookBySerieIDRequest struct {
+		ID           int64 `form:"id"`
+		withSerie    bool  `form:"withSerie"`
+		withEditions bool  `form:"withEdition"`
+		withIssues   bool  `form:"withIssues"`
+		withUser     bool  `form:"withUser"`
+	}
+	// GET form data
+	var req BookBySerieIDRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		utils.ReturnErrorMessage(c, http.StatusBadRequest, "invalid request", err)
+		return
+	}
+
+	books, err := models.GetBooksBySerieID(req.ID, req.withSerie, req.withEditions, req.withIssues, req.withUser)
+	if err != nil && err == sql.ErrNoRows {
+		errmsg := fmt.Sprintf("books not found for serie (id=%d)", req.ID)
+		utils.ReturnErrorMessage(c, http.StatusNotFound, errmsg, err)
+		return
+	} else if err != nil {
+		utils.ReturnErrorMessage(c, http.StatusInternalServerError, "internal error", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"books": books,
+	})
+}
+
 func GetLatestBooks(c *gin.Context) {
 	type LatestBooksRequest struct {
-		From  int `form:"from"`
-		Limit int `form:"limit"`
+		From         int  `form:"from"`
+		Limit        int  `form:"limit"`
+		withSerie    bool `form:"withSerie"`
+		withEditions bool `form:"withEdition"`
+		withIssues   bool `form:"withIssues"`
+		withUser     bool `form:"withUser"`
 	}
 	// GET form data
 	var req LatestBooksRequest
@@ -53,7 +100,7 @@ func GetLatestBooks(c *gin.Context) {
 		return
 	}
 
-	books, err := models.GetLatestBooks(req.From, req.Limit, false, false, true)
+	books, err := models.GetLatestBooks(req.From, req.Limit, req.withSerie, req.withEditions, req.withIssues, req.withUser)
 	if err != nil {
 		utils.ReturnErrorMessage(c, http.StatusInternalServerError, "failed to get latest books", err)
 		return

@@ -12,7 +12,9 @@ import (
 
 func GetSerieByID(c *gin.Context) {
 	type SerieByIDRequest struct {
-		ID int64 `form:"id"`
+		ID        int64 `form:"id"`
+		withBooks bool  `form:"withBooks"`
+		withUser  bool  `form:"withUser"`
 	}
 	// GET form data
 	var req SerieByIDRequest
@@ -21,7 +23,7 @@ func GetSerieByID(c *gin.Context) {
 		return
 	}
 
-	serie, err := models.GetSerieByID(req.ID, false)
+	serie, err := models.GetSerieByID(req.ID, req.withBooks, req.withUser)
 	if err != nil && err == sql.ErrNoRows {
 		errmsg := fmt.Sprintf("serie not found (id=%d)", req.ID)
 		utils.ReturnErrorMessage(c, http.StatusNotFound, errmsg, err)
