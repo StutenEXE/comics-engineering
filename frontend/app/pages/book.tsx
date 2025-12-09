@@ -3,11 +3,8 @@ import type { Route } from "../+types/root";
 import { createError } from "~/utils/error";
 import { PageHeaderComponent } from "~/components/headers/PageHeader";
 import { PageTemplate } from "~/components/templates/PageTemplate";
-import { IssueList } from "~/components/lists/issuelists/IssueList";
-import { BookList } from "~/components/lists/booklists/BookList";
 import { EditionList } from "~/components/lists/EditionList";
 import type { Link } from "~/components/lists/LinkButtonList";
-import type { Book } from "~/models/book";
 import { BookListBySerieId } from "~/components/lists/booklists/BookListBySerieId";
 import { IssueListByBookId } from "~/components/lists/issuelists/IssueListByBookId";
 
@@ -20,7 +17,8 @@ export function meta({ params }: Route.MetaArgs) {
 
 export default function BookPage({ params }: { params : { id: number}}) {
   
-  const { data, isLoading, error } = useBookByIdQuery({ id: params.id });
+  // No issues to limit lag
+  const { data, isLoading, error } = useBookByIdQuery({ id: params.id, withEditions: true, withSerie: true, withIssues: false,  withUser: true });
   const book = data?.book ?? null;
   const err = createError(error)
 

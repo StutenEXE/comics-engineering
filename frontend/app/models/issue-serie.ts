@@ -10,7 +10,7 @@ export interface IssueSerie {
     issues: Issue[]
     createdAt: Date,
     modifiedAt: Date,
-    addedBy: User
+    addedBy: User | null
 }
 
 // Utility function to transform the api data to an instance of Issue
@@ -24,6 +24,6 @@ export function parseDataToIssueSerie(data: Record<string, any>): IssueSerie {
         issues: data.issues?.map((i: Record<string, any>) =>  parseDataToIssue(i)) ?? [],
         createdAt: new Date(data.createdAt),
         modifiedAt: new Date(data.modifiedAt),
-        addedBy: parseDataToUser(data.addedBy)  
+        addedBy: data.addedBy ? parseDataToUser(data.addedBy) : null  
     }
 }

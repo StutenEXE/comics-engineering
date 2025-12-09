@@ -18,7 +18,7 @@ export function BookListBySerieId({ serieId, toIgnore, descOrder, className }: B
         }} className={className}/>)
     }
 
-    const { data, isLoading, error } = useBookBySerieIdQuery({ id: serieId });
+    const { data, isLoading, error } = useBookBySerieIdQuery({ id: serieId, withEditions: true, withSerie: true, withUser: false });
     const books = data?.books ?? null;
     const err = createError(error)
 

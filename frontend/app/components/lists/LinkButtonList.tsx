@@ -15,7 +15,7 @@ export function LinkButtonList({ links }: LinkButtonListProps) {
     return (
         <div className="flex w-full justify-end gap-2">
             {
-                list.map((link) => <LinkButton {...link}>{link.name}</LinkButton>)
+                list.map((link) => <LinkButton key={link.name} {...link}>{link.name}</LinkButton>)
             }
         </div>
     )

@@ -14,7 +14,7 @@ export interface Book {
 	issues: Issue[],
 	createdAt: Date,
 	modifiedAt: Date,
-	addedBy: User
+	addedBy: User | null
 }
 
 // Utility function to transform the api data to an instance of Book
@@ -30,6 +30,6 @@ export function parseDataToBook(data: Record<string, any>): Book {
 		issues: data.issues?.map((is: Record<string, any>) => parseDataToIssue(is)) ?? [],
 		createdAt: new Date(data.createdAt),
 		modifiedAt: new Date(data.modifiedAt),
-		addedBy: parseDataToUser(data.addedBy)
+		addedBy: data.addedBy ? parseDataToUser(data.addedBy) : null
 	}
 }

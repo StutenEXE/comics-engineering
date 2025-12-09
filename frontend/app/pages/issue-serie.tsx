@@ -19,7 +19,7 @@ export function meta({ params }: Route.MetaArgs) {
 
 export default function IssueSeriePage({ params }: { params : { id: number}}) {
   
-  const { data, isLoading, error } = useIssueSerieByIdQuery({ id: params.id });
+  const { data, isLoading, error } = useIssueSerieByIdQuery({ id: params.id, withIssues: true, withUser: true });
   const issueSerie = data?.issueSerie ?? null;
   const err = createError(error)
 
