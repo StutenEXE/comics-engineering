@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/StutenEXE/comics-backend/database"
 	"github.com/StutenEXE/comics-backend/utils"
@@ -57,6 +58,8 @@ func instSerieFromRow(row *SerieRow, withBooks, withUser bool) (*Serie, error) {
 		Ongoing:    row.Ongoing,
 		Oneshot:    row.Oneshot,
 		Nvolumes:   row.Nvolumes,
+		VoStart:    row.VoStart,
+		VoEnd:      row.VoEnd,
 		Books:      books,
 		CreatedAt:  row.CreatedAt,
 		ModifiedAt: row.ModifiedAt,
@@ -103,4 +106,12 @@ func getSerieList(query string, params []any, withBooks, withUser bool) ([]*Seri
 func GetSerieByID(serieID int64, withBooks, withUser bool) (*Serie, error) {
 	query := fmt.Sprintf("SELECT %s FROM series WHERE id=$1", utils.GetSelectQueryFields[SerieRow](""))
 	return getSerie(query, []any{serieID}, withBooks, withUser)
+}
+
+func SearchSeriesByName(str string) ([]*Serie, error) {
+	query := fmt.Sprintf(`SELECT %s FROM series WHERE LOWER(name) LIKE $1`,
+		utils.GetSelectQueryFields[SerieRow](""))
+	// Add %% around string for query
+	str = fmt.Sprintf("%%%s%%", strings.ToLower(str))
+	return getSerieList(query, []any{str}, true, false)
 }
