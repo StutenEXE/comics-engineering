@@ -25,7 +25,7 @@ func GetBookByID(c *gin.Context) {
 		return
 	}
 
-	book, err := models.GetBookByID(req.ID, req.withSerie, req.withEditions, req.withIssues, req.withUser)
+	book, err := models.GetBookByID(req.ID, req.WithSerie, req.WithEditions, req.WithIssues, req.WithUser)
 	if err != nil && err == sql.ErrNoRows {
 		errmsg := fmt.Sprintf("book not found (id=%d)", req.ID)
 		utils.ReturnErrorMessage(c, http.StatusNotFound, errmsg, err)
@@ -52,10 +52,10 @@ func GetBookByID(c *gin.Context) {
 func GetBooksBySerieID(c *gin.Context) {
 	type BookBySerieIDRequest struct {
 		ID           int64 `form:"id"`
-		withSerie    bool  `form:"withSerie"`
-		withEditions bool  `form:"withEdition"`
-		withIssues   bool  `form:"withIssues"`
-		withUser     bool  `form:"withUser"`
+		WithSerie    bool  `form:"withSerie"`
+		WithEditions bool  `form:"withEditions"`
+		WithIssues   bool  `form:"withIssues"`
+		WithUser     bool  `form:"withUser"`
 	}
 	// GET form data
 	var req BookBySerieIDRequest
@@ -64,7 +64,7 @@ func GetBooksBySerieID(c *gin.Context) {
 		return
 	}
 
-	books, err := models.GetBooksBySerieID(req.ID, req.withSerie, req.withEditions, req.withIssues, req.withUser)
+	books, err := models.GetBooksBySerieID(req.ID, req.WithSerie, req.WithEditions, req.WithIssues, req.WithUser)
 	if err != nil && err == sql.ErrNoRows {
 		errmsg := fmt.Sprintf("books not found for serie (id=%d)", req.ID)
 		utils.ReturnErrorMessage(c, http.StatusNotFound, errmsg, err)
@@ -83,10 +83,10 @@ func GetLatestBooks(c *gin.Context) {
 	type LatestBooksRequest struct {
 		From         int  `form:"from"`
 		Limit        int  `form:"limit"`
-		withSerie    bool `form:"withSerie"`
-		withEditions bool `form:"withEdition"`
-		withIssues   bool `form:"withIssues"`
-		withUser     bool `form:"withUser"`
+		WithSerie    bool `form:"withSerie"`
+		WithEditions bool `form:"withEditions"`
+		WithIssues   bool `form:"withIssues"`
+		WithUser     bool `form:"withUser"`
 	}
 	// GET form data
 	var req LatestBooksRequest
@@ -100,7 +100,7 @@ func GetLatestBooks(c *gin.Context) {
 		return
 	}
 
-	books, err := models.GetLatestBooks(req.From, req.Limit, req.withSerie, req.withEditions, req.withIssues, req.withUser)
+	books, err := models.GetLatestBooks(req.From, req.Limit, req.WithSerie, req.WithEditions, req.WithIssues, req.WithUser)
 	if err != nil {
 		utils.ReturnErrorMessage(c, http.StatusInternalServerError, "failed to get latest books", err)
 		return
