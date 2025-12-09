@@ -13,8 +13,8 @@ import (
 func GetIssueSerieByID(c *gin.Context) {
 	type IssueSerieByIDRequest struct {
 		ID         int64 `form:"id"`
-		withIssues bool  `form:"withIssues"`
-		withUser   bool  `form:"withUser"`
+		WithIssues bool  `form:"withIssues"`
+		WithUser   bool  `form:"withUser"`
 	}
 	// GET form data
 	var req IssueSerieByIDRequest
@@ -23,7 +23,7 @@ func GetIssueSerieByID(c *gin.Context) {
 		return
 	}
 
-	issueSerie, err := models.GetIssueSerieByID(req.ID, req.withIssues, req.withUser)
+	issueSerie, err := models.GetIssueSerieByID(req.ID, req.WithIssues, req.WithUser)
 	if err != nil && err == sql.ErrNoRows {
 		errmsg := fmt.Sprintf("issue serie not found (id=%d)", req.ID)
 		utils.ReturnErrorMessage(c, http.StatusNotFound, errmsg, err)

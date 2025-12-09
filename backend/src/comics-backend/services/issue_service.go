@@ -13,9 +13,9 @@ import (
 func GetIssueByID(c *gin.Context) {
 	type IssueByIDRequest struct {
 		ID             int64 `form:"id"`
-		withIssueSerie bool  `form:"withIssueSerie"`
-		withBooks      bool  `form:"withBooks"`
-		withUser       bool  `form:"withUser"`
+		WithIssueSerie bool  `form:"WithIssueSerie"`
+		WithBooks      bool  `form:"WithBooks"`
+		WithUser       bool  `form:"WithUser"`
 	}
 	// GET form data
 	var req IssueByIDRequest
@@ -24,7 +24,7 @@ func GetIssueByID(c *gin.Context) {
 		return
 	}
 
-	issue, err := models.GetIssueByID(req.ID, req.withIssueSerie, req.withBooks, req.withUser)
+	issue, err := models.GetIssueByID(req.ID, req.WithIssueSerie, req.WithBooks, req.WithUser)
 	if err != nil && err == sql.ErrNoRows {
 		errmsg := fmt.Sprintf("issue not found (id=%d)", req.ID)
 		utils.ReturnErrorMessage(c, http.StatusNotFound, errmsg, err)
@@ -42,9 +42,9 @@ func GetIssueByID(c *gin.Context) {
 func GetIssueByBookID(c *gin.Context) {
 	type IssueByBookIDRequest struct {
 		ID             int64 `form:"id"`
-		withIssueSerie bool  `form:"withIssueSerie"`
-		withBooks      bool  `form:"withBooks"`
-		withUser       bool  `form:"withUser"`
+		WithIssueSerie bool  `form:"withIssueSerie"`
+		WithBooks      bool  `form:"withBooks"`
+		WithUser       bool  `form:"withUser"`
 	}
 	// GET form data
 	var req IssueByBookIDRequest
@@ -53,7 +53,7 @@ func GetIssueByBookID(c *gin.Context) {
 		return
 	}
 
-	issues, err := models.GetIssuesByBookID(req.ID, req.withIssueSerie, req.withBooks, req.withUser)
+	issues, err := models.GetIssuesByBookID(req.ID, req.WithIssueSerie, req.WithBooks, req.WithUser)
 	if err != nil && err == sql.ErrNoRows {
 		errmsg := fmt.Sprintf("issue not found (id=%d)", req.ID)
 		utils.ReturnErrorMessage(c, http.StatusNotFound, errmsg, err)
