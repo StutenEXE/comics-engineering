@@ -6,4 +6,5 @@ export default [
     route("edition/:id", "pages/edition.tsx"),
     route("issue_serie/:id", "pages/issue-serie.tsx"),
     route("issue/:id", "pages/issue.tsx"),
+    route("serie/:id", "pages/serie.tsx"),
 ] satisfies RouteConfig;

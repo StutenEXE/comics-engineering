@@ -17,7 +17,7 @@ export function meta({ params }: Route.MetaArgs) {
 
 export default function BookPage({ params }: { params : { id: number}}) {
   
-  // No issues to limit lag
+  // No issues to limit lag, refetch in other component
   const { data, isLoading, error } = useBookByIdQuery({ id: params.id, withEditions: true, withSerie: true, withIssues: false,  withUser: true });
   const book = data?.book ?? null;
   const err = createError(error)
@@ -55,13 +55,11 @@ export default function BookPage({ params }: { params : { id: number}}) {
             </p>
           </div>
           <div className="flex gap-2 flex-col">
-            <h3 className="text-xl text-gray-200 font-semibold">From the same serie :</h3>
-            {/* <BookList bookList={book?.otherBooks.filter((bk) => bk.id !== book.id)} className="border border-gray-500 rounded-lg"/> */}
+            <h3 className="text-xl text-gray-200 font-semibold">From the same series :</h3>
             <BookListBySerieId serieId={book?.serie?.id} toIgnore={book}  className="border border-gray-500 rounded-lg" />
           </div>
           <div className="flex gap-2 flex-col">
             <h3 className="text-xl text-gray-200 font-semibold">Issues :</h3>
-            {/* <IssueList issueList={book?.issues} className="border border-gray-500 rounded-lg" /> */}
             <IssueListByBookId bookId={book?.id} className="border border-gray-500 rounded-lg" />
           </div>
           <div className="flex gap-2 flex-col">

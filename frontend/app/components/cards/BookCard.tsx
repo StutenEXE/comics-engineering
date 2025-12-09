@@ -25,7 +25,7 @@ export function BookCard({ book, className}: BookCardProps) {
     
     return (
         <Link to={`/book/${book.id}`}>
-            <div className={`flex flex-col items-center justify-between ${className}`}>
+            <div className={`h-full flex flex-col items-center justify-between ${className}`}>
                 <div className="p-1 flex-shrink-0">
                     <img
                         src={book.editions[0].imgUrl}
@@ -33,7 +33,7 @@ export function BookCard({ book, className}: BookCardProps) {
                         className="w-full h-full object-cover rounded"
                     />
                 </div>
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center justify-between">
                     <h3 className="font-semibold text-center text-sm">{book.name}</h3>
                     <h4 className="text-center sm:text-sm italic">{book.serie?.name} (#{book.number})</h4>
                 </div>

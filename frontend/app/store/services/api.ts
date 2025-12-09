@@ -67,7 +67,7 @@ export const publicApi = createApi({
      ****************/
     // Get issue serie by id
     issueSerieById: build.query<{ issueSerie: IssueSerie }, { id: number, withIssues: boolean, withUser: boolean }>({
-      query: ({ id }) => ({ url: "/issueseries", method: 'GET', params: { id } }),
+      query: (params) => ({ url: "/issueseries", method: 'GET', params: params }),
       transformResponse: (resp: { issueSerie: IssueSerie }) => ({
         issueSerie: parseDataToIssueSerie(resp.issueSerie),
       }),
