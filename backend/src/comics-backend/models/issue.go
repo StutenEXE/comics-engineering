@@ -39,23 +39,27 @@ type Issue struct {
 	AddedBy      *User       `json:"addedBy"`
 }
 
-func instIssueFromRow(row *IssueRow, skipIssueSerie, skipBooks bool) (*Issue, error) {
-	user, err := GetUserByID(row.UserID)
-	if err != nil {
-		return nil, err
-	}
+func instIssueFromRow(row *IssueRow, withIssueSerie, withBooks, withUser bool) (*Issue, error) {
+	var err error
 	var serie *IssueSerie = nil
-	if !skipIssueSerie {
-		// Skipping issues to avoid infinite loops
-		serie, err = GetIssueSerieByID(row.IssueSerieID, true)
+	if withIssueSerie {
+		// Skipping issues to avoid infinite loops and user
+		serie, err = GetIssueSerieByID(row.IssueSerieID, false, false)
 		if err != nil {
 			return nil, err
 		}
 	}
 	books := []*Book{}
-	if !skipBooks {
-		// Skipping issues to avoid infinite loops
-		books, err = GetBooksByIssueID(row.ID, false, false, true)
+	if withBooks {
+		// Skipping issues to avoid infinite loops and user
+		books, err = GetBooksByIssueID(row.ID, true, true, false, false)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var user *User = nil
+	if withUser {
+		user, err = GetUserByID(row.UserID)
 		if err != nil {
 			return nil, err
 		}
@@ -83,7 +87,7 @@ func instIssueFromRow(row *IssueRow, skipIssueSerie, skipBooks bool) (*Issue, er
 	return issue, nil
 }
 
-func getIssue(query string, params []any, skipIssueSerie, skipBooks bool) (*Issue, error) {
+func getIssue(query string, params []any, withIssueSerie, withBooks, withUser bool) (*Issue, error) {
 	row := database.PgDb.QueryRow(query, params...)
 	if err := row.Err(); err != nil {
 		return nil, err
@@ -92,10 +96,10 @@ func getIssue(query string, params []any, skipIssueSerie, skipBooks bool) (*Issu
 	if err := utils.SqlRowToStruct(row, issueRow); err != nil {
 		return nil, err
 	}
-	return instIssueFromRow(issueRow, skipIssueSerie, skipBooks)
+	return instIssueFromRow(issueRow, withIssueSerie, withBooks, withUser)
 }
 
-func getIssueList(query string, params []any, skipIssueSerie, skipBooks bool) ([]*Issue, error) {
+func getIssueList(query string, params []any, withIssueSerie, withBooks, withUser bool) ([]*Issue, error) {
 	rows, err := database.PgDb.Query(query, params...)
 	if err != nil {
 		return nil, err
@@ -109,7 +113,7 @@ func getIssueList(query string, params []any, skipIssueSerie, skipBooks bool) ([
 	}
 	issues := []*Issue{}
 	for _, issueRow := range issueRows {
-		issue, err := instIssueFromRow(issueRow, skipIssueSerie, skipBooks)
+		issue, err := instIssueFromRow(issueRow, withIssueSerie, withBooks, withUser)
 		if err != nil {
 			return nil, err
 		}
@@ -118,20 +122,20 @@ func getIssueList(query string, params []any, skipIssueSerie, skipBooks bool) ([
 	return issues, nil
 }
 
-func GetIssueByID(bookID int64, skipIssueSerie, skipBooks bool) (*Issue, error) {
+func GetIssueByID(bookID int64, withIssueSerie, withBooks, withUser bool) (*Issue, error) {
 	query := fmt.Sprintf("SELECT %s FROM issues WHERE id=$1", utils.GetSelectQueryFields[IssueRow](""))
-	return getIssue(query, []any{bookID}, skipIssueSerie, skipBooks)
+	return getIssue(query, []any{bookID}, withIssueSerie, withBooks, withUser)
 }
 
-func GetIssuesByIssueSerieID(serieID int64, skipIssueSerie, skipBooks bool) ([]*Issue, error) {
+func GetIssuesByIssueSerieID(serieID int64, withIssueSerie, withBooks, withUser bool) ([]*Issue, error) {
 	query := fmt.Sprintf("SELECT %s FROM issues WHERE series_id=$1", utils.GetSelectQueryFields[IssueRow](""))
-	return getIssueList(query, []any{serieID}, skipIssueSerie, skipBooks)
+	return getIssueList(query, []any{serieID}, withIssueSerie, withBooks, withUser)
 }
 
-func GetIssuesByBookID(bookID int64, skipIssueSerie, skipBooks bool) ([]*Issue, error) {
+func GetIssuesByBookID(bookID int64, withIssueSerie, withBooks, withUser bool) ([]*Issue, error) {
 	query := fmt.Sprintf(`SELECT %s FROM issues i 
 	INNER JOIN books_issues bi ON i.id=bi.issue_id 
 	WHERE bi.book_id=$1
 	ORDER BY i.number`, utils.GetSelectQueryFields[IssueRow]("i"))
-	return getIssueList(query, []any{bookID}, skipIssueSerie, skipBooks)
+	return getIssueList(query, []any{bookID}, withIssueSerie, withBooks, withUser)
 }

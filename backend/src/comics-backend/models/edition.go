@@ -39,23 +39,27 @@ type Edition struct {
 	AddedBy      *User      `json:"addedBy"`
 }
 
-func instEditionFromRow(row *EditionRow, skipPublisher, skipBook bool) (*Edition, error) {
-	user, err := GetUserByID(row.UserID)
-	if err != nil {
-		return nil, err
-	}
+func instEditionFromRow(row *EditionRow, withPublisher, withBook, withUser bool) (*Edition, error) {
+	var err error
 	var publisher *Publisher = nil
-	if !skipPublisher {
+	if withPublisher {
 		// Skipping editions to avoid infinite loops
-		publisher, err = GetPublisherByID(row.PublisherId, true)
+		publisher, err = GetPublisherByID(row.PublisherId, false)
 		if err != nil {
 			return nil, err
 		}
 	}
 	var book *Book = nil
-	if !skipBook {
-		// Skipping editions to avoid infinite loops
-		book, err = GetBookByID(row.BookID, false, true, false)
+	if withBook {
+		// Skipping editions to avoid infinite loops and user
+		book, err = GetBookByID(row.BookID, true, false, true, false)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var user *User = nil
+	if withUser {
+		user, err = GetUserByID(row.UserID)
 		if err != nil {
 			return nil, err
 		}
@@ -78,7 +82,7 @@ func instEditionFromRow(row *EditionRow, skipPublisher, skipBook bool) (*Edition
 	return edition, nil
 }
 
-func getEdition(query string, params []any, skipPublisher, skipBook bool) (*Edition, error) {
+func getEdition(query string, params []any, withPublisher, withBook, withUser bool) (*Edition, error) {
 	row := database.PgDb.QueryRow(query, params...)
 	if err := row.Err(); err != nil {
 		return nil, err
@@ -87,10 +91,10 @@ func getEdition(query string, params []any, skipPublisher, skipBook bool) (*Edit
 	if err := utils.SqlRowToStruct(row, editionRow); err != nil {
 		return nil, err
 	}
-	return instEditionFromRow(editionRow, skipPublisher, skipBook)
+	return instEditionFromRow(editionRow, withPublisher, withBook, withUser)
 }
 
-func getEditionList(query string, params []any, skipPublisher, skipBook bool) ([]*Edition, error) {
+func getEditionList(query string, params []any, withPublisher, withBook, withUser bool) ([]*Edition, error) {
 	rows, err := database.PgDb.Query(query, params...)
 	if err != nil {
 		return nil, err
@@ -104,7 +108,7 @@ func getEditionList(query string, params []any, skipPublisher, skipBook bool) ([
 	}
 	editions := []*Edition{}
 	for _, editionRow := range editionRows {
-		edition, err := instEditionFromRow(editionRow, skipPublisher, skipBook)
+		edition, err := instEditionFromRow(editionRow, withPublisher, withBook, withUser)
 		if err != nil {
 			return nil, err
 		}
@@ -113,17 +117,17 @@ func getEditionList(query string, params []any, skipPublisher, skipBook bool) ([
 	return editions, nil
 }
 
-func GetEditionByID(editionID int64, skipPublisher, skipBook bool) (*Edition, error) {
+func GetEditionByID(editionID int64, withPublisher, withBook, withUser bool) (*Edition, error) {
 	query := fmt.Sprintf("SELECT %s FROM editions WHERE id=$1", utils.GetSelectQueryFields[EditionRow](""))
-	return getEdition(query, []any{editionID}, skipPublisher, skipBook)
+	return getEdition(query, []any{editionID}, withPublisher, withBook, withUser)
 }
 
-func GetEditionsByBookID(bookID int64, skipPublisher, skipBook bool) ([]*Edition, error) {
+func GetEditionsByBookID(bookID int64, withPublisher, withBook, withUser bool) ([]*Edition, error) {
 	query := fmt.Sprintf("SELECT %s FROM editions WHERE book_id=$1", utils.GetSelectQueryFields[EditionRow](""))
-	return getEditionList(query, []any{bookID}, skipPublisher, skipBook)
+	return getEditionList(query, []any{bookID}, withPublisher, withBook, withUser)
 }
 
-func GetEditionsByPublisherID(publisherID int64, skipPublisher, skipBook bool) ([]*Edition, error) {
+func GetEditionsByPublisherID(publisherID int64, withPublisher, withBook, withUser bool) ([]*Edition, error) {
 	query := fmt.Sprintf("SELECT %s FROM editions WHERE publisher_id=$1", utils.GetSelectQueryFields[EditionRow](""))
-	return getEditionList(query, []any{publisherID}, skipPublisher, skipBook)
+	return getEditionList(query, []any{publisherID}, withPublisher, withBook, withUser)
 }
