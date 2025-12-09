@@ -50,6 +50,9 @@ func startRouter() {
 		public.GET("/publishers", services.GetPublisherByID)
 		// Serie services
 		public.GET("/series", services.GetSerieByID)
+
+		// Search services
+		public.GET("/search/books_and_series", services.SearchBooksAndSeries)
 	}
 
 	// Setup protected routes

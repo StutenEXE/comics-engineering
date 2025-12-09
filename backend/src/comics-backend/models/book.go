@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/StutenEXE/comics-backend/database"
 	"github.com/StutenEXE/comics-backend/utils"
@@ -163,4 +164,12 @@ func GetBooksFromWishlist(userID int64, withSerie, withEditions, withIssues, wit
 			  INNER JOIN wishlist w ON b.id = w.book_id
 			  WHERE w.user_id = $1`, utils.GetSelectQueryFields[BookRow]("b"))
 	return getBookList(query, []any{userID}, withSerie, withEditions, withIssues, withUser)
+}
+
+func SearchBooksByName(str string) ([]*Book, error) {
+	query := fmt.Sprintf(`SELECT %s FROM books WHERE LOWER(name) LIKE $1`,
+		utils.GetSelectQueryFields[BookRow](""))
+	// Add %% around string for query
+	str = fmt.Sprintf("%%%s%%", strings.ToLower(str))
+	return getBookList(query, []any{str}, true, true, false, false)
 }
