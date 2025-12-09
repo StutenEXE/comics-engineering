@@ -13,10 +13,10 @@ import (
 func GetBookByID(c *gin.Context) {
 	type BookByIDRequest struct {
 		ID           int64 `form:"id"`
-		withSerie    bool  `form:"withSerie"`
-		withEditions bool  `form:"withEdition"`
-		withIssues   bool  `form:"withIssues"`
-		withUser     bool  `form:"withUser"`
+		WithSerie    bool  `form:"withSerie"`
+		WithEditions bool  `form:"withEditions"`
+		WithIssues   bool  `form:"withIssues"`
+		WithUser     bool  `form:"withUser"`
 	}
 	// GET form data
 	var req BookByIDRequest

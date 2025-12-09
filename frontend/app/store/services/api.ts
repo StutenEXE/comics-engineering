@@ -30,8 +30,8 @@ export const publicApi = createApi({
      * BOOKS
      ****************/
     // Get book by id
-    bookById: build.query<{ book: Book }, { id: number }>({
-      query: ({ id }) => ({ url: "/books", method: 'GET', params: { id } }),
+    bookById: build.query<{ book: Book }, { id: number, withSerie: boolean, withEditions: boolean, withUser: boolean }>({
+      query: (params) => ({ url: "/books", method: 'GET', params: params }),
       transformResponse: (resp: { book: Book }) => ({
         book: parseDataToBook(resp.book),
       }),
@@ -44,8 +44,8 @@ export const publicApi = createApi({
       }),
     }),
     // Latest books endpoint (reuse parseDateLikeFields)
-    latestBooks: build.query<{ books: Book[] }, { from: number; limit: number }>({
-      query: ({ from, limit }) => ({ url: "/books/latest", method: 'GET', params: { from, limit } }),
+    latestBooks: build.query<{ books: Book[] }, { from: number; limit: number, withSerie: boolean, withEditions: boolean, withUser: boolean }>({
+      query: (params) => ({ url: "/books/latest", method: 'GET', params: params }),
       transformResponse: (resp: { books: Book[] }) => ({
         books: resp.books.map((book) => parseDataToBook(book)),
       }),
@@ -55,8 +55,8 @@ export const publicApi = createApi({
      * EDITIONS
      ****************/
     // Get edition by id
-    editionById: build.query<{ edition: Edition }, { id: number }>({
-      query: ({ id }) => ({ url: "/editions", method: 'GET', params: { id } }),
+    editionById: build.query<{ edition: Edition }, { id: number, withPublisher: boolean, withBook: boolean, withUser: boolean }>({
+      query: (params) => ({ url: "/editions", method: 'GET', params: params }),
       transformResponse: (resp: { edition: Edition }) => ({
         edition: parseDataToEdition(resp.edition),
       }),
@@ -66,7 +66,7 @@ export const publicApi = createApi({
      * ISSUE SERIES
      ****************/
     // Get issue serie by id
-    issueSerieById: build.query<{ issueSerie: IssueSerie }, { id: number }>({
+    issueSerieById: build.query<{ issueSerie: IssueSerie }, { id: number, withIssues: boolean, withUser: boolean }>({
       query: ({ id }) => ({ url: "/issueseries", method: 'GET', params: { id } }),
       transformResponse: (resp: { issueSerie: IssueSerie }) => ({
         issueSerie: parseDataToIssueSerie(resp.issueSerie),
@@ -77,8 +77,8 @@ export const publicApi = createApi({
      * ISSUES
      ****************/
     // Get issue by id
-    issueById: build.query<{ issue: Issue }, { id: number }>({
-      query: ({ id }) => ({ url: "/issues", method: 'GET', params: { id } }),
+    issueById: build.query<{ issue: Issue }, { id: number, withIssueSerie: boolean, withBooks: boolean, withUser: boolean }>({
+      query: (params) => ({ url: "/issues", method: 'GET', params: params }),
       transformResponse: (resp: { issue: Issue }) => ({
         issue: parseDataToIssue(resp.issue),
       }),
@@ -95,8 +95,8 @@ export const publicApi = createApi({
      * PUBLISHER
      ****************/
     // Get publisher by id
-    publisherById: build.query<{ publisher: Publisher }, { id: number }>({
-      query: ({ id }) => ({ url: "/publishers", method: 'GET', params: { id } }),
+    publisherById: build.query<{ publisher: Publisher }, { id: number, withEditions: boolean }>({
+      query: (params) => ({ url: "/publishers", method: 'GET', params: params }),
       transformResponse: (resp: { publisher: Publisher }) => ({
         publisher: parseDataToPublisher(resp.publisher),
       }),
@@ -105,7 +105,7 @@ export const publicApi = createApi({
     /****************
      * SERIES
      ****************/
-    // Get issue by id
+    // Get serie by id
     serieById: build.query<{ serie: Serie }, { id: number }>({
       query: ({ id }) => ({ url: "/series", method: 'GET', params: { id } }),
       transformResponse: (resp: { serie: Serie }) => ({
