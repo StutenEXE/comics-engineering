@@ -28,7 +28,6 @@ export default function IssueSeriePage({ params }: { params : { id: number}}) {
     else {
       subtitle += ` - ${dateToMonthYearString("en-EN", serie?.voEnd)}`
     }
-  
 
   return (
     <PageTemplate hasImg={false}>
