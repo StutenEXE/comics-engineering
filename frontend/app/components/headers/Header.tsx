@@ -39,7 +39,7 @@ export function Header() {
                 <nav>
                     <ul className="flex space-x-4">
                         <li><Link to="/" className="hover:underline cursor-pointer">Home</Link></li>
-                        <li><Link to="books" className="hover:underline cursor-pointer">Books</Link></li>
+                        <li><Link to="search" className="hover:underline cursor-pointer">Search</Link></li>
                         {isAuthenticated ? (
                             <>
                                 <li><Link to="/collection" className="hover:underline">My collection</Link></li>

@@ -16,7 +16,7 @@ export function PageHeaderComponent({ headerTitle, title, subtitle, createdAt, m
     return (
         <>
             <div className="-mt-2 -mb-2 flex items-center justify-between gap-2">
-                <p className="text-lg text-gray-600">
+                <p className="w-full text-lg text-gray-600">
                     <b>{headerTitle}</b>
                 </p>
                 <LinkButtonList links={links} />

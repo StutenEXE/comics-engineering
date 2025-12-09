@@ -67,7 +67,7 @@ export const publicApi = createApi({
      ****************/
     // Get issue serie by id
     issueSerieById: build.query<{ issueSerie: IssueSerie }, { id: number, withIssues: boolean, withUser: boolean }>({
-      query: ({ id }) => ({ url: "/issueseries", method: 'GET', params: { id } }),
+      query: (params) => ({ url: "/issueseries", method: 'GET', params: params }),
       transformResponse: (resp: { issueSerie: IssueSerie }) => ({
         issueSerie: parseDataToIssueSerie(resp.issueSerie),
       }),
@@ -112,6 +112,18 @@ export const publicApi = createApi({
         serie: parseDataToSerie(resp.serie),
       }),
     }),
+
+    /****************
+     * SEARCH
+     ****************/
+    // Get serie by id
+    searchBooksAndSeriesByName: build.query<{ books: Book[], series: Serie[] }, { query: string }>({
+      query: ({ query }) => ({ url: "/search/books_and_series", method: 'GET', params: { query: query.trim().toLowerCase() } }),
+      transformResponse: (resp: { books: Book[], series: Serie[] }) => ({
+        books: resp.books.map(parseDataToBook),
+        series: resp.series.map(parseDataToSerie),
+      }),
+    }),
   }),
 });
 
@@ -122,7 +134,8 @@ export const {
   useIssueSerieByIdQuery,
   useIssueByIdQuery, useIssueByBookIdQuery,
   usePublisherByIdQuery,
-  useSerieByIdQuery
+  useSerieByIdQuery,
+  useSearchBooksAndSeriesByNameQuery
  } 
   = publicApi;
 

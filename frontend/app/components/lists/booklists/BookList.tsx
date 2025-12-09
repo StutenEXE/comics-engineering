@@ -13,12 +13,13 @@ interface BookListProps {
 
 export function BookList({ bookList, isLoading, error, className }: BookListProps) {
     const mapper = (bk: Book) =>  (
-        <BookCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
+        <BookCard className="w-35 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
            key={bk.id} book={bk} /> 
     )
 
     const list = !bookList ? [] : [...bookList]
 
+    console.log(list)
     return(
         <>
             <GenericList 
