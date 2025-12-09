@@ -12,7 +12,7 @@ type BookRow struct {
 	Name       string `db:"name"`
 	Desc       string `db:"desc"`
 	Number     int    `db:"number"`
-	VoContent  string `db:"vo_content"`
+	VoContent  string `db:"vo_content"` // TODO : remove
 	SerieID    int64  `db:"series_id"`
 	CreatedAt  string `db:"created_at"`
 	ModifiedAt string `db:"modified_at"`
@@ -24,7 +24,7 @@ type Book struct {
 	Name       string     `json:"name"`
 	Desc       string     `json:"desc"`
 	Number     int        `json:"number"`
-	VoContent  string     `json:"voContent"`
+	VoContent  string     `json:"voContent"` // TODO : remove
 	Serie      *Serie     `json:"serie"`
 	Editions   []*Edition `json:"editions"`
 	Issues     []*Issue   `json:"issues"`
@@ -33,31 +33,35 @@ type Book struct {
 	AddedBy    *User      `json:"addedBy"`
 }
 
-func instBookFromRow(row *BookRow, skipSerie, skipEditions, skipIssues bool) (*Book, error) {
-	user, err := GetUserByID(row.UserID)
-	if err != nil {
-		return nil, err
-	}
+func instBookFromRow(row *BookRow, withSerie, withEditions, withIssues, withUser bool) (*Book, error) {
+	var err error
 	var serie *Serie = nil
-	if !skipSerie {
-		// Skipping books to avoid infinite loops
-		serie, err = GetSerieByID(row.SerieID, true)
+	if withSerie {
+		// skipping books to avoid infinite loops and user
+		serie, err = GetSerieByID(row.SerieID, false, false)
 		if err != nil {
 			return nil, err
 		}
 	}
 	editions := []*Edition{}
-	if !skipEditions {
-		// Skipping books to avoid infinite loops
-		editions, err = GetEditionsByBookID(row.ID, false, true)
+	if withEditions {
+		// skipping books to avoid infinite loops and user
+		editions, err = GetEditionsByBookID(row.ID, true, false, false)
 		if err != nil {
 			return nil, err
 		}
 	}
 	issues := []*Issue{}
-	if !skipIssues {
-		// Skipping books to avoid infinite loops
-		issues, err = GetIssuesByBookID(row.ID, false, true)
+	if withIssues {
+		// skipping books to avoid infinite loops and user
+		issues, err = GetIssuesByBookID(row.ID, true, false, false)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var user *User = nil
+	if withUser {
+		user, err = GetUserByID(row.UserID)
 		if err != nil {
 			return nil, err
 		}
@@ -78,7 +82,7 @@ func instBookFromRow(row *BookRow, skipSerie, skipEditions, skipIssues bool) (*B
 	return book, nil
 }
 
-func getBook(query string, params []any, skipSerie, skipEditions, skipIssues bool) (*Book, error) {
+func getBook(query string, params []any, withSerie, withEditions, withIssues, withUser bool) (*Book, error) {
 	row := database.PgDb.QueryRow(query, params...)
 	if err := row.Err(); err != nil {
 		return nil, err
@@ -87,10 +91,10 @@ func getBook(query string, params []any, skipSerie, skipEditions, skipIssues boo
 	if err := utils.SqlRowToStruct(row, bookRow); err != nil {
 		return nil, err
 	}
-	return instBookFromRow(bookRow, skipSerie, skipEditions, skipIssues)
+	return instBookFromRow(bookRow, withSerie, withEditions, withIssues, withUser)
 }
 
-func getBookList(query string, params []any, skipSerie, skipEditions, skipIssues bool) ([]*Book, error) {
+func getBookList(query string, params []any, withSerie, withEditions, withIssues, withUser bool) ([]*Book, error) {
 	rows, err := database.PgDb.Query(query, params...)
 	if err != nil {
 		return nil, err
@@ -104,7 +108,7 @@ func getBookList(query string, params []any, skipSerie, skipEditions, skipIssues
 	}
 	books := []*Book{}
 	for _, bookRow := range bookRows {
-		book, err := instBookFromRow(bookRow, skipSerie, skipEditions, skipIssues)
+		book, err := instBookFromRow(bookRow, withSerie, withEditions, withIssues, withUser)
 		if err != nil {
 			return nil, err
 		}
@@ -131,32 +135,32 @@ func (b *Book) UpdateBookInDatabase() error {
 	return nil
 }
 
-func GetBookByID(bookID int64, skipSerie, skipEditions, skipIssues bool) (*Book, error) {
+func GetBookByID(bookID int64, withSerie, withEditions, withIssues, withUser bool) (*Book, error) {
 	query := fmt.Sprintf("SELECT %s FROM books WHERE id=$1", utils.GetSelectQueryFields[BookRow](""))
-	return getBook(query, []any{bookID}, skipSerie, skipEditions, skipIssues)
+	return getBook(query, []any{bookID}, withSerie, withEditions, withIssues, withUser)
 }
 
-func GetBooksBySeriesID(seriesID int64, skipSerie, skipEditions, skipIssues bool) ([]*Book, error) {
+func GetBooksBySerieID(seriesID int64, withSerie, withEditions, withIssues, withUser bool) ([]*Book, error) {
 	query := fmt.Sprintf("SELECT %s FROM books WHERE series_id=$1", utils.GetSelectQueryFields[BookRow](""))
-	return getBookList(query, []any{seriesID}, skipSerie, skipEditions, skipIssues)
+	return getBookList(query, []any{seriesID}, withSerie, withEditions, withIssues, withUser)
 }
 
-func GetBooksByIssueID(issueID int64, skipSerie, skipEditions, skipIssues bool) ([]*Book, error) {
+func GetBooksByIssueID(issueID int64, withSerie, withEditions, withIssues, withUser bool) ([]*Book, error) {
 	query := fmt.Sprintf(`SELECT %s FROM books b 
 		INNER JOIN books_issues bi ON b.id=bi.book_id 
 		WHERE bi.issue_id=$1`, utils.GetSelectQueryFields[BookRow]("b"))
-	return getBookList(query, []any{issueID}, skipSerie, skipEditions, skipIssues)
+	return getBookList(query, []any{issueID}, withSerie, withEditions, withIssues, withUser)
 }
 
-func GetLatestBooks(from int, limit int, skipSerie, skipEditions, skipIssues bool) ([]*Book, error) {
+func GetLatestBooks(from int, limit int, withSerie, withEditions, withIssues, withUser bool) ([]*Book, error) {
 	query := fmt.Sprintf("SELECT %s FROM books ORDER BY created_at DESC OFFSET $1 LIMIT $2",
 		utils.GetSelectQueryFields[BookRow](""))
-	return getBookList(query, []any{from, limit}, skipSerie, skipEditions, skipIssues)
+	return getBookList(query, []any{from, limit}, withSerie, withEditions, withIssues, withUser)
 }
 
-func GetBooksFromWishlist(userID int64, skipSerie, skipEditions, skipIssues bool) ([]*Book, error) {
+func GetBooksFromWishlist(userID int64, withSerie, withEditions, withIssues, withUser bool) ([]*Book, error) {
 	query := fmt.Sprintf(`SELECT %s FROM books b
 			  INNER JOIN wishlist w ON b.id = w.book_id
 			  WHERE w.user_id = $1`, utils.GetSelectQueryFields[BookRow]("b"))
-	return getBookList(query, []any{userID}, skipSerie, skipEditions, skipIssues)
+	return getBookList(query, []any{userID}, withSerie, withEditions, withIssues, withUser)
 }

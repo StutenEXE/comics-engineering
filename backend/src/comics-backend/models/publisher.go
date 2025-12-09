@@ -22,12 +22,12 @@ type Publisher struct {
 	ModifiedAt string     `json:"modifiedAt"`
 }
 
-func instPublisherFromRow(row *PublisherRow, skipEditions bool) (*Publisher, error) {
+func instPublisherFromRow(row *PublisherRow, withEditions bool) (*Publisher, error) {
 	var err error
 	editions := []*Edition{}
-	if !skipEditions {
-		// Skipping publisher to avoid infinite loops
-		editions, err = GetEditionsByPublisherID(row.ID, true, false)
+	if withEditions {
+		// Skipping publisher to avoid infinite loops and user
+		editions, err = GetEditionsByPublisherID(row.ID, false, true, false)
 		if err != nil {
 			return nil, err
 		}
@@ -42,7 +42,7 @@ func instPublisherFromRow(row *PublisherRow, skipEditions bool) (*Publisher, err
 	return publisher, nil
 }
 
-func getPublisher(query string, params []any, skipEditions bool) (*Publisher, error) {
+func getPublisher(query string, params []any, withEditions bool) (*Publisher, error) {
 	row := database.PgDb.QueryRow(query, params...)
 	if err := row.Err(); err != nil {
 		return nil, err
@@ -51,10 +51,10 @@ func getPublisher(query string, params []any, skipEditions bool) (*Publisher, er
 	if err := utils.SqlRowToStruct(row, publisherRow); err != nil {
 		return nil, err
 	}
-	return instPublisherFromRow(publisherRow, skipEditions)
+	return instPublisherFromRow(publisherRow, withEditions)
 }
 
-func getPublisherList(query string, params []any, skipEditions bool) ([]*Publisher, error) {
+func getPublisherList(query string, params []any, withEditions bool) ([]*Publisher, error) {
 	rows, err := database.PgDb.Query(query, params...)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func getPublisherList(query string, params []any, skipEditions bool) ([]*Publish
 	}
 	publishers := []*Publisher{}
 	for _, publisherRow := range publisherRows {
-		publisher, err := instPublisherFromRow(publisherRow, skipEditions)
+		publisher, err := instPublisherFromRow(publisherRow, withEditions)
 		if err != nil {
 			return nil, err
 		}
@@ -77,7 +77,7 @@ func getPublisherList(query string, params []any, skipEditions bool) ([]*Publish
 	return publishers, nil
 }
 
-func GetPublisherByID(publisherID int64, skipEditions bool) (*Publisher, error) {
+func GetPublisherByID(publisherID int64, withEditions bool) (*Publisher, error) {
 	query := fmt.Sprintf("SELECT %s FROM publishers WHERE id=$1", utils.GetSelectQueryFields[PublisherRow](""))
-	return getPublisher(query, []any{publisherID}, skipEditions)
+	return getPublisher(query, []any{publisherID}, withEditions)
 }

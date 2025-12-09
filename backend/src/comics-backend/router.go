@@ -36,18 +36,20 @@ func startRouter() {
 		public.POST("/signup", services.CreateUserService)
 
 		// Book services
-		public.GET("/book", services.GetBookByID)
+		public.GET("/books", services.GetBookByID)
+		public.GET("/books/serie", services.GetBooksBySerieID)
 		public.GET("/books/latest", services.GetLatestBooks)
 		// Edition services
-		public.GET("/edition", services.GetEditionByID)
+		public.GET("/editions", services.GetEditionByID)
 		// Issue serie services
-		public.GET("/issueserie", services.GetIssueSerieByID)
+		public.GET("/issueseries", services.GetIssueSerieByID)
 		// Issue services
-		public.GET("/issue", services.GetIssueByID)
+		public.GET("/issues", services.GetIssueByID)
+		public.GET("/issues/book", services.GetIssueByBookID)
 		// Publisher services
-		public.GET("/publisher", services.GetPublisherByID)
+		public.GET("/publishers", services.GetPublisherByID)
 		// Serie services
-		public.GET("/serie", services.GetSerieByID)
+		public.GET("/series", services.GetSerieByID)
 	}
 
 	// Setup protected routes

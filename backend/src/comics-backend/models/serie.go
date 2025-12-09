@@ -34,14 +34,19 @@ type Serie struct {
 	AddedBy    *User   `json:"addedBy"`
 }
 
-func instSerieFromRow(row *SerieRow, skipBooks bool) (*Serie, error) {
-	user, err := GetUserByID(row.UserID)
-	if err != nil {
-		return nil, err
-	}
+func instSerieFromRow(row *SerieRow, withBooks, withUser bool) (*Serie, error) {
+	var err error
 	books := []*Book{}
-	if !skipBooks {
-		books, err = GetBooksBySeriesID(row.ID, true, false, false)
+	if withBooks {
+		// Skipping series to avoid infinite loop and user and issues for lag
+		books, err = GetBooksBySerieID(row.ID, false, true, false, false)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var user *User = nil
+	if withUser {
+		user, err = GetUserByID(row.UserID)
 		if err != nil {
 			return nil, err
 		}
@@ -60,7 +65,7 @@ func instSerieFromRow(row *SerieRow, skipBooks bool) (*Serie, error) {
 	return serie, nil
 }
 
-func getSerie(query string, params []any, skipBooks bool) (*Serie, error) {
+func getSerie(query string, params []any, withBooks, withUser bool) (*Serie, error) {
 	row := database.PgDb.QueryRow(query, params...)
 	if err := row.Err(); err != nil {
 		return nil, err
@@ -69,10 +74,10 @@ func getSerie(query string, params []any, skipBooks bool) (*Serie, error) {
 	if err := utils.SqlRowToStruct(row, serieRow); err != nil {
 		return nil, err
 	}
-	return instSerieFromRow(serieRow, skipBooks)
+	return instSerieFromRow(serieRow, withBooks, withUser)
 }
 
-func getSerieList(query string, params []any, skipBooks bool) ([]*Serie, error) {
+func getSerieList(query string, params []any, withBooks, withUser bool) ([]*Serie, error) {
 	rows, err := database.PgDb.Query(query, params...)
 	if err != nil {
 		return nil, err
@@ -86,7 +91,7 @@ func getSerieList(query string, params []any, skipBooks bool) ([]*Serie, error) 
 	}
 	series := []*Serie{}
 	for _, serieRow := range serieRows {
-		serie, err := instSerieFromRow(serieRow, skipBooks)
+		serie, err := instSerieFromRow(serieRow, withBooks, withUser)
 		if err != nil {
 			return nil, err
 		}
@@ -95,7 +100,7 @@ func getSerieList(query string, params []any, skipBooks bool) ([]*Serie, error) 
 	return series, nil
 }
 
-func GetSerieByID(serieID int64, skipBooks bool) (*Serie, error) {
+func GetSerieByID(serieID int64, withBooks, withUser bool) (*Serie, error) {
 	query := fmt.Sprintf("SELECT %s FROM series WHERE id=$1", utils.GetSelectQueryFields[SerieRow](""))
-	return getSerie(query, []any{serieID}, skipBooks)
+	return getSerie(query, []any{serieID}, withBooks, withUser)
 }

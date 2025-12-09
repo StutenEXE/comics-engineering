@@ -31,15 +31,19 @@ type IssueSerie struct {
 	AddedBy    *User    `json:"addedBy"`
 }
 
-func instIssueSerieFromRow(row *IssueSerieRow, skipIssues bool) (*IssueSerie, error) {
-	user, err := GetUserByID(row.UserID)
-	if err != nil {
-		return nil, err
-	}
+func instIssueSerieFromRow(row *IssueSerieRow, withIssues, withUser bool) (*IssueSerie, error) {
+	var err error
 	issues := []*Issue{}
-	if !skipIssues {
-		// Skipping issue series to avoid infinite loops
-		issues, err = GetIssuesByIssueSerieID(row.ID, true, false)
+	if withIssues {
+		// Skipping issue series to avoid infinite loops and user
+		issues, err = GetIssuesByIssueSerieID(row.ID, false, true, false)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var user *User = nil
+	if withUser {
+		user, err = GetUserByID(row.UserID)
 		if err != nil {
 			return nil, err
 		}
@@ -67,7 +71,7 @@ func instIssueSerieFromRow(row *IssueSerieRow, skipIssues bool) (*IssueSerie, er
 	return serie, nil
 }
 
-func getIssueSerie(query string, params []any, skipIssues bool) (*IssueSerie, error) {
+func getIssueSerie(query string, params []any, withIssues, withUser bool) (*IssueSerie, error) {
 	row := database.PgDb.QueryRow(query, params...)
 	if err := row.Err(); err != nil {
 		return nil, err
@@ -76,10 +80,10 @@ func getIssueSerie(query string, params []any, skipIssues bool) (*IssueSerie, er
 	if err := utils.SqlRowToStruct(row, issueSerieRow); err != nil {
 		return nil, err
 	}
-	return instIssueSerieFromRow(issueSerieRow, skipIssues)
+	return instIssueSerieFromRow(issueSerieRow, withIssues, withUser)
 }
 
-func getIssueSerieList(query string, params []any, skipIssues bool) ([]*IssueSerie, error) {
+func getIssueSerieList(query string, params []any, withIssues, withUser bool) ([]*IssueSerie, error) {
 	rows, err := database.PgDb.Query(query, params...)
 	if err != nil {
 		return nil, err
@@ -93,7 +97,7 @@ func getIssueSerieList(query string, params []any, skipIssues bool) ([]*IssueSer
 	}
 	issueSeries := []*IssueSerie{}
 	for _, issueSerieRow := range issueSerieRows {
-		issueSerie, err := instIssueSerieFromRow(issueSerieRow, skipIssues)
+		issueSerie, err := instIssueSerieFromRow(issueSerieRow, withIssues, withUser)
 		if err != nil {
 			return nil, err
 		}
@@ -102,7 +106,7 @@ func getIssueSerieList(query string, params []any, skipIssues bool) ([]*IssueSer
 	return issueSeries, nil
 }
 
-func GetIssueSerieByID(serieID int64, skipIssues bool) (*IssueSerie, error) {
+func GetIssueSerieByID(serieID int64, withIssues, withUser bool) (*IssueSerie, error) {
 	query := fmt.Sprintf("SELECT %s FROM issue_series WHERE id=$1", utils.GetSelectQueryFields[IssueSerieRow](""))
-	return getIssueSerie(query, []any{serieID}, skipIssues)
+	return getIssueSerie(query, []any{serieID}, withIssues, withUser)
 }
