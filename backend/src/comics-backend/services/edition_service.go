@@ -13,9 +13,9 @@ import (
 func GetEditionByID(c *gin.Context) {
 	type EditionByIDRequest struct {
 		ID            int64 `form:"id"`
-		withPublisher bool  `form:"withPublisher"`
-		withBook      bool  `form:"withBook"`
-		withUser      bool  `form:"withUser"`
+		WithPublisher bool  `form:"withPublisher"`
+		WithBook      bool  `form:"withBook"`
+		WithUser      bool  `form:"withUser"`
 	}
 	// GET form data
 	var req EditionByIDRequest
@@ -24,7 +24,7 @@ func GetEditionByID(c *gin.Context) {
 		return
 	}
 
-	edition, err := models.GetEditionByID(req.ID, req.withPublisher, req.withBook, req.withUser)
+	edition, err := models.GetEditionByID(req.ID, req.WithPublisher, req.WithBook, req.WithUser)
 	if err != nil && err == sql.ErrNoRows {
 		errmsg := fmt.Sprintf("edition not found (id=%d)", req.ID)
 		utils.ReturnErrorMessage(c, http.StatusNotFound, errmsg, err)

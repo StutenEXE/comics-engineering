@@ -13,7 +13,7 @@ import (
 func GetPublisherByID(c *gin.Context) {
 	type PublisherByIDRequest struct {
 		ID           int64 `form:"id"`
-		withEditions bool  `form:"withEditions"`
+		WithEditions bool  `form:"withEditions"`
 	}
 	// GET form data
 	var req PublisherByIDRequest
@@ -22,7 +22,7 @@ func GetPublisherByID(c *gin.Context) {
 		return
 	}
 
-	publisher, err := models.GetPublisherByID(req.ID, req.withEditions)
+	publisher, err := models.GetPublisherByID(req.ID, req.WithEditions)
 	if err != nil && err == sql.ErrNoRows {
 		errmsg := fmt.Sprintf("publisher not found (id=%d)", req.ID)
 		utils.ReturnErrorMessage(c, http.StatusNotFound, errmsg, err)
