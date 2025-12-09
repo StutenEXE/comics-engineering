@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BookCard } from "~/components/cards/BookCard";
-import { useToast } from "~/components/toast/toast";
+import { useToast } from "~/components/toast/Toast";
 import { useLatestBooksQuery } from "~/store/services/api";
 import type { Route } from "../+types/root";
 import { GenericButton } from "~/components/buttons/GenericButton";
@@ -22,7 +22,7 @@ export default function LandingPage() {
   const from = page * BOOKS_PER_PAGE;
   
   // Fetch books for current page
-  const { data, error, isFetching } = useLatestBooksQuery({ from, limit: BOOKS_PER_PAGE });
+  const { data, error, isFetching } = useLatestBooksQuery({ from, limit: BOOKS_PER_PAGE, withEditions: true, withSerie: true, withIssues: false, withUser: false });
   const books = data?.books ?? [];
 
   const handleNextPage = () => {

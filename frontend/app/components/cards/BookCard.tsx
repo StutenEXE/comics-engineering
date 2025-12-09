@@ -3,11 +3,15 @@ import { Link } from "react-router";
 import type { Book } from "~/models/book";
 
 type BookCardProps = {
-    book: Book;
+    book: Book | undefined | null
     className?: string;
 };
 
-export function BookCard({book, className}: BookCardProps) {
+export function BookCard({ book, className}: BookCardProps) {
+    if (!book) {
+        return
+    }
+
     const [index, setIndex] = useState(0);
     const editions = book.editions ?? [];
 

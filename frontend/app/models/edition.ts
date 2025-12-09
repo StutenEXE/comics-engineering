@@ -15,7 +15,7 @@ export interface Edition {
     book: Book | null,
     createdAt: Date,
     modifiedAt: Date,
-    addedBy: User
+    addedBy: User | null
 }
 
 // Utility function to transform the api data to an instance of Edition
@@ -33,6 +33,6 @@ export function parseDataToEdition(data: Record<string, any>): Edition {
         book: data.book ? parseDataToBook(data.book) : null,
         createdAt: new Date(data.createdAt),
         modifiedAt: new Date(data.modifiedAt),
-        addedBy: parseDataToUser(data.addedBy)
+        addedBy: data.addedBy ? parseDataToUser(data.addedBy) : null
     }
 }

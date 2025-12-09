@@ -5,8 +5,10 @@ import { BookCard } from "~/components/cards/BookCard";
 import { compareDates, dateToMonthYearString, dateToVerboseDateString } from "~/utils/date";
 import { IssueCard } from "~/components/cards/IssueCard";
 import type { Book } from "~/models/book";
-import { PageHeaderComponent } from "~/components/headers/pageHeader";
-import { PageTemplate } from "~/components/templates/pageTemplate";
+import { PageHeaderComponent } from "~/components/headers/PageHeader";
+import { PageTemplate } from "~/components/templates/PageTemplate";
+import { IssueList } from "~/components/lists/issuelists/IssueList";
+import { BookList } from "~/components/lists/booklists/BookList";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -17,12 +19,14 @@ export function meta({ params }: Route.MetaArgs) {
 
 export default function IssueSeriePage({ params }: { params : { id: number}}) {
   
-  const { data, isLoading, error } = useIssueSerieByIdQuery({ id: params.id });
+  const { data, isLoading, error } = useIssueSerieByIdQuery({ id: params.id, withIssues: true, withUser: true });
   const issueSerie = data?.issueSerie ?? null;
   const err = createError(error)
 
-  
+  // Remove duplicate books by id
+  const ids = new Set();
   const books: Book[] | undefined = issueSerie?.issues.flatMap(is => is.books)
+    .filter(({ id }) => !ids.has(id) && ids.add(id))
 
   let subtitle = dateToMonthYearString("en-EN", issueSerie?.voStart)
   if (!issueSerie?.voEnd) { subtitle += " - Present" }
@@ -50,7 +54,7 @@ export default function IssueSeriePage({ params }: { params : { id: number}}) {
       )}
       { (!isLoading && !error) && (
         <>
-          <PageHeaderComponent title={issueSerie?.name} subtitle={subtitle} 
+          <PageHeaderComponent headerTitle="Issue Serie" title={issueSerie?.name} subtitle={subtitle} 
             createdAt={issueSerie?.createdAt} modifiedAt={issueSerie?.modifiedAt} addedBy={issueSerie?.addedBy?.username} />
           <div className="flex flex-col gap-2">
             <h3 className="text-xl text-gray-200 font-semibold">Description :</h3>
@@ -60,30 +64,19 @@ export default function IssueSeriePage({ params }: { params : { id: number}}) {
           </div>
           <div className="flex gap-2 flex-col">
             <h3 className="text-xl text-gray-200 font-semibold">Issues :</h3>
-            <div className="max-h-40 flex flex-col gap-0 p-2 border border-gray-500 rounded-lg overflow-y-scroll snap-y snap-proximity">
-              { issueSerie?.issues && [...issueSerie.issues]
-                // Sort in ascending order (oldest issue first)
-                .sort((is1, is2) => compareDates(is1.parutionDate, is2.parutionDate))
-                .map((is) => {
-                  return (
-                    <IssueCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
-                      key={is.id} issue={is} /> 
-                  )
-                }) }
-            </div>
+              <IssueList issueList={
+                issueSerie?.issues.map((is) => {
+                  // Since issueSerie is read-only, it's children are too,  nd we need to have a defined issueSerie here
+                  // it is not sent back by the API (infinite loops in this case)
+                  return {
+                    ...is,
+                    issueSerie: {...issueSerie}
+                  }
+              })} className="border border-gray-500 rounded-lg"/>
           </div>
-
           <div className="flex gap-2 flex-col">
             <h3 className="text-xl text-gray-200 font-semibold">Books :</h3>
-            <div className="flex gap-2 p-2 border border-gray-500 rounded-lg overflow-hidden snap-x snap-proximity">
-              {  books?.map((bk) => {
-                return (
-                  <BookCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
-                    key={bk.id} book={bk} /> 
-                )
-              })
-            }
-            </div>
+            <BookList bookList={books} className="border border-gray-500 rounded-lg"/>
           </div>
         </>
       )}

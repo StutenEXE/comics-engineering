@@ -13,7 +13,7 @@ import (
 func GetBookByID(c *gin.Context) {
 	type BookByIDRequest struct {
 		ID           int64 `form:"id"`
-		WithSerie    bool  `form:"withSerie" binding:"required"`
+		WithSerie    bool  `form:"withSerie"`
 		WithEditions bool  `form:"withEditions"`
 		WithIssues   bool  `form:"withIssues"`
 		WithUser     bool  `form:"withUser"`
@@ -44,7 +44,7 @@ func GetBooksBySerieID(c *gin.Context) {
 	type BookBySerieIDRequest struct {
 		ID           int64 `form:"id"`
 		WithSerie    bool  `form:"withSerie"`
-		WithEditions bool  `form:"withEdition"`
+		WithEditions bool  `form:"withEditions"`
 		WithIssues   bool  `form:"withIssues"`
 		WithUser     bool  `form:"withUser"`
 	}
@@ -75,7 +75,7 @@ func GetLatestBooks(c *gin.Context) {
 		From         int  `form:"from"`
 		Limit        int  `form:"limit"`
 		WithSerie    bool `form:"withSerie"`
-		WithEditions bool `form:"withEdition"`
+		WithEditions bool `form:"withEditions"`
 		WithIssues   bool `form:"withIssues"`
 		WithUser     bool `form:"withUser"`
 	}

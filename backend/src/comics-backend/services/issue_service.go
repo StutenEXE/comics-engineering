@@ -13,9 +13,9 @@ import (
 func GetIssueByID(c *gin.Context) {
 	type IssueByIDRequest struct {
 		ID             int64 `form:"id"`
-		WithIssueSerie bool  `form:"WithIssueSerie"`
-		WithBooks      bool  `form:"WithBooks"`
-		WithUser       bool  `form:"WithUser"`
+		WithIssueSerie bool  `form:"withIssueSerie"`
+		WithBooks      bool  `form:"withBooks"`
+		WithUser       bool  `form:"withUser"`
 	}
 	// GET form data
 	var req IssueByIDRequest

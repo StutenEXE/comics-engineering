@@ -1,11 +1,12 @@
 import { useBookByIdQuery } from "~/store/services/api";
 import type { Route } from "../+types/root";
-import { EditionCard } from "~/components/cards/EditionCard";
-import { IssueCard } from "~/components/cards/IssueCard";
 import { createError } from "~/utils/error";
-import { compareDates } from "~/utils/date";
-import { PageHeaderComponent } from "~/components/headers/pageHeader";
-import { PageTemplate } from "~/components/templates/pageTemplate";
+import { PageHeaderComponent } from "~/components/headers/PageHeader";
+import { PageTemplate } from "~/components/templates/PageTemplate";
+import { EditionList } from "~/components/lists/EditionList";
+import type { Link } from "~/components/lists/LinkButtonList";
+import { BookListBySerieId } from "~/components/lists/booklists/BookListBySerieId";
+import { IssueListByBookId } from "~/components/lists/issuelists/IssueListByBookId";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -16,14 +17,17 @@ export function meta({ params }: Route.MetaArgs) {
 
 export default function BookPage({ params }: { params : { id: number}}) {
   
-  const { data, isLoading, error } = useBookByIdQuery({ id: params.id });
+  // No issues to limit lag
+  const { data, isLoading, error } = useBookByIdQuery({ id: params.id, withEditions: true, withSerie: true, withIssues: false,  withUser: true });
   const book = data?.book ?? null;
   const err = createError(error)
 
-
+  const links: Link[] = [
+    { name: "Go to serie", path: `/serie/${book?.serie?.id}`, disabled: isLoading }
+  ]
 
   return (
-    <PageTemplate hasImg={true} imgUrl={book?.editions[0].imgUrl} imgAlt={book?.name}>
+    <PageTemplate hasImg={true} imgUrl={book?.editions[0].imgUrl} imgAlt={book?.name} links={links}>
       { isLoading && (
         <div className="flex items-center justify-center">
             <h1 className="text-3xl text-gray-500">Loading book...</h1>
@@ -39,8 +43,11 @@ export default function BookPage({ params }: { params : { id: number}}) {
       )}
       { (!isLoading && !error) && (
         <>
-          <PageHeaderComponent title={book?.name} subtitle={`${book?.serie?.name} (#${book?.number}/${book?.serie?.nvolumes})`} 
-            createdAt={book?.createdAt} modifiedAt={book?.modifiedAt} addedBy={book?.addedBy?.username} />
+          <PageHeaderComponent headerTitle="Book" title={book?.name} 
+            subtitle={`${book?.serie?.name} (#${book?.number}/${book?.serie?.nvolumes})`} 
+            createdAt={book?.createdAt} modifiedAt={book?.modifiedAt} addedBy={book?.addedBy?.username} 
+            links={links}
+          />
           <div className="flex flex-col gap-2">
             <h3 className="text-xl text-gray-200 font-semibold">Description :</h3>
             <p>
@@ -48,32 +55,18 @@ export default function BookPage({ params }: { params : { id: number}}) {
             </p>
           </div>
           <div className="flex gap-2 flex-col">
-            <h3 className="text-xl text-gray-200 font-semibold">Editions :</h3>
-            <div className="flex gap-2 p-2 border border-gray-500 rounded-lg overflow-x-scroll snap-x snap-proximity">
-              {  book?.editions && book.editions
-                // Sort in descending order (latest edition first)
-                .sort((bk1, bk2) => compareDates(bk2.parutionDate, bk2.parutionDate))
-                .map((ed) => {
-                return (
-                  <EditionCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
-                    key={ed.id} edition={ed} /> 
-                )
-              }) }
-            </div>
+            <h3 className="text-xl text-gray-200 font-semibold">From the same serie :</h3>
+            {/* <BookList bookList={book?.otherBooks.filter((bk) => bk.id !== book.id)} className="border border-gray-500 rounded-lg"/> */}
+            <BookListBySerieId serieId={book?.serie?.id} toIgnore={book}  className="border border-gray-500 rounded-lg" />
           </div>
           <div className="flex gap-2 flex-col">
             <h3 className="text-xl text-gray-200 font-semibold">Issues :</h3>
-            <div className="max-h-40 flex flex-col gap-0 p-2 border border-gray-500 rounded-lg overflow-y-scroll snap-y snap-proximity">
-              { book?.issues && [...book.issues]
-                // Sort in ascending order (oldest issue first)
-                .sort((is1, is2) => compareDates(is1.parutionDate, is2.parutionDate))
-                .map((is) => {
-                  return (
-                    <IssueCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
-                      key={is.id} issue={is} /> 
-                  )
-                }) }
-            </div>
+            {/* <IssueList issueList={book?.issues} className="border border-gray-500 rounded-lg" /> */}
+            <IssueListByBookId bookId={book?.id} className="border border-gray-500 rounded-lg" />
+          </div>
+          <div className="flex gap-2 flex-col">
+            <h3 className="text-xl text-gray-200 font-semibold">Editions :</h3>
+            <EditionList editionList={book?.editions} className="border border-gray-500 rounded-lg"/>
           </div>
         </>
       )}

@@ -1,9 +1,9 @@
 import { Link } from 'react-router'
 import { useSelector } from 'react-redux';
 import type { RootState } from '~/store/store';
-import { LoginForm } from '../forms/loginForm';
+import { LoginForm } from '../forms/LoginForm';
 import { useState } from 'react';
-import { SignupForm } from '../forms/signupForm';
+import { SignupForm } from '../forms/SignupForm';
 
 export function Header() {
     const { isAuthenticated, user } = useSelector((state: RootState) => state.user);

@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { GenericButton, type ButtonProps } from "./GenericButton";
 
-interface LinkButtonProps extends ButtonProps {
+export interface LinkButtonProps extends ButtonProps {
     path: string;
 };
 
