@@ -1,7 +1,7 @@
 import type { Edition } from "~/models/edition";
-import { EditionCard } from "../cards/EditionCard";
+import { EditionCard } from "../../cards/EditionCard";
 import { compareDates } from "~/utils/date";
-import { GenericList } from "./GenericList";
+import { GenericList } from "../GenericList";
 
 
 interface EditionListProps {

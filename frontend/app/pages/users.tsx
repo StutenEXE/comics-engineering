@@ -19,8 +19,6 @@ export default function UsersPage() {
     const { data, error, isFetching } = useUserListQuery({ from: 0, limit: 10 }, { refetchOnMountOrArgChange: true },);
     const users = data?.users ?? [];
     const err = createError(error)
-
-    console.log(err)
         
     return (
       <AdminProtectedRoute>

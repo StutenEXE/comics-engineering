@@ -1,7 +1,7 @@
 import type { Error } from "~/utils/error";
 import type { Serie } from "~/models/serie";
-import { GenericList } from "./GenericList";
-import { BookList } from "./booklists/BookList";
+import { GenericList } from "../GenericList";
+import { BookList } from "../booklists/BookList";
 import { useState } from "react";
 import { BsArrowsCollapse, BsArrowsExpand } from "react-icons/bs";
 
@@ -30,8 +30,6 @@ export function CollapsableSerieList({ serieList, descOrder, isLoading, error, c
             </div>
         )
     }
-
-    console.log(serieList)
 
     const list = !serieList ? [] : [...serieList]
         // Sorting list
