@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { User } from '~/models/user';
+import { publicApi } from '../services/api';
 
 export interface UserState {
   user: User | null;
@@ -42,6 +43,21 @@ const userSlice = createSlice({
     setAuthenticated: (state, action: PayloadAction<boolean>) => {
       state.isAuthenticated = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addMatcher(
+      publicApi.endpoints.refresh.matchFulfilled,
+      (state, { payload }) => {
+        state.user = payload.user;
+        state.isLoading = false;
+      }
+    );
+    builder.addMatcher(
+      publicApi.endpoints.refresh.matchRejected,
+      (state) => {
+        state.isLoading = false;
+      }
+    );
   },
 });
 

@@ -5,7 +5,7 @@ import { parseDataToIssue, type Issue } from "~/models/issue";
 import { parseDataToIssueSerie, type IssueSerie } from "~/models/issue-serie";
 import { parseDataToPublisher, type Publisher } from "~/models/publisher";
 import { parseDataToSerie, type Serie } from "~/models/serie";
-import type { SignupData, User, UserCredentials } from "~/models/user";
+import { parseDataToUser, type SignupData, type User, type UserCredentials } from "~/models/user";
 
 ////////////////////////////////////
 //////////// PUBLIC API ////////////
@@ -24,6 +24,9 @@ export const publicApi = createApi({
     // Signup API endpoint
     signup: build.mutation<{ user: User }, SignupData>({
       query: (data) => ({ url: '/signup', method: 'POST', body: data }),
+    }),
+    refresh: build.query({
+      query: () => ({ url: '/refresh', method: 'GET' }),
     }),
 
     /****************
@@ -128,7 +131,7 @@ export const publicApi = createApi({
 });
 
 export const { 
-  useLoginMutation, useSignupMutation, 
+  useLoginMutation, useSignupMutation, useRefreshQuery,
   useBookByIdQuery, useBookBySerieIdQuery, useLatestBooksQuery,
   useEditionByIdQuery,
   useIssueSerieByIdQuery,
@@ -141,7 +144,7 @@ export const {
 
 
 ////////////////////////////////////
-//////////// PRIVATE API ////////////
+//////////// PRIVATE API ///////////
 ////////////////////////////////////
 
 export const API_PVT_BASE_URL = "http://localhost:8080/api/comics/pvt";
@@ -156,3 +159,32 @@ export const privateApi = createApi({
 });
 
 export const {  } = privateApi;
+
+
+////////////////////////////////////
+///////////// ADMIN API ////////////
+////////////////////////////////////
+
+export const API_ADM_BASE_URL = "http://localhost:8080/api/comics/adm";
+
+// RTK Query service for private API endpoints
+export const adminApi = createApi({
+  reducerPath: 'adminApi',
+  baseQuery: fetchBaseQuery({ baseUrl: API_ADM_BASE_URL, credentials: 'include' }),
+  endpoints: (build) => ({
+    /****************
+     * SERIES
+     ****************/
+    // Get list of users
+    userList: build.query<{ users: User[] }, { from: number; limit: number }>({
+      query: (params) => ({ url: "/users/list", method: 'GET', params: params }),
+      transformResponse: (resp: { users: User[] }) => ({
+        users: resp.users.map((usr) => parseDataToUser(usr)),
+      }),
+    }),
+  }),
+});
+
+export const { 
+  useUserListQuery
+ } = adminApi;

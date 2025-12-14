@@ -4,6 +4,7 @@ import { useToast } from "~/components/toast/Toast";
 import { useLatestBooksQuery } from "~/store/services/api";
 import type { Route } from "../+types/root";
 import { GenericButton } from "~/components/buttons/GenericButton";
+import { BsArrowLeft, BsArrowLeftCircle, BsArrowRight, BsArrowRightCircle } from "react-icons/bs";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -68,7 +69,7 @@ export default function LandingPage() {
               onClick={handlePreviousPage}
               disabled={page === 0}
             >
-              Previous
+               <BsArrowLeft size={20} />
             </GenericButton>
             <span className="flex items-center px-4 py-2">
               Page {page + 1}
@@ -77,7 +78,7 @@ export default function LandingPage() {
               onClick={handleNextPage}
               disabled={books.length < BOOKS_PER_PAGE}
             >
-              Next
+              <BsArrowRight size={20} />
             </GenericButton>
           </div>
 
