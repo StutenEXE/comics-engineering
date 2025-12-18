@@ -2,17 +2,16 @@ import {
   isRouteErrorResponse,
   Links,
   Meta,
-  Outlet,
   Scripts,
   ScrollRestoration,
 } from "react-router";
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import { Header } from "./components/headers/Header";
 import { ToastProvider } from "./components/toast/Toast";
 import { Provider } from 'react-redux';
 import { store } from './store/store';
+import App from "./app";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -45,16 +44,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function App() {
+export default function Root() {
+
   return (
     <Provider store={store}>
       <ToastProvider>
-        <div className="wrapper">
-          <Header />
-          <main className="main-content">
-            <Outlet />
-          </main>
-        </div>
+        <App/>
       </ToastProvider>
     </Provider>
   );

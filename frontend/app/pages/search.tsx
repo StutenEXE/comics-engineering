@@ -5,7 +5,7 @@ import { createError } from "~/utils/error";
 import type { Serie } from "~/models/serie";
 import type { Book } from "~/models/book";
 import { deepCopy } from "~/utils/object";
-import { CollapsableSerieList } from "~/components/lists/CollapsableSerieList";
+import { CollapsableSerieList } from "~/components/lists/serielists/CollapsableSerieList";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -65,8 +65,6 @@ export default function SearchPage() {
         const value = event.target.value;
         setQuery(value);
     };
-
-    console.log(allSeries)
 
     return (
         <main className="flex flex-col items-center pt-8">

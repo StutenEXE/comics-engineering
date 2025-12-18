@@ -3,7 +3,7 @@ import type { Route } from "../+types/root";
 import { createError } from "~/utils/error";
 import { PageHeaderComponent } from "~/components/headers/PageHeader";
 import { PageTemplate } from "~/components/templates/PageTemplate";
-import { EditionList } from "~/components/lists/EditionList";
+import { EditionList } from "~/components/lists/editionlists/EditionList";
 import type { Link } from "~/components/lists/LinkButtonList";
 import { BookListBySerieId } from "~/components/lists/booklists/BookListBySerieId";
 import { IssueListByBookId } from "~/components/lists/issuelists/IssueListByBookId";

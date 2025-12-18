@@ -43,6 +43,7 @@ export function Header() {
                         {isAuthenticated ? (
                             <>
                                 <li><Link to="/collection" className="hover:underline">My collection</Link></li>
+                                {user?.isAdmin && <li><Link to="/users" className="hover:underline">Users</Link></li>}
                                 <li><Link to="/profile" className="hover:underline">My profile</Link></li>
                             </>
                         ) : (

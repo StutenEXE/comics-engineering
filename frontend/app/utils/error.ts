@@ -1,5 +1,6 @@
 import type { SerializedError } from "@reduxjs/toolkit";
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import { capitalize } from "./strings";
 
 export interface Error {
     status: number | string;
@@ -20,7 +21,7 @@ export function createError(error: FetchBaseQueryError | SerializedError | undef
         let err = error.data as Error
         return {
             status: error.status,
-            error: err.error
+            error: capitalize(err.error)
         }
     }
     return UNKNOWN_ERROR
