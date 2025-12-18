@@ -1,4 +1,5 @@
 import type { MRT_ColumnDef } from "material-react-table";
+import type { ColumnDef } from "~/components/tables/GenericTable";
 
 export interface User {
     id: number;
@@ -32,37 +33,35 @@ export interface SignupData {
   password: string;
 }
 
-export function getUserMRTColumns(): MRT_ColumnDef<User>[] {
+export function getUserColumns(): ColumnDef<User>[] {
   return [
     {
-      accessorKey: 'id',
+      key: 'id',
       header: 'ID',
-      size: 50,
+      searchable: true,
     },
     {
-      accessorKey: 'email',
+      key: 'email',
       header: 'Email',
-      size: 150,
+      searchable: true
     },
     {
-      accessorKey: 'username',
+      key: 'username',
       header: 'Username',
-      size: 150,
+      searchable: true
     },
     {
-      accessorKey: 'createdAt',
+      key: 'createdAt',
       header: 'Created at',
-      size: 150,
-      Cell: ({ cell }) => {
-        return cell.getValue<Date>()?.toLocaleDateString()
+      cellRenderer: (usr) => {
+        return usr?.createdAt.toLocaleDateString()
       },
     },
     {
-      accessorKey: 'isAdmin',
+      key: 'isAdmin',
       header: 'Admin',
-      size: 50,
-      Cell: ({ cell }) => {
-        return cell.getValue<boolean>() ? "Yes" : "No"
+      cellRenderer: (usr) => {
+        return usr.isAdmin ? "Yes" : "No"
       },
     }
   ]

@@ -1,4 +1,4 @@
-import { getUserMRTColumns, type User } from "~/models/user"
+import { getUserColumns, type User } from "~/models/user"
 import { GenericTable } from "./GenericTable"
 import type { Error } from "~/utils/error"
 import { MdDelete, MdModeEdit, MdRemoveRedEye } from "react-icons/md"
@@ -30,10 +30,8 @@ export function UserTable({ userList, isLoading, error, showActions }: UserTable
     }
 
     return (
-        <> 
-            <GenericTable list={userList} columns={getUserMRTColumns()}  
-            addActions={showActions} actionGenerator={actionGenerator}
-            isLoading={isLoading} error={error} />
-        </>
+        <GenericTable list={userList} columns={getUserColumns()}  
+        addActions={showActions} actionGenerator={actionGenerator}
+        isLoading={isLoading} error={error} />
     )
 }
