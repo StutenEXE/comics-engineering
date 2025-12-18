@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/StutenEXE/comics-backend/models"
@@ -13,7 +12,7 @@ import (
 const SessionPrefix = "comic-session:"
 
 type Session struct {
-	UserID    string    `json:"user_id"`
+	UserID    int64     `json:"user_id"`
 	Roles     []string  `json:"roles"`
 	ExpiresAt time.Time `json:"expires_at"`
 }
@@ -25,9 +24,13 @@ func CreateSessionKey() string {
 
 func CreateSession(c *gin.Context, user *models.UserWithPassword) {
 	session := &Session{
-		UserID:    fmt.Sprint(user.ID),
+		UserID:    user.ID,
 		Roles:     []string{"user"},
 		ExpiresAt: time.Now().Add(30 * time.Minute),
+	}
+
+	if user.IsAdmin {
+		session.Roles = append(session.Roles, "admin")
 	}
 
 	jsonData, _ := json.Marshal(session)

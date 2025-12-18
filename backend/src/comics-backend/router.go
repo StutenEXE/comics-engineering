@@ -34,6 +34,7 @@ func startRouter() {
 		// User services
 		public.POST("/login", services.LoginService)
 		public.POST("/signup", services.CreateUserService)
+		public.GET("/refresh", services.RefreshAuth)
 
 		// Book services
 		public.GET("/books", services.GetBookByID)
@@ -55,11 +56,19 @@ func startRouter() {
 		public.GET("/search/books_and_series", services.SearchBooksAndSeries)
 	}
 
-	// Setup protected routes
+	// Setup protected routes (user logged in)
 	protected := r.Group("/api/comics/prv")
 	protected.Use(middleware.SessionAuth())
 	{
 
+	}
+
+	// Setup admin protected routes
+	admProtected := r.Group("/api/comics/adm")
+	admProtected.Use(middleware.AdminSessionAuth())
+	{
+		// Admin user services
+		admProtected.GET("/users/list", services.GetUserList)
 	}
 
 	// Start server
