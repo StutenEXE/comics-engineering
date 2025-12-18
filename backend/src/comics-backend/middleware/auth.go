@@ -1,50 +1,69 @@
 package middleware
 
 import (
-	"encoding/json"
+	"fmt"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/StutenEXE/comics-backend/utils"
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 )
+
+func authUser(c *gin.Context) {
+	// Read session cookie
+	sessionKey, err := c.Cookie("session_id")
+	if err != nil || sessionKey == "" {
+		utils.ReturnErrorMessage(c, http.StatusUnauthorized, "missing session", err)
+		return
+	}
+	// Retreive session from redis
+	session, err := GetSessionFromRedis(c, sessionKey)
+	if err != nil {
+		// Err already handled in redis function
+		return
+	}
+	// Check session expiration
+	if time.Now().After(session.ExpiresAt) {
+		redisClient.Del(c, sessionKey)
+		utils.ReturnErrorMessage(c, http.StatusUnauthorized, "session expired", nil)
+		return
+	}
+	// Extend session expiration by 30 minutes
+	redisClient.Expire(c, sessionKey, 30*time.Minute)
+	// Store session in Gin context
+	c.Set("session", session)
+	c.Set("user_id", session.UserID)
+}
 
 func SessionAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Read session cookie
-		cookie, err := c.Cookie("session_id")
-		if err != nil || cookie == "" {
-			utils.ReturnErrorMessage(c, http.StatusUnauthorized, "missing session", err)
+		// Auth user if can be authed
+		authUser(c)
+		// Continue (exit middleware)
+		c.Next()
+	}
+}
+
+func AdminSessionAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Auth user if can be authed
+		authUser(c)
+		// Check if admin
+		s, exists := c.Get("session")
+		if !exists {
 			return
 		}
-		sessionKey := SessionPrefix + cookie
-		// Fetch session from Redis
-		sessionJSON, err := redisClient.Get(c, sessionKey).Result()
-		if err == redis.Nil {
-			utils.ReturnErrorMessage(c, http.StatusUnauthorized, "invalid session", err)
-			return
-		} else if err != nil {
-			utils.ReturnErrorMessage(c, http.StatusInternalServerError, "redis error", err)
+		session, ok := s.(*Session)
+		if !ok {
+			fmt.Printf("\n%v : %v test : %v\n\n", s, session, ok)
+			utils.ReturnErrorMessage(c, http.StatusInternalServerError, "session badly formatted", nil)
 			return
 		}
-		// Deserialize session
-		var session Session
-		if err := json.Unmarshal([]byte(sessionJSON), &session); err != nil {
-			utils.ReturnErrorMessage(c, http.StatusInternalServerError, "bad session data", err)
+		if !slices.Contains(session.Roles, "admin") {
+			utils.ReturnErrorMessage(c, http.StatusUnauthorized, "only admins allowed", nil)
 			return
 		}
-		// Check session expiration
-		if time.Now().After(session.ExpiresAt) {
-			redisClient.Del(c, sessionKey)
-			utils.ReturnErrorMessage(c, http.StatusUnauthorized, "session expired", nil)
-			return
-		}
-		// Extend session expiration by 30 minutes
-		redisClient.Expire(c, sessionKey, 30*time.Minute)
-		// Store session in Gin context
-		c.Set("session", session)
-		c.Set("user_id", session.UserID)
 		// Continue (exit middleware)
 		c.Next()
 	}

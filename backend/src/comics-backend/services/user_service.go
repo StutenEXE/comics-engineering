@@ -1,6 +1,7 @@
 package services
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/StutenEXE/comics-backend/middleware"
@@ -18,12 +19,12 @@ func CreateUserService(c *gin.Context) {
 	}
 	// If email already exists
 	existingUser, err := models.GetUserByEmail(user.Email)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		utils.ReturnErrorMessage(c, http.StatusInternalServerError, "internal error", err)
 		return
 	}
 	// Email already in use
-	if existingUser != nil {
+	if existingUser != nil || err != sql.ErrNoRows {
 		utils.ReturnErrorMessage(c, http.StatusConflict, "email already in use", nil)
 		return
 	}
@@ -69,12 +70,12 @@ func LoginService(c *gin.Context) {
 	}
 	// Database lookup
 	user, err := models.GetUserByEmail(loginData.Email)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		utils.ReturnErrorMessage(c, http.StatusInternalServerError, "internal error", err)
 		return
 	}
 	// No user found
-	if user == nil {
+	if err == sql.ErrNoRows {
 		utils.ReturnErrorMessage(c, http.StatusUnauthorized, "invalid credentials", nil)
 		return
 	}
@@ -92,4 +93,59 @@ func LoginService(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"user": userResp})
+}
+
+func RefreshAuth(c *gin.Context) {
+	var user *models.User = &models.User{}
+	// Retreive session key
+	sessionKey, err := c.Cookie("session_id")
+	if err != nil || sessionKey == "" {
+		utils.ReturnErrorMessage(c, http.StatusUnauthorized, "missing session", err)
+		return
+	}
+	// Retreive session
+	session, err := middleware.GetSessionFromRedis(c, sessionKey)
+	if err != nil {
+		// Already handled in redis function
+		return
+	}
+	if session == nil {
+		utils.ReturnErrorMessage(c, http.StatusUnauthorized, "session terminated", nil)
+		return
+	}
+	// Get user in session
+	user, err = models.GetUserByID(session.UserID)
+	if err != nil {
+		utils.ReturnErrorMessage(c, http.StatusInternalServerError, "internal error", err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"user": user})
+}
+
+func GetUserList(c *gin.Context) {
+	type UserListRequest struct {
+		From  int `form:"from"`
+		Limit int `form:"limit"`
+	}
+	// GET form data
+	var req UserListRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		utils.ReturnErrorMessage(c, http.StatusBadRequest, "invalid request", err)
+		return
+	}
+	// Invalid params
+	if req.From < 0 || req.Limit <= 0 {
+		utils.ReturnErrorMessage(c, http.StatusBadRequest, "invalid request", nil)
+		return
+	}
+
+	users, err := models.GetUsers(req.From, req.Limit)
+	if err != nil {
+		utils.ReturnErrorMessage(c, http.StatusInternalServerError, "failed to get users", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"users": users,
+	})
 }

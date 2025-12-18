@@ -6,6 +6,7 @@ package comics_db {
         username: text
         email: text
         password: hash
+        is_admin: boolean
         created_at: datetime
         modified_at: datetime
     }
