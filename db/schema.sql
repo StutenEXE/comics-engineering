@@ -115,3 +115,21 @@ CREATE TABLE IF NOT EXISTS books_issues (
 	issue_id BIGINT NOT NULL REFERENCES issues(id) ON DELETE CASCADE,
 	PRIMARY KEY (book_id, issue_id)
 );
+
+-- Submission Types
+CREATE TYPE submission_type_enum AS ENUM ('book', 'serie', 'edition', 'issue', 'issueserie', 'publisher', 'link_book_issue');
+-- Submission Action
+CREATE TYPE submission_action_enum AS ENUM ('create', 'update', 'delete');
+
+-- User Submissions
+CREATE TABLE IF NOT EXISTS user_submissions (
+	id SERIAL PRIMARY KEY,
+	user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	related_to BIGINT REFERENCES user_submissions(id) ON DELETE SET NULL,
+	submission_type submission_type_enum NOT NULL,
+	submission_action submission_action_enum  NOT NULL,
+	submission_data JSONB NOT NULL,
+	note TEXT,
+	validated BOOLEAN,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);

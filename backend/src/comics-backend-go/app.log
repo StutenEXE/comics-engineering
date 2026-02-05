@@ -1,0 +1,180 @@
+2026/01/28 15:20:21 main.go:24: Application started
+2026/01/28 15:20:21 main.go:28: no .env file found (that's OK in production)
+2026/01/28 15:23:13 errors.go:13: Error 500: pq: password authentication failed for user "ABX3"
+2026/01/28 15:33:46 main.go:24: Application started
+2026/01/28 15:35:02 main.go:24: Application started
+2026/01/28 15:35:23 main.go:24: Application started
+2026/01/28 15:36:13 main.go:25: Application started
+2026/01/28 15:37:24 main.go:24: Application started
+2026/01/28 15:38:07 main.go:24: Application started
+2026/01/28 15:39:35 main.go:24: Application started
+2026/01/28 15:43:25 main.go:24: Application started
+2026/01/28 15:43:25 main.go:28: no .env file found (that's OK in production)
+2026/01/28 15:44:39 main.go:24: Application started
+2026/01/28 15:45:03 errors.go:13: Error 500: dial tcp: lookup postgresql: no such host
+2026/01/28 15:45:30 main.go:24: Application started
+2026/01/28 15:45:35 errors.go:13: Error 500: dial tcp: lookup postgresql: no such host
+2026/01/28 15:46:50 main.go:24: Application started
+2026/01/28 15:46:57 errors.go:13: Error 500: dial tcp: lookup postgresql: no such host
+2026/01/28 15:48:46 main.go:24: Application started
+2026/01/28 15:48:51 errors.go:13: Error 500: dial tcp: lookup postgresql: no such host
+2026/01/28 15:49:04 main.go:24: Application started
+2026/01/28 15:49:07 errors.go:13: Error 500: dial tcp: lookup postgresql: no such host
+2026/01/28 15:49:35 main.go:24: Application started
+2026/01/28 15:49:40 errors.go:13: Error 500: pq: password authentication failed for user "comics_backend_test"
+2026/01/28 15:50:28 main.go:24: Application started
+2026/01/28 15:50:30 errors.go:13: Error 500: pq: password authentication failed for user "comics_backend_test"
+2026/01/28 15:51:32 main.go:24: Application started
+2026/01/28 15:51:45 errors.go:13: Error 500: pq: relation "users" does not exist
+2026/01/28 16:43:18 main.go:24: Application started
+2026/01/28 16:43:34 errors.go:13: Error 500: pq: invalid input syntax for type timestamp with time zone: ""
+2026/01/28 16:44:24 errors.go:13: Error 500: pq: invalid input syntax for type timestamp with time zone: ""
+2026/01/28 16:44:35 errors.go:13: Error 500: pq: invalid input syntax for type timestamp with time zone: ""
+2026/01/28 16:46:05 main.go:24: Application started
+2026/01/28 16:46:06 errors.go:13: Error 500: pq: invalid input syntax for type timestamp with time zone: ""
+2026/01/28 16:47:17 main.go:24: Application started
+2026/01/28 16:47:21 errors.go:13: Error 500: pq: invalid input syntax for type timestamp with time zone: ""
+2026/01/28 16:47:49 errors.go:13: Error 500: pq: invalid input syntax for type timestamp with time zone: ""
+2026/01/28 16:48:45 main.go:24: Application started
+2026/01/28 16:48:46 errors.go:13: Error 500: pq: invalid input syntax for type timestamp with time zone: ""
+2026/01/28 16:49:31 main.go:24: Application started
+2026/01/28 16:49:32 errors.go:13: Error 500: pq: invalid input syntax for type timestamp with time zone: ""
+2026/01/28 16:49:57 main.go:24: Application started
+2026/01/28 16:49:58 errors.go:13: Error 500: pq: null value in column "created_at" of relation "series" violates not-null constraint
+2026/01/28 16:53:19 main.go:24: Application started
+2026/01/28 16:53:23 errors.go:13: Error 500: pq: got 8 parameters but the statement requires 10
+2026/01/28 16:55:54 main.go:24: Application started
+2026/01/28 16:56:10 main.go:24: Application started
+2026/01/28 16:56:11 errors.go:13: Error 500: pq: insert or update on table "series" violates foreign key constraint "series_added_by_fkey"
+2026/01/28 16:57:19 errors.go:13: Error 500: pq: insert or update on table "series" violates foreign key constraint "series_added_by_fkey"
+2026/01/28 16:59:37 main.go:24: Application started
+2026/01/28 16:59:45 errors.go:13: Error 500: pq: insert or update on table "series" violates foreign key constraint "series_added_by_fkey"
+2026/01/28 17:01:20 main.go:24: Application started
+2026/01/28 17:01:44 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:02:07 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:02:08 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:02:08 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:02:09 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:02:10 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:02:10 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:02:11 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:02:12 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:02:13 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:02:13 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:02:14 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:02:15 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:02:15 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:02:16 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:03:45 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:03:51 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:03:51 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:03:52 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:03:53 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:03:53 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:03:54 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:03:55 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:03:55 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:03:56 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:03:56 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:04:47 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:05:05 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:05:06 errors.go:13: Error 500: pq: duplicate key value violates unique constraint "series_pkey"
+2026/01/28 17:05:55 main.go:24: Application started
+2026/01/29 10:53:53 main.go:24: Application started
+2026/01/29 12:24:55 main.go:24: Application started
+2026/01/29 12:25:22 main.go:24: Application started
+2026/01/29 12:28:52 main.go:24: Application started
+2026/01/29 12:32:33 main.go:24: Application started
+2026/01/29 12:32:35 user_submission_service.go:38: Creating 0 related submissions
+2026/01/29 12:34:06 main.go:24: Application started
+2026/01/29 12:40:47 main.go:24: Application started
+2026/01/29 12:40:49 user_submission_service.go:19: Request &{%!s(*io.LimitedReader=&{0xc00030c060 571}) <nil> %!s(*bufio.Reader=<nil>) %!s(bool=false) %!s(bool=true) {%!s(int32=0) %!s(uint32=0)} %!s(bool=false) %!s(bool=false) %!s(bool=false) %!s(func()=0x798480)} related submissions
+2026/01/29 12:42:03 main.go:24: Application started
+2026/01/29 14:11:14 main.go:24: Application started
+2026/01/29 14:13:19 main.go:24: Application started
+2026/01/29 14:19:48 main.go:24: Application started
+2026/01/29 14:22:39 main.go:24: Application started
+2026/01/29 14:23:01 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 14:28:37 main.go:24: Application started
+2026/01/29 14:28:42 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 14:29:04 main.go:24: Application started
+2026/01/29 14:29:05 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 14:32:16 main.go:24: Application started
+2026/01/29 14:32:18 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 14:32:31 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 14:34:42 main.go:24: Application started
+2026/01/29 14:34:45 serie.go:127: 1. Here 
+2026/01/29 14:34:45 serie.go:132: 2. Here 
+2026/01/29 14:34:45 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 14:38:15 main.go:24: Application started
+2026/01/29 14:42:51 main.go:24: Application started
+2026/01/29 14:48:22 main.go:24: Application started
+2026/01/29 14:52:58 main.go:24: Application started
+2026/01/29 14:53:00 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 14:57:00 main.go:24: Application started
+2026/01/29 14:57:01 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 14:57:02 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 14:57:51 main.go:24: Application started
+2026/01/29 14:58:42 main.go:24: Application started
+2026/01/29 15:00:07 main.go:24: Application started
+2026/01/29 15:01:10 main.go:24: Application started
+2026/01/29 15:02:44 main.go:24: Application started
+2026/01/29 15:03:44 main.go:24: Application started
+2026/01/29 15:06:33 main.go:24: Application started
+2026/01/29 15:07:24 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 15:14:07 main.go:24: Application started
+2026/01/29 15:14:08 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 15:15:15 main.go:24: Application started
+2026/01/29 15:15:18 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 15:15:40 main.go:24: Application started
+2026/01/29 15:15:42 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 15:16:08 main.go:24: Application started
+2026/01/29 15:16:09 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 15:16:26 errors.go:13: Error 500: sql: Scan error on column index 6, name "vo_end": converting NULL to string is unsupported
+2026/01/29 15:17:46 main.go:24: Application started
+2026/01/29 15:17:49 errors.go:13: Error 500: sql: Scan error on column index 6, name "vo_end": converting NULL to string is unsupported
+2026/01/29 15:20:07 main.go:24: Application started
+2026/01/29 15:20:08 errors.go:13: Error 500: pq: there is no parameter $1
+2026/01/29 15:28:08 main.go:24: Application started
+2026/01/29 15:28:10 errors.go:13: Error 500: pq: there is no parameter $1
+2026/01/29 15:29:54 main.go:24: Application started
+2026/01/29 15:29:55 errors.go:13: Error 500: pq: null value in column "created_at" of relation "books" violates not-null constraint
+2026/01/29 15:30:53 main.go:24: Application started
+2026/01/29 15:31:38 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 16:00:12 main.go:24: Application started
+2026/01/29 16:00:19 errors.go:13: Error 404: sql: no rows in result set
+2026/01/29 16:00:36 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 16:03:50 main.go:24: Application started
+2026/01/29 16:03:57 errors.go:13: Error 500: Related submission (id=1) not validated
+2026/01/29 16:09:25 main.go:24: Application started
+2026/01/29 16:10:21 main.go:24: Application started
+2026/01/29 16:12:05 main.go:24: Application started
+2026/01/29 16:13:00 main.go:24: Application started
+2026/01/29 16:16:14 main.go:24: Application started
+2026/01/29 16:19:05 main.go:24: Application started
+2026/01/29 16:37:49 main.go:24: Application started
+2026/01/29 16:58:54 main.go:24: Application started
+2026/01/29 17:00:39 errors.go:13: Error 500: pq: invalid input syntax for type json
+2026/01/29 17:01:46 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 17:03:31 main.go:24: Application started
+2026/01/29 17:03:32 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 17:03:58 main.go:24: Application started
+2026/01/29 17:04:00 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 17:05:54 main.go:24: Application started
+2026/01/29 17:06:06 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 17:09:26 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 17:10:08 main.go:24: Application started
+2026/01/29 17:10:12 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 17:10:18 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 17:10:56 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 17:11:16 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 17:12:20 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 17:12:35 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 17:16:13 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 17:19:15 errors.go:13: Error 500: sql: no rows in result set
+2026/01/29 17:19:45 main.go:24: Application started
+2026/01/29 17:19:48 errors.go:13: Error 500: pq: syntax error at or near "desc"
+2026/01/29 17:20:06 main.go:24: Application started
+2026/01/29 17:20:12 errors.go:13: Error 500: pq: syntax error at or near "desc"
+2026/01/29 17:23:44 main.go:24: Application started
+2026/01/29 17:23:48 errors.go:13: Error 500: pq: syntax error at or near "desc"
