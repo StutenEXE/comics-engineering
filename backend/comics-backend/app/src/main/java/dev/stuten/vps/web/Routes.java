@@ -13,17 +13,19 @@ import io.javalin.Javalin;
 public class Routes {
 
     @SuppressWarnings("null")
-    private static List<Router> routers = Arrays.asList(new UserRouter());
+    private static List<Router> routers = Arrays.asList(
+        new UserRouter()
+    );
 
     public static void register(Javalin app) {
 
         // Authentification required for these paths
-        app.before("/prv/*", AuthMiddleware::authenticate);
-        app.before("/adm/*", AuthMiddleware::authenticate);
+        app.before("/api/comics/prv/*", AuthMiddleware::authenticate);
+        app.before("/api/comics/adm/*", AuthMiddleware::authenticate);
 
         // Has to be admin to access path (implicitly, prv accessible by any logged
         // user)
-        app.before("/adm/*", RoleMiddleware.require(Role.ADMIN));
+        app.before("/api/comics/adm/*", RoleMiddleware.require(Role.ADMIN));
 
         // Register all routers
         for (Router router : routers) {

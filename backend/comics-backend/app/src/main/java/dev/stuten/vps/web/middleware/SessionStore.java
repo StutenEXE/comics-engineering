@@ -9,7 +9,7 @@ public class SessionStore {
 
     public static final String SESSION_PREFIX = "comics-session:";
 
-    private static final RedisClient redisClient = RedisClient.create(System.getProperty("redis.url"));
+    private static final RedisClient redisClient = RedisClient.create(System.getenv("COMICS_REDIS_URL"));
     private static final RedisCommands<String, String> redis = redisClient.connect().sync();
 
     private static final int TTL_SECONDS = 30 * 60; // 30 minutes sliding session
@@ -24,7 +24,7 @@ public class SessionStore {
     }
 
     // Save a session
-    public static void save(String token, String userId, Role role) {
+    public static void save(String token, Integer userId, Role role) {
         String value = userId + ":" + role.name();
         redis.setex(SESSION_PREFIX + token, TTL_SECONDS, value);
     }

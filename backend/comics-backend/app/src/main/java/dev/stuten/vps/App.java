@@ -3,23 +3,29 @@
  */
 package dev.stuten.vps;
 
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import dev.stuten.vps.web.Routes;
 import io.javalin.Javalin;
+import io.javalin.json.JavalinJackson;
 
 public class App {
-    
+
     public static void main(String[] args) {
+
         int port = Integer.parseInt(
-            System.getProperty("server.port", "8080")
-        );
+                System.getProperty("server.port", "8080"));
 
         Javalin app = Javalin.create(config -> {
             config.http.defaultContentType = "application/json";
+            config.jsonMapper(new JavalinJackson().updateMapper(mapper -> {
+                mapper.registerModule(new Jdk8Module());
+                mapper.registerModule(new JavaTimeModule());
+            }));
         });
 
         Routes.register(app);
-
-        System.out.println("%Mains");
 
         app.start(port);
     }

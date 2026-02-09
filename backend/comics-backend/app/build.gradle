@@ -9,10 +9,11 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
+
+    id 'nu.studer.jooq' version '8.2'
 }
 
 repositories {
-    // Use Maven Central for resolving dependencies.
     mavenCentral()
 }
 
@@ -20,12 +21,26 @@ dependencies {
     // This dependency is used by the application.
     implementation libs.guava
 
+    // Lombok
+    compileOnly("org.projectlombok:lombok:1.18.42")
+	annotationProcessor("org.projectlombok:lombok:1.18.42")
+	testCompileOnly("org.projectlombok:lombok:1.18.42")
+	testAnnotationProcessor("org.projectlombok:lombok:1.18.42")
+
     // Javalin
     implementation 'io.javalin:javalin:6.3.0'
 
-
     // JSON
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.15.2' // Optional<T> handling
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2' // java.time.OffsetDateTime handling
+
+    // BCrypt
+    implementation 'org.mindrot:jbcrypt:0.4'
+
+    // QueryDSL
+    implementation 'com.querydsl:querydsl-jpa:5.0.0'
+    annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jpa'
 
     // JDBC pool
     implementation 'com.zaxxer:HikariCP:5.1.0'
@@ -40,6 +55,12 @@ dependencies {
     implementation 'org.slf4j:slf4j-simple:2.0.13'
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+
+    // jOOQ
+    implementation 'org.jooq:jooq:3.20.11'
+    implementation 'org.jooq:jooq-meta:3.20.11'
+    implementation 'org.jooq:jooq-codegen:3.20.11'
+    jooqGenerator 'org.postgresql:postgresql:42.7.3'
 }
 
 testing {
@@ -62,4 +83,43 @@ java {
 application {
     // Define the main class for the application.
     mainClass = 'dev.stuten.vps.App'
+}
+
+jooq {
+    configurations {
+        main {
+            generationTool {
+                jdbc {
+                    driver = 'org.postgresql.Driver'  // Change based on your DB
+                    url = System.getenv('DB_URL') 
+                    user = System.getenv('DB_USER') 
+                    password = System.getenv('DB_PASSWORD')
+                }
+                generator {
+                    name = 'org.jooq.codegen.DefaultGenerator'
+                    database {
+                        name = 'org.jooq.meta.postgres.PostgresDatabase'  // Change based on your DB
+                        inputSchema = 'public'
+                    }
+                    generate {
+                        records = true // Table records
+                        deprecated = false // Skip deprecated fields
+                        javaTimeTypes = true // LocalDateTime instead of Timestamp
+                    }
+                    target {
+                        packageName = 'dev.stuten.vps.jooq'
+                        directory = 'build/generated-src/jooq/'
+                    }
+                }
+            }
+        }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java', 'build/generated-src/jooq']
+        }
+    }
 }
