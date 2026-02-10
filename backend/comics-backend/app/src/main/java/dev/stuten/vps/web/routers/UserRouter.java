@@ -8,12 +8,12 @@ public class UserRouter implements Router {
 
     @Override
     public void register(Javalin app) {
-        // app.get("/pub/example", ctx -> ctx.json("public example"));
-        // app.get("/prv/example", ctx -> ctx.json("private example"));
-        // app.get("/adm/example", ctx -> ctx.json("admin example"));
+        // Public
+        app.post(APIPathBuilder.buildPublicPath("/signup"), UserService::signupService);
+        app.post(APIPathBuilder.buildPublicPath("/login"), UserService::loginService);
+        app.get(APIPathBuilder.buildPublicPath("/refresh"), UserService::refreshAuth);
 
-        app.post(APIPathBuilder.buildPublicPath("/signup"), UserService::SignupService);
-        app.post(APIPathBuilder.buildPublicPath("/login"), UserService::LoginService);
+        // Admin
     }
     
 }

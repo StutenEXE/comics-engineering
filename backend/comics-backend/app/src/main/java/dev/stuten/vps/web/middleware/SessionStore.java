@@ -26,12 +26,12 @@ public final class SessionStore {
     // Save a session
     public static void save(String token, Integer userId, Role role) {
         String value = userId + ":" + role.name();
-        redis.setex(SESSION_PREFIX + token, TTL_SECONDS, value);
+        redis.setex(token, TTL_SECONDS, value);
     }
 
     // Find a session
     public static Session find(String token) {
-        String value = redis.get(SESSION_PREFIX + token);
+        String value = redis.get(token);
         if (value == null) {
             return null;
         }
@@ -46,11 +46,11 @@ public final class SessionStore {
 
     // Refresh TTL
     public static void refresh(String token) {
-        redis.expire(SESSION_PREFIX + token, TTL_SECONDS);
+        redis.expire(token, TTL_SECONDS);
     }
 
     // Delete session (logout)
     public static void delete(String token) {
-        redis.del(SESSION_PREFIX + token);
+        redis.del(token);
     }
 }
