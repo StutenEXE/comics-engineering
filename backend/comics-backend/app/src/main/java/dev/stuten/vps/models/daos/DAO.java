@@ -43,4 +43,8 @@ public abstract class DAO {
     protected <T> List<T> selectMany(Condition where) {
         return selectMany(where, getDefaultMapper());
     }
+
+    protected String toSearchPattern(String query) {
+        return "%" + query + "%";
+    }
 }

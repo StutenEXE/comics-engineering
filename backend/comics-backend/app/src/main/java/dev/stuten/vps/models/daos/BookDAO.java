@@ -82,4 +82,9 @@ public class BookDAO extends DAO {
                                 .limit(limit)
                                 .fetch(getDefaultMapper());
         }
+
+        public List<BookDTO> searchByName(String query) {
+                String searchPattern = toSearchPattern(query);
+                return super.selectMany(BOOKS.NAME.likeIgnoreCase(searchPattern));
+        }
 }

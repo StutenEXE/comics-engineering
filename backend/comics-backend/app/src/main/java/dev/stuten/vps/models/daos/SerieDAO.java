@@ -6,6 +6,7 @@ import static dev.stuten.vps.jooq.tables.Users.USERS;
 import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.select;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.jooq.DSLContext;
@@ -60,4 +61,8 @@ public class SerieDAO extends DAO {
         return super.selectOne(SERIES.ID.eq(id));
     }
 
+    public List<SerieDTO> searchByName(String query) {
+        String searchPattern = toSearchPattern(query);
+        return super.selectMany(SERIES.NAME.likeIgnoreCase(searchPattern));
+    }
 }
