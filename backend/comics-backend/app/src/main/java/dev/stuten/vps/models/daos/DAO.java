@@ -33,8 +33,6 @@ public abstract class DAO {
     protected <T> List<T> selectMany(Condition where, RecordMapper<? super Record, T> mapper) {
         return getDefaultSelectStatement()
             .where(where)
-            .offset(1)
-            .limit(1)
             .fetch(mapper);
     }
     

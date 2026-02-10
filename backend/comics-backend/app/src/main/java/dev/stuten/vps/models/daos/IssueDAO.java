@@ -69,6 +69,9 @@ public class IssueDAO extends DAO {
         }
 
         public List<IssueDTO> findByBookId(Integer bookID) {
-                return super.selectMany(BOOKS.ID.eq(bookID));
+                return super.selectMany(ISSUES.ID.in(
+                                select(BOOKS_ISSUES.ISSUE_ID)
+                                                .from(BOOKS_ISSUES)
+                                                .where(BOOKS_ISSUES.BOOK_ID.eq(bookID))));
         }
 }

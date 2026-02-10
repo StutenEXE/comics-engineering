@@ -50,7 +50,7 @@ public class EditionDAO extends DAO {
                 .set(EDITIONS.PARUTION_DATE, dto.parutionDate())
                 .set(EDITIONS.PUBLISHER_ID, dto.publisher().id())
                 .set(EDITIONS.BOOK_ID, dto.book().id())
-                .set(BOOKS.ADDED_BY, dto.addedBy().id())
+                .set(EDITIONS.ADDED_BY, dto.addedBy().id())
                 .returning(EDITIONS.asterisk())
                 .fetchOptional(EditionMapper::mapToDTO);
     }

@@ -10,6 +10,7 @@ import dev.stuten.vps.web.routers.BookRouter;
 import dev.stuten.vps.web.routers.EditionRouter;
 import dev.stuten.vps.web.routers.IssueRouter;
 import dev.stuten.vps.web.routers.IssueSerieRouter;
+import dev.stuten.vps.web.routers.PublisherRouter;
 import dev.stuten.vps.web.routers.Router;
 import dev.stuten.vps.web.routers.UserRouter;
 import dev.stuten.vps.web.routers.utils.APIPathBuilder;
@@ -23,6 +24,7 @@ public class Routes {
         new EditionRouter(),
         new IssueRouter(),
         new IssueSerieRouter(),
+        new PublisherRouter(),
         new UserRouter()
     );
 
