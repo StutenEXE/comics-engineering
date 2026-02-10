@@ -27,7 +27,7 @@ public class IssueSerieService {
             return; // For compiler
         }
 
-        // Get book by id
+        // Get issue serie by id
         Optional<IssueSerieDTO> issueSerie = dao.findById(id);
         if (issueSerie.isEmpty()) {
             String message = String.format("Issue serie of id %s not found", id);

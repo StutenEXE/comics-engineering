@@ -26,7 +26,7 @@ public class EditionService {
             return; // For compiler
         }
 
-        // Get book by id
+        // Get edition by id
         Optional<EditionDTO> edition = dao.findById(id);
         if (edition.isEmpty()) {
             String message = String.format("Edition of id %s not found", id);
