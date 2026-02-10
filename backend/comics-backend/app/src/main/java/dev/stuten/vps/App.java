@@ -19,10 +19,19 @@ public class App {
 
         Javalin app = Javalin.create(config -> {
             config.http.defaultContentType = "application/json";
+            // Jackson modules
             config.jsonMapper(new JavalinJackson().updateMapper(mapper -> {
                 mapper.registerModule(new Jdk8Module());
                 mapper.registerModule(new JavaTimeModule());
             }));
+            // CORS policy
+            config.bundledPlugins.enableCors(cors -> {
+                cors.addRule(it -> {
+                    // Dev rule
+                    it.allowHost("http://localhost:5173");
+                    it.allowCredentials = true; 
+                });
+            });
         });
 
         Routes.register(app);

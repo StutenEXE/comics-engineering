@@ -10,22 +10,19 @@ public final class AuthMiddleware {
 
     public static void authenticate(Context ctx) {
 
-        String auth = ctx.cookie("session_id");
-        if (auth == null || auth.isEmpty()) {
+        String sessionKey = ctx.cookie("session_id");
+        if (sessionKey == null || sessionKey.isEmpty()) {
             throw new HttpResponseException(HttpStatus.UNAUTHORIZED, "Missing token", new HashMap<String,String>());
-        }
-
-        // Removing session prefix
-        String token = auth.substring(SessionStore.SESSION_PREFIX.length());
+        };
 
         // Example Redis lookup
-        Session session = SessionStore.find(token);
+        Session session = SessionStore.find(sessionKey);
         if (session == null) {
             throw new HttpResponseException(HttpStatus.UNAUTHORIZED, "Invalid session", new HashMap<String,String>());
         }
 
         // Sliding expiration
-        SessionStore.refresh(token);
+        SessionStore.refresh(sessionKey);
 
         ctx.attribute("auth", new AuthContext(
                 session.userId(),

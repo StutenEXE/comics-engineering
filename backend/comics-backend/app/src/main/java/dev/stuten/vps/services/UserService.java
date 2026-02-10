@@ -1,5 +1,6 @@
 package dev.stuten.vps.services;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -102,7 +103,28 @@ public class UserService {
             ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid session", "No user found for this session");
         }
 
+        // Refresh session
         SessionStore.refresh(sessionKey);
         ctx.json(Map.of("user", user));
+    }
+
+    public static void getList(Context ctx) {
+         Integer from, limit;
+        try {
+            from = Integer.parseInt(ctx.queryParam("from"));
+            limit = Integer.parseInt(ctx.queryParam("limit"));
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing 'from' or 'limit' or NaN 'from' or 'limit'");
+            return; // For compiler
+        }
+
+        if (from < 0 || limit <= 0) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "", "'from' < 0 or 'limit' <= 0");
+        }
+
+        // Retreive users
+        List<UserDTO> users = dao.getUsers(from, limit);
+
+        ctx.json(Map.of("users", users));
     }
 }

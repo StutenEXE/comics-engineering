@@ -1,5 +1,6 @@
 package dev.stuten.vps.models.daos;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.jooq.DSLContext;
@@ -61,6 +62,13 @@ public class UserDAO extends DAO {
 
     public Optional<UserWithPasswordDTO> findByEmailWithPassword(String email) {
         return selectOne(USERS.EMAIL.eq(email), UserMapper::mapToPasswordDTO);
+    }
+
+    public List<UserDTO> getUsers(Integer from, Integer limit) {
+        return getDefaultSelectStatement()
+                        .offset(from)
+                        .limit(limit)
+                        .fetch(getDefaultMapper());
     }
 
 }

@@ -14,6 +14,7 @@ public class UserRouter implements Router {
         app.get(APIPathBuilder.buildPublicPath("/refresh"), UserService::refreshAuth);
 
         // Admin
+        app.get(APIPathBuilder.buildAdminPath("/users/list"), UserService::getList);
     }
     
 }
