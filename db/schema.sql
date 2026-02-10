@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS issue_series (
 	"desc" TEXT,
 	vo_start TIMESTAMPTZ NOT NULL,
 	vo_end TIMESTAMPTZ,
-	added_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+	added_by INT REFERENCES users(id) ON DELETE SET NULL,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	modified_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -33,8 +33,8 @@ CREATE TABLE IF NOT EXISTS issues (
 	is_annual BOOLEAN,
 	has_backup BOOLEAN,
 	backup_name TEXT,
-	series_id BIGINT REFERENCES issue_series(id) ON DELETE SET NULL,
-	added_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+	series_id INT REFERENCES issue_series(id) ON DELETE SET NULL,
+	added_by INT REFERENCES users(id) ON DELETE SET NULL,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	modified_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -53,10 +53,10 @@ CREATE TABLE IF NOT EXISTS series (
 	name TEXT NOT NULL,
 	ongoing BOOLEAN NOT NULL DEFAULT FALSE,
 	oneshot BOOLEAN NOT NULL DEFAULT FALSE,
-	nvolumes TEXT,
+	nvolumes SMALLINT,
 	vo_start TIMESTAMPTZ,
 	vo_end TIMESTAMPTZ,
-	added_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+	added_by INT REFERENCES users(id) ON DELETE SET NULL,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	modified_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -68,8 +68,8 @@ CREATE TABLE IF NOT EXISTS books (
 	"desc" TEXT,
 	number INTEGER,
 	vo_content TEXT,
-	series_id BIGINT REFERENCES series(id) ON DELETE SET NULL,
-	added_by BIGINT REFERENCES users(id) ON DELETE SET null,
+	series_id INT REFERENCES series(id) ON DELETE SET NULL,
+	added_by INT REFERENCES users(id) ON DELETE SET null,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	modified_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -77,8 +77,8 @@ CREATE TABLE IF NOT EXISTS books (
 -- Editions
 CREATE TABLE IF NOT EXISTS editions (
 	id SERIAL PRIMARY KEY,
-	publisher_id BIGINT REFERENCES publishers(id) ON DELETE SET NULL,
-	book_id BIGINT NOT NULL REFERENCES books(id) ON DELETE CASCADE,
+	publisher_id INT REFERENCES publishers(id) ON DELETE SET NULL,
+	book_id INT NOT NULL REFERENCES books(id) ON DELETE CASCADE,
 	isbn VARCHAR(20),
 	ean VARCHAR(20),
 	price REAL,
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS editions (
 	img_url TEXT,
 	cover_type TEXT,
 	parution_date TIMESTAMPTZ,
-	added_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+	added_by INT REFERENCES users(id) ON DELETE SET NULL,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	modified_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -94,8 +94,8 @@ CREATE TABLE IF NOT EXISTS editions (
 -- Edition ownership (not composed primary key if edition is deleted)
 CREATE TABLE IF NOT EXISTS edition_ownership (
 	id SERIAL PRIMARY KEY,
-	user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-	edition_id BIGINT NOT NULL REFERENCES editions(id) ON DELETE SET NULL,
+	user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	edition_id INT NOT NULL REFERENCES editions(id) ON DELETE SET NULL,
 	read BOOLEAN NOT NULL DEFAULT FALSE,
 	gift BOOLEAN NOT NULL DEFAULT FALSE,
 	buy_price NUMERIC(10,2),
@@ -104,15 +104,15 @@ CREATE TABLE IF NOT EXISTS edition_ownership (
 
 -- Wishlist (composed primary key)
 CREATE TABLE IF NOT EXISTS wishlist (
-	user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-	book_id BIGINT NOT NULL REFERENCES books(id) ON DELETE CASCADE,
+	user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	book_id INT NOT NULL REFERENCES books(id) ON DELETE CASCADE,
 	PRIMARY KEY (user_id, book_id)
 );
 
 -- Books-Issues
 CREATE TABLE IF NOT EXISTS books_issues (
-	book_id BIGINT NOT NULL REFERENCES books(id) ON DELETE CASCADE,
-	issue_id BIGINT NOT NULL REFERENCES issues(id) ON DELETE CASCADE,
+	book_id INT NOT NULL REFERENCES books(id) ON DELETE CASCADE,
+	issue_id INT NOT NULL REFERENCES issues(id) ON DELETE CASCADE,
 	PRIMARY KEY (book_id, issue_id)
 );
 
@@ -124,8 +124,8 @@ CREATE TYPE submission_action_enum AS ENUM ('create', 'update', 'delete');
 -- User Submissions
 CREATE TABLE IF NOT EXISTS user_submissions (
 	id SERIAL PRIMARY KEY,
-	user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-	related_to BIGINT REFERENCES user_submissions(id) ON DELETE SET NULL,
+	user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	related_to INT REFERENCES user_submissions(id) ON DELETE SET NULL,
 	submission_type submission_type_enum NOT NULL,
 	submission_action submission_action_enum  NOT NULL,
 	submission_data JSONB NOT NULL,

@@ -5,6 +5,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.javalin.http.HttpResponseException;
+import io.javalin.http.HttpStatus;
 
 public class ErrorResponse {
 
@@ -14,7 +15,7 @@ public class ErrorResponse {
     ) {}
 
 
-    public static void send(int code, String error, String message) {
+    public static void send(HttpStatus code, String error, String message) {
          throw new HttpResponseException(code, error, Map.of("error", error, "message", message));
     }
 }

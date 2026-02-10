@@ -91,9 +91,9 @@ jooq {
             generationTool {
                 jdbc {
                     driver = 'org.postgresql.Driver'  // Change based on your DB
-                    url = System.getenv('DB_URL') 
-                    user = System.getenv('DB_USER') 
-                    password = System.getenv('DB_PASSWORD')
+                    url = System.getenv('COMICS_DB_URL') 
+                    user = System.getenv('COMICS_DB_USER') 
+                    password = System.getenv('COMICS_DB_PASSWORD')
                 }
                 generator {
                     name = 'org.jooq.codegen.DefaultGenerator'

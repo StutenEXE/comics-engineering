@@ -6,6 +6,7 @@ import java.util.List;
 import dev.stuten.vps.web.middleware.AuthMiddleware;
 import dev.stuten.vps.web.middleware.Role;
 import dev.stuten.vps.web.middleware.RoleMiddleware;
+import dev.stuten.vps.web.routers.BookRouter;
 import dev.stuten.vps.web.routers.Router;
 import dev.stuten.vps.web.routers.UserRouter;
 import io.javalin.Javalin;
@@ -14,6 +15,7 @@ public class Routes {
 
     @SuppressWarnings("null")
     private static List<Router> routers = Arrays.asList(
+        new BookRouter(),
         new UserRouter()
     );
 

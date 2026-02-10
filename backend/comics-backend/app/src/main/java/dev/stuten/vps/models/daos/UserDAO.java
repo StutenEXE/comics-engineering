@@ -10,6 +10,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import dev.stuten.vps.jooq.tables.Users;
 import dev.stuten.vps.models.dtos.UserDTO;
 import dev.stuten.vps.models.dtos.UserWithPasswordDTO;
+import dev.stuten.vps.models.mappers.UserMapper;
 
 public class UserDAO extends DAO {
 
@@ -35,48 +36,25 @@ public class UserDAO extends DAO {
                 .set(Users.USERS.EMAIL, dto.email())
                 .set(Users.USERS.PASSWORD, hashedPwd)
                 .returning(Users.USERS.asterisk())
-                .fetchOptional(this::mapToDTO);
+                .fetchOptional(UserMapper::mapToDTO);
     }
 
     public Optional<UserDTO> findById(Integer id) {
         return DSL().selectFrom(Users.USERS)
                 .where(Users.USERS.ID.eq(id))
-                .fetchOptional(this::mapToDTO);
+                .fetchOptional(UserMapper::mapToDTO);
     }
 
     public Optional<UserDTO> findByEmail(String email) {
         return DSL().selectFrom(Users.USERS)
                 .where(Users.USERS.EMAIL.eq(email))
-                .fetchOptional(this::mapToDTO);
+                .fetchOptional(UserMapper::mapToDTO);
     }
 
     public Optional<UserWithPasswordDTO> findByEmailWithPassword(String email) {
         return DSL().selectFrom(Users.USERS)
                 .where(Users.USERS.EMAIL.eq(email))
-                .fetchOptional(this::mapToPasswordDTO);
-    }
-
-    private UserDTO mapToDTO(Record r) {
-        UserDTO dto = new UserDTO(
-                r.get(Users.USERS.ID),
-                r.get(Users.USERS.USERNAME),
-                r.get(Users.USERS.EMAIL),
-                r.get(Users.USERS.IS_ADMIN),
-                r.get(Users.USERS.CREATED_AT).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                r.get(Users.USERS.MODIFIED_AT).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        return dto;
-    }
-
-    private UserWithPasswordDTO mapToPasswordDTO(Record r) {
-        UserWithPasswordDTO dto = new UserWithPasswordDTO(
-                r.get(Users.USERS.ID),
-                r.get(Users.USERS.USERNAME),
-                r.get(Users.USERS.EMAIL),
-                r.get(Users.USERS.PASSWORD),
-                r.get(Users.USERS.IS_ADMIN),
-                r.get(Users.USERS.CREATED_AT).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                r.get(Users.USERS.MODIFIED_AT).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        return dto;
+                .fetchOptional(UserMapper::mapToPasswordDTO);
     }
 
 }

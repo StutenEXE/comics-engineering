@@ -9,7 +9,6 @@ import java.util.HashMap;
 public class AuthMiddleware {
 
     public static void authenticate(Context ctx) {
-        System.out.println("AuthMiddleware");
 
         String auth = ctx.cookie("session_id");
         if (auth == null || auth.isEmpty()) {
