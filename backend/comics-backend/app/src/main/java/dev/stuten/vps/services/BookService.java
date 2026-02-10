@@ -1,5 +1,7 @@
 package dev.stuten.vps.services;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import dev.stuten.vps.db.JooqProvider;
@@ -11,7 +13,7 @@ import io.javalin.http.HttpStatus;
 
 public class BookService {
     
-     private BookService() {}
+    private BookService() {}
 
     private static BookDAO dao = new BookDAO(
             JooqProvider.get());
@@ -22,7 +24,7 @@ public class BookService {
         try {
             id = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Missing ID or NaN ID", "");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
             return; // For compiler
         }
 
@@ -33,7 +35,42 @@ public class BookService {
             ErrorResponse.send(HttpStatus.NOT_FOUND, "Book not found", message);
         }
 
-        ctx.json(book);
+        ctx.json(Map.of("book", book));
     }
 
+    public static void getBySerieID(Context ctx) {
+        // Retreive serie ID from request
+        Integer serieID;
+        try {
+            serieID = Integer.parseInt(ctx.queryParam("id"));
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            return; // For compiler
+        }
+
+        // Retreive books
+        List<BookDTO> books = dao.findBySerieId(serieID);
+
+        ctx.json(Map.of("books", books));
+    }
+
+    public static void getLatest(Context ctx) {
+        Integer from, limit;
+        try {
+            from = Integer.parseInt(ctx.queryParam("from"));
+            limit = Integer.parseInt(ctx.queryParam("limit"));
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing 'from' or 'limit' or NaN 'from' or 'limit'");
+            return; // For compiler
+        }
+
+        if (from < 0 || limit <= 0) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "", "'from' < 0 or 'limit' <= 0");
+        }
+
+        // Retreive books
+        List<BookDTO> books = dao.findLatest(from, limit);
+
+        ctx.json(Map.of("books", books));
+    }
 }

@@ -9,8 +9,10 @@ import org.jooq.Result;
 import org.jooq.impl.TableImpl;
 import org.jspecify.annotations.Nullable;
 
-public class MappingUtils {
+public final class MappingUtils {
     
+    private MappingUtils() {}
+
     public static <T extends Record, @Nullable R> R getSingleDTOFromRecord(Record r, TableImpl<T> table, RecordMapper<Record, R> mapper) {
         T r2 = r.into(table);
         if (r2 == null) {
@@ -20,6 +22,7 @@ public class MappingUtils {
         return dto;
     }
 
+    @SuppressWarnings("unchecked")
     public static <R> List<R> getMultipleDTOFromRecord(Record r, String fieldName, RecordMapper<Record, R> mapper) {
         List<R> dtos = Arrays.asList();
         if (r.field(fieldName) != null) {

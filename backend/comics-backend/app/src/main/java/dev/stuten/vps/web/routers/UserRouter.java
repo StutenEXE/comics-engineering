@@ -1,6 +1,7 @@
 package dev.stuten.vps.web.routers;
 
 import dev.stuten.vps.services.UserService;
+import dev.stuten.vps.web.routers.utils.APIPathBuilder;
 import io.javalin.Javalin;
 
 public class UserRouter implements Router {
@@ -11,8 +12,8 @@ public class UserRouter implements Router {
         // app.get("/prv/example", ctx -> ctx.json("private example"));
         // app.get("/adm/example", ctx -> ctx.json("admin example"));
 
-        app.post("/api/comics/pub/signup", UserService::SignupService);
-        app.post("/api/comics/pub/login", UserService::LoginService);
+        app.post(APIPathBuilder.buildPublicPath("/signup"), UserService::SignupService);
+        app.post(APIPathBuilder.buildPublicPath("/login"), UserService::LoginService);
     }
     
 }

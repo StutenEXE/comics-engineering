@@ -1,5 +1,6 @@
 package dev.stuten.vps.services;
 
+import java.util.Map;
 import java.util.Optional;
 
 import dev.stuten.vps.db.JooqProvider;
@@ -42,8 +43,7 @@ public class UserService {
         ctx.cookie("session_id", sessionKey);
 
         // Send back account info to the client
-        ctx.json(newUser);
-        System.out.println("New user:" + dto.email());
+        ctx.json(Map.of("user", newUser));
     }
 
     public static void LoginService(Context ctx) {
@@ -71,7 +71,6 @@ public class UserService {
         ctx.cookie("session_id", sessionKey);
 
         // Send back account info to the client
-        ctx.json(user);
-        System.out.println("Log in:" + dto.email());
+        ctx.json(Map.of("user", user));
     }
 }
