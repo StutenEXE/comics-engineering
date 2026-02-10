@@ -15,7 +15,7 @@ export function meta({ params }: Route.MetaArgs) {
 
 export default function EditionPage({ params }: { params : { id: number}}) {
   
-  const { data, isLoading, error } = useEditionByIdQuery({ id: params.id, withBook: true, withPublisher: true, withUser: true });
+  const { data, isLoading, error } = useEditionByIdQuery({ id: params.id });
   const edition = data?.edition ?? null;
   const err = createError(error)
 

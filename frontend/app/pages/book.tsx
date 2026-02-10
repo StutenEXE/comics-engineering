@@ -18,7 +18,7 @@ export function meta({ params }: Route.MetaArgs) {
 export default function BookPage({ params }: { params : { id: number}}) {
   
   // No issues to limit lag, refetch in other component
-  const { data, isLoading, error } = useBookByIdQuery({ id: params.id, withEditions: true, withSerie: true, withIssues: false,  withUser: true });
+  const { data, isLoading, error } = useBookByIdQuery({ id: params.id });
   const book = data?.book ?? null;
   const err = createError(error)
 
