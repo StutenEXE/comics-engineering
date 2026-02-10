@@ -6,7 +6,7 @@ import io.javalin.http.HttpStatus;
 
 import java.util.HashMap;
 
-public class AuthMiddleware {
+public final class AuthMiddleware {
 
     public static void authenticate(Context ctx) {
 

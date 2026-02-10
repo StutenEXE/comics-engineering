@@ -5,7 +5,7 @@ import java.util.UUID;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.sync.RedisCommands;
 
-public class SessionStore {
+public final class SessionStore {
 
     public static final String SESSION_PREFIX = "comics-session:";
 

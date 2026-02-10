@@ -7,7 +7,7 @@ import io.javalin.http.HttpStatus;
 
 import java.util.HashMap;
 
-public class RoleMiddleware {
+public final class RoleMiddleware {
 
     private RoleMiddleware() {
     }
