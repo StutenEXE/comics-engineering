@@ -39,6 +39,7 @@ public class BookMapper {
                 bookRecord.getDesc(),
                 bookRecord.getNumber(), 
                 bookRecord.getVoContent(),
+                bookRecord.getImgUrl(),
                 serie,
                 editions,
                 issues,

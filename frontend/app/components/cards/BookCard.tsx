@@ -28,7 +28,7 @@ export function BookCard({ book, className}: BookCardProps) {
             <div className={`h-full flex flex-col items-center justify-between ${className}`}>
                 <div className="p-1 flex-shrink-0">
                     <img
-                        src={book.editions[0].imgUrl}
+                        src={book.imgUrl}
                         alt={book.name}
                         className="w-full h-full object-cover rounded"
                     />

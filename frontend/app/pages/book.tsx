@@ -27,7 +27,7 @@ export default function BookPage({ params }: { params : { id: number}}) {
   ]
 
   return (
-    <PageTemplate hasImg={true} imgUrl={book?.editions[0].imgUrl} imgAlt={book?.name} links={links}>
+    <PageTemplate hasImg={true} imgUrl={book?.imgUrl} imgAlt={book?.name} links={links}>
       { isLoading && (
         <div className="flex items-center justify-center">
             <h1 className="text-3xl text-gray-500">Loading book...</h1>

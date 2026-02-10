@@ -38,3 +38,6 @@ INSERT INTO issues(series_id, added_by, "name", "number", cover_date, parution_d
 INSERT INTO books_issues(book_id, issue_id) VALUES
     -- Batman metal T1
     (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8);
+
+-- Add the first edition image to the book as a default img
+UPDATE books b SET img_url = (select e.img_url from editions e where e.book_id = b.id order by e.parution_date  ASC limit 1);

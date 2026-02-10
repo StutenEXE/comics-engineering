@@ -16,6 +16,7 @@ public record BookDTO(
                 @JsonProperty("desc") String desc,
                 @JsonProperty("number") Integer number,
                 @JsonProperty("voContent") String voContent,
+                @JsonProperty("imgUrl") String imgUrl,
                 @JsonProperty("serie") SerieDTO serie,
                 @JsonProperty("editions") List<EditionDTO> editions,
                 @JsonProperty("issues") List<IssueDTO> issues,

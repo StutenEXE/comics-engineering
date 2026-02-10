@@ -62,6 +62,7 @@ public class BookDAO extends DAO {
                                 .set(BOOKS.DESC, dto.desc())
                                 .set(BOOKS.NUMBER, dto.number())
                                 .set(BOOKS.VO_CONTENT, dto.voContent())
+                                .set(BOOKS.IMG_URL, dto.imgUrl())
                                 .set(BOOKS.SERIES_ID, dto.serie().id())
                                 .set(BOOKS.ADDED_BY, dto.addedBy().id())
                                 .returning(BOOKS.asterisk())

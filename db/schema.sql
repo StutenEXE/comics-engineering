@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS books (
 	"desc" TEXT,
 	number INTEGER,
 	vo_content TEXT,
+	img_url TEXT,
 	series_id INT REFERENCES series(id) ON DELETE SET NULL,
 	added_by INT REFERENCES users(id) ON DELETE SET null,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
