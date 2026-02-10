@@ -23,7 +23,7 @@ export default function LandingPage() {
   const from = page * BOOKS_PER_PAGE;
   
   // Fetch books for current page
-  const { data, error, isFetching } = useLatestBooksQuery({ from, limit: BOOKS_PER_PAGE, withEditions: true, withSerie: true, withIssues: false, withUser: false });
+  const { data, error, isFetching } = useLatestBooksQuery({ from, limit: BOOKS_PER_PAGE });
   const books = data?.books ?? [];
 
   const handleNextPage = () => {

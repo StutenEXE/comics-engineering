@@ -1,0 +1,130 @@
+package dev.stuten.vps.services;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import dev.stuten.vps.db.JooqProvider;
+import dev.stuten.vps.models.daos.UserDAO;
+import dev.stuten.vps.models.dtos.UserDTO;
+import dev.stuten.vps.models.dtos.UserWithPasswordDTO;
+import dev.stuten.vps.web.ErrorResponse;
+import dev.stuten.vps.web.middleware.Role;
+import dev.stuten.vps.web.middleware.Session;
+import dev.stuten.vps.web.middleware.SessionStore;
+import io.javalin.http.Context;
+import io.javalin.http.HttpStatus;
+
+public class UserService {
+
+    private UserService() {}
+
+    private final static String SESSION_KEY_NAME = "session_id";
+
+    private static UserDAO dao = new UserDAO(
+            JooqProvider.get());
+
+    public static void signupService(Context ctx) {
+        UserWithPasswordDTO dto = ctx.bodyAsClass(UserWithPasswordDTO.class);
+
+        // If email already in use
+        if (dao.findByEmail(dto.email()).isPresent()) {
+            ErrorResponse.send(HttpStatus.CONFLICT, "Email already in use", "");
+        }
+
+        // Create user
+        Optional<UserDTO> optUser = dao.create(dto);
+
+        // If user was not created
+        if (optUser.isEmpty()) {
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Account not created", "");
+        }
+        UserDTO newUser = optUser.get();
+
+        // Log in user
+        String sessionKey = SessionStore.createSessionKey();
+        SessionStore.save(sessionKey, newUser.id(), newUser.isAdmin() ? Role.ADMIN : Role.USER);
+        ctx.cookie(SESSION_KEY_NAME, sessionKey);
+
+        // Send back account info to the client
+        ctx.json(Map.of("user", newUser));
+    }
+
+    public static void loginService(Context ctx) {
+        UserWithPasswordDTO dto = ctx.bodyAsClass(UserWithPasswordDTO.class);
+
+        // Database lookup
+        Optional<UserWithPasswordDTO> optUser = dao.findByEmailWithPassword(dto.email());
+        // No user found
+        if (optUser.isEmpty()) {
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid credentials", "");
+        }
+
+        UserWithPasswordDTO userPwd = optUser.get();
+        // Check password validity
+        if (!UserDAO.checkPassword(userPwd.password(), dto.password())) {
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid credentials", "");
+        }
+
+        // Remove password for safety
+        UserDTO user = UserDAO.removePassword(userPwd);
+
+        // Log in user
+        String sessionKey = SessionStore.createSessionKey();
+        SessionStore.save(sessionKey, user.id(), user.isAdmin() ? Role.ADMIN : Role.USER);
+        ctx.cookie(SESSION_KEY_NAME, sessionKey);
+
+        // Send back account info to the client
+        ctx.json(Map.of("user", user));
+    }
+
+    public static void refreshAuth(Context ctx) {
+        // Retreive session key
+        String sessionKey = ctx.cookie(SESSION_KEY_NAME);
+        if (sessionKey == null || sessionKey.isBlank()) {
+            ctx.removeCookie(SESSION_KEY_NAME);
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid session", "No session key");
+        }
+
+        // Retreive session
+        Session session = SessionStore.find(sessionKey);
+        if (session == null) {
+            ctx.removeCookie(SESSION_KEY_NAME);
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid session", "Session terminated");
+            return; // For compiler
+        }
+
+        // Get user in session
+        Optional<UserDTO> user = dao.findById(Integer.parseInt(session.userId()));
+        System.out.println(user.toString());
+        if (user.isEmpty()) {
+            ctx.removeCookie(SESSION_KEY_NAME);
+            SessionStore.delete(sessionKey);
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid session", "No user found for this session");
+        }
+
+        // Refresh session
+        SessionStore.refresh(sessionKey);
+        ctx.json(Map.of("user", user));
+    }
+
+    public static void getList(Context ctx) {
+         Integer from, limit;
+        try {
+            from = Integer.parseInt(ctx.queryParam("from"));
+            limit = Integer.parseInt(ctx.queryParam("limit"));
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing 'from' or 'limit' or NaN 'from' or 'limit'");
+            return; // For compiler
+        }
+
+        if (from < 0 || limit <= 0) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "", "'from' < 0 or 'limit' <= 0");
+        }
+
+        // Retreive users
+        List<UserDTO> users = dao.getUsers(from, limit);
+
+        ctx.json(Map.of("users", users));
+    }
+}

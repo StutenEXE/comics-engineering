@@ -19,7 +19,6 @@ export function BookList({ bookList, isLoading, error, className }: BookListProp
 
     const list = !bookList ? [] : [...bookList]
 
-    console.log(list)
     return(
         <>
             <GenericList 

@@ -15,7 +15,7 @@ export function meta({ params }: Route.MetaArgs) {
 
 export default function EditionPage({ params }: { params : { id: number}}) {
   
-  const { data, isLoading, error } = useEditionByIdQuery({ id: params.id, withBook: true, withPublisher: true, withUser: true });
+  const { data, isLoading, error } = useEditionByIdQuery({ id: params.id });
   const edition = data?.edition ?? null;
   const err = createError(error)
 
@@ -35,7 +35,7 @@ export default function EditionPage({ params }: { params : { id: number}}) {
         <div className="flex flex-col items-center justify-center">
             <h1 className="text-3xl text-gray-500">Error while fetching edition</h1>
             <h3 className="text-xl text-red-400">
-              [Code: {err.status}] { err.error }
+              [Code: {err.status}] { err.details.message }
             </h3> 
         </div>
       )}

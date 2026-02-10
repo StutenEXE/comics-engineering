@@ -15,7 +15,7 @@ export default function App() {
   useEffect(() => {
     if (isSuccess && data?.user) {
       dispatch(setUser(data.user));
-      toast.success("Login successful");
+      // toast.success("Login successful"); // Is too much on the screen
     }
   }, [isSuccess, data]);
 

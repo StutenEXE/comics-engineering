@@ -102,6 +102,19 @@ package comics_db {
         - *book_id: id
     }
     note top: composed pkey
+    
+    class UserSubmissions {
+        *id: id
+        - user_id: id
+        - related_to: id
+        submission_type: string
+        submission_action: string
+        submission_data: json
+        note: string
+        created_at: datetime
+    }
+    note bottom: submission_type and submission_action are enums
+
 }
 
 package comics_prices_db {
@@ -138,5 +151,8 @@ comics_db.Books "*" --> "1" Users
 comics_db.Books ..> comics_prices_db.Book
 
 comics_db.Series "*" --> "1" Users
+
+UserSubmissions "*" --> "1" Users
+UserSubmissions "*" --> "0..1" UserSubmissions
 
 @enduml
