@@ -48,7 +48,7 @@ export default function IssueSeriePage({ params }: { params : { id: number}}) {
         <div className="flex flex-col items-center justify-center">
             <h1 className="text-3xl text-gray-500">Error while fetching issue</h1>
             <h3 className="text-xl text-red-400">
-              [Code: {err.status}] { err.error }
+              [Code: {err.status}] { err.details.message }
             </h3> 
         </div>
       )}

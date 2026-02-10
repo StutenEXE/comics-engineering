@@ -36,7 +36,7 @@ export default function IssuePage({ params }: { params : { id: number}}) {
         <div className="flex flex-col items-center justify-center">
             <h1 className="text-3xl text-gray-500">Error while fetching issue</h1>
             <h3 className="text-xl text-red-400">
-              [Code: {err.status}] { err.error }
+              [Code: {err.status}] { err.details.message }
             </h3> 
         </div>
       )}
@@ -59,7 +59,7 @@ export default function IssuePage({ params }: { params : { id: number}}) {
             </p>
           </div>
           <div className="flex gap-2 items-center">
-            <h3 className="text-xl text-gray-200 font-semibold">Story :</h3>
+            <h3 className="text-xl text-gray-200 font-semibold">Story&nbsp;:</h3>
             <p className="text-xl text-gray-200">
               {issue?.name}
             </p>
