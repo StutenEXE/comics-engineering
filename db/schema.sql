@@ -16,8 +16,8 @@ CREATE TABLE IF NOT EXISTS issue_series (
 	id SERIAL PRIMARY KEY,
 	name TEXT NOT NULL,
 	"desc" TEXT,
-	vo_start DATE NOT NULL,
-	vo_end DATE,
+	start_date DATE NOT NULL,
+	end_date DATE,
 	added_by INT REFERENCES users(id) ON DELETE SET NULL,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	modified_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -51,8 +51,8 @@ CREATE TABLE IF NOT EXISTS series (
 	ongoing BOOLEAN NOT NULL DEFAULT FALSE,
 	oneshot BOOLEAN NOT NULL DEFAULT FALSE,
 	nvolumes SMALLINT,
-	vo_start DATE NOT NULL,
-	vo_end DATE,
+	start_date DATE NOT NULL,
+	end_date DATE,
 	added_by INT REFERENCES users(id) ON DELETE SET NULL,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	modified_at TIMESTAMPTZ NOT NULL DEFAULT now()
