@@ -28,7 +28,7 @@ export function createError(error: FetchBaseQueryError | SerializedError | undef
         return {
             status: error.status,
             details: {
-                error: capitalize(err.details.error),
+                error: capitalize(err.details.error || ""),
                 message: err.details.message ? capitalize(err.details.message) : undefined
             }
         }

@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS contributions (
 	proposed_data JSONB NOT NULL, 
 	entity_snapshot JSONB, -- JSON snapshot of the entity before modification (null for create actions)
 	status contribution_status_enum NOT NULL DEFAULT 'pending',
-	resolved_entity_id INT, -- new entity ID after approval
+	resolved_entity_id INT -- new entity ID after approval
 );
 
 CREATE TABLE IF NOT EXISTS contribution_reviews (
