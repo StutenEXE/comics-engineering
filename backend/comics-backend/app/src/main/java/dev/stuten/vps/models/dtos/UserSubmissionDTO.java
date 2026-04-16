@@ -1,6 +1,9 @@
 package dev.stuten.vps.models.dtos;
 
 import java.time.OffsetDateTime;
+import java.util.List;
+
+import org.jooq.JSONB;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,9 +16,10 @@ public record UserSubmissionDTO(
         @JsonProperty("id") Integer id,
         @JsonProperty("addedBy") UserDTO addedBy,
         @JsonProperty("relatedTo") UserSubmissionDTO relatedTo,
+        @JsonProperty("childSubmissions") List<UserSubmissionDTO> childSubmissions,
         @JsonProperty("submissionType") UserSubmissionType submissionType,
         @JsonProperty("submissionAction") UserSubmissionAction submissionAction,
-        @JsonProperty("submissionData") String submissionData,
+        @JsonProperty("submissionData") JSONB submissionData,
         @JsonProperty("note") String note,
         @JsonProperty("validated") Boolean validated,
 
@@ -55,5 +59,20 @@ public record UserSubmissionDTO(
         public String getValue() {
             return value;
         }
+    }
+
+    public UserSubmissionDTO(UserSubmissionDTO dto, UserSubmissionDTO relatedTo) {
+        this(
+            dto.id(),
+            dto.addedBy(),
+            relatedTo,
+            dto.childSubmissions(),
+            dto.submissionType(),
+            dto.submissionAction(),
+            dto.submissionData(),
+            dto.note(),
+            dto.validated(),
+            dto.createdAt()
+        );
     }
 }

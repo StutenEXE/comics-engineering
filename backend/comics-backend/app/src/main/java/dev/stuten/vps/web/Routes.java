@@ -15,6 +15,7 @@ import dev.stuten.vps.web.routers.Router;
 import dev.stuten.vps.web.routers.SearchRouter;
 import dev.stuten.vps.web.routers.SerieRouter;
 import dev.stuten.vps.web.routers.UserRouter;
+import dev.stuten.vps.web.routers.UserSubmissionRouter;
 import dev.stuten.vps.web.routers.utils.APIPathBuilder;
 import io.javalin.Javalin;
 
@@ -29,6 +30,8 @@ public class Routes {
         new PublisherRouter(),
         new SerieRouter(),
         new UserRouter(),
+
+        new UserSubmissionRouter(),
 
         new SearchRouter()
     );

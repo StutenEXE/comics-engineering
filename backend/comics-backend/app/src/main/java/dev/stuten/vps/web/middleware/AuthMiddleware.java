@@ -15,7 +15,7 @@ public final class AuthMiddleware {
             throw new HttpResponseException(HttpStatus.UNAUTHORIZED, "Missing token", new HashMap<String,String>());
         };
 
-        // Example Redis lookup
+        // Redis lookup
         Session session = SessionStore.find(sessionKey);
         if (session == null) {
             throw new HttpResponseException(HttpStatus.UNAUTHORIZED, "Invalid session", new HashMap<String,String>());
@@ -27,5 +27,9 @@ public final class AuthMiddleware {
         ctx.attribute("auth", new AuthContext(
                 session.userId(),
                 session.role()));
+    }
+
+    public static Session getCurrentSession(Context ctx) {
+        return ctx.attribute("auth");
     }
 }
