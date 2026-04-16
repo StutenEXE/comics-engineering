@@ -14,7 +14,9 @@ export function BookListBySerieId({ serieId, toIgnore, descOrder, className }: B
     if (!serieId) {
         return(<BookList bookList={[]} error={{
             status: 0,
-            error: "No serie found"
+            details: {
+                error: "No serie found"
+            }
         }} className={className}/>)
     }
 
