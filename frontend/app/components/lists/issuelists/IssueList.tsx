@@ -1,4 +1,4 @@
-import { createBackupFromIssue, type Issue } from "~/models/issue";
+import { type Issue } from "~/models/issue";
 import { compareDates } from "~/utils/date";
 import { IssueCard } from "../../cards/IssueCard";
 import { GenericList } from "../GenericList";
@@ -20,17 +20,6 @@ export function IssueList({ issueList, descOrder, isLoading, error, className }:
     ) 
     
     const list = !issueList ? [] : [...issueList]
-        // Creating backup issues 
-        .map((is) => {
-            if (!is.hasBackup) {
-                return is
-        }
-            return [ is, createBackupFromIssue(is) ]
-        })
-        // Flattening nested lists
-        .flat()
-        // Removing null vals
-        .filter(is => is !== null)
         // Sorting list
         .sort((is1, is2) => {
             if (descOrder) {
@@ -46,7 +35,7 @@ export function IssueList({ issueList, descOrder, isLoading, error, className }:
             <GenericList 
                 list={list} 
                 emptyMsg={isLoading ? "Loading issues..." : 
-                    error ? error.error :  
+                    error ? error.details.error :  
                     "No issues linked"}
                 elemGenerator={mapper}
                 vertical

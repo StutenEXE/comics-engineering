@@ -20,13 +20,13 @@ export default function IssueSeriePage({ params }: { params : { id: number}}) {
   const serie = data?.serie ?? null;
   const err = createError(error)
 
-  let subtitle = dateToMonthYearString("en-EN", serie?.voStart)
-    if (!serie?.voEnd && serie?.ongoing) { subtitle += " - Present" }
+  let subtitle = dateToMonthYearString("en-EN", serie?.startDate)
+    if (!serie?.endDate && serie?.ongoing) { subtitle += " - Present" }
     else if (serie?.oneshot) {
       subtitle += " (Oneshot)"
     }
     else {
-      subtitle += ` - ${dateToMonthYearString("en-EN", serie?.voEnd)}`
+      subtitle += ` - ${dateToMonthYearString("en-EN", serie?.endDate)}`
     }
 
   return (

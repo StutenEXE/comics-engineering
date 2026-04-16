@@ -28,13 +28,13 @@ export default function IssueSeriePage({ params }: { params : { id: number}}) {
   const books: Book[] | undefined = issueSerie?.issues.flatMap(is => is.books)
     .filter(({ id }) => !ids.has(id) && ids.add(id))
 
-  let subtitle = dateToMonthYearString("en-EN", issueSerie?.voStart)
-  if (!issueSerie?.voEnd) { subtitle += " - Present" }
-  else if (issueSerie?.voStart.getTime() === issueSerie?.voEnd.getTime()) {
+  let subtitle = dateToMonthYearString("en-EN", issueSerie?.startDate)
+  if (!issueSerie?.endDate) { subtitle += " - Present" }
+  else if (issueSerie?.startDate.getTime() === issueSerie?.endDate.getTime()) {
     subtitle += " (Oneshot)"
   }
   else {
-    subtitle += ` - ${dateToMonthYearString("en-EN", issueSerie?.voEnd)}`
+    subtitle += ` - ${dateToMonthYearString("en-EN", issueSerie?.endDate)}`
   }
 
   return (

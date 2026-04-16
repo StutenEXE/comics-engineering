@@ -64,14 +64,6 @@ export default function IssuePage({ params }: { params : { id: number}}) {
               {issue?.name}
             </p>
           </div>
-          { issue?.hasBackup && (
-            <div className="flex gap-2 items-center">
-              <h3 className="text-xl text-gray-200 font-semibold">Backup story :</h3>
-              <p className="text-xl text-gray-200">
-                {issue?.backupName}
-              </p>
-            </div>
-          )}
           <div className="flex gap-2 flex-col">
             <h3 className="text-xl text-gray-200 font-semibold">Books :</h3>
             <BookList bookList={issue?.books} className="border border-gray-500 rounded-lg"/>

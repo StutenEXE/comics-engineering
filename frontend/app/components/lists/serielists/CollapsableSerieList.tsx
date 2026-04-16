@@ -47,7 +47,7 @@ export function CollapsableSerieList({ serieList, descOrder, isLoading, error, c
             <GenericList 
                 list={list} 
                 emptyMsg={isLoading ? "Loading..." : 
-                    error ? error.error :  
+                    error ? error.details.error :  
                     "Nothing found"}
                 elemGenerator={mapper}
                 vertical

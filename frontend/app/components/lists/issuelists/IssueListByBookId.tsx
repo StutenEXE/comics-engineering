@@ -14,7 +14,9 @@ export function IssueListByBookId({ bookId, toIgnore, descOrder, className }: Is
     if (!bookId) {
         return(<IssueList issueList={[]} error={{
             status: 0,
-            error: "No book found"
+            details: {
+                error: "No book found"
+            }
         }} className={className}/>)
     }
 

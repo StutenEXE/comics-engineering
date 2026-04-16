@@ -1,9 +1,9 @@
-import { createBackupFromIssue, type Issue } from "~/models/issue";
+import { type Issue } from "~/models/issue";
 import type { User } from "~/models/user";
 import { compareDates } from "~/utils/date";
 import type { Error } from "~/utils/error";
-import { UserCard } from "../cards/UserCard";
-import { GenericList } from "./GenericList";
+import { UserCard } from "../../cards/UserCard";
+import { GenericList } from "../GenericList";
 
 
 interface UserListProps {
@@ -25,7 +25,7 @@ export function UserList({ userList, isLoading, error, showActions, className }:
             <GenericList 
                 list={userList} 
                 emptyMsg={isLoading ? "Loading user..." : 
-                    error ? error.error :  
+                    error ? error.details.error :  
                     "No users found"}
                 elemGenerator={mapper}
                 vertical
