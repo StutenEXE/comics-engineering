@@ -119,20 +119,47 @@ CREATE TABLE IF NOT EXISTS books_issues (
 	PRIMARY KEY (book_id, issue_id)
 );
 
--- Submission Types
-CREATE TYPE submission_type_enum AS ENUM ('book', 'serie', 'edition', 'issue', 'issueserie', 'publisher', 'link_book_issue');
--- Submission Action
-CREATE TYPE submission_action_enum AS ENUM ('create', 'update', 'delete');
 
--- User Submissions
-CREATE TABLE IF NOT EXISTS user_submissions (
+-----------------------------------
+------- User Contributions --------
+-----------------------------------
+
+-- Contribution Bundle Status
+CREATE TYPE contribution_bundle_status_enum AS ENUM ('pending', 'approved', 'rejected', 'needs_revision');
+-- Contribution Types
+CREATE TYPE contribution_type_enum AS ENUM ('book', 'serie', 'edition', 'issue', 'issueserie', 'publisher', 'link_book_issue');
+-- Contribution Action
+CREATE TYPE contribution_action_enum AS ENUM ('create', 'update', 'delete');
+
+-- Contribution Status
+CREATE TYPE contribution_status_enum AS ENUM ('pending', 'approved', 'rejected', 'skipped', 'needs_revision');
+
+CREATE TABLE IF NOT EXISTS contribution_bundles (
 	id SERIAL PRIMARY KEY,
-	user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-	related_to INT REFERENCES user_submissions(id) ON DELETE SET NULL,
-	submission_type submission_type_enum NOT NULL,
-	submission_action submission_action_enum  NOT NULL,
-	submission_data JSONB NOT NULL,
+	submitter_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	status contribution_bundle_status_enum NOT NULL DEFAULT 'pending',
 	note TEXT,
-	validated BOOLEAN,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+	modified_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS contributions (
+	id SERIAL PRIMARY KEY,
+	bundle_id INT NOT NULL REFERENCES contribution_bundles(id) ON DELETE CASCADE,
+	local_ref TEXT, -- Reference to the local entity (e.g., book name, serie name, etc.) if needed
+	entity_type contribution_type_enum NOT NULL,
+	action contribution_action_enum NOT NULL,
+	entity_id INT, -- null for create actions
+	proposed_data JSONB NOT NULL, 
+	entity_snapshot JSONB, -- JSON snapshot of the entity before modification (null for create actions)
+	status contribution_status_enum NOT NULL DEFAULT 'pending',
+	resolved_entity_id INT, -- new entity ID after approval
+);
+
+CREATE TABLE IF NOT EXISTS contribution_reviews (
+	id SERIAL PRIMARY KEY,
+	contribution_id INT NOT NULL REFERENCES contributions(id) ON DELETE CASCADE,
+	reviewer_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	comment TEXT NOT NULL,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
