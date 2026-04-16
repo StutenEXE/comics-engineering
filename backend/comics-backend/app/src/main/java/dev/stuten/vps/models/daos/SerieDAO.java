@@ -50,8 +50,8 @@ public class SerieDAO extends DAO {
                 .set(SERIES.ONGOING, dto.ongoing())
                 .set(SERIES.ONESHOT, dto.oneshot())
                 .set(SERIES.NVOLUMES, dto.nvolumes())
-                .set(SERIES.VO_START, dto.voStart())
-                .set(SERIES.VO_END, dto.voEnd())
+                .set(SERIES.START_DATE, dto.startDate())
+                .set(SERIES.END_DATE, dto.endDate())
                 .set(SERIES.ADDED_BY, dto.addedBy().id())
                 .returning(SERIES.asterisk())
                 .fetchOptional(SerieMapper::mapToDTO);
