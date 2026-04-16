@@ -15,7 +15,7 @@ public final class APIPathBuilder {
     }
 
     public static String getPrivateGenericPath() {
-        return ADMIN_STUB + "/*";
+        return PRIVATE_STUB + "/*";
     }
 
     public static String getAdminGenericPath() {
