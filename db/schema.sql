@@ -97,10 +97,15 @@ CREATE TABLE IF NOT EXISTS edition_ownership (
 	id SERIAL PRIMARY KEY,
 	user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	edition_id INT NOT NULL REFERENCES editions(id) ON DELETE SET NULL,
+	date TIMESTAMPTZ NOT NULL DEFAULT now(),
 	read BOOLEAN NOT NULL DEFAULT FALSE,
+	date_read DATE,
 	gift BOOLEAN NOT NULL DEFAULT FALSE,
-	buy_price NUMERIC(10,2),
-	date TIMESTAMPTZ NOT NULL DEFAULT now()
+	signed BOOLEAN NOT NULL DEFAULT FALSE,
+	purchase_price NUMERIC(10,2),
+	fees NUMERIC(10,2),
+	retail_price NUMERIC(10,2),
+	note TEXT
 );
 
 -- Wishlist (composed primary key)
