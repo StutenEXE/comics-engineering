@@ -19,9 +19,6 @@ public record IssueDTO(
 
                 @JsonProperty("parutionDate") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss") @JsonSerialize(using = OffsetDateTimeSerializer.class) @JsonDeserialize(using = OffsetTimeDeserializer.class) OffsetDateTime parutionDate,
 
-                @JsonProperty("isAnnual") Boolean isAnnual,
-                @JsonProperty("hasBackup") Boolean hasBackup,
-                @JsonProperty("backupName") String backupName,
                 @JsonProperty("issueSerie") IssueSerieDTO issueSerie,
                 @JsonProperty("books") List<BookDTO> books,
 
