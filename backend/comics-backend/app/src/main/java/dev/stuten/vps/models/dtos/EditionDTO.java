@@ -21,7 +21,7 @@ public record EditionDTO(
         @JsonProperty("imgUrl") String imgUrl,
         @JsonProperty("coverType") String coverType,
 
-        @JsonProperty("parutionDate") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss") @JsonSerialize(using = LocalDateSerializer.class) @JsonDeserialize(using = LocalDateDeserializer.class) LocalDate parutionDate,
+        @JsonProperty("parutionDate") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") @JsonSerialize(using = LocalDateSerializer.class) @JsonDeserialize(using = LocalDateDeserializer.class) LocalDate parutionDate,
 
         @JsonProperty("publisher") PublisherDTO publisher,
         @JsonProperty("book") BookDTO book,

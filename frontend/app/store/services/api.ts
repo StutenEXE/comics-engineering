@@ -60,9 +60,12 @@ export const publicApi = createApi({
     // Get edition by id
     editionById: build.query<{ edition: Edition }, { id: number }>({
       query: (params) => ({ url: "/editions", method: 'GET', params: params }),
-      transformResponse: (resp: { edition: Edition }) => ({
-        edition: parseDataToEdition(resp.edition),
-      }),
+      transformResponse: (resp: { edition: Edition }) => {
+        console.log("Raw edition response:", resp); 
+        return ({
+          edition: parseDataToEdition(resp.edition),
+        })
+      },
     }),
 
     /****************
@@ -130,7 +133,7 @@ export const publicApi = createApi({
   }),
 });
 
-export const { 
+export const {
   useLoginMutation, useSignupMutation, useRefreshQuery,
   useBookByIdQuery, useBookBySerieIdQuery, useLatestBooksQuery,
   useEditionByIdQuery,
@@ -139,7 +142,7 @@ export const {
   usePublisherByIdQuery,
   useSerieByIdQuery,
   useSearchBooksAndSeriesByNameQuery
- } 
+}
   = publicApi;
 
 
@@ -158,7 +161,7 @@ export const privateApi = createApi({
   }),
 });
 
-export const {  } = privateApi;
+export const { } = privateApi;
 
 
 ////////////////////////////////////
@@ -185,6 +188,6 @@ export const adminApi = createApi({
   }),
 });
 
-export const { 
+export const {
   useUserListQuery
- } = adminApi;
+} = adminApi;

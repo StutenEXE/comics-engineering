@@ -18,9 +18,9 @@ public record IssueDTO(
                 @JsonProperty("name") String name,
                 @JsonProperty("number") Integer number,
 
-                @JsonProperty("coverDate") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss") @JsonSerialize(using =LocalDateSerializer.class) @JsonDeserialize(using = LocalDateDeserializer.class) LocalDate coverDate,
+                @JsonProperty("coverDate") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") @JsonSerialize(using =LocalDateSerializer.class) @JsonDeserialize(using = LocalDateDeserializer.class) LocalDate coverDate,
 
-                @JsonProperty("parutionDate") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss") @JsonSerialize(using = LocalDateSerializer.class) @JsonDeserialize(using = LocalDateDeserializer.class) LocalDate parutionDate,
+                @JsonProperty("parutionDate") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") @JsonSerialize(using = LocalDateSerializer.class) @JsonDeserialize(using = LocalDateDeserializer.class) LocalDate parutionDate,
 
                 @JsonProperty("issueSerie") IssueSerieDTO issueSerie,
                 @JsonProperty("books") List<BookDTO> books,
