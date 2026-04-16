@@ -48,8 +48,8 @@ public class IssueSerieDAO extends DAO {
         return DSL().insertInto(ISSUE_SERIES)
                 .set(ISSUE_SERIES.NAME, dto.name())
                 .set(ISSUE_SERIES.DESC, dto.desc())
-                .set(ISSUE_SERIES.VO_START, dto.voStart())
-                .set(ISSUE_SERIES.VO_END, dto.voEnd())
+                .set(ISSUE_SERIES.START_DATE, dto.startDate())
+                .set(ISSUE_SERIES.END_DATE, dto.endDate())
                 .set(BOOKS.ADDED_BY, dto.addedBy().id())
                 .returning(ISSUE_SERIES.asterisk())
                 .fetchOptional(IssueSerieMapper::mapToDTO);

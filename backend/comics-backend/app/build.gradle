@@ -90,7 +90,7 @@ jooq {
         main {
             generationTool {
                 jdbc {
-                    driver = 'org.postgresql.Driver'  // Change based on your DB
+                    driver = 'org.postgresql.Driver'  // Change based on DB
                     url = System.getenv('COMICS_DB_URL') 
                     user = System.getenv('COMICS_DB_USER') 
                     password = System.getenv('COMICS_DB_PASSWORD')
@@ -98,7 +98,7 @@ jooq {
                 generator {
                     name = 'org.jooq.codegen.DefaultGenerator'
                     database {
-                        name = 'org.jooq.meta.postgres.PostgresDatabase'  // Change based on your DB
+                        name = 'org.jooq.meta.postgres.PostgresDatabase'  // Change based on DB
                         inputSchema = 'public'
                     }
                     generate {

@@ -9,9 +9,8 @@
 
 ### Backend
 
-* Technology : Go
-* Framework : gin
-* Logs : `app.log`
+* Technology : Java
+* Framework : Javalin
 
 ### Frontend
 
