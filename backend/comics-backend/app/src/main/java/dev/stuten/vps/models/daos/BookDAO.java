@@ -9,15 +9,17 @@ import static dev.stuten.vps.jooq.tables.Users.USERS;
 import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.select;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
+import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectWhereStep;
 
-import dev.stuten.vps.models.dtos.BookDTO;
+import dev.stuten.vps.models.dtos.full.BookDTO;
 import dev.stuten.vps.models.mappers.BookMapper;
 
 public class BookDAO extends DAO {
@@ -33,23 +35,39 @@ public class BookDAO extends DAO {
         }
 
         @Override
-        protected SelectWhereStep<Record> getDefaultSelectStatement() {
-                return DSL().select(
-                                BOOKS.asterisk(),
-                                SERIES.asterisk(),
-                                USERS.asterisk(),
-                                // Editions (1 to many)
-                                multiset(
-                                                select(EDITIONS.asterisk())
+        protected Collection<SelectFieldOrAsterisk> getSimpleSelectStatement() {
+                return List.of(
+                                BOOKS.ID.as(BookMapper.getFieldName(BOOKS.ID)),
+                                BOOKS.NAME.as(BookMapper.getFieldName(BOOKS.NAME)),
+                                BOOKS.DESC.as(BookMapper.getFieldName(BOOKS.DESC)),
+                                BOOKS.NUMBER.as(BookMapper.getFieldName(BOOKS.NUMBER)),
+                                BOOKS.VO_CONTENT.as(BookMapper.getFieldName(BOOKS.VO_CONTENT)),
+                                BOOKS.IMG_URL.as(BookMapper.getFieldName(BOOKS.IMG_URL)),
+                                BOOKS.SERIES_ID.as(BookMapper.getFieldName(BOOKS.SERIES_ID)),
+                                BOOKS.ADDED_BY.as(BookMapper.getFieldName(BOOKS.ADDED_BY)),
+                                BOOKS.CREATED_AT.as(BookMapper.getFieldName(BOOKS.CREATED_AT)),
+                                BOOKS.MODIFIED_AT.as(BookMapper.getFieldName(BOOKS.MODIFIED_AT)));
+        }
+
+        @Override
+        protected SelectWhereStep<? extends Record> getDefaultSelectStatement() {
+                return DSL().select(getSimpleSelectStatement())
+                                .select(new SerieDAO(this.DSL()).getSimpleSelectStatement())
+                                .select(new UserDAO(this.DSL()).getSimpleSelectStatement())
+                                .select(multiset( // Editions (1 to many)
+                                                select(new EditionDAO(this.DSL())
+                                                                .getSimpleSelectStatement())
                                                                 .from(EDITIONS)
                                                                 .where(EDITIONS.BOOK_ID.eq(BOOKS.ID)))
-                                                .as("editions"),
-                                // Issues (many to many)
-                                multiset(
-                                                select(ISSUES.asterisk())
+                                                .as("editions"))
+                                .select(multiset( // Issues (many to many)
+                                                select(new IssueDAO(this.DSL())
+                                                                .getSimpleSelectStatement())
                                                                 .from(BOOKS_ISSUES)
-                                                                .join(ISSUES).on(BOOKS_ISSUES.ISSUE_ID.eq(ISSUES.ID))
-                                                                .where(BOOKS_ISSUES.BOOK_ID.eq(BOOKS.ID)))
+                                                                .join(ISSUES)
+                                                                .on(BOOKS_ISSUES.ISSUE_ID.eq(ISSUES.ID))
+                                                                .where(BOOKS_ISSUES.BOOK_ID
+                                                                                .eq(BOOKS.ID)))
                                                 .as("issues"))
                                 .from(BOOKS)
                                 .leftJoin(SERIES).on(BOOKS.SERIES_ID.eq(SERIES.ID))

@@ -16,13 +16,7 @@ public final class MappingUtils {
 
     public static <T extends Record, @Nullable R> R getSingleDTOFromRecord(Record r, TableImpl<T> table,
             RecordMapper<Record, R> mapper) {
-        T r2 = r.into(table);
-        if (r2 == null) {
-            return null;
-        }
-        // TODO : prevent mapping values with same name that are not the one of the
-        // object (example : id that corresponds to the parent applied here)
-        R dto = r2.get(table.field(0)) != null ? r2.map(mapper) : null;
+        R dto = r.map(mapper);
         return dto;
     }
 

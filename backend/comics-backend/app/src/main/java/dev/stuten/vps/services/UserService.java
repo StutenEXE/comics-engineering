@@ -6,8 +6,8 @@ import java.util.Optional;
 
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.UserDAO;
-import dev.stuten.vps.models.dtos.UserDTO;
-import dev.stuten.vps.models.dtos.UserWithPasswordDTO;
+import dev.stuten.vps.models.dtos.full.UserDTO;
+import dev.stuten.vps.models.dtos.full.UserWithPasswordDTO;
 import dev.stuten.vps.web.ErrorResponse;
 import dev.stuten.vps.web.middleware.Role;
 import dev.stuten.vps.web.middleware.Session;

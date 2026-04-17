@@ -1,4 +1,4 @@
-package dev.stuten.vps.models.dtos;
+package dev.stuten.vps.models.dtos.full;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -13,6 +13,9 @@ import com.fasterxml.jackson.datatype.jsr310.deser.OffsetTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.OffsetDateTimeSerializer;
 
+import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
+
 public record SerieDTO(
         @JsonProperty("id") Integer id,
         @JsonProperty("name") String name,
@@ -24,11 +27,11 @@ public record SerieDTO(
 
         @JsonProperty("endDate") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") @JsonSerialize(using = LocalDateSerializer.class) @JsonDeserialize(using = LocalDateDeserializer.class) LocalDate endDate,
 
-        @JsonProperty("books") List<BookDTO> books,
+        @JsonProperty("books") List<SimpleBookDTO> books,
 
         @JsonProperty("createdAt") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss") @JsonSerialize(using = OffsetDateTimeSerializer.class) @JsonDeserialize(using = OffsetTimeDeserializer.class) OffsetDateTime createdAt,
 
         @JsonProperty("modifiedAt") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss") @JsonSerialize(using = OffsetDateTimeSerializer.class) @JsonDeserialize(using = OffsetTimeDeserializer.class) OffsetDateTime modifiedAt,
 
-        @JsonProperty("addedBy") UserDTO addedBy) {
+        @JsonProperty("addedBy") SimpleUserDTO addedBy) {
 }

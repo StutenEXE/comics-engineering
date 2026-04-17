@@ -1,7 +1,8 @@
-package dev.stuten.vps.models.dtos;
+package dev.stuten.vps.models.dtos.full;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,23 +13,23 @@ import com.fasterxml.jackson.datatype.jsr310.deser.OffsetTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.OffsetDateTimeSerializer;
 
-public record EditionDTO(
+import dev.stuten.vps.models.dtos.simple.SimpleIssueDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
+
+public record IssueSerieDTO(
         @JsonProperty("id") Integer id,
-        @JsonProperty("isbn") String isbn,
-        @JsonProperty("ean") String ean,
-        @JsonProperty("price") Float price,
-        @JsonProperty("url") String url,
-        @JsonProperty("imgUrl") String imgUrl,
-        @JsonProperty("coverType") String coverType,
+        @JsonProperty("name") String name,
+        @JsonProperty("desc") String desc,
 
-        @JsonProperty("parutionDate") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") @JsonSerialize(using = LocalDateSerializer.class) @JsonDeserialize(using = LocalDateDeserializer.class) LocalDate parutionDate,
+        @JsonProperty("startDate") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") @JsonSerialize(using = LocalDateSerializer.class) @JsonDeserialize(using = LocalDateDeserializer.class) LocalDate startDate,
 
-        @JsonProperty("publisher") PublisherDTO publisher,
-        @JsonProperty("book") BookDTO book,
+        @JsonProperty("endDate") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") @JsonSerialize(using = LocalDateSerializer.class) @JsonDeserialize(using = LocalDateDeserializer.class) LocalDate endDate,
+
+        @JsonProperty("issues") List<SimpleIssueDTO> issues,
 
         @JsonProperty("createdAt") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss") @JsonSerialize(using = OffsetDateTimeSerializer.class) @JsonDeserialize(using = OffsetTimeDeserializer.class) OffsetDateTime createdAt,
 
         @JsonProperty("modifiedAt") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss") @JsonSerialize(using = OffsetDateTimeSerializer.class) @JsonDeserialize(using = OffsetTimeDeserializer.class) OffsetDateTime modifiedAt,
 
-        @JsonProperty("addedBy") UserDTO addedBy) {
+        @JsonProperty("addedBy") SimpleUserDTO addedBy) {
 }

@@ -1,17 +1,20 @@
 package dev.stuten.vps.models.daos;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
+import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectWhereStep;
 import org.mindrot.jbcrypt.BCrypt;
 
 import static dev.stuten.vps.jooq.tables.Users.USERS;
-import dev.stuten.vps.models.dtos.UserDTO;
-import dev.stuten.vps.models.dtos.UserWithPasswordDTO;
+
+import dev.stuten.vps.models.dtos.full.UserDTO;
+import dev.stuten.vps.models.dtos.full.UserWithPasswordDTO;
 import dev.stuten.vps.models.mappers.UserMapper;
 
 public class UserDAO extends DAO {
@@ -36,8 +39,20 @@ public class UserDAO extends DAO {
     }
 
     @Override
-    protected SelectWhereStep<? super Record> getDefaultSelectStatement() {
-        return DSL().select(USERS.asterisk()).from(USERS);
+    protected Collection<SelectFieldOrAsterisk> getSimpleSelectStatement() {
+        return List.of(
+                USERS.ID.as(UserMapper.getFieldName(USERS.ID)),
+                USERS.USERNAME.as(UserMapper.getFieldName(USERS.USERNAME)),
+                USERS.EMAIL.as(UserMapper.getFieldName(USERS.EMAIL)),
+                USERS.IS_ADMIN.as(UserMapper.getFieldName(USERS.IS_ADMIN)),
+                USERS.CREATED_AT.as(UserMapper.getFieldName(USERS.CREATED_AT)),
+                USERS.MODIFIED_AT.as(UserMapper.getFieldName(USERS.MODIFIED_AT)));
+    }
+
+    @Override
+    protected SelectWhereStep<? extends Record> getDefaultSelectStatement() {
+        return DSL().select(getSimpleSelectStatement())
+                .from(USERS);
     }
 
     public Optional<UserDTO> create(UserWithPasswordDTO dto) {

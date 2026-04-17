@@ -8,15 +8,17 @@ import static dev.stuten.vps.jooq.tables.Users.USERS;
 import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.select;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
+import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectWhereStep;
 
-import dev.stuten.vps.models.dtos.IssueDTO;
+import dev.stuten.vps.models.dtos.full.IssueDTO;
 import dev.stuten.vps.models.mappers.IssueMapper;
 
 public class IssueDAO extends DAO {
@@ -32,17 +34,32 @@ public class IssueDAO extends DAO {
         }
 
         @Override
-        protected SelectWhereStep<Record> getDefaultSelectStatement() {
-                return DSL().select(
-                                ISSUES.asterisk(),
-                                ISSUE_SERIES.asterisk(),
-                                USERS.asterisk(),
-                                // Books (many to many)
-                                multiset(
-                                                select(BOOKS.asterisk())
+        protected Collection<SelectFieldOrAsterisk> getSimpleSelectStatement() {
+                return List.of(
+                                ISSUES.ID.as(IssueMapper.getFieldName(ISSUES.ID)),
+                                ISSUES.NAME.as(IssueMapper.getFieldName(ISSUES.NAME)),
+                                ISSUES.NUMBER.as(IssueMapper.getFieldName(ISSUES.NUMBER)),
+                                ISSUES.COVER_DATE.as(IssueMapper.getFieldName(ISSUES.COVER_DATE)),
+                                ISSUES.PARUTION_DATE.as(IssueMapper.getFieldName(ISSUES.PARUTION_DATE)),
+                                ISSUES.SERIES_ID.as(IssueMapper.getFieldName(ISSUES.SERIES_ID)),
+                                ISSUES.ADDED_BY.as(IssueMapper.getFieldName(ISSUES.ADDED_BY)),
+                                ISSUES.CREATED_AT.as(IssueMapper.getFieldName(ISSUES.CREATED_AT)),
+                                ISSUES.MODIFIED_AT.as(IssueMapper.getFieldName(ISSUES.MODIFIED_AT)));
+        }
+
+        @Override
+        protected SelectWhereStep<? extends Record> getDefaultSelectStatement() {
+                return DSL().select(getSimpleSelectStatement())
+                                .select(new IssueSerieDAO(this.DSL()).getSimpleSelectStatement())
+                                .select(new UserDAO(this.DSL()).getSimpleSelectStatement())
+                                .select(multiset( // Books (many to many)
+                                                select(new BookDAO(this.DSL())
+                                                                .getSimpleSelectStatement())
                                                                 .from(BOOKS_ISSUES)
-                                                                .join(BOOKS).on(BOOKS_ISSUES.BOOK_ID.eq(BOOKS.ID))
-                                                                .where(BOOKS_ISSUES.ISSUE_ID.eq(ISSUES.ID)))
+                                                                .join(BOOKS)
+                                                                .on(BOOKS_ISSUES.BOOK_ID.eq(BOOKS.ID))
+                                                                .where(BOOKS_ISSUES.ISSUE_ID
+                                                                                .eq(ISSUES.ID)))
                                                 .as("books"))
                                 .from(ISSUES)
                                 .leftJoin(ISSUE_SERIES).on(ISSUES.SERIES_ID.eq(ISSUE_SERIES.ID))

@@ -1,5 +1,6 @@
 package dev.stuten.vps.models.daos;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -7,6 +8,7 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
+import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectWhereStep;
 
 public abstract class DAO {
@@ -22,7 +24,9 @@ public abstract class DAO {
 
     protected abstract <T> RecordMapper<? super Record, T> getDefaultMapper();
 
-    protected abstract SelectWhereStep<? super Record> getDefaultSelectStatement();
+    protected abstract <T> Collection<SelectFieldOrAsterisk> getSimpleSelectStatement();
+
+    protected abstract SelectWhereStep<? extends Record> getDefaultSelectStatement();
 
     protected <T> Optional<T> selectOne(Condition where, RecordMapper<? super Record, T> mapper) {
         return getDefaultSelectStatement()
