@@ -26,6 +26,7 @@ public class UserService {
 
     public static void signupService(Context ctx) {
         UserWithPasswordDTO dto = ctx.bodyAsClass(UserWithPasswordDTO.class);
+        // TODO : Validate email format, password strength, etc.
 
         // If email already in use
         if (dao.findByEmail(dto.email()).isPresent()) {
@@ -33,13 +34,13 @@ public class UserService {
         }
 
         // Create user
-        Optional<UserDTO> optUser = dao.create(dto);
+        Optional<Integer> userId = dao.create(dto);
 
         // If user was not created
-        if (optUser.isEmpty()) {
+        if (userId.isEmpty()) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Account not created", "");
         }
-        UserDTO newUser = optUser.get();
+        UserDTO newUser = dao.findById(userId.get()).get();
 
         // Log in user
         String sessionKey = SessionStore.createSessionKey();

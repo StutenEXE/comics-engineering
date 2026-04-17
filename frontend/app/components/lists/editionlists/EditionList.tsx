@@ -2,6 +2,7 @@ import type { Edition } from "~/models/edition";
 import { EditionCard } from "../../cards/EditionCard";
 import { compareDates } from "~/utils/date";
 import { GenericList } from "../GenericList";
+import { useTranslation } from "~/i18n/i18n";
 
 
 interface EditionListProps {
@@ -11,6 +12,8 @@ interface EditionListProps {
 }
 
 export function EditionList({ editionList, descOrder, className }: EditionListProps) {
+    const { t } = useTranslation()
+
     const mapper = (ed: Edition) =>  (
         <EditionCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
             key={ed.id} edition={ed} /> 
@@ -31,7 +34,7 @@ export function EditionList({ editionList, descOrder, className }: EditionListPr
         <>
             <GenericList 
                 list={list} 
-                emptyMsg="No editions linked"
+                emptyMsg={t("loader.edition.nodata")}
                 elemGenerator={mapper}
                 className={className}
             />

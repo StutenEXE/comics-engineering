@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { Link } from "react-router";
+import { useTranslation } from "~/i18n/i18n";
 import type { Edition } from "~/models/edition";
 
 type EditionCardProps = {
@@ -8,6 +9,8 @@ type EditionCardProps = {
 };
 
 export function EditionCard({edition, className}: EditionCardProps) {
+    const { locale } = useTranslation();
+
     if (!edition) {
         return
     }
@@ -23,7 +26,7 @@ export function EditionCard({edition, className}: EditionCardProps) {
                 </div>
                 <div className="flex flex-col items-center">
                     <h3 className="text-sm font-semibold">{edition.publisher?.name}</h3>
-                    <h4 className="text-sm italic">{edition.parutionDate.toLocaleDateString("fr")}</h4>
+                    <h4 className="text-sm italic">{edition.parutionDate.toLocaleDateString(locale)}</h4>
                 </div>
             </div>
         </Link>

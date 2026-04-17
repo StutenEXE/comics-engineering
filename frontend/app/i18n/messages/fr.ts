@@ -1,0 +1,129 @@
+export default {
+    // ============================
+    // == Generics
+    // ============================
+    "generic.yes": "oui",
+    "generic.no": "non",
+    "generic.cancel": "annuler",
+    "generic.the": "le",
+    "generic.present": "présent",
+    "generic.oneshot": "oneshot",
+    "generic.volume": "tome",
+    "generic.admin": "admin",
+    "generic.actions": "actions",
+    "generic.search.placeholder": "Rechercher...",
+    // ============================
+    // == Loading
+    // ============================
+    "loader.loading": "Chargement...",
+    "loader.error": "Une erreur est survenue",
+    "loader.nodata": "Aucune donnée trouvée",
+    "loader.book.loading": "Chargement des livres...",
+    "loader.book.nodata": "Aucun livre trouvé",
+    "loader.book.error": "Erreur lors du chargement des livres",
+    "loader.edition.loading": "Chargement des éditions...",
+    "loader.edition.nodata": "Aucune édition trouvée",
+    "loader.edition.error": "Erreur lors du chargement des éditions",
+    "loader.issueserie.loading": "Chargement des séries d'issues...",
+    "loader.issueserie.nodata": "Aucune série d'issues trouvée",
+    "loader.issueserie.error": "Erreur lors du chargement des séries d'issues",
+    "loader.issue.loading": "Chargement des issues...",
+    "loader.issue.nodata": "Aucun issue trouvé",
+    "loader.issue.error": "Erreur lors du chargement des issues",
+    "loader.serie.loading": "Chargement des séries...",
+    "loader.serie.nodata": "Aucune série trouvée",
+    "loader.serie.error": "Erreur lors du chargement des séries",
+    "loader.user.loading": "Chargement des utilisateurs...",
+    "loader.user.nodata": "Aucun utilisateur trouvé",
+    "loader.user.error": "Erreur lors du chargement des utilisateurs",
+    // ============================
+    // == PAGES 
+    // ============================
+    // Landing page
+    "landing.title": "Dernières additions à notre bibliothèque",
+    // Search page
+    "search.header": "Rechercher",
+    "search.placeholder": "Rechercher des livres ou des séries...",
+    "search.atleast3chars": "Veuillez entrer au moins 3 caractères pour lancer la recherche",
+    // Book page
+    "book.header": "Livre",
+    "book.description": "Description",
+    "book.sameseries": "De la même série",
+    "book.issues": "Issues",
+    "book.editions": "Éditions",
+    "book.link.serie": "Aller à la série",
+    // Edition page
+    "edition.header": "Édition",
+    "edition.ean": "EAN",
+    "edition.isbn": "ISBN",
+    "edition.publisher": "Éditeur",
+    "edition.link": "Lien vers le site de l'éditeur",
+    "edition.coverType": "Type de couverture",
+    "edition.parutionDate": "Date de parution",
+    "edition.price": "Prix",
+    "edition.link.book": "Aller au livre",
+    "edition.link.publisher": "Aller à l'éditeur",
+    // Issue Serie page
+    "issueserie.header": "Série d'issues",
+    "issueserie.description": "Description",
+    "issueserie.issues": "Issues",
+    "issueserie.books": "Livres associés",
+    // Issue page
+    "issue.header": "Issue",
+    "issue.parutionDate": "Date de parution",
+    "issue.coverDate": "Date de couverture",
+    "issue.story": "Histoire",
+    "issue.books": "Livres associés",
+    "issue.link.issueserie": "Aller à la série d'issues",
+    // Serie page
+    "serie.header": "Série",
+    "serie.books": "Livres",
+    // User page
+    "user.header": "Utilisateur",
+    "user.id": "ID",
+    "user.email": "Email",
+    "user.username": "Nom d'utilisateur",
+    "user.isAdmin": "Admin",
+    "user.createdAt": "Créé le",
+    "user.updatedAt": "Modifié le",
+    // ============================
+    // == HEADERS
+    // ============================
+    // Header
+    "header.login": "Connexion",
+    "header.signup": "Inscription",
+    "header.welcome": "Bienvenue",
+    "header.home": "Accueil",
+    "header.search": "Rechercher",
+    "header.collection": "Ma collection",
+    "header.users": "Utilisateurs",
+    "header.profile": "Mon profil",
+    // Info page header
+    "infoheader.created": "Crée le",
+    "infoheader.modified": "Modifié le",
+    "infoheader.addedBy": "Ajouté par",
+    // ============================
+    // == FORMS
+    // ============================
+    // Login form
+    "login.header": "Connectez-vous à votre compte",
+    "login.email": "Email",
+    "login.password": "Mot de passe",
+    "login.submit": "Se connecter",
+    "login.success": "Connexion réussie",
+    "login.error": "Email ou mot de passe invalide",
+    "login.placeholder.email": "Entrez votre email",
+    "login.placeholder.password": "Entrez votre mot de passe",
+    // Signup form
+    "signup.header": "Créez un compte",
+    "signup.username": "Nom d'utilisateur",
+    "signup.email": "Email",
+    "signup.password": "Mot de passe",
+    "signup.submit": "S'inscrire",
+    "signup.success": "Inscription réussie",
+    "signup.error": "Informations invalides",
+    "signup.missingfields": "Veuillez remplir tous les champs",
+    "signup.placeholder.username": "Entrez votre nom d'utilisateur",
+    "signup.placeholder.email": "Entrez votre email",
+    "signup.placeholder.password": "Entrez votre mot de passe",
+};

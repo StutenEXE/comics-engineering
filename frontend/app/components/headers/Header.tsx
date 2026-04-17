@@ -4,8 +4,11 @@ import type { RootState } from '~/store/store';
 import { LoginForm } from '../forms/LoginForm';
 import { useState } from 'react';
 import { SignupForm } from '../forms/SignupForm';
+import { useTranslation } from '~/i18n/i18n';
 
 export function Header() {
+    const { t } = useTranslation();
+
     const { isAuthenticated, user } = useSelector((state: RootState) => state.user);
     // Handles login modal state
     const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -33,23 +36,23 @@ export function Header() {
                         <span className="text-yellow-300">S</span>tash
                     </h1>
                     {isAuthenticated && (
-                        <p>Welcome, {user?.username}!</p>
+                        <p>{t("header.welcome")}, {user?.username}!</p>
                     )}
                 </div>
                 <nav>
                     <ul className="flex space-x-4">
-                        <li><Link to="/" className="hover:underline cursor-pointer">Home</Link></li>
-                        <li><Link to="search" className="hover:underline cursor-pointer">Search</Link></li>
+                        <li><Link to="/" className="hover:underline cursor-pointer">{t("header.home")}</Link></li>
+                        <li><Link to="search" className="hover:underline cursor-pointer">{t("header.search")}</Link></li>
                         {isAuthenticated ? (
                             <>
-                                <li><Link to="/collection" className="hover:underline">My collection</Link></li>
-                                {user?.isAdmin && <li><Link to="/users" className="hover:underline">Users</Link></li>}
-                                <li><Link to="/profile" className="hover:underline">My profile</Link></li>
+                                <li><Link to="/collection" className="hover:underline">{t("header.collection")}</Link></li>
+                                {user?.isAdmin && <li><Link to="/users" className="hover:underline">{t("header.users")}</Link></li>}
+                                <li><Link to="/profile" className="hover:underline">{t("header.profile")}</Link></li>
                             </>
                         ) : (
                             <>
-                                <li><p className="hover:underline cursor-pointer" onClick={openLoginModal}>Login</p></li>
-                                <li><p className="hover:underline cursor-pointer" onClick={openSignupModal}>Sign up</p></li>
+                                <li><p className="hover:underline cursor-pointer" onClick={openLoginModal}>{t("header.login")}</p></li>
+                                <li><p className="hover:underline cursor-pointer" onClick={openSignupModal}>{t("header.signup")}</p></li>
                             </>
                         )}
                     </ul>

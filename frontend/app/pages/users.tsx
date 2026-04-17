@@ -1,11 +1,8 @@
+import { AdminProtectedRoute } from "~/components/security/AdminProtectedRoute";
+import { UserTable } from "~/components/tables/UserTable";
 import { useUserListQuery } from "~/store/services/api";
 import { createError } from "~/utils/error";
 import type { Route } from "../+types/root";
-import { UserTable } from "~/components/tables/UserTable";
-import { useSelector } from "react-redux";
-import type { RootState } from "~/store/store";
-import { redirect, type LoaderFunctionArgs } from "react-router";
-import { AdminProtectedRoute } from "~/components/security/AdminProtectedRoute";
 
 export function meta({}: Route.MetaArgs) {
   return [

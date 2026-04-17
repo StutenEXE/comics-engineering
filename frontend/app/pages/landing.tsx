@@ -5,6 +5,7 @@ import { useLatestBooksQuery } from "~/store/services/api";
 import type { Route } from "../+types/root";
 import { GenericButton } from "~/components/buttons/GenericButton";
 import { BsArrowLeft, BsArrowLeftCircle, BsArrowRight, BsArrowRightCircle } from "react-icons/bs";
+import { useTranslation } from "~/i18n/i18n";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -17,6 +18,8 @@ export function meta({}: Route.MetaArgs) {
 const BOOKS_PER_PAGE = 3;
 
 export default function LandingPage() {
+  const { t } = useTranslation();
+  
   const [page, setPage] = useState(0);
   
   // Calculate from and to based on current page
@@ -39,17 +42,17 @@ export default function LandingPage() {
     if (error === undefined || error === null) {
       return
     }
-    toast.error("Error while loading books")
+    toast.error(t("loader.book.error"))
   }, [error])
 
   return (
     <main className="flex items-center justify-center pt-16 pb-4">
       <div className="flex-1 flex flex-col items-center gap-16 min-h-0">
         <header className="flex flex-col items-center gap-9">
-          <h1 className="text-xl">Latest additions our library</h1>
+          <h1 className="text-xl">{t("landing.title")}</h1>
         </header>
 
-        {isFetching && <p className="text-gray-500">Loading books...</p>}
+        {isFetching && <p className="text-gray-500">{t("loader.book.loading")}</p>}
         
         <div className="flex flex-col items-center">
           {(!isFetching && books.length > 0) ? (
@@ -62,7 +65,7 @@ export default function LandingPage() {
               </ul>
             </>
           ) : (
-            !isFetching && <p className="text-gray-500">No books found</p>
+            !isFetching && <p className="text-gray-500">{t("loader.book.nodata")}</p>
           )}
           <div className="flex gap-4 justify-center mt-8">
             <GenericButton

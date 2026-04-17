@@ -44,6 +44,7 @@ public class UserDAO extends DAO {
                 USERS.ID.as(UserMapper.getFieldName(USERS.ID)),
                 USERS.USERNAME.as(UserMapper.getFieldName(USERS.USERNAME)),
                 USERS.EMAIL.as(UserMapper.getFieldName(USERS.EMAIL)),
+                USERS.PASSWORD.as(UserMapper.getFieldName(USERS.PASSWORD)),
                 USERS.IS_ADMIN.as(UserMapper.getFieldName(USERS.IS_ADMIN)),
                 USERS.CREATED_AT.as(UserMapper.getFieldName(USERS.CREATED_AT)),
                 USERS.MODIFIED_AT.as(UserMapper.getFieldName(USERS.MODIFIED_AT)));
@@ -55,16 +56,16 @@ public class UserDAO extends DAO {
                 .from(USERS);
     }
 
-    public Optional<UserDTO> create(UserWithPasswordDTO dto) {
+    public Optional<Integer> create(UserWithPasswordDTO dto) {
         // 12 log rounds for security and performance
         String hashedPwd = BCrypt.hashpw(dto.password(), BCrypt.gensalt(12));
-
         return DSL().insertInto(USERS)
                 .set(USERS.USERNAME, dto.username())
                 .set(USERS.EMAIL, dto.email())
                 .set(USERS.PASSWORD, hashedPwd)
-                .returning(USERS.asterisk())
-                .fetchOptional(UserMapper::mapToDTO);
+                .returning(USERS.ID)
+                .fetchOptional()
+                .map(record -> record.get(USERS.ID));
     }
 
     public Optional<UserDTO> findById(Integer id) {

@@ -2,6 +2,7 @@ import { useBookBySerieIdQuery } from "~/store/services/api";
 import { createError } from "~/utils/error";
 import { BookList } from "./BookList";
 import type { Book } from "~/models/book";
+import { useTranslation } from "~/i18n/i18n";
 
 interface BookListBySerieIdProps {
     serieId: number | null | undefined
@@ -11,11 +12,13 @@ interface BookListBySerieIdProps {
 }
 
 export function BookListBySerieId({ serieId, toIgnore, descOrder, className }: BookListBySerieIdProps) {
+    const { t } = useTranslation()
+
     if (!serieId) {
         return(<BookList bookList={[]} error={{
             status: 0,
             details: {
-                error: "No serie found"
+                error: t("loader.serie.nodata")
             }
         }} className={className}/>)
     }

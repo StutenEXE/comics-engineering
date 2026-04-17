@@ -3,6 +3,7 @@ import { useLoginMutation } from "~/store/services/api";
 import { setUser } from "~/store/slices/userSlice";
 import { store } from "~/store/store";
 import { useToast } from "../toast/Toast";
+import { useTranslation } from "~/i18n/i18n";
 
 type LoginFormProps = {
     onDone?: () => void;
@@ -10,6 +11,8 @@ type LoginFormProps = {
 };
 
 export function LoginForm({ onDone, onCancel }: LoginFormProps) {
+    const { t } = useTranslation();
+    
     const [login] = useLoginMutation();
     const toast = useToast();
 
@@ -30,12 +33,12 @@ export function LoginForm({ onDone, onCancel }: LoginFormProps) {
         login(credentials).unwrap()
             .then((response) => {
                 store.dispatch(setUser(response.user));
-                toast.success("Login successful");
+                toast.success(t("login.success"));
                 // Execute onDone callback if provided
                 if (onDone) onDone();
             })
             .catch((error) => {
-                const msg = error.data?.error || 'Invalid email or password';
+                const msg = error.data?.error || t("login.error");
                 toast.error(String(msg));
             });
         
@@ -51,26 +54,26 @@ export function LoginForm({ onDone, onCancel }: LoginFormProps) {
             onSubmit={handleSubmit}
             className="max-w-md mx-auto mt-8 p-6 border border-gray-300 rounded-lg shadow-md bg-black"
         >
-            <h2 className="text-2xl font-bold mb-6 text-center">Login to Your Account</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center">{t("login.header")}</h2>
             <div className="mb-4">
-                <label htmlFor="email" className="block font-semibold mb-2">Email</label>
+                <label htmlFor="email" className="block font-semibold mb-2">{t("login.email")}</label>
                 <input
                     type="email"
                     id="email"
                     name="email"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter your email"
+                    placeholder={t("login.placeholder.email")}
                     required
                 />
             </div>
             <div className="mb-6">
-                <label htmlFor="password" className="block font-semibold mb-2">Password</label>
+                <label htmlFor="password" className="block font-semibold mb-2">{t("login.password")}</label>
                 <input
                     type="password"
                     id="password"
                     name="password"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter your password"
+                    placeholder={t("login.placeholder.password")}
                     required
                 />
             </div>
@@ -81,13 +84,13 @@ export function LoginForm({ onDone, onCancel }: LoginFormProps) {
                     onClick={handleCancel}
                     className="w-30 bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-md hover:bg-gray-400 transition"
                 >
-                    Cancel
+                    {t("generic.cancel", { capitalize: true })}
                 </button>
                 <button
                     type="submit"
                     className="w-30 bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600 transition"
                 >
-                    Login
+                    {t("login.submit")}
                 </button>
             </div>
 

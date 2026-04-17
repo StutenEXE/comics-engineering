@@ -30,31 +30,31 @@ public class UserMapper {
 
     public static UserDTO mapToDTO(Record r) {
         UserDTO dto = new UserDTO(
-                (Integer) r.get(getFieldName(USERS.ID)),
-                (String) r.get(getFieldName(USERS.USERNAME)),
-                (String) r.get(getFieldName(USERS.EMAIL)),
-                (Boolean) r.get(getFieldName(USERS.IS_ADMIN)),
-                (OffsetDateTime) r.get(getFieldName(USERS.CREATED_AT)),
-                (OffsetDateTime) r.get(getFieldName(USERS.MODIFIED_AT)));
+                r.get(getFieldName(USERS.ID), Integer.class),
+                r.get(getFieldName(USERS.USERNAME), String.class),
+                r.get(getFieldName(USERS.EMAIL), String.class),
+                r.get(getFieldName(USERS.IS_ADMIN), Boolean.class),
+                r.get(getFieldName(USERS.CREATED_AT), OffsetDateTime.class),
+                r.get(getFieldName(USERS.MODIFIED_AT), OffsetDateTime.class));
         return dto;
     }
     
     public static SimpleUserDTO mapToSimpleDTO(Record r) {
         SimpleUserDTO dto = new SimpleUserDTO(
-                (Integer) r.get(getFieldName(USERS.ID)),
-                (String) r.get(getFieldName(USERS.USERNAME)));
+                r.get(getFieldName(USERS.ID), Integer.class),
+                r.get(getFieldName(USERS.USERNAME), String.class));
         return dto;
     }
 
     public static UserWithPasswordDTO mapToPasswordDTO(Record r) {
         UserWithPasswordDTO dto = new UserWithPasswordDTO(
-                (Integer) r.get(getFieldName(USERS.ID)),
-                (String) r.get(getFieldName(USERS.USERNAME)),
-                (String) r.get(getFieldName(USERS.EMAIL)),
-                (String) r.get(getFieldName(USERS.PASSWORD)),
-                (Boolean) r.get(getFieldName(USERS.IS_ADMIN)),
-                (OffsetDateTime) r.get(getFieldName(USERS.CREATED_AT)),
-                (OffsetDateTime) r.get(getFieldName(USERS.MODIFIED_AT)));
+                r.get(getFieldName(USERS.ID), Integer.class),
+                r.get(getFieldName(USERS.USERNAME), String.class),
+                r.get(getFieldName(USERS.EMAIL), String.class),
+                r.get(getFieldName(USERS.PASSWORD), String.class),
+                r.get(getFieldName(USERS.IS_ADMIN), Boolean.class),
+                r.get(getFieldName(USERS.CREATED_AT), OffsetDateTime.class),
+                r.get(getFieldName(USERS.MODIFIED_AT), OffsetDateTime.class));
         return dto;
     }
 }

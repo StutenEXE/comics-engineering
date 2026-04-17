@@ -2,6 +2,7 @@ import { BookCard } from "../../cards/BookCard";
 import type { Book } from "~/models/book";
 import { GenericList } from "../GenericList";
 import type { Error } from "~/utils/error";
+import { useTranslation } from "~/i18n/i18n";
 
 interface BookListProps {
     bookList: Book[] | null | undefined
@@ -12,6 +13,8 @@ interface BookListProps {
 }
 
 export function BookList({ bookList, isLoading, error, className }: BookListProps) {
+    const { t } = useTranslation()
+
     const mapper = (bk: Book) =>  (
         <BookCard className="w-35 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
            key={bk.id} book={bk} /> 
@@ -23,9 +26,9 @@ export function BookList({ bookList, isLoading, error, className }: BookListProp
         <>
             <GenericList 
                 list={list} 
-                emptyMsg={isLoading ? "Loading books..." : 
-                    error ? error.error :  
-                    "No books linked"}
+                emptyMsg={isLoading ? t("loader.book.loading") : 
+                    error ? error.details.error :  
+                    t("loader.book.nodata")}
                 elemGenerator={mapper}
                 className={className}
             />

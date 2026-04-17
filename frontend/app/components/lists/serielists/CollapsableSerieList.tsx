@@ -4,6 +4,7 @@ import { GenericList } from "../GenericList";
 import { BookList } from "../booklists/BookList";
 import { useState } from "react";
 import { BsArrowsCollapse, BsArrowsExpand } from "react-icons/bs";
+import { useTranslation } from "~/i18n/i18n";
 
 
 interface CollapsableSerieListProps {
@@ -15,6 +16,8 @@ interface CollapsableSerieListProps {
 }
 
 export function CollapsableSerieList({ serieList, descOrder, isLoading, error, className }: CollapsableSerieListProps) {
+    const { t } = useTranslation()
+
     const mapper = (ser: Serie) => {
         const [ isOpened, setOpened ] = useState(ser?.books.length < ser?.nvolumes ? true : false)
         return (
@@ -46,9 +49,9 @@ export function CollapsableSerieList({ serieList, descOrder, isLoading, error, c
         <>
             <GenericList 
                 list={list} 
-                emptyMsg={isLoading ? "Loading..." : 
+                emptyMsg={isLoading ? t("loader.serie.loading") : 
                     error ? error.details.error :  
-                    "Nothing found"}
+                    t("loader.serie.nodata")}
                 elemGenerator={mapper}
                 vertical
                 className={`max-h-full w-full flex items-center ${className}`}

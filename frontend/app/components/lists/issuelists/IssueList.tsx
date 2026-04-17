@@ -3,6 +3,7 @@ import { compareDates } from "~/utils/date";
 import { IssueCard } from "../../cards/IssueCard";
 import { GenericList } from "../GenericList";
 import type { Error } from "~/utils/error";
+import { useTranslation } from "~/i18n/i18n";
 
 
 interface IssueListProps {
@@ -14,6 +15,8 @@ interface IssueListProps {
 }
 
 export function IssueList({ issueList, descOrder, isLoading, error, className }: IssueListProps) {
+    const { t } = useTranslation()
+
     const mapper = (is: Issue) => (
         <IssueCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
                 key={is?.id} issue={is} />
@@ -34,9 +37,9 @@ export function IssueList({ issueList, descOrder, isLoading, error, className }:
         <>
             <GenericList 
                 list={list} 
-                emptyMsg={isLoading ? "Loading issues..." : 
+                emptyMsg={isLoading ? t("loader.issue.loading") : 
                     error ? error.details.error :  
-                    "No issues linked"}
+                    t("loader.issue.nodata")}
                 elemGenerator={mapper}
                 vertical
                 className={className}

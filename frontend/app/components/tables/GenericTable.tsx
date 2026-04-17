@@ -1,70 +1,86 @@
-import { useEffect, useState, useMemo, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { MdOutlineSearch } from "react-icons/md";
+import { useTranslation } from "~/i18n/i18n";
+import { type Error } from "~/utils/error";
 import { capitalize } from "~/utils/strings";
 import { ToggleButton } from "../buttons/ToggleButton";
-import { type Error } from "~/utils/error";
 
 interface TableControlsProps {
-    searchableKeys: string[] 
-    activeKeys: string[]
-    onToggleKey: (arg0: string, arg1: boolean) => void
-    searchValue: string
-    onSearchChange: (arg0: string) => void
+  searchableKeys: string[];
+  searchableKeysDisplay: string[];
+  activeKeys: string[];
+  onToggleKey: (arg0: string, arg1: boolean) => void;
+  searchValue: string;
+  onSearchChange: (arg0: string) => void;
 }
 
-function TableControls({ searchableKeys, activeKeys, onToggleKey, searchValue, onSearchChange }: TableControlsProps) {
+function TableControls({
+  searchableKeys,
+  searchableKeysDisplay,
+  activeKeys,
+  onToggleKey,
+  searchValue,
+  onSearchChange,
+}: TableControlsProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="p-4 flex flex-wrap justify-between items-center gap-4 bg-gray-900 rounded-t-lg">
-        <div className="flex flex-wrap gap-2">
-            { searchableKeys.map((key: string) => (                
-                <ToggleButton
-                    key={key}
-                    selected={activeKeys.includes(key)}
-                    onClick={() => onToggleKey(key, !activeKeys.includes(key))}
-                    className="px-3 h-9 text-sm"
-                >
-                    {capitalize(key)}
-                </ToggleButton>
-            ))}
-        </div>
-        <div className="flex items-center gap-2 bg-gray-900 border border-gray-600 px-3 py-1 
+      <div className="flex flex-wrap gap-2">
+        {searchableKeys.map((key: string, index: number) => (
+          <ToggleButton
+            key={key}
+            selected={activeKeys.includes(key)}
+            onClick={() => onToggleKey(key, !activeKeys.includes(key))}
+            className="px-3 h-9 text-sm"
+          >
+            {searchableKeysDisplay[index] ?? capitalize(key)}
+          </ToggleButton>
+        ))}
+      </div>
+      <div
+        className="flex items-center gap-2 bg-gray-900 border border-gray-600 px-3 py-1 
             rounded-md focus:border-white-500 transition-colors"
-        >
-            <label htmlFor="search">
-                <MdOutlineSearch size={20} className="text-gray-400" />
-            </label>
-            <input
-                id="search"
-                type="text"
-                value={searchValue}
-                onChange={(e) => onSearchChange(e.target.value)}
-                placeholder="Search..."
-                className="bg-transparent border-none outline-none text-sm text-white w-48 md:w-64"
-            />
-        </div>
+      >
+        <label htmlFor="search">
+          <MdOutlineSearch size={20} className="text-gray-400" />
+        </label>
+        <input
+          id="search"
+          type="text"
+          value={searchValue}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder={t("generic.search.placeholder")}
+          className="bg-transparent border-none outline-none text-sm text-white w-48 md:w-64"
+        />
+      </div>
     </div>
   );
 }
 
 export interface ColumnDef<T> {
-    key?: string;
-    header?: string;
-    searchable?: boolean;
-    cellRenderer?: (arg: T) => ReactNode;
+  key?: string;
+  header?: string;
+  searchable?: boolean;
+  cellRenderer?: (arg: T) => ReactNode;
 }
 
 interface GenericTableProps<T> {
-    list: T[] | null | undefined;
-    columns: ColumnDef<T>[];
-    addActions?: boolean;
-    actionGenerator?: (arg: T) => ReactNode;
-    isLoading?: boolean;
-    emptyMessage?: string;
-    error?: Error;
-    className?: string;
+  list: T[] | null | undefined;
+  columns: ColumnDef<T>[];
+  addActions?: boolean;
+  actionGenerator?: (arg: T) => ReactNode;
+  isLoading?: boolean;
+  emptyMessage?: string;
+  error?: Error;
+  className?: string;
 }
 
-export function GenericTable<T extends Record<string, any>>(props: GenericTableProps<T>) {
+export function GenericTable<T extends Record<string, any>>(
+  props: GenericTableProps<T>,
+) {
+  const { t } = useTranslation();
+
   const { list = [], columns, addActions, actionGenerator, isLoading } = props;
 
   // Prepare Columns (memoized to prevent unnecessary re-calculation)
@@ -72,7 +88,7 @@ export function GenericTable<T extends Record<string, any>>(props: GenericTableP
     const cols = [...columns];
     if (addActions && actionGenerator) {
       cols.push({
-        header: "Actions",
+        header: t("generic.actions", { capitalize: true }),
         cellRenderer: (val: T) => actionGenerator(val),
       });
     }
@@ -80,18 +96,22 @@ export function GenericTable<T extends Record<string, any>>(props: GenericTableP
   }, [columns, addActions, actionGenerator]);
 
   // Search State
-  const searchableKeys = useMemo(() => 
-    columns.filter(col => col.searchable && col.key).map(col => col.key as string),
-    [columns]
+  const searchableKeys = useMemo(
+    () =>
+      columns
+        .filter((col) => col.searchable && col.key)
+        .map((col) => col.key as string),
+    [columns],
   );
 
   // Search keys
-  const [activeSearchKeys, setActiveSearchKeys] = useState<string[]>(searchableKeys);
+  const [activeSearchKeys, setActiveSearchKeys] =
+    useState<string[]>(searchableKeys);
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleToggleKey = (key: string, isSelected: boolean) => {
-    setActiveSearchKeys(prev =>
-      isSelected ? [...prev, key] : prev.filter(k => k !== key)
+    setActiveSearchKeys((prev) =>
+      isSelected ? [...prev, key] : prev.filter((k) => k !== key),
     );
   };
 
@@ -101,8 +121,8 @@ export function GenericTable<T extends Record<string, any>>(props: GenericTableP
     if (!searchQuery) return list;
 
     const lowerQuery = searchQuery.toLowerCase();
-    return list.filter(item => {
-      return activeSearchKeys.some(key => {
+    return list.filter((item) => {
+      return activeSearchKeys.some((key) => {
         const value = item[key];
         return String(value).toLowerCase().includes(lowerQuery);
       });
@@ -110,52 +130,71 @@ export function GenericTable<T extends Record<string, any>>(props: GenericTableP
   }, [list, searchQuery, activeSearchKeys]);
 
   // Loading & Empty States
-  if (isLoading) return <div className="p-8 text-center">Loading...</div>;
+  if (isLoading)
+    return <div className="p-8 text-center">{t("loader.loading")}</div>;
+
+  console.log(searchableKeys);
 
   return (
-    <div className={`overflow-x border border-gray-700 rounded-lg ${props.className}`}>
-        {searchableKeys.length > 0 && (
-            <TableControls
-                searchableKeys={searchableKeys}
-                activeKeys={activeSearchKeys}
-                onToggleKey={handleToggleKey}
-                searchValue={searchQuery}
-                onSearchChange={setSearchQuery}
-            />
-        )}
+    <div
+      className={`overflow-x border border-gray-700 rounded-lg ${props.className}`}
+    >
+      {searchableKeys.length > 0 && (
+        <TableControls
+          searchableKeys={searchableKeys}
+          searchableKeysDisplay={searchableKeys.map(
+            (key) => columns.find((col) => col.key === key)?.header ?? key,
+          )}
+          activeKeys={activeSearchKeys}
+          onToggleKey={handleToggleKey}
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
+      )}
 
       <div className="overflow-x-auto">
         <table className="w-full table-auto border-collapse">
-            <thead>
-                <tr className="bg-gray-800 text-gray-300">
-                    {tableCols.map((col, idx) => (
-                        <th key={col.header ?? idx} className="p-3 text-left font-semibold border-b border-gray-700">
-                            {col.header}
-                        </th>
-                    ))}
+          <thead>
+            <tr className="bg-gray-800 text-gray-300">
+              {tableCols.map((col, idx) => (
+                <th
+                  key={col.header ?? idx}
+                  className="p-3 text-left font-semibold border-b border-gray-700"
+                >
+                  {col.header}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-700">
+            {filteredList.length > 0 ? (
+              filteredList.map((row, rowIdx) => (
+                <tr
+                  key={row.id ?? rowIdx}
+                  className="hover:bg-gray-700/50 transition-colors"
+                >
+                  {tableCols.map((col, colIdx) => (
+                    <td key={`${rowIdx}-${colIdx}`} className="p-3 text-sm">
+                      {col.cellRenderer
+                        ? col.cellRenderer(row)
+                        : col.key
+                          ? row[col.key]
+                          : null}
+                    </td>
+                  ))}
                 </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-700">
-                {filteredList.length > 0 ? (
-                    filteredList.map((row, rowIdx) => (
-                        <tr key={row.id ?? rowIdx} className="hover:bg-gray-700/50 transition-colors">
-                        {tableCols.map((col, colIdx) => (
-                            <td key={`${rowIdx}-${colIdx}`} className="p-3 text-sm">
-                                {col.cellRenderer 
-                                    ? col.cellRenderer(row) 
-                                    : col.key ? row[col.key] : null}
-                            </td>
-                        ))}
-                        </tr>
-                    ))
-                ) : (
-                    <tr>
-                        <td colSpan={tableCols.length} className="p-8 text-center text-gray-500">
-                            {props.emptyMessage ?? "No results found."}
-                        </td>
-                    </tr>
-                )}
-            </tbody>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan={tableCols.length}
+                  className="p-8 text-center text-gray-500"
+                >
+                  {props.emptyMessage ?? t("loader.nodata")}
+                </td>
+              </tr>
+            )}
+          </tbody>
         </table>
       </div>
     </div>

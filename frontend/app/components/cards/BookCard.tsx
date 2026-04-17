@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { Link } from "react-router";
+import { useTranslation } from "~/i18n/i18n";
 import type { Book } from "~/models/book";
 
 type BookCardProps = {
@@ -8,20 +9,11 @@ type BookCardProps = {
 };
 
 export function BookCard({ book, className}: BookCardProps) {
+    const { t } = useTranslation();
+
     if (!book) {
         return
     }
-
-    const [index, setIndex] = useState(0);
-    const editions = book.editions ?? [];
-
-    const onScroll = useCallback((event: React.WheelEvent) => {
-        if (event.deltaY > 0) {
-            setIndex(i => (i + 1) % editions.length);
-        } else {
-            setIndex(i => (i - 1 + editions.length) % editions.length);
-        }
-    }, [editions.length]);
     
     return (
         <Link to={`/book/${book.id}`}>
@@ -35,7 +27,8 @@ export function BookCard({ book, className}: BookCardProps) {
                 </div>
                 <div className="flex flex-col items-center justify-between">
                     <h3 className="font-semibold text-center text-sm">{book.name}</h3>
-                    <h4 className="text-center sm:text-sm italic">{book.serie?.name} (#{book.number})</h4>
+                    <h4 className="text-center sm:text-sm">{book.serie?.name}</h4>
+                    <h4 className="text-center sm:text-sm italic">{t("generic.volume", { capitalize: true })} {book.number}</h4>
                 </div>
             </div>
         </Link>

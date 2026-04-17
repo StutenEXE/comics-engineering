@@ -6,6 +6,7 @@ import type { Serie } from "~/models/serie";
 import type { Book } from "~/models/book";
 import { deepCopy } from "~/utils/object";
 import { CollapsableSerieList } from "~/components/lists/serielists/CollapsableSerieList";
+import { useTranslation } from "~/i18n/i18n";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -16,8 +17,9 @@ export function meta({ params }: Route.MetaArgs) {
 
 
 export default function SearchPage() {
+    const { t } = useTranslation();
+    
     const [query, setQuery] = useState("");
-
     // Fetch data from query 
     const { data, error, isLoading } = useSearchBooksAndSeriesByNameQuery({ query });
     const books = data?.books ?? [];
@@ -71,25 +73,21 @@ export default function SearchPage() {
             <div className="max-w-500 w-1/2 mb-4">
                 <div className="w-full flex flex-col items-center">
                     <div className="w-1/2 mb-4 ">
-                        <label htmlFor="text" className="block font-semibold mb-2">Search</label>
+                        <label htmlFor="text" className="block font-semibold mb-2">{t("search.header")}</label>
                         <input
                             type="text"
                             id="search"
                             name="search"
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Search books and series"
+                            placeholder={t("search.placeholder")}
                             onChange={handleQueryChange}
                         />
                     </div>
                     <div className="w-full flex flex-col items-center">
-                        { query.trim().length < 3 && <p>Type at least 3 characters to search</p> }
+                        { query.trim().length < 3 && <p>{t("search.atleast3chars")}</p> }
                         { query.trim().length >= 3 && <CollapsableSerieList serieList={allSeries} isLoading={isLoading} error={err} />}
                     </div>
                 </div>
-            </div>
-
-            <div>
-
             </div>
 
         </main>
