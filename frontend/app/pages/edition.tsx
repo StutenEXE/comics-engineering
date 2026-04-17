@@ -42,7 +42,7 @@ export default function EditionPage({ params }: { params : { id: number}}) {
       { (!isLoading && !error) && (
         <>
           <PageHeaderComponent headerTitle="Edition" title={edition?.book?.name} 
-            subtitle={`${edition?.book?.serie?.name}  (#${edition?.book?.number}/${edition?.book?.serie?.nvolumes})`} 
+            subtitle={`${edition?.serie?.name}  (#${edition?.book?.number}/${edition?.serie?.nvolumes})`} 
             createdAt={edition?.createdAt} modifiedAt={edition?.modifiedAt} addedBy={edition?.addedBy?.username} 
             links={links}
           />

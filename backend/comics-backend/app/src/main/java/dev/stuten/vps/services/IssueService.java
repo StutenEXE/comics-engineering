@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.IssueDAO;
-import dev.stuten.vps.models.dtos.IssueDTO;
+import dev.stuten.vps.models.dtos.full.IssueDTO;
 import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;

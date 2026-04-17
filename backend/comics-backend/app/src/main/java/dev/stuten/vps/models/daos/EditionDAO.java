@@ -3,16 +3,20 @@ package dev.stuten.vps.models.daos;
 import static dev.stuten.vps.jooq.tables.Books.BOOKS;
 import static dev.stuten.vps.jooq.tables.Editions.EDITIONS;
 import static dev.stuten.vps.jooq.tables.Publishers.PUBLISHERS;
+import static dev.stuten.vps.jooq.tables.Series.SERIES;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
+import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectWhereStep;
 
-import dev.stuten.vps.models.dtos.EditionDTO;
+import dev.stuten.vps.models.dtos.full.EditionDTO;
 import dev.stuten.vps.models.mappers.EditionMapper;
 
 public class EditionDAO extends DAO {
@@ -28,15 +32,34 @@ public class EditionDAO extends DAO {
     }
 
     @Override
-    protected SelectWhereStep<? super Record> getDefaultSelectStatement() {
-        return DSL().select(
-                EDITIONS.asterisk(),
-                PUBLISHERS.asterisk(),
-                BOOKS.asterisk(),
-                USERS.asterisk())
+    protected Collection<SelectFieldOrAsterisk> getSimpleSelectStatement() {
+        return List.of(
+                EDITIONS.ID.as(EditionMapper.getFieldName(EDITIONS.ID)),
+                EDITIONS.ISBN.as(EditionMapper.getFieldName(EDITIONS.ISBN)),
+                EDITIONS.EAN.as(EditionMapper.getFieldName(EDITIONS.EAN)),
+                EDITIONS.PRICE.as(EditionMapper.getFieldName(EDITIONS.PRICE)),
+                EDITIONS.URL.as(EditionMapper.getFieldName(EDITIONS.URL)),
+                EDITIONS.IMG_URL.as(EditionMapper.getFieldName(EDITIONS.IMG_URL)),
+                EDITIONS.COVER_TYPE.as(EditionMapper.getFieldName(EDITIONS.COVER_TYPE)),
+                EDITIONS.PARUTION_DATE.as(EditionMapper.getFieldName(EDITIONS.PARUTION_DATE)),
+                EDITIONS.PUBLISHER_ID.as(EditionMapper.getFieldName(EDITIONS.PUBLISHER_ID)),
+                EDITIONS.BOOK_ID.as(EditionMapper.getFieldName(EDITIONS.BOOK_ID)),
+                EDITIONS.ADDED_BY.as(EditionMapper.getFieldName(EDITIONS.ADDED_BY)),
+                EDITIONS.CREATED_AT.as(EditionMapper.getFieldName(EDITIONS.CREATED_AT)),
+                EDITIONS.MODIFIED_AT.as(EditionMapper.getFieldName(EDITIONS.MODIFIED_AT)));
+    }
+
+    @Override
+    protected SelectWhereStep<? extends Record> getDefaultSelectStatement() {
+        return DSL().select(getSimpleSelectStatement())
+                .select(new PublisherDAO(this.DSL()).getSimpleSelectStatement())
+                .select(new BookDAO(this.DSL()).getSimpleSelectStatement())
+                .select(new SerieDAO(this.DSL()).getSimpleSelectStatement())
+                .select(new UserDAO(this.DSL()).getSimpleSelectStatement())
                 .from(EDITIONS)
                 .leftJoin(PUBLISHERS).on(EDITIONS.PUBLISHER_ID.eq(PUBLISHERS.ID))
                 .leftJoin(BOOKS).on(EDITIONS.BOOK_ID.eq(BOOKS.ID))
+                .leftJoin(SERIES).on(BOOKS.SERIES_ID.eq(SERIES.ID))
                 .leftJoin(USERS).on(EDITIONS.ADDED_BY.eq(USERS.ID));
     }
 

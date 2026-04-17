@@ -2,33 +2,59 @@ package dev.stuten.vps.models.mappers;
 
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 
-import org.jooq.Record;
+import java.time.OffsetDateTime;
+import java.util.Map;
 
-import dev.stuten.vps.models.dtos.UserDTO;
-import dev.stuten.vps.models.dtos.UserWithPasswordDTO;
+import org.jooq.Record;
+import org.jooq.TableField;
+
+import dev.stuten.vps.jooq.tables.records.UsersRecord;
+import dev.stuten.vps.models.dtos.full.UserDTO;
+import dev.stuten.vps.models.dtos.full.UserWithPasswordDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 
 public class UserMapper {
+    private static Map<TableField<UsersRecord, ? extends Object>, String> fieldMapping = Map.of(
+            USERS.ID, "user_id",
+            USERS.USERNAME, "user_username",
+            USERS.EMAIL, "user_email",
+            USERS.PASSWORD, "user_password",
+            USERS.IS_ADMIN, "user_is_admin",
+            USERS.CREATED_AT, "user_created_at",
+            USERS.MODIFIED_AT, "user_modified_at"
+    );
+
+    public static String getFieldName(TableField<UsersRecord, ? extends Object> field) {
+        return fieldMapping.get(field);
+    }
 
     public static UserDTO mapToDTO(Record r) {
         UserDTO dto = new UserDTO(
-                r.get(USERS.ID),
-                r.get(USERS.USERNAME),
-                r.get(USERS.EMAIL),
-                r.get(USERS.IS_ADMIN),
-                r.get(USERS.CREATED_AT),
-                r.get(USERS.MODIFIED_AT));
+                (Integer) r.get(getFieldName(USERS.ID)),
+                (String) r.get(getFieldName(USERS.USERNAME)),
+                (String) r.get(getFieldName(USERS.EMAIL)),
+                (Boolean) r.get(getFieldName(USERS.IS_ADMIN)),
+                (OffsetDateTime) r.get(getFieldName(USERS.CREATED_AT)),
+                (OffsetDateTime) r.get(getFieldName(USERS.MODIFIED_AT)));
+        return dto;
+    }
+    
+    public static SimpleUserDTO mapToSimpleDTO(Record r) {
+        SimpleUserDTO dto = new SimpleUserDTO(
+                (Integer) r.get(getFieldName(USERS.ID)),
+                (String) r.get(getFieldName(USERS.USERNAME)));
         return dto;
     }
 
     public static UserWithPasswordDTO mapToPasswordDTO(Record r) {
         UserWithPasswordDTO dto = new UserWithPasswordDTO(
-                r.get(USERS.ID),
-                r.get(USERS.USERNAME),
-                r.get(USERS.EMAIL),
-                r.get(USERS.PASSWORD),
-                r.get(USERS.IS_ADMIN),
-                r.get(USERS.CREATED_AT),
-                r.get(USERS.MODIFIED_AT));
+                (Integer) r.get(getFieldName(USERS.ID)),
+                (String) r.get(getFieldName(USERS.USERNAME)),
+                (String) r.get(getFieldName(USERS.EMAIL)),
+                (String) r.get(getFieldName(USERS.PASSWORD)),
+                (Boolean) r.get(getFieldName(USERS.IS_ADMIN)),
+                (OffsetDateTime) r.get(getFieldName(USERS.CREATED_AT)),
+                (OffsetDateTime) r.get(getFieldName(USERS.MODIFIED_AT)));
         return dto;
     }
 }

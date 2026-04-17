@@ -1,7 +1,7 @@
-import { ContentPasteSearchOutlined } from "@mui/icons-material"
 import { parseDataToBook, type Book } from "./book"
 import { parseDataToPublisher, type Publisher } from "./publisher"
 import { parseDataToUser, type User } from "./user"
+import { parseDataToSerie, type Serie } from "./serie"
 
 export interface Edition {
     id: number,
@@ -14,6 +14,7 @@ export interface Edition {
     parutionDate: Date,
     publisher: Publisher | null,
     book: Book | null,
+    serie: Serie | null,
     createdAt: Date,
     modifiedAt: Date,
     addedBy: User | null
@@ -32,6 +33,7 @@ export function parseDataToEdition(data: Record<string, any>): Edition {
         parutionDate: new Date(data.parutionDate),
         publisher: data.publisher ? parseDataToPublisher(data.publisher) : null,
         book: data.book ? parseDataToBook(data.book) : null,
+        serie: data.serie ? parseDataToSerie(data.serie) : null,
         createdAt: new Date(data.createdAt),
         modifiedAt: new Date(data.modifiedAt),
         addedBy: data.addedBy ? parseDataToUser(data.addedBy) : null

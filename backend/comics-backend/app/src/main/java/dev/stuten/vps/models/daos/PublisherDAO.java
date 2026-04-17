@@ -5,14 +5,17 @@ import static dev.stuten.vps.jooq.tables.Publishers.PUBLISHERS;
 import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.select;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
+import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectWhereStep;
 
-import dev.stuten.vps.models.dtos.PublisherDTO;
+import dev.stuten.vps.models.dtos.full.PublisherDTO;
 import dev.stuten.vps.models.mappers.PublisherMapper;
 
 public class PublisherDAO extends DAO {
@@ -28,11 +31,18 @@ public class PublisherDAO extends DAO {
     }
 
     @Override
-    protected SelectWhereStep<? super Record> getDefaultSelectStatement() {
-        return DSL().select(
-                PUBLISHERS.asterisk(),
-                // Editions (1 to many)
-                multiset(
+    protected Collection<SelectFieldOrAsterisk> getSimpleSelectStatement() {
+        return List.of(
+                PUBLISHERS.ID.as(PublisherMapper.getFieldName(PUBLISHERS.ID)),
+                PUBLISHERS.NAME.as(PublisherMapper.getFieldName(PUBLISHERS.NAME)),
+                PUBLISHERS.CREATED_AT.as(PublisherMapper.getFieldName(PUBLISHERS.CREATED_AT)),
+                PUBLISHERS.MODIFIED_AT.as(PublisherMapper.getFieldName(PUBLISHERS.MODIFIED_AT)));
+    }
+
+    @Override
+    protected SelectWhereStep<? extends Record> getDefaultSelectStatement() {
+        return DSL().select(getSimpleSelectStatement())
+                .select(multiset( // Editions (1 to many)
                         select(EDITIONS.asterisk())
                                 .from(EDITIONS)
                                 .where(EDITIONS.PUBLISHER_ID.eq(PUBLISHERS.ID)))

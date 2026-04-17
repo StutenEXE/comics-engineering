@@ -6,15 +6,17 @@ import static dev.stuten.vps.jooq.tables.Users.USERS;
 import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.select;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
+import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectWhereStep;
 
-import dev.stuten.vps.models.dtos.SerieDTO;
+import dev.stuten.vps.models.dtos.full.SerieDTO;
 import dev.stuten.vps.models.mappers.SerieMapper;
 
 public class SerieDAO extends DAO {
@@ -30,13 +32,26 @@ public class SerieDAO extends DAO {
     }
 
     @Override
-    protected SelectWhereStep<? super Record> getDefaultSelectStatement() {
-        return DSL().select(
-                SERIES.asterisk(),
-                USERS.asterisk(),
-                // Books (1 to many)
-                multiset(
-                        select(BOOKS.asterisk())
+    protected Collection<SelectFieldOrAsterisk> getSimpleSelectStatement() {
+        return List.of(
+                SERIES.ID.as(SerieMapper.getFieldName(SERIES.ID)),
+                SERIES.NAME.as(SerieMapper.getFieldName(SERIES.NAME)),
+                SERIES.ONGOING.as(SerieMapper.getFieldName(SERIES.ONGOING)),
+                SERIES.ONESHOT.as(SerieMapper.getFieldName(SERIES.ONESHOT)),
+                SERIES.NVOLUMES.as(SerieMapper.getFieldName(SERIES.NVOLUMES)),
+                SERIES.START_DATE.as(SerieMapper.getFieldName(SERIES.START_DATE)),
+                SERIES.END_DATE.as(SerieMapper.getFieldName(SERIES.END_DATE)),
+                SERIES.ADDED_BY.as(SerieMapper.getFieldName(SERIES.ADDED_BY)),
+                SERIES.CREATED_AT.as(SerieMapper.getFieldName(SERIES.CREATED_AT)),
+                SERIES.MODIFIED_AT.as(SerieMapper.getFieldName(SERIES.MODIFIED_AT)));
+    }
+
+    @Override
+    protected SelectWhereStep<? extends Record> getDefaultSelectStatement() {
+        return DSL().select(getSimpleSelectStatement())
+                .select(new UserDAO(this.DSL()).getSimpleSelectStatement())
+                .select(multiset( // Books (1 to many)
+                        select(new BookDAO(this.DSL()).getSimpleSelectStatement())
                                 .from(BOOKS)
                                 .where(BOOKS.SERIES_ID.eq(SERIES.ID)))
                         .as("books"))
