@@ -19,6 +19,7 @@ import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.models.dtos.full.BookDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
 import dev.stuten.vps.models.mappers.BookMapper;
 
 public class BookDAO extends DAO {
@@ -43,6 +44,7 @@ public class BookDAO extends DAO {
                                 BOOKS.VO_CONTENT.as(BookMapper.getFieldName(BOOKS.VO_CONTENT)),
                                 BOOKS.IMG_URL.as(BookMapper.getFieldName(BOOKS.IMG_URL)),
                                 BOOKS.SERIES_ID.as(BookMapper.getFieldName(BOOKS.SERIES_ID)),
+                                SERIES.NAME.as(BookMapper.getFieldName(SERIES.NAME)),
                                 BOOKS.ADDED_BY.as(BookMapper.getFieldName(BOOKS.ADDED_BY)),
                                 BOOKS.CREATED_AT.as(BookMapper.getFieldName(BOOKS.CREATED_AT)),
                                 BOOKS.MODIFIED_AT.as(BookMapper.getFieldName(BOOKS.MODIFIED_AT)));
@@ -50,7 +52,8 @@ public class BookDAO extends DAO {
 
         @Override
         protected SelectJoinStep<? extends Record> getSimpleFromClause() {
-                return DSL().select(getSimpleSelectFields()).from(BOOKS);
+                return DSL().select(getSimpleSelectFields()).from(BOOKS)
+                .leftJoin(SERIES).on(BOOKS.SERIES_ID.eq(SERIES.ID));
         }
 
         @Override
@@ -96,11 +99,11 @@ public class BookDAO extends DAO {
                 return super.selectMany(BOOKS.SERIES_ID.eq(serieID));
         }
 
-        public List<BookDTO> findLatest(Integer from, Integer limit) {
-                return getFullFromClause()
+        public List<SimpleBookDTO> findLatest(Integer from, Integer limit) {
+                return getSimpleFromClause()
                                 .offset(from)
                                 .limit(limit)
-                                .fetch(getDefaultMapper());
+                                .fetch(BookMapper::mapToSimpleDTO);
         }
 
         public List<BookDTO> searchByName(String query) {

@@ -18,7 +18,6 @@ import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.models.dtos.full.EditionDTO;
 import dev.stuten.vps.models.mappers.EditionMapper;
-import dev.stuten.vps.models.mappers.PublisherMapper;
 
 public class EditionDAO extends DAO {
 
@@ -45,7 +44,7 @@ public class EditionDAO extends DAO {
                 EDITIONS.COVER_TYPE.as(EditionMapper.getFieldName(EDITIONS.COVER_TYPE)),
                 EDITIONS.PARUTION_DATE.as(EditionMapper.getFieldName(EDITIONS.PARUTION_DATE)),
                 EDITIONS.PUBLISHER_ID.as(EditionMapper.getFieldName(EDITIONS.PUBLISHER_ID)),
-                PUBLISHERS.NAME.as(PublisherMapper.getFieldName(PUBLISHERS.NAME)),
+                PUBLISHERS.NAME.as(EditionMapper.getFieldName(PUBLISHERS.NAME)),
                 EDITIONS.BOOK_ID.as(EditionMapper.getFieldName(EDITIONS.BOOK_ID)),
                 EDITIONS.ADDED_BY.as(EditionMapper.getFieldName(EDITIONS.ADDED_BY)),
                 EDITIONS.CREATED_AT.as(EditionMapper.getFieldName(EDITIONS.CREATED_AT)),

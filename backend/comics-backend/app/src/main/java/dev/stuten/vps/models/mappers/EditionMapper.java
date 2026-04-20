@@ -13,7 +13,6 @@ import java.util.Map;
 import org.jooq.Record;
 import org.jooq.TableField;
 
-import dev.stuten.vps.jooq.tables.records.EditionsRecord;
 import dev.stuten.vps.models.dtos.full.EditionDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleEditionDTO;
@@ -23,7 +22,7 @@ import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 import dev.stuten.vps.models.mappers.utils.MappingUtils;
 
 public class EditionMapper {
-    private static Map<TableField<EditionsRecord, ? extends Object>, String> fieldMapping = Map.ofEntries(
+    private static Map<TableField<? extends Record, ? extends Object>, String> fieldMapping = Map.ofEntries(
             Map.entry(EDITIONS.ID, "edition_id"),
             Map.entry(EDITIONS.ISBN, "edition_isbn"),
             Map.entry(EDITIONS.EAN, "edition_ean"),
@@ -34,12 +33,13 @@ public class EditionMapper {
             Map.entry(EDITIONS.COVER_TYPE, "edition_cover_type"),
             Map.entry(EDITIONS.PARUTION_DATE, "edition_parution_date"),
             Map.entry(EDITIONS.PUBLISHER_ID, "edition_publisher_id"),
+            Map.entry(PUBLISHERS.NAME, "edition_publisher_name"),
             Map.entry(EDITIONS.BOOK_ID, "edition_book_id"),
             Map.entry(EDITIONS.ADDED_BY, "edition_added_by"),
             Map.entry(EDITIONS.CREATED_AT, "edition_created_at"),
             Map.entry(EDITIONS.MODIFIED_AT, "edition_modified_at"));
 
-    public static String getFieldName(TableField<EditionsRecord, ? extends Object> field) {
+    public static String getFieldName(TableField<? extends Record, ? extends Object> field) {
         return fieldMapping.get(field);
     }
 
@@ -85,7 +85,7 @@ public class EditionMapper {
                 r.get(getFieldName(EDITIONS.COVER_TYPE), String.class),
                 r.get(getFieldName(EDITIONS.PARUTION_DATE), LocalDate.class),
                 r.get(getFieldName(EDITIONS.PUBLISHER_ID), Integer.class),
-                r.get(PublisherMapper.getFieldName(PUBLISHERS.NAME), String.class),
+                r.get(getFieldName(PUBLISHERS.NAME), String.class),
                 r.get(getFieldName(EDITIONS.BOOK_ID), Integer.class));
         return dto;
     }

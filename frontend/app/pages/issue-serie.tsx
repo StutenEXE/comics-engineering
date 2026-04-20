@@ -1,15 +1,13 @@
-import { useIssueSerieByIdQuery } from "~/store/services/api";
-import type { Route } from "../+types/root";
-import { createError } from "~/utils/error";
-import { BookCard } from "~/components/cards/BookCard";
-import { compareDates, dateToMonthYearString, dateToVerboseDateString } from "~/utils/date";
-import { IssueCard } from "~/components/cards/IssueCard";
-import type { Book } from "~/models/book";
 import { InfoPageHeaderComponent } from "~/components/headers/InfoPageHeader";
-import { PageTemplate } from "~/components/templates/PageTemplate";
-import { IssueList } from "~/components/lists/issuelists/IssueList";
 import { BookList } from "~/components/lists/booklists/BookList";
+import { IssueList } from "~/components/lists/issuelists/IssueList";
+import { PageTemplate } from "~/components/templates/PageTemplate";
 import { useTranslation } from "~/i18n/i18n";
+import type { Book, SimpleBook } from "~/models/book";
+import { useIssueSerieByIdQuery } from "~/store/services/api";
+import { dateToMonthYearString } from "~/utils/date";
+import { createError } from "~/utils/error";
+import type { Route } from "../+types/root";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -27,8 +25,7 @@ export default function IssueSeriePage({ params }: { params : { id: number}}) {
 
   // Remove duplicate books by id
   const ids = new Set();
-  const books: Book[] | undefined = issueSerie?.issues.flatMap(is => is.books)
-    .filter(({ id }) => !ids.has(id) && ids.add(id))
+  const books: SimpleBook[] | undefined = issueSerie?.books
 
   let subtitle = dateToMonthYearString(locale, issueSerie?.startDate)
   if (!issueSerie?.endDate) { subtitle += ` - ${t("generic.present", { capitalize: true })}` }

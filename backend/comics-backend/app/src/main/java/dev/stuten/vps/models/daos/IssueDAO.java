@@ -42,13 +42,15 @@ public class IssueDAO extends DAO {
                                 ISSUES.COVER_DATE.as(IssueMapper.getFieldName(ISSUES.COVER_DATE)),
                                 ISSUES.PARUTION_DATE.as(IssueMapper.getFieldName(ISSUES.PARUTION_DATE)),
                                 ISSUES.SERIES_ID.as(IssueMapper.getFieldName(ISSUES.SERIES_ID)),
+                                ISSUE_SERIES.NAME.as(IssueMapper.getFieldName(ISSUE_SERIES.NAME)),
                                 ISSUES.ADDED_BY.as(IssueMapper.getFieldName(ISSUES.ADDED_BY)),
                                 ISSUES.CREATED_AT.as(IssueMapper.getFieldName(ISSUES.CREATED_AT)),
                                 ISSUES.MODIFIED_AT.as(IssueMapper.getFieldName(ISSUES.MODIFIED_AT)));
         }
 
         protected SelectJoinStep<? extends Record> getSimpleFromClause() {
-                return DSL().select(getSimpleSelectFields()).from(ISSUES);
+                return DSL().select(getSimpleSelectFields()).from(ISSUES)
+                .leftJoin(ISSUE_SERIES).on(ISSUES.SERIES_ID.eq(ISSUE_SERIES.ID));
         }
 
         @Override

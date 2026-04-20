@@ -4,6 +4,7 @@ import static dev.stuten.vps.jooq.tables.Books.BOOKS;
 import static dev.stuten.vps.jooq.tables.Series.SERIES;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 import static org.jooq.impl.DSL.multiset;
+import static org.jooq.impl.DSL.select;
 
 import java.util.Collection;
 import java.util.List;
@@ -55,8 +56,8 @@ public class SerieDAO extends DAO {
         return DSL().select(getSimpleSelectFields())
                 .select(new UserDAO(this.DSL()).getSimpleSelectFields())
                 .select(multiset( // Books (1 to many)
-                        new BookDAO(this.DSL())
-                                .getSimpleFromClause()
+                        select(new BookDAO(this.DSL()).getSimpleSelectFields())
+                                .from(BOOKS)
                                 .where(BOOKS.SERIES_ID.eq(SERIES.ID)))
                         .as("books"))
                 .from(SERIES)

@@ -2,7 +2,6 @@ import { Link } from "react-router";
 import type { User } from "~/models/user";
 import { MdDelete, MdModeEdit } from "react-icons/md";
 import { useTranslation } from "~/i18n/i18n";
-import { capitalize } from "~/utils/strings";
 
 type UserCardProps = {
     user: User | null | undefined;

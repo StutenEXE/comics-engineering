@@ -1,5 +1,7 @@
 package dev.stuten.vps.models.daos;
 
+import static dev.stuten.vps.jooq.tables.Books.BOOKS;
+import static dev.stuten.vps.jooq.tables.BooksIssues.BOOKS_ISSUES;
 import static dev.stuten.vps.jooq.tables.IssueSeries.ISSUE_SERIES;
 import static dev.stuten.vps.jooq.tables.Issues.ISSUES;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
@@ -56,6 +58,12 @@ public class IssueSerieDAO extends DAO {
                                 .getSimpleFromClause()
                                 .where(ISSUES.SERIES_ID.eq(ISSUE_SERIES.ID)))
                         .as("issues"))
+                .select(multiset( // Books (1 to many through Issues)
+                        new BookDAO(this.DSL()).getSimpleFromClause()
+                                .join(BOOKS_ISSUES).on(BOOKS.ID.eq(BOOKS_ISSUES.BOOK_ID))
+                                .join(ISSUES).on(BOOKS_ISSUES.ISSUE_ID.eq(ISSUES.ID))
+                                .where(ISSUES.SERIES_ID.eq(ISSUE_SERIES.ID)))
+                        .as("books"))
                 .from(ISSUE_SERIES)
                 .leftJoin(USERS).on(ISSUE_SERIES.ADDED_BY.eq(USERS.ID));
     }

@@ -1,11 +1,11 @@
 import { Link } from "react-router";
 import { useTranslation } from "~/i18n/i18n";
-import { buildIssueShortName, type Issue } from "~/models/issue";
+import { buildIssueShortName, type SimpleIssue } from "~/models/issue";
 
 
 
 type IssueCardProps = {
-    issue: Issue | null | undefined;
+    issue: SimpleIssue | null | undefined;
     className?: string;
 };
 

@@ -1,5 +1,6 @@
 package dev.stuten.vps.models.mappers;
 
+import static dev.stuten.vps.jooq.tables.Books.BOOKS;
 import static dev.stuten.vps.jooq.tables.Series.SERIES;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 
@@ -10,8 +11,6 @@ import java.util.Map;
 import org.jooq.Record;
 import org.jooq.TableField;
 
-import dev.stuten.vps.jooq.tables.Books;
-import dev.stuten.vps.jooq.tables.records.BooksRecord;
 import dev.stuten.vps.models.dtos.full.BookDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleEditionDTO;
@@ -21,19 +20,20 @@ import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 import dev.stuten.vps.models.mappers.utils.MappingUtils;
 
 public class BookMapper {
-    private static Map<TableField<BooksRecord, ? extends Object>, String> fieldMapping = Map.of(
-            Books.BOOKS.ID, "book_id",
-            Books.BOOKS.NAME, "book_name",
-            Books.BOOKS.DESC, "book_desc",
-            Books.BOOKS.NUMBER, "book_number",
-            Books.BOOKS.VO_CONTENT, "book_vo_content",
-            Books.BOOKS.IMG_URL, "book_img_url",
-            Books.BOOKS.SERIES_ID, "book_series_id",
-            Books.BOOKS.ADDED_BY, "book_added_by",
-            Books.BOOKS.CREATED_AT, "book_created_at",
-            Books.BOOKS.MODIFIED_AT, "book_modified_at");
+    private static Map<TableField<? extends Record, ? extends Object>, String> fieldMapping = Map.ofEntries(
+            Map.entry(BOOKS.ID, "book_id"),
+            Map.entry(BOOKS.NAME, "book_name"),
+            Map.entry(BOOKS.DESC, "book_desc"),
+            Map.entry(BOOKS.NUMBER, "book_number"),
+            Map.entry(BOOKS.VO_CONTENT, "book_vo_content"),
+            Map.entry(BOOKS.IMG_URL, "book_img_url"),
+            Map.entry(BOOKS.SERIES_ID, "book_series_id"),
+            Map.entry(SERIES.NAME, "books_serie_name"),
+            Map.entry(BOOKS.ADDED_BY, "book_added_by"),
+            Map.entry(BOOKS.CREATED_AT, "book_created_at"),
+            Map.entry(BOOKS.MODIFIED_AT, "book_modified_at"));
 
-    public static String getFieldName(TableField<BooksRecord, ? extends Object> field) {
+    public static String getFieldName(TableField<? extends Record, ? extends Object> field) {
         return fieldMapping.get(field);
     }
 
@@ -49,31 +49,31 @@ public class BookMapper {
         SimpleUserDTO user = MappingUtils.getSingleDTOFromRecord(r, USERS, UserMapper::mapToSimpleDTO);
         // Map book
         BookDTO dto = new BookDTO(
-                (Integer) r.get(getFieldName(Books.BOOKS.ID)),
-                (String) r.get(getFieldName(Books.BOOKS.NAME)),
-                (String) r.get(getFieldName(Books.BOOKS.DESC)),
-                (Integer) r.get(getFieldName(Books.BOOKS.NUMBER)),
-                (String) r.get(getFieldName(Books.BOOKS.VO_CONTENT)),
-                (String) r.get(getFieldName(Books.BOOKS.IMG_URL)),
+                r.get(getFieldName(BOOKS.ID), Integer.class),
+                r.get(getFieldName(BOOKS.NAME), String.class),
+                r.get(getFieldName(BOOKS.DESC), String.class),
+                r.get(getFieldName(BOOKS.NUMBER), Integer.class),
+                r.get(getFieldName(BOOKS.VO_CONTENT), String.class),
+                r.get(getFieldName(BOOKS.IMG_URL), String.class),
                 serie,
                 editions,
                 issues,
-                (LocalDateTime) r.get(getFieldName(Books.BOOKS.CREATED_AT)),
-                (LocalDateTime) r.get(getFieldName(Books.BOOKS.MODIFIED_AT)),
+                r.get(getFieldName(BOOKS.CREATED_AT), LocalDateTime.class),
+                r.get(getFieldName(BOOKS.MODIFIED_AT), LocalDateTime.class),
                 user);
         return dto;
     }
 
     public static SimpleBookDTO mapToSimpleDTO(Record r) {
         SimpleBookDTO dto = new SimpleBookDTO(
-                (Integer) r.get(getFieldName(Books.BOOKS.ID)),
-                (String) r.get(getFieldName(Books.BOOKS.NAME)),
-                (String) r.get(getFieldName(Books.BOOKS.DESC)),
-                (Integer) r.get(getFieldName(Books.BOOKS.NUMBER)),
-                (String) r.get(getFieldName(Books.BOOKS.VO_CONTENT)),
-                (String) r.get(getFieldName(Books.BOOKS.IMG_URL)),
-                (Integer) r.get(getFieldName(Books.BOOKS.SERIES_ID))
-        );
+                r.get(getFieldName(BOOKS.ID), Integer.class),
+                r.get(getFieldName(BOOKS.NAME), String.class),
+                r.get(getFieldName(BOOKS.DESC), String.class),
+                r.get(getFieldName(BOOKS.NUMBER), Integer.class),
+                r.get(getFieldName(BOOKS.VO_CONTENT), String.class),
+                r.get(getFieldName(BOOKS.IMG_URL), String.class),
+                r.get(getFieldName(BOOKS.SERIES_ID), Integer.class),
+                r.get(getFieldName(SERIES.NAME), String.class));
         return dto;
     }
 }

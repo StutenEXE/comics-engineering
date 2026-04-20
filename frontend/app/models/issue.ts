@@ -1,6 +1,6 @@
-import { parseDataToBook, type Book } from "./book"
-import { parseDataToIssueSerie, type IssueSerie } from "./issue-serie"
-import { parseDataToUser, type User } from "./user"
+import { parseToSimpleBook, type SimpleBook } from "./book"
+import { parseToSimpleIssueSerie, type SimpleIssueSerie } from "./issue-serie"
+import { parseToSimpleUser, type SimpleUser } from "./user"
 
 export interface Issue {
     id: number,
@@ -8,33 +8,71 @@ export interface Issue {
     number: number,
     coverDate: Date,
     parutionDate: Date,
-    issueSerie: IssueSerie | null,
-    books: Book[]
+    issueSerie: SimpleIssueSerie | null,
+    books: SimpleBook[]
     createdAt: Date,
     modifiedAt: Date,
-    addedBy: User | null
+    addedBy: SimpleUser | null
 }
 
 // Utility function to transform the api data to an instance of Issue
-export function parseDataToIssue(data: Record<string, any>): Issue {
+export function parseToIssue(data: Record<string, any>): Issue {
     return {
         id: data.id,
         name: data.name,
         number: data.number,
         coverDate: new Date(data.coverDate),
         parutionDate: new Date(data.parutionDate),
-        issueSerie: data.issueSerie ? parseDataToIssueSerie(data.issueSerie) : null,
-        books: data.books?.map((bk: Record<string, any>) => parseDataToBook(bk)) ?? [],
+        issueSerie: data.issueSerie ? parseToSimpleIssueSerie(data.issueSerie) : null,
+        books: data.books?.map((bk: Record<string, any>) => parseToSimpleBook(bk)) ?? [],
         createdAt: new Date(data.createdAt),
         modifiedAt: new Date(data.modifiedAt),
-        addedBy: data.addedBy ? parseDataToUser(data.addedBy) : null
+        addedBy: data.addedBy ? parseToSimpleUser(data.addedBy) : null
     }
 }
 
-export function buildIssueShortName(is: Issue | null): string {
+export interface SimpleIssue {
+    id: number,
+    name: string,
+    number: number,
+    coverDate: Date,
+    parutionDate: Date,
+    issueSerieId: number | null,
+    issueSerieName: string | null
+}
+
+export function parseToSimpleIssue(data: Record<string, any>): SimpleIssue {
+    return {
+        id: data.id,
+        name: data.name,
+        number: data.number,
+        coverDate: new Date(data.coverDate),
+        parutionDate: new Date(data.parutionDate),
+        issueSerieId: data.issueSerieId,
+        issueSerieName: data.issueSerieName
+    }
+}
+
+export function isSimpleIssue(issue: Issue | SimpleIssue): issue is SimpleIssue {
+    return (issue as SimpleIssue).issueSerieId !== undefined;
+}
+
+export function issueToSimpleIssue(issue: Issue): SimpleIssue {
+    return {
+        id: issue.id,
+        name: issue.name,
+        number: issue.number,
+        coverDate: issue.coverDate,
+        parutionDate: issue.parutionDate,
+        issueSerieId: issue.issueSerie ? issue.issueSerie.id : null,
+        issueSerieName: issue.issueSerie ? issue.issueSerie.name : null
+    }
+}
+
+export function buildIssueShortName(is: Issue | SimpleIssue | null): string {
     if (!is) {
         return "";
     }
-    let shortTitle = `${is.issueSerie?.name}` 
+    let shortTitle =`${isSimpleIssue(is) ? is.issueSerieName :is.issueSerie?.name}`
     return `${shortTitle} #${is.number}`
 }

@@ -9,6 +9,7 @@ public record SimpleBookDTO(
         @JsonProperty("number") Integer number,
         @JsonProperty("voContent") String voContent,
         @JsonProperty("imgUrl") String imgUrl,
-        @JsonProperty("serieId") Integer serieId
+        @JsonProperty("serieId") Integer serieId,
+        @JsonProperty("serieName") String serieName
 ) {
 }

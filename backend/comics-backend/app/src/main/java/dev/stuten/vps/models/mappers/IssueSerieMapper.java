@@ -13,6 +13,7 @@ import org.jooq.TableField;
 
 import dev.stuten.vps.jooq.tables.records.IssueSeriesRecord;
 import dev.stuten.vps.models.dtos.full.IssueSerieDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleIssueDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleIssueSerieDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
@@ -36,6 +37,8 @@ public class IssueSerieMapper {
     public static IssueSerieDTO mapToDTO(Record r) {
         // Map issues
         List<SimpleIssueDTO> issues = MappingUtils.getMultipleDTOFromRecord(r, "issues", IssueMapper::mapToSimpleDTO);
+        // Map books
+        List<SimpleBookDTO> books = MappingUtils.getMultipleDTOFromRecord(r, "books", BookMapper::mapToSimpleDTO);
         // Map user
         SimpleUserDTO user = MappingUtils.getSingleDTOFromRecord(r, USERS, UserMapper::mapToSimpleDTO);
         // Map issue serie
@@ -46,6 +49,7 @@ public class IssueSerieMapper {
                 (LocalDate) r.get(getFieldName(ISSUE_SERIES.START_DATE)),
                 (LocalDate) r.get(getFieldName(ISSUE_SERIES.END_DATE)),
                 issues,
+                books,
                 (LocalDateTime) r.get(getFieldName(ISSUE_SERIES.CREATED_AT)),
                 (LocalDateTime) r.get(getFieldName(ISSUE_SERIES.MODIFIED_AT)),
                 user);

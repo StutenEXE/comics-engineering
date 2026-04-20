@@ -18,5 +18,7 @@ public record SimpleIssueDTO(
 
         @JsonProperty("parutionDate") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") @JsonSerialize(using = LocalDateSerializer.class) @JsonDeserialize(using = LocalDateDeserializer.class) LocalDate parutionDate,
 
-        @JsonProperty("issueSerieId") Integer issueSerieId) {
+        @JsonProperty("issueSerieId") Integer issueSerieId,
+        @JsonProperty("issueSerieName") String issueSerieName
+) {
 }

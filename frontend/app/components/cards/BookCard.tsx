@@ -1,14 +1,14 @@
 import { useCallback, useState } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "~/i18n/i18n";
-import type { Book } from "~/models/book";
+import type { SimpleBook } from "~/models/book";
 
 type BookCardProps = {
-    book: Book | undefined | null
+    book: SimpleBook | undefined | null
     className?: string;
 };
 
-export function BookCard({ book, className}: BookCardProps) {
+export function BookCard({ book, className }: BookCardProps) {
     const { t } = useTranslation();
 
     if (!book) {
@@ -27,7 +27,7 @@ export function BookCard({ book, className}: BookCardProps) {
                 </div>
                 <div className="flex flex-col items-center justify-between">
                     <h3 className="font-semibold text-center text-sm">{book.name}</h3>
-                    <h4 className="text-center sm:text-sm">{book.serie?.name}</h4>
+                    <h4 className="text-center sm:text-sm">{book.serieName}</h4>
                     <h4 className="text-center sm:text-sm italic">{t("generic.volume", { capitalize: true })} {book.number}</h4>
                 </div>
             </div>

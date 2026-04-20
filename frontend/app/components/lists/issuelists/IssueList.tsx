@@ -1,4 +1,4 @@
-import { type Issue } from "~/models/issue";
+import { isSimpleIssue, issueToSimpleIssue, type Issue, type SimpleIssue } from "~/models/issue";
 import { compareDates } from "~/utils/date";
 import { IssueCard } from "../../cards/IssueCard";
 import { GenericList } from "../GenericList";
@@ -7,7 +7,7 @@ import { useTranslation } from "~/i18n/i18n";
 
 
 interface IssueListProps {
-    issueList: Issue[] | null | undefined
+    issueList: Issue[] | SimpleIssue[] | null | undefined
     descOrder?: boolean
     isLoading?: boolean
     error?: Error
@@ -17,12 +17,14 @@ interface IssueListProps {
 export function IssueList({ issueList, descOrder, isLoading, error, className }: IssueListProps) {
     const { t } = useTranslation()
 
-    const mapper = (is: Issue) => (
+    const mapper = (is: SimpleIssue) => (
         <IssueCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
                 key={is?.id} issue={is} />
     ) 
     
-    const list = !issueList ? [] : [...issueList]
+    const list = !issueList || issueList.length === 0 ? []
+     : isSimpleIssue(issueList[0]) ? issueList as SimpleIssue[]
+     : (issueList as Issue[]).map(issueToSimpleIssue)
         // Sorting list
         .sort((is1, is2) => {
             if (descOrder) {
