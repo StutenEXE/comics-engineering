@@ -5,6 +5,8 @@ import { LoginForm } from '../forms/LoginForm';
 import { useState } from 'react';
 import { SignupForm } from '../forms/SignupForm';
 import { useTranslation } from '~/i18n/i18n';
+import { LoginModal } from '../modals/LoginModal';
+import { SignupModal } from '../modals/SignupModal';
 
 export function Header() {
     const { t } = useTranslation();
@@ -59,20 +61,8 @@ export function Header() {
                 </nav>
             </div>
             {/* Modals */}
-            <section className="w-full max-w-lg mx-auto absolute top-20 left-0 right-0">
-                { isLoginOpen && (
-                    <LoginForm
-                        onDone={() => setIsLoginOpen(false)}
-                        onCancel={() => setIsLoginOpen(false)}
-                    />
-                )}
-                { isSignupOpen && (
-                    <SignupForm
-                        onDone={() => setIsSignupOpen(false)}
-                        onCancel={() => setIsSignupOpen(false)}
-                    />
-                )}
-            </section>
+            <LoginModal isOpen={isLoginOpen} onDone={() => setIsLoginOpen(false)} onCancel={() => setIsLoginOpen(false)} />
+            <SignupModal isOpen={isSignupOpen} onDone={() => setIsSignupOpen(false)} onCancel={() => setIsSignupOpen(false)} />
         </header>
     );
 }

@@ -61,7 +61,7 @@ export function SignupForm({ onDone, onCancel }: SignupFormProps) {
     return (
         <form
             onSubmit={handleSubmit}
-            className="max-w-md mx-auto mt-8 p-6 border border-gray-300 rounded-lg shadow-md bg-black"
+            className="w-100 mx-auto mt-8 p-6"
         >
             <h2 className="text-2xl font-bold mb-6 text-center">{t("signup.header")}</h2>
             <div className="mb-4">
