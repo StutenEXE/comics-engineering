@@ -2,7 +2,7 @@ import { useBookByIdQuery } from "~/store/services/api";
 import type { Route } from "../+types/root";
 import { createError } from "~/utils/error";
 import { InfoPageHeaderComponent } from "~/components/headers/InfoPageHeader";
-import { PageTemplate } from "~/components/templates/PageTemplate";
+import { InfoPageTemplate } from "~/components/templates/InfoPageTemplate";
 import { EditionList } from "~/components/lists/editionlists/EditionList";
 import type { Link } from "~/components/lists/LinkButtonList";
 import { BookListBySerieId } from "~/components/lists/booklists/BookListBySerieId";
@@ -29,7 +29,7 @@ export default function BookPage({ params }: { params : { id: number}}) {
   ]
 
   return (
-    <PageTemplate hasImg={true} imgUrl={book?.imgUrl} imgAlt={book?.name} links={links}>
+    <InfoPageTemplate hasImg={true} imgUrl={book?.imgUrl} imgAlt={book?.name} links={links}>
       { isLoading && (
         <div className="flex items-center justify-center">
             <h1 className="text-3xl text-gray-500">{t("loader.book.loading")}</h1>
@@ -70,6 +70,6 @@ export default function BookPage({ params }: { params : { id: number}}) {
           </div>
         </>
       )}
-    </PageTemplate>
+    </InfoPageTemplate>
   );
 }

@@ -1,6 +1,6 @@
 import { InfoPageHeaderComponent } from "~/components/headers/InfoPageHeader";
 import { BookList } from "~/components/lists/booklists/BookList";
-import { PageTemplate } from "~/components/templates/PageTemplate";
+import { InfoPageTemplate } from "~/components/templates/InfoPageTemplate";
 import { useTranslation } from "~/i18n/i18n";
 import { useSerieByIdQuery } from "~/store/services/api";
 import { dateToMonthYearString } from "~/utils/date";
@@ -31,7 +31,7 @@ export default function IssueSeriePage({ params }: { params : { id: number}}) {
     }
 
   return (
-    <PageTemplate hasImg={false}>
+    <InfoPageTemplate hasImg={false}>
       { isLoading && (
         <div className="flex items-center justify-center">
             <h1 className="text-3xl text-gray-500">{t("loader.serie.loading")}</h1>
@@ -62,6 +62,6 @@ export default function IssueSeriePage({ params }: { params : { id: number}}) {
           </div>
         </>
       )}
-    </PageTemplate>
+    </InfoPageTemplate>
   );
 }

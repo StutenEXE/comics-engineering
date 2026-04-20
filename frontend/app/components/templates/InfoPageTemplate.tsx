@@ -9,7 +9,7 @@ interface PageTemplateProps {
     children?: ReactNode
 }
 
-export function PageTemplate({ hasImg, imgUrl, imgAlt, links, children}: PageTemplateProps) {
+export function InfoPageTemplate({ hasImg, imgUrl, imgAlt, links, children}: PageTemplateProps) {
     return (
         <main className="flex flex-col items-center pt-8">
             <div className="max-w-500 w-1/2">

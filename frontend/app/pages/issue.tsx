@@ -3,7 +3,7 @@ import type { Route } from "../+types/root";
 import { createError } from "~/utils/error";
 import { dateToMonthYearString, dateToVerboseDateString } from "~/utils/date";
 import { InfoPageHeaderComponent } from "~/components/headers/InfoPageHeader";
-import { PageTemplate } from "~/components/templates/PageTemplate";
+import { InfoPageTemplate } from "~/components/templates/InfoPageTemplate";
 import { buildIssueShortName } from "~/models/issue";
 import { BookList } from "~/components/lists/booklists/BookList";
 import type { Link } from "~/components/lists/LinkButtonList";
@@ -28,7 +28,7 @@ export default function IssuePage({ params }: { params : { id: number}}) {
   ]
 
   return (
-    <PageTemplate links={links}>
+    <InfoPageTemplate links={links}>
       { isLoading && (
         <div className="flex items-center justify-center">
             <h1 className="text-3xl text-gray-500">{t("loader.issue.loading")}</h1>
@@ -72,6 +72,6 @@ export default function IssuePage({ params }: { params : { id: number}}) {
           </div>
         </>
       )}
-    </PageTemplate>
+    </InfoPageTemplate>
   );
 }

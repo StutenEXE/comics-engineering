@@ -1,5 +1,5 @@
 import { useAppSelector } from "~/store/hooks";
-import { PageTemplate } from "~/components/templates/PageTemplate";
+import { InfoPageTemplate } from "~/components/templates/InfoPageTemplate";
 import { useTranslation } from "~/i18n/i18n";
 import { GenericButton } from "~/components/buttons/GenericButton";
 import { GenericTable, type ColumnDef } from "~/components/tables/GenericTable";

@@ -2,7 +2,7 @@ import { useEditionByIdQuery } from "~/store/services/api";
 import type { Route } from "../+types/root";
 import { createError } from "~/utils/error";
 import { LinkButton } from "~/components/buttons/LinkButton";
-import { PageTemplate } from "~/components/templates/PageTemplate";
+import { InfoPageTemplate } from "~/components/templates/InfoPageTemplate";
 import { InfoPageHeaderComponent } from "~/components/headers/InfoPageHeader";
 import type { Link } from "~/components/lists/LinkButtonList";
 import { useTranslation } from "~/i18n/i18n";
@@ -35,7 +35,7 @@ export default function EditionPage({ params }: { params: { id: number } }) {
   ];
 
   return (
-    <PageTemplate
+    <InfoPageTemplate
       hasImg={true}
       imgUrl={edition?.imgUrl}
       imgAlt={edition?.book?.name}
@@ -128,6 +128,6 @@ export default function EditionPage({ params }: { params: { id: number } }) {
           </div>
         </>
       )}
-    </PageTemplate>
+    </InfoPageTemplate>
   );
 }
