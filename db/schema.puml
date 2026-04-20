@@ -85,6 +85,7 @@ entity "editions" as editions {
   book_id : INT [FK → books.id, ON DELETE CASCADE, NOT NULL]
   isbn : VARCHAR(20)
   ean : VARCHAR(20)
+  npages : INT
   price : REAL
   url : TEXT
   img_url : TEXT

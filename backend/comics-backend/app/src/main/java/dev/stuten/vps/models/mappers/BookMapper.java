@@ -3,7 +3,7 @@ package dev.stuten.vps.models.mappers;
 import static dev.stuten.vps.jooq.tables.Series.SERIES;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -58,8 +58,8 @@ public class BookMapper {
                 serie,
                 editions,
                 issues,
-                (OffsetDateTime) r.get(getFieldName(Books.BOOKS.CREATED_AT)),
-                (OffsetDateTime) r.get(getFieldName(Books.BOOKS.MODIFIED_AT)),
+                (LocalDateTime) r.get(getFieldName(Books.BOOKS.CREATED_AT)),
+                (LocalDateTime) r.get(getFieldName(Books.BOOKS.MODIFIED_AT)),
                 user);
         return dto;
     }

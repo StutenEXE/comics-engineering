@@ -4,7 +4,7 @@ import static dev.stuten.vps.jooq.tables.Series.SERIES;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -49,8 +49,8 @@ public class SerieMapper {
                 (LocalDate) r.get(getFieldName(SERIES.START_DATE)),
                 (LocalDate) r.get(getFieldName(SERIES.END_DATE)),
                 books,
-                (OffsetDateTime) r.get(getFieldName(SERIES.CREATED_AT)),
-                (OffsetDateTime) r.get(getFieldName(SERIES.MODIFIED_AT)),
+                (LocalDateTime) r.get(getFieldName(SERIES.CREATED_AT)),
+                (LocalDateTime) r.get(getFieldName(SERIES.MODIFIED_AT)),
                 user);
         return dto;
     }

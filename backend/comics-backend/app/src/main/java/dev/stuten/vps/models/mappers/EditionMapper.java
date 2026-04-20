@@ -7,7 +7,7 @@ import static dev.stuten.vps.jooq.tables.Series.SERIES;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.jooq.Record;
@@ -67,8 +67,8 @@ public class EditionMapper {
                 publisher,
                 book,
                 serie,
-                r.get(getFieldName(EDITIONS.CREATED_AT), OffsetDateTime.class),
-                r.get(getFieldName(EDITIONS.MODIFIED_AT), OffsetDateTime.class),
+                r.get(getFieldName(EDITIONS.CREATED_AT), LocalDateTime.class),
+                r.get(getFieldName(EDITIONS.MODIFIED_AT), LocalDateTime.class),
                 user);
         return dto;
     }

@@ -2,7 +2,7 @@ package dev.stuten.vps.models.mappers;
 
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.jooq.Record;
@@ -34,8 +34,8 @@ public class UserMapper {
                 r.get(getFieldName(USERS.USERNAME), String.class),
                 r.get(getFieldName(USERS.EMAIL), String.class),
                 r.get(getFieldName(USERS.IS_ADMIN), Boolean.class),
-                r.get(getFieldName(USERS.CREATED_AT), OffsetDateTime.class),
-                r.get(getFieldName(USERS.MODIFIED_AT), OffsetDateTime.class));
+                r.get(getFieldName(USERS.CREATED_AT), LocalDateTime.class),
+                r.get(getFieldName(USERS.MODIFIED_AT), LocalDateTime.class));
         return dto;
     }
     
@@ -53,8 +53,8 @@ public class UserMapper {
                 r.get(getFieldName(USERS.EMAIL), String.class),
                 r.get(getFieldName(USERS.PASSWORD), String.class),
                 r.get(getFieldName(USERS.IS_ADMIN), Boolean.class),
-                r.get(getFieldName(USERS.CREATED_AT), OffsetDateTime.class),
-                r.get(getFieldName(USERS.MODIFIED_AT), OffsetDateTime.class));
+                r.get(getFieldName(USERS.CREATED_AT), LocalDateTime.class),
+                r.get(getFieldName(USERS.MODIFIED_AT), LocalDateTime.class));
         return dto;
     }
 }

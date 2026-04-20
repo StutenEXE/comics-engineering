@@ -4,7 +4,7 @@ import static dev.stuten.vps.jooq.tables.IssueSeries.ISSUE_SERIES;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -46,8 +46,8 @@ public class IssueSerieMapper {
                 (LocalDate) r.get(getFieldName(ISSUE_SERIES.START_DATE)),
                 (LocalDate) r.get(getFieldName(ISSUE_SERIES.END_DATE)),
                 issues,
-                (OffsetDateTime) r.get(getFieldName(ISSUE_SERIES.CREATED_AT)),
-                (OffsetDateTime) r.get(getFieldName(ISSUE_SERIES.MODIFIED_AT)),
+                (LocalDateTime) r.get(getFieldName(ISSUE_SERIES.CREATED_AT)),
+                (LocalDateTime) r.get(getFieldName(ISSUE_SERIES.MODIFIED_AT)),
                 user);
         return dto;
     }

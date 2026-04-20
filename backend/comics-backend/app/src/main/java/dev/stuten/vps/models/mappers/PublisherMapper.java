@@ -2,7 +2,7 @@ package dev.stuten.vps.models.mappers;
 
 import static dev.stuten.vps.jooq.tables.Publishers.PUBLISHERS;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -35,8 +35,8 @@ public class PublisherMapper {
                 (Integer) r.get(getFieldName(PUBLISHERS.ID)),
                 (String) r.get(getFieldName(PUBLISHERS.NAME)),
                 editions,
-                (OffsetDateTime) r.get(getFieldName(PUBLISHERS.CREATED_AT)),
-                (OffsetDateTime) r.get(getFieldName(PUBLISHERS.MODIFIED_AT)));
+                (LocalDateTime) r.get(getFieldName(PUBLISHERS.CREATED_AT)),
+                (LocalDateTime) r.get(getFieldName(PUBLISHERS.MODIFIED_AT)));
         return dto;
     }
     

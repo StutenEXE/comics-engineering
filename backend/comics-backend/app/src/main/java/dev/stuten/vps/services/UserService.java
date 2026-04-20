@@ -19,8 +19,6 @@ public class UserService {
 
     private UserService() {}
 
-    private final static String SESSION_KEY_NAME = "session_id";
-
     private static UserDAO dao = new UserDAO(
             JooqProvider.get());
 
@@ -45,7 +43,7 @@ public class UserService {
         // Log in user
         String sessionKey = SessionStore.createSessionKey();
         SessionStore.save(sessionKey, newUser.id(), newUser.isAdmin() ? Role.ADMIN : Role.USER);
-        ctx.cookie(SESSION_KEY_NAME, sessionKey);
+        ctx.cookie(SessionStore.COOKIE_SESSION_KEY, sessionKey);
 
         // Send back account info to the client
         ctx.json(Map.of("user", newUser));
@@ -73,7 +71,7 @@ public class UserService {
         // Log in user
         String sessionKey = SessionStore.createSessionKey();
         SessionStore.save(sessionKey, user.id(), user.isAdmin() ? Role.ADMIN : Role.USER);
-        ctx.cookie(SESSION_KEY_NAME, sessionKey);
+        ctx.cookie(SessionStore.COOKIE_SESSION_KEY, sessionKey);
 
         // Send back account info to the client
         ctx.json(Map.of("user", user));
@@ -81,16 +79,16 @@ public class UserService {
 
     public static void refreshAuth(Context ctx) {
         // Retreive session key
-        String sessionKey = ctx.cookie(SESSION_KEY_NAME);
+        String sessionKey = ctx.cookie(SessionStore.COOKIE_SESSION_KEY);
         if (sessionKey == null || sessionKey.isBlank()) {
-            ctx.removeCookie(SESSION_KEY_NAME);
+            ctx.removeCookie(SessionStore.COOKIE_SESSION_KEY);
             ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid session", "No session key");
         }
 
         // Retreive session
         Session session = SessionStore.find(sessionKey);
         if (session == null) {
-            ctx.removeCookie(SESSION_KEY_NAME);
+            ctx.removeCookie(SessionStore.COOKIE_SESSION_KEY);
             ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid session", "Session terminated");
             return; // For compiler
         }
@@ -99,7 +97,7 @@ public class UserService {
         Optional<UserDTO> user = dao.findById(Integer.parseInt(session.userId()));
         System.out.println(user.toString());
         if (user.isEmpty()) {
-            ctx.removeCookie(SESSION_KEY_NAME);
+            ctx.removeCookie(SessionStore.COOKIE_SESSION_KEY);
             SessionStore.delete(sessionKey);
             ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid session", "No user found for this session");
         }
