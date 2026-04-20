@@ -85,6 +85,7 @@ public class EditionMapper {
                 r.get(getFieldName(EDITIONS.COVER_TYPE), String.class),
                 r.get(getFieldName(EDITIONS.PARUTION_DATE), LocalDate.class),
                 r.get(getFieldName(EDITIONS.PUBLISHER_ID), Integer.class),
+                r.get(PublisherMapper.getFieldName(PUBLISHERS.NAME), String.class),
                 r.get(getFieldName(EDITIONS.BOOK_ID), Integer.class));
         return dto;
     }

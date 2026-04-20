@@ -1,5 +1,7 @@
 package dev.stuten.vps.models.daos;
 
+import static dev.stuten.vps.jooq.tables.Users.USERS;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -8,10 +10,8 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.SelectFieldOrAsterisk;
-import org.jooq.SelectWhereStep;
+import org.jooq.SelectJoinStep;
 import org.mindrot.jbcrypt.BCrypt;
-
-import static dev.stuten.vps.jooq.tables.Users.USERS;
 
 import dev.stuten.vps.models.dtos.full.UserDTO;
 import dev.stuten.vps.models.dtos.full.UserWithPasswordDTO;
@@ -39,7 +39,7 @@ public class UserDAO extends DAO {
     }
 
     @Override
-    protected Collection<SelectFieldOrAsterisk> getSimpleSelectStatement() {
+    protected Collection<SelectFieldOrAsterisk> getSimpleSelectFields() {
         return List.of(
                 USERS.ID.as(UserMapper.getFieldName(USERS.ID)),
                 USERS.USERNAME.as(UserMapper.getFieldName(USERS.USERNAME)),
@@ -51,8 +51,13 @@ public class UserDAO extends DAO {
     }
 
     @Override
-    protected SelectWhereStep<? extends Record> getDefaultSelectStatement() {
-        return DSL().select(getSimpleSelectStatement())
+    protected SelectJoinStep<? extends Record> getSimpleFromClause() {
+        return DSL().select(getSimpleSelectFields()).from(USERS);
+    }
+
+    @Override
+    protected SelectJoinStep<? extends Record> getFullFromClause() {
+        return DSL().select(getSimpleSelectFields())
                 .from(USERS);
     }
 
@@ -81,7 +86,7 @@ public class UserDAO extends DAO {
     }
 
     public List<UserDTO> getUsers(Integer from, Integer limit) {
-        return getDefaultSelectStatement()
+        return getFullFromClause()
                         .offset(from)
                         .limit(limit)
                         .fetch(getDefaultMapper());

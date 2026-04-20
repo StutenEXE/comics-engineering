@@ -4,7 +4,6 @@ import static dev.stuten.vps.jooq.tables.IssueSeries.ISSUE_SERIES;
 import static dev.stuten.vps.jooq.tables.Issues.ISSUES;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 import static org.jooq.impl.DSL.multiset;
-import static org.jooq.impl.DSL.select;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,7 +13,7 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.SelectFieldOrAsterisk;
-import org.jooq.SelectWhereStep;
+import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.models.dtos.full.IssueSerieDTO;
 import dev.stuten.vps.models.mappers.IssueSerieMapper;
@@ -32,7 +31,7 @@ public class IssueSerieDAO extends DAO {
     }
 
     @Override
-    protected Collection<SelectFieldOrAsterisk> getSimpleSelectStatement() {
+    protected Collection<SelectFieldOrAsterisk> getSimpleSelectFields() {
         return List.of(
                 ISSUE_SERIES.ID.as(IssueSerieMapper.getFieldName(ISSUE_SERIES.ID)),
                 ISSUE_SERIES.NAME.as(IssueSerieMapper.getFieldName(ISSUE_SERIES.NAME)),
@@ -44,13 +43,17 @@ public class IssueSerieDAO extends DAO {
                 ISSUE_SERIES.MODIFIED_AT.as(IssueSerieMapper.getFieldName(ISSUE_SERIES.MODIFIED_AT)));
     }
 
+    protected SelectJoinStep<? extends Record> getSimpleFromClause() {
+        return DSL().select(getSimpleSelectFields()).from(ISSUE_SERIES);
+    }
+
     @Override
-    protected SelectWhereStep<? extends Record> getDefaultSelectStatement() {
-        return DSL().select(getSimpleSelectStatement())
-                .select(new UserDAO(this.DSL()).getSimpleSelectStatement())
+    protected SelectJoinStep<? extends Record> getFullFromClause() {
+        return DSL().select(getSimpleSelectFields())
+                .select(new UserDAO(this.DSL()).getSimpleSelectFields())
                 .select(multiset( // Issues (1 to many)
-                        select(new IssueDAO(this.DSL()).getSimpleSelectStatement())
-                                .from(ISSUES)
+                        new IssueDAO(this.DSL())
+                                .getSimpleFromClause()
                                 .where(ISSUES.SERIES_ID.eq(ISSUE_SERIES.ID)))
                         .as("issues"))
                 .from(ISSUE_SERIES)

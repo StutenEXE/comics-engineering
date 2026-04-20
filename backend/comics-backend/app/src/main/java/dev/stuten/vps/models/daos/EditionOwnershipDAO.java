@@ -1,18 +1,18 @@
 package dev.stuten.vps.models.daos;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-
 import static dev.stuten.vps.jooq.tables.EditionOwnership.EDITION_OWNERSHIP;
 import static dev.stuten.vps.jooq.tables.Editions.EDITIONS;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.SelectFieldOrAsterisk;
-import org.jooq.SelectWhereStep;
+import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.models.dtos.full.OwnedEditionDTO;
 import dev.stuten.vps.models.mappers.OwnedEditionMapper;
@@ -30,7 +30,7 @@ public class EditionOwnershipDAO extends DAO {
     }
 
     @Override
-    protected Collection<SelectFieldOrAsterisk> getSimpleSelectStatement() {
+    protected Collection<SelectFieldOrAsterisk> getSimpleSelectFields() {
         return List.of(
                 EDITION_OWNERSHIP.ID.as(OwnedEditionMapper.getFieldName(EDITION_OWNERSHIP.ID)),
                 EDITION_OWNERSHIP.DATE.as(OwnedEditionMapper.getFieldName(EDITION_OWNERSHIP.DATE)),
@@ -44,12 +44,16 @@ public class EditionOwnershipDAO extends DAO {
                 EDITION_OWNERSHIP.NOTE.as(OwnedEditionMapper.getFieldName(EDITION_OWNERSHIP.NOTE)));
     }
 
+    protected SelectJoinStep<? extends Record> getSimpleFromClause() {
+        return DSL().select(getSimpleSelectFields()).from(EDITION_OWNERSHIP);
+    };
+
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    protected SelectWhereStep getDefaultSelectStatement() {
-        return DSL().select(getSimpleSelectStatement())
-                .select(new EditionDAO(this.DSL()).getSimpleSelectStatement())
-                .select(new UserDAO(this.DSL()).getSimpleSelectStatement())
+    protected SelectJoinStep getFullFromClause() {
+        return DSL().select(getSimpleSelectFields())
+                .select(new EditionDAO(this.DSL()).getSimpleSelectFields())
+                .select(new UserDAO(this.DSL()).getSimpleSelectFields())
                 .from(EDITION_OWNERSHIP)
                 .leftJoin(EDITIONS).on(EDITION_OWNERSHIP.EDITION_ID.eq(EDITIONS.ID))
                 .leftJoin(USERS).on(EDITION_OWNERSHIP.USER_ID.eq(USERS.ID));

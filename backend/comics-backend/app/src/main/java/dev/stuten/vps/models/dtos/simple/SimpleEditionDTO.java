@@ -22,5 +22,7 @@ public record SimpleEditionDTO(
                 @JsonProperty("parutionDate") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") @JsonSerialize(using = LocalDateSerializer.class) @JsonDeserialize(using = LocalDateDeserializer.class) LocalDate parutionDate,
 
                 @JsonProperty("publisherId") Integer publisherId,
+                @JsonProperty("publisherName") String publisherName,
+
                 @JsonProperty("bookId") Integer bookId) {
 }

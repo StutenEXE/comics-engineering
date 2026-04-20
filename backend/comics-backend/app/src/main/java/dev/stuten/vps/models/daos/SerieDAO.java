@@ -4,7 +4,6 @@ import static dev.stuten.vps.jooq.tables.Books.BOOKS;
 import static dev.stuten.vps.jooq.tables.Series.SERIES;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 import static org.jooq.impl.DSL.multiset;
-import static org.jooq.impl.DSL.select;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,7 +13,7 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.SelectFieldOrAsterisk;
-import org.jooq.SelectWhereStep;
+import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.models.dtos.full.SerieDTO;
 import dev.stuten.vps.models.mappers.SerieMapper;
@@ -32,7 +31,7 @@ public class SerieDAO extends DAO {
     }
 
     @Override
-    protected Collection<SelectFieldOrAsterisk> getSimpleSelectStatement() {
+    protected Collection<SelectFieldOrAsterisk> getSimpleSelectFields() {
         return List.of(
                 SERIES.ID.as(SerieMapper.getFieldName(SERIES.ID)),
                 SERIES.NAME.as(SerieMapper.getFieldName(SERIES.NAME)),
@@ -47,12 +46,17 @@ public class SerieDAO extends DAO {
     }
 
     @Override
-    protected SelectWhereStep<? extends Record> getDefaultSelectStatement() {
-        return DSL().select(getSimpleSelectStatement())
-                .select(new UserDAO(this.DSL()).getSimpleSelectStatement())
+    protected SelectJoinStep<? extends Record> getSimpleFromClause() {
+        return DSL().select(getSimpleSelectFields()).from(SERIES);
+    }
+
+    @Override
+    protected SelectJoinStep<? extends Record> getFullFromClause() {
+        return DSL().select(getSimpleSelectFields())
+                .select(new UserDAO(this.DSL()).getSimpleSelectFields())
                 .select(multiset( // Books (1 to many)
-                        select(new BookDAO(this.DSL()).getSimpleSelectStatement())
-                                .from(BOOKS)
+                        new BookDAO(this.DSL())
+                                .getSimpleFromClause()
                                 .where(BOOKS.SERIES_ID.eq(SERIES.ID)))
                         .as("books"))
                 .from(SERIES)

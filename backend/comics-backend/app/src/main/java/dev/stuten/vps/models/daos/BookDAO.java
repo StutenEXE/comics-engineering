@@ -7,7 +7,6 @@ import static dev.stuten.vps.jooq.tables.Issues.ISSUES;
 import static dev.stuten.vps.jooq.tables.Series.SERIES;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 import static org.jooq.impl.DSL.multiset;
-import static org.jooq.impl.DSL.select;
 
 import java.util.Collection;
 import java.util.List;
@@ -17,7 +16,7 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.SelectFieldOrAsterisk;
-import org.jooq.SelectWhereStep;
+import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.models.dtos.full.BookDTO;
 import dev.stuten.vps.models.mappers.BookMapper;
@@ -35,7 +34,7 @@ public class BookDAO extends DAO {
         }
 
         @Override
-        protected Collection<SelectFieldOrAsterisk> getSimpleSelectStatement() {
+        protected Collection<SelectFieldOrAsterisk> getSimpleSelectFields() {
                 return List.of(
                                 BOOKS.ID.as(BookMapper.getFieldName(BOOKS.ID)),
                                 BOOKS.NAME.as(BookMapper.getFieldName(BOOKS.NAME)),
@@ -50,24 +49,26 @@ public class BookDAO extends DAO {
         }
 
         @Override
-        protected SelectWhereStep<? extends Record> getDefaultSelectStatement() {
-                return DSL().select(getSimpleSelectStatement())
-                                .select(new SerieDAO(this.DSL()).getSimpleSelectStatement())
-                                .select(new UserDAO(this.DSL()).getSimpleSelectStatement())
+        protected SelectJoinStep<? extends Record> getSimpleFromClause() {
+                return DSL().select(getSimpleSelectFields()).from(BOOKS);
+        }
+
+        @Override
+        protected SelectJoinStep<? extends Record> getFullFromClause() {
+                return DSL().select(getSimpleSelectFields())
+                                .select(new SerieDAO(this.DSL()).getSimpleSelectFields())
+                                .select(new UserDAO(this.DSL()).getSimpleSelectFields())
                                 .select(multiset( // Editions (1 to many)
-                                                select(new EditionDAO(this.DSL())
-                                                                .getSimpleSelectStatement())
-                                                                .from(EDITIONS)
+                                                new EditionDAO(this.DSL())
+                                                                .getSimpleFromClause()
                                                                 .where(EDITIONS.BOOK_ID.eq(BOOKS.ID)))
                                                 .as("editions"))
                                 .select(multiset( // Issues (many to many)
-                                                select(new IssueDAO(this.DSL())
-                                                                .getSimpleSelectStatement())
-                                                                .from(BOOKS_ISSUES)
-                                                                .join(ISSUES)
+                                                new IssueDAO(this.DSL())
+                                                                .getSimpleFromClause()
+                                                                .join(BOOKS_ISSUES)
                                                                 .on(BOOKS_ISSUES.ISSUE_ID.eq(ISSUES.ID))
-                                                                .where(BOOKS_ISSUES.BOOK_ID
-                                                                                .eq(BOOKS.ID)))
+                                                                .where(BOOKS_ISSUES.BOOK_ID.eq(BOOKS.ID)))
                                                 .as("issues"))
                                 .from(BOOKS)
                                 .leftJoin(SERIES).on(BOOKS.SERIES_ID.eq(SERIES.ID))
@@ -96,7 +97,7 @@ public class BookDAO extends DAO {
         }
 
         public List<BookDTO> findLatest(Integer from, Integer limit) {
-                return getDefaultSelectStatement()
+                return getFullFromClause()
                                 .offset(from)
                                 .limit(limit)
                                 .fetch(getDefaultMapper());

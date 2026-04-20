@@ -3,7 +3,6 @@ package dev.stuten.vps.models.daos;
 import static dev.stuten.vps.jooq.tables.Editions.EDITIONS;
 import static dev.stuten.vps.jooq.tables.Publishers.PUBLISHERS;
 import static org.jooq.impl.DSL.multiset;
-import static org.jooq.impl.DSL.select;
 
 import java.util.Collection;
 import java.util.List;
@@ -13,7 +12,7 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.SelectFieldOrAsterisk;
-import org.jooq.SelectWhereStep;
+import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.models.dtos.full.PublisherDTO;
 import dev.stuten.vps.models.mappers.PublisherMapper;
@@ -31,7 +30,7 @@ public class PublisherDAO extends DAO {
     }
 
     @Override
-    protected Collection<SelectFieldOrAsterisk> getSimpleSelectStatement() {
+    protected Collection<SelectFieldOrAsterisk> getSimpleSelectFields() {
         return List.of(
                 PUBLISHERS.ID.as(PublisherMapper.getFieldName(PUBLISHERS.ID)),
                 PUBLISHERS.NAME.as(PublisherMapper.getFieldName(PUBLISHERS.NAME)),
@@ -40,11 +39,16 @@ public class PublisherDAO extends DAO {
     }
 
     @Override
-    protected SelectWhereStep<? extends Record> getDefaultSelectStatement() {
-        return DSL().select(getSimpleSelectStatement())
+    protected SelectJoinStep<? extends Record> getSimpleFromClause() {
+        return DSL().select(getSimpleSelectFields()).from(PUBLISHERS);
+    }
+
+    @Override
+    protected SelectJoinStep<? extends Record> getFullFromClause() {
+        return DSL().select(getSimpleSelectFields())
                 .select(multiset( // Editions (1 to many)
-                        select(EDITIONS.asterisk())
-                                .from(EDITIONS)
+                        new EditionDAO(this.DSL())
+                                .getSimpleFromClause()
                                 .where(EDITIONS.PUBLISHER_ID.eq(PUBLISHERS.ID)))
                         .as("editions"))
                 .from(PUBLISHERS);

@@ -14,10 +14,11 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.SelectFieldOrAsterisk;
-import org.jooq.SelectWhereStep;
+import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.models.dtos.full.EditionDTO;
 import dev.stuten.vps.models.mappers.EditionMapper;
+import dev.stuten.vps.models.mappers.PublisherMapper;
 
 public class EditionDAO extends DAO {
 
@@ -32,7 +33,7 @@ public class EditionDAO extends DAO {
     }
 
     @Override
-    protected Collection<SelectFieldOrAsterisk> getSimpleSelectStatement() {
+    protected Collection<SelectFieldOrAsterisk> getSimpleSelectFields() {
         return List.of(
                 EDITIONS.ID.as(EditionMapper.getFieldName(EDITIONS.ID)),
                 EDITIONS.ISBN.as(EditionMapper.getFieldName(EDITIONS.ISBN)),
@@ -44,6 +45,7 @@ public class EditionDAO extends DAO {
                 EDITIONS.COVER_TYPE.as(EditionMapper.getFieldName(EDITIONS.COVER_TYPE)),
                 EDITIONS.PARUTION_DATE.as(EditionMapper.getFieldName(EDITIONS.PARUTION_DATE)),
                 EDITIONS.PUBLISHER_ID.as(EditionMapper.getFieldName(EDITIONS.PUBLISHER_ID)),
+                PUBLISHERS.NAME.as(PublisherMapper.getFieldName(PUBLISHERS.NAME)),
                 EDITIONS.BOOK_ID.as(EditionMapper.getFieldName(EDITIONS.BOOK_ID)),
                 EDITIONS.ADDED_BY.as(EditionMapper.getFieldName(EDITIONS.ADDED_BY)),
                 EDITIONS.CREATED_AT.as(EditionMapper.getFieldName(EDITIONS.CREATED_AT)),
@@ -51,12 +53,18 @@ public class EditionDAO extends DAO {
     }
 
     @Override
-    protected SelectWhereStep<? extends Record> getDefaultSelectStatement() {
-        return DSL().select(getSimpleSelectStatement())
-                .select(new PublisherDAO(this.DSL()).getSimpleSelectStatement())
-                .select(new BookDAO(this.DSL()).getSimpleSelectStatement())
-                .select(new SerieDAO(this.DSL()).getSimpleSelectStatement())
-                .select(new UserDAO(this.DSL()).getSimpleSelectStatement())
+    protected SelectJoinStep<? extends Record> getSimpleFromClause() {
+        return DSL().select(getSimpleSelectFields()).from(EDITIONS)
+            .leftJoin(PUBLISHERS).on(EDITIONS.PUBLISHER_ID.eq(PUBLISHERS.ID));
+    }
+
+    @Override
+    protected SelectJoinStep<? extends Record> getFullFromClause() {
+        return DSL().select(getSimpleSelectFields())
+                .select(new PublisherDAO(this.DSL()).getSimpleSelectFields())
+                .select(new BookDAO(this.DSL()).getSimpleSelectFields())
+                .select(new SerieDAO(this.DSL()).getSimpleSelectFields())
+                .select(new UserDAO(this.DSL()).getSimpleSelectFields())
                 .from(EDITIONS)
                 .leftJoin(PUBLISHERS).on(EDITIONS.PUBLISHER_ID.eq(PUBLISHERS.ID))
                 .leftJoin(BOOKS).on(EDITIONS.BOOK_ID.eq(BOOKS.ID))

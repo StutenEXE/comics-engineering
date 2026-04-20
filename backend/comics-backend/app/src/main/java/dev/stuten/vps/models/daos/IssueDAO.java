@@ -16,7 +16,7 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.SelectFieldOrAsterisk;
-import org.jooq.SelectWhereStep;
+import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.models.dtos.full.IssueDTO;
 import dev.stuten.vps.models.mappers.IssueMapper;
@@ -34,7 +34,7 @@ public class IssueDAO extends DAO {
         }
 
         @Override
-        protected Collection<SelectFieldOrAsterisk> getSimpleSelectStatement() {
+        protected Collection<SelectFieldOrAsterisk> getSimpleSelectFields() {
                 return List.of(
                                 ISSUES.ID.as(IssueMapper.getFieldName(ISSUES.ID)),
                                 ISSUES.NAME.as(IssueMapper.getFieldName(ISSUES.NAME)),
@@ -47,16 +47,19 @@ public class IssueDAO extends DAO {
                                 ISSUES.MODIFIED_AT.as(IssueMapper.getFieldName(ISSUES.MODIFIED_AT)));
         }
 
+        protected SelectJoinStep<? extends Record> getSimpleFromClause() {
+                return DSL().select(getSimpleSelectFields()).from(ISSUES);
+        }
+
         @Override
-        protected SelectWhereStep<? extends Record> getDefaultSelectStatement() {
-                return DSL().select(getSimpleSelectStatement())
-                                .select(new IssueSerieDAO(this.DSL()).getSimpleSelectStatement())
-                                .select(new UserDAO(this.DSL()).getSimpleSelectStatement())
+        protected SelectJoinStep<? extends Record> getFullFromClause() {
+                return DSL().select(getSimpleSelectFields())
+                                .select(new IssueSerieDAO(this.DSL()).getSimpleSelectFields())
+                                .select(new UserDAO(this.DSL()).getSimpleSelectFields())
                                 .select(multiset( // Books (many to many)
-                                                select(new BookDAO(this.DSL())
-                                                                .getSimpleSelectStatement())
-                                                                .from(BOOKS_ISSUES)
-                                                                .join(BOOKS)
+                                                new BookDAO(this.DSL())
+                                                                .getSimpleFromClause()
+                                                                .join(BOOKS_ISSUES)
                                                                 .on(BOOKS_ISSUES.BOOK_ID.eq(BOOKS.ID))
                                                                 .where(BOOKS_ISSUES.ISSUE_ID
                                                                                 .eq(ISSUES.ID)))
