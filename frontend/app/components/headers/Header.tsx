@@ -45,6 +45,7 @@ export function Header() {
                     <ul className="flex space-x-4">
                         <li><Link to="/" className="hover:underline cursor-pointer">{t("header.home")}</Link></li>
                         <li><Link to="search" className="hover:underline cursor-pointer">{t("header.search")}</Link></li>
+                        <li><Link to="contribute" className="hover:underline cursor-pointer">{t("header.contribute")}</Link></li>
                         {isAuthenticated ? (
                             <>
                                 <li><Link to="/collection" className="hover:underline">{t("header.collection")}</Link></li>
