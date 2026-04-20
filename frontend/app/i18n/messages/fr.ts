@@ -5,6 +5,7 @@ export default {
     "generic.yes": "oui",
     "generic.no": "non",
     "generic.cancel": "annuler",
+    "generic.confirm": "confirmer",
     "generic.the": "le",
     "generic.present": "présent",
     "generic.oneshot": "oneshot",

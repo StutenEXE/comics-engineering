@@ -133,8 +133,6 @@ export function GenericTable<T extends Record<string, any>>(
   if (isLoading)
     return <div className="p-8 text-center">{t("loader.loading")}</div>;
 
-  console.log(searchableKeys);
-
   return (
     <div
       className={`overflow-x border border-gray-700 rounded-lg ${props.className}`}

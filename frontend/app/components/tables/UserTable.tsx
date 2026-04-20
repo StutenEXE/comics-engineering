@@ -3,6 +3,7 @@ import { GenericTable } from "./GenericTable"
 import type { Error } from "~/utils/error"
 import { MdDelete, MdModeEdit, MdRemoveRedEye } from "react-icons/md"
 import { Link } from "react-router"
+import { useConfirm } from "../modals/ConfirmModalProvider"
 
 
 interface UserTableProps {
@@ -16,6 +17,8 @@ interface UserTableProps {
 
 export function UserTable({ userList, isLoading, error, showActions }: UserTableProps) {
 
+    const confirm = useConfirm()
+
     const actionGenerator = (usr: User) => {
         return (
              <div className="w-min flex gap-2 justify-center items-center">
@@ -24,7 +27,15 @@ export function UserTable({ userList, isLoading, error, showActions }: UserTable
                     className="hover:text-green-500"/>
                 </Link>
                 <MdModeEdit size={20} className="cursor-pointer hover:text-blue-500"/>
-                <MdDelete size={20} className="cursor-pointer hover:text-red-500"/>
+                <MdDelete size={20} className="cursor-pointer hover:text-red-500"
+                    onClick={() => confirm({
+                        title: "Delete User",
+                        message: `Are you sure you want to delete user ${usr.username}? This action cannot be undone.`,
+                        onConfirm: () => { 
+                            console.log(`User ${usr.username} deleted`)
+                        }
+                    })}
+                />
             </div>
         )
     }
