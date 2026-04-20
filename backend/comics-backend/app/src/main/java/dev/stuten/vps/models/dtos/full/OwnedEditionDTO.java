@@ -13,7 +13,6 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
-import dev.stuten.vps.models.dtos.simple.SimpleEditionDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 
 public record OwnedEditionDTO (
@@ -32,6 +31,6 @@ public record OwnedEditionDTO (
     @JsonProperty("retailPrice") BigDecimal retailPrice,
     @JsonProperty("note") String note,
 
-    @JsonProperty("edition") SimpleEditionDTO edition,
+    @JsonProperty("edition") EditionDTO edition,
     @JsonProperty("user") SimpleUserDTO user
 ) {}

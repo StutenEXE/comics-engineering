@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import dev.stuten.vps.db.JooqProvider;
-import dev.stuten.vps.models.daos.EditionOwnershipDAO;
+import dev.stuten.vps.models.daos.OwnedEditionDAO;
 import dev.stuten.vps.models.dtos.full.OwnedEditionDTO;
 import dev.stuten.vps.web.ErrorResponse;
 import dev.stuten.vps.web.middleware.Role;
@@ -18,7 +18,7 @@ public class EditionOwnershipService {
     
     private EditionOwnershipService() {}
 
-    private static EditionOwnershipDAO dao = new EditionOwnershipDAO(
+    private static OwnedEditionDAO dao = new OwnedEditionDAO(
             JooqProvider.get());
 
     public static void create(Context ctx) {
@@ -42,7 +42,7 @@ public class EditionOwnershipService {
         if (ownedEditionId.isEmpty()) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Owned edition not created", "");
         }
-        OwnedEditionDTO newOwnedEdition = dao.findById(ownedEditionId.get()).get();
+        OwnedEditionDTO newOwnedEdition = dao.findOwnedById(ownedEditionId.get()).get();
 
         // Send back account info to the client
         ctx.json(Map.of("ownedEdition", newOwnedEdition));
@@ -60,7 +60,7 @@ public class EditionOwnershipService {
         }
 
         // Get owned edition by id
-        Optional<OwnedEditionDTO> edition = dao.findById(id);
+        Optional<OwnedEditionDTO> edition = dao.findOwnedById(id);
         if (edition.isEmpty()) {
             String message = String.format("OwnedEdition of id %s not found", id);
             ErrorResponse.send(HttpStatus.NOT_FOUND, "OwnedEdition not found", message);
@@ -80,7 +80,7 @@ public class EditionOwnershipService {
         }
 
         // Retreive owned editions
-        List<OwnedEditionDTO> ownedEditions = dao.findByUserId(userID);
+        List<OwnedEditionDTO> ownedEditions = dao.findOwnedByUserId(userID);
 
         ctx.json(Map.of("ownedEditions", ownedEditions));
     }

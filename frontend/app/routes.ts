@@ -12,4 +12,5 @@ export default [
     route("serie/:id", "pages/serie.tsx"),
 
     route("contribute", "pages/contribute.tsx"),
+    route("collection", "pages/collection.tsx"),
 ] satisfies RouteConfig;

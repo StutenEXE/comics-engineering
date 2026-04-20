@@ -2,8 +2,8 @@ package dev.stuten.vps.models.daos;
 
 import static dev.stuten.vps.jooq.tables.EditionOwnership.EDITION_OWNERSHIP;
 import static dev.stuten.vps.jooq.tables.Editions.EDITIONS;
-import static dev.stuten.vps.jooq.tables.Users.USERS;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -17,21 +17,21 @@ import org.jooq.SelectJoinStep;
 import dev.stuten.vps.models.dtos.full.OwnedEditionDTO;
 import dev.stuten.vps.models.mappers.OwnedEditionMapper;
 
-public class EditionOwnershipDAO extends DAO {
+public class OwnedEditionDAO extends EditionDAO {
 
-    public EditionOwnershipDAO(DSLContext dsl) {
+    public OwnedEditionDAO(DSLContext dsl) {
         super(dsl);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    protected RecordMapper<? super Record, OwnedEditionDTO> getDefaultMapper() {
+    protected RecordMapper<? super Record, ?> getDefaultMapper() {
         return OwnedEditionMapper::mapToDTO;
     }
 
     @Override
     protected Collection<SelectFieldOrAsterisk> getSimpleSelectFields() {
-        return List.of(
+        Collection<SelectFieldOrAsterisk> editionFields = new ArrayList<SelectFieldOrAsterisk>(super.getSimpleSelectFields());
+        editionFields.addAll(List.of(
                 EDITION_OWNERSHIP.ID.as(OwnedEditionMapper.getFieldName(EDITION_OWNERSHIP.ID)),
                 EDITION_OWNERSHIP.DATE.as(OwnedEditionMapper.getFieldName(EDITION_OWNERSHIP.DATE)),
                 EDITION_OWNERSHIP.READ.as(OwnedEditionMapper.getFieldName(EDITION_OWNERSHIP.READ)),
@@ -41,22 +41,20 @@ public class EditionOwnershipDAO extends DAO {
                 EDITION_OWNERSHIP.PURCHASE_PRICE.as(OwnedEditionMapper.getFieldName(EDITION_OWNERSHIP.PURCHASE_PRICE)),
                 EDITION_OWNERSHIP.FEES.as(OwnedEditionMapper.getFieldName(EDITION_OWNERSHIP.FEES)),
                 EDITION_OWNERSHIP.RETAIL_PRICE.as(OwnedEditionMapper.getFieldName(EDITION_OWNERSHIP.RETAIL_PRICE)),
-                EDITION_OWNERSHIP.NOTE.as(OwnedEditionMapper.getFieldName(EDITION_OWNERSHIP.NOTE)));
+                EDITION_OWNERSHIP.NOTE.as(OwnedEditionMapper.getFieldName(EDITION_OWNERSHIP.NOTE))));
+        return editionFields;
     }
 
     protected SelectJoinStep<? extends Record> getSimpleFromClause() {
-        return DSL().select(getSimpleSelectFields()).from(EDITION_OWNERSHIP);
+        return super.getSimpleFromClause()
+                .leftJoin(EDITION_OWNERSHIP).on(EDITION_OWNERSHIP.EDITION_ID.eq(EDITIONS.ID));
     };
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     protected SelectJoinStep getFullFromClause() {
-        return DSL().select(getSimpleSelectFields())
-                .select(new EditionDAO(this.DSL()).getSimpleSelectFields())
-                .select(new UserDAO(this.DSL()).getSimpleSelectFields())
-                .from(EDITION_OWNERSHIP)
-                .leftJoin(EDITIONS).on(EDITION_OWNERSHIP.EDITION_ID.eq(EDITIONS.ID))
-                .leftJoin(USERS).on(EDITION_OWNERSHIP.USER_ID.eq(USERS.ID));
+        return super.getFullFromClause()
+                .leftJoin(EDITION_OWNERSHIP).on(EDITION_OWNERSHIP.EDITION_ID.eq(EDITIONS.ID));
     }
 
     public Optional<Integer> create(OwnedEditionDTO dto) {
@@ -77,11 +75,11 @@ public class EditionOwnershipDAO extends DAO {
                 .map(record -> record.get(EDITION_OWNERSHIP.ID));
     }
 
-    public Optional<OwnedEditionDTO> findById(Integer id) {
+    public Optional<OwnedEditionDTO> findOwnedById(Integer id) {
         return super.selectOne(EDITION_OWNERSHIP.ID.eq(id));
     }
 
-    public List<OwnedEditionDTO> findByUserId(Integer userId) {
+    public List<OwnedEditionDTO> findOwnedByUserId(Integer userId) {
         return super.selectMany(EDITION_OWNERSHIP.USER_ID.eq(userId));
     }
 }

@@ -13,8 +13,8 @@ import org.jooq.Record;
 import org.jooq.TableField;
 
 import dev.stuten.vps.jooq.tables.records.EditionOwnershipRecord;
+import dev.stuten.vps.models.dtos.full.EditionDTO;
 import dev.stuten.vps.models.dtos.full.OwnedEditionDTO;
-import dev.stuten.vps.models.dtos.simple.SimpleEditionDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 import dev.stuten.vps.models.mappers.utils.MappingUtils;
 
@@ -39,7 +39,7 @@ public class OwnedEditionMapper {
 
     public static OwnedEditionDTO mapToDTO(Record r) {
         // Map edition
-        SimpleEditionDTO edition = MappingUtils.getSingleDTOFromRecord(r, EDITIONS, EditionMapper::mapToSimpleDTO);
+        EditionDTO edition = MappingUtils.getSingleDTOFromRecord(r, EDITIONS, EditionMapper::mapToDTO);
         // Map user
         SimpleUserDTO user = MappingUtils.getSingleDTOFromRecord(r, USERS, UserMapper::mapToSimpleDTO);
         // Map edition

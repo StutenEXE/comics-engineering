@@ -27,7 +27,7 @@ public class EditionDAO extends DAO {
 
     @SuppressWarnings("unchecked")
     @Override
-    protected RecordMapper<? super Record, EditionDTO> getDefaultMapper() {
+    protected RecordMapper<? super Record, ?> getDefaultMapper() {
         return EditionMapper::mapToDTO;
     }
 

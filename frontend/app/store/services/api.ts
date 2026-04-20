@@ -3,6 +3,7 @@ import { parseToBook, parseToSimpleBook, type Book, type SimpleBook } from "~/mo
 import { parseToEdition, type Edition } from "~/models/edition";
 import { parseToIssue, type Issue } from "~/models/issue";
 import { parseToIssueSerie, type IssueSerie } from "~/models/issue-serie";
+import { parseToOwnedEdition, type OwnedEdition } from "~/models/ownedEdition";
 import { parseToPublisher, type Publisher } from "~/models/publisher";
 import { parseToSerie, type Serie } from "~/models/serie";
 import { parseToUser, type SignupData, type User, type UserCredentials } from "~/models/user";
@@ -150,18 +151,26 @@ export const {
 //////////// PRIVATE API ///////////
 ////////////////////////////////////
 
-export const API_PVT_BASE_URL = "http://localhost:8080/api/comics/pvt";
+export const API_PVT_BASE_URL = "http://localhost:8080/api/comics/prv";
 
 // RTK Query service for private API endpoints
 export const privateApi = createApi({
   reducerPath: 'privateApi',
   baseQuery: fetchBaseQuery({ baseUrl: API_PVT_BASE_URL, credentials: 'include' }),
   endpoints: (build) => ({
-    // Define private endpoints here
+    /****************
+     * USER COLLECTION
+     ****************/
+    collection: build.query<{ ownedEditions: OwnedEdition[] }, { id: number }>({
+      query: (params) => ({ url: "/collection", method: 'GET', params: params }),
+      transformResponse: (resp: { ownedEditions: OwnedEdition[] }) => ({
+        ownedEditions: resp.ownedEditions.map(parseToOwnedEdition),
+      }),
+    }),
   }),
 });
 
-export const { } = privateApi;
+export const { useCollectionQuery } = privateApi;
 
 
 ////////////////////////////////////

@@ -1,4 +1,5 @@
 import { useAppSelector } from "~/store/hooks";
+import type { Route } from "../+types/root";
 import { InfoPageTemplate } from "~/components/templates/InfoPageTemplate";
 import { useTranslation } from "~/i18n/i18n";
 import { GenericButton } from "~/components/buttons/GenericButton";
@@ -11,6 +12,14 @@ interface Contribution {
   date: string;
   status: string;
 }
+
+export function meta({ }: Route.MetaArgs) {
+  return [
+    { title: `Contribute` },
+    { name: "description", content: `Contribute to the library` },
+  ];
+}
+
 
 export default function ContributePage() {
   const { t } = useTranslation();

@@ -22,9 +22,9 @@ export function IssueList({ issueList, descOrder, isLoading, error, className }:
                 key={is?.id} issue={is} />
     ) 
     
-    const list = !issueList || issueList.length === 0 ? []
+    const list = (!issueList || issueList.length === 0 ? []
      : isSimpleIssue(issueList[0]) ? issueList as SimpleIssue[]
-     : (issueList as Issue[]).map(issueToSimpleIssue)
+     : (issueList as Issue[]).map(issueToSimpleIssue))
         // Sorting list
         .sort((is1, is2) => {
             if (descOrder) {

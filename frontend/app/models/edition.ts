@@ -52,9 +52,9 @@ export interface SimpleEdition {
     imgUrl: string,
     coverType: string,
     parutionDate: Date,
-    publisherId: number,
-    publisherName: string,
-    bookId: number
+    publisherId: number | null,
+    publisherName: string | null,
+    bookId: number | null
 }
 
 export function parseToSimpleEdition(data: Record<string, any>): SimpleEdition {
@@ -71,5 +71,26 @@ export function parseToSimpleEdition(data: Record<string, any>): SimpleEdition {
         publisherId: data.publisherId,
         publisherName: data.publisherName,
         bookId: data.bookId,
+    }
+}
+
+export function isSimpleEdition(edition: Edition | SimpleEdition): edition is SimpleEdition {
+    return (edition as SimpleEdition).publisherId !== undefined && (edition as SimpleEdition).bookId !== undefined
+}
+
+export function editionToSimpleEdition(edition: Edition): SimpleEdition {
+    return {
+        id: edition.id,
+        isbn: edition.isbn,
+        ean: edition.ean,
+        npages: edition.npages,
+        price: edition.price,
+        url: edition.url,
+        imgUrl: edition.imgUrl,
+        coverType: edition.coverType,
+        parutionDate: edition.parutionDate,
+        publisherId: edition.publisher ? edition.publisher.id : null,
+        publisherName: edition.publisher ? edition.publisher.name : null,
+        bookId: edition.book ? edition.book.id : null,
     }
 }
