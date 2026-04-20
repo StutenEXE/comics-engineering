@@ -10,11 +10,11 @@ INSERT INTO books (series_id, added_by, "name", "desc", "number", vo_content) VA
 
 INSERT INTO publishers (name) VALUES('Urban Comics');
 
-INSERT INTO editions (isbn, ean, price, url, img_url, cover_type, parution_date, publisher_id, book_id, added_by) VALUES
-    ('9791026813781', '9791026813781', 22.5, 'https://www.urban-comics.com/batman-metal-tome-1/', 'https://bdi.dlpdomain.com/album/9791026813781/couv/M385x862/batman-metal-tome-1.jpg', 'Hardcover', '2018-05-25T00:00:00Z', 1, 1, 1),
-    ('', '9791026813873', 25.0, 'https://www.urban-comics.com/batman-metal-tome-2/', 'https://bdi.dlpdomain.com/album/9791026813873/couv/M385x862/batman-metal-tome-2.jpg', 'Hardcover', '2018-07-06T00:00:00Z', 1, 2, 1),
-    ('', '9791026824107', 25.0, 'https://www.urban-comics.com/batman-metal-tome-3/', 'https://bdi.dlpdomain.com/album/9791026824107/couv/M385x862/batman-metal-tome-3.jpg', 'Hardcover', '2018-11-02T00:00:00Z', 1, 3, 1),
-    ('', '9791026819707', 18.5, 'https://www.urban-comics.com/nightwing-infinite-tome-1/', 'https://bdi.dlpdomain.com/album/9791026819707/couv/M385x862/nightwing-infinite-tome-1.jpg', 'Hardcover', '2022-02-25T00:00:00Z', 1, 4, 1);
+INSERT INTO editions (isbn, ean, npages, price, url, img_url, cover_type, parution_date, publisher_id, book_id, added_by) VALUES
+    ('9791026813781', '9791026813781', 232, 22.5, 'https://www.urban-comics.com/batman-metal-tome-1/', 'https://bdi.dlpdomain.com/album/9791026813781/couv/M385x862/batman-metal-tome-1.jpg', 'Hardcover', '2018-05-25T00:00:00Z', 1, 1, 1),
+    ('', '9791026813873', 248, 25.0, 'https://www.urban-comics.com/batman-metal-tome-2/', 'https://bdi.dlpdomain.com/album/9791026813873/couv/M385x862/batman-metal-tome-2.jpg', 'Hardcover', '2018-07-06T00:00:00Z', 1, 2, 1),
+    ('', '9791026824107', 264, 25.0, 'https://www.urban-comics.com/batman-metal-tome-3/', 'https://bdi.dlpdomain.com/album/9791026824107/couv/M385x862/batman-metal-tome-3.jpg', 'Hardcover', '2018-11-02T00:00:00Z', 1, 3, 1),
+    ('', '9791026819707', 160, 18.5, 'https://www.urban-comics.com/nightwing-infinite-tome-1/', 'https://bdi.dlpdomain.com/album/9791026819707/couv/M385x862/nightwing-infinite-tome-1.jpg', 'Hardcover', '2022-02-25T00:00:00Z', 1, 4, 1);
 
 INSERT INTO issue_series(added_by, "name", "desc", start_date, end_date) VALUES
     (1, 'Dark Knights: Metal (Volume 1)', 'Dark Knights: Metal event monthly parution', '2017-10-01T00:00:00Z', '2018-05-01T00:00:00Z'),

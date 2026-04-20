@@ -21,6 +21,7 @@ public record EditionDTO(
                 @JsonProperty("id") Integer id,
                 @JsonProperty("isbn") String isbn,
                 @JsonProperty("ean") String ean,
+                @JsonProperty("npages") Integer npages,
                 @JsonProperty("price") Float price,
                 @JsonProperty("url") String url,
                 @JsonProperty("imgUrl") String imgUrl,

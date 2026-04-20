@@ -37,6 +37,7 @@ public class EditionDAO extends DAO {
                 EDITIONS.ID.as(EditionMapper.getFieldName(EDITIONS.ID)),
                 EDITIONS.ISBN.as(EditionMapper.getFieldName(EDITIONS.ISBN)),
                 EDITIONS.EAN.as(EditionMapper.getFieldName(EDITIONS.EAN)),
+                EDITIONS.NPAGES.as(EditionMapper.getFieldName(EDITIONS.NPAGES)),
                 EDITIONS.PRICE.as(EditionMapper.getFieldName(EDITIONS.PRICE)),
                 EDITIONS.URL.as(EditionMapper.getFieldName(EDITIONS.URL)),
                 EDITIONS.IMG_URL.as(EditionMapper.getFieldName(EDITIONS.IMG_URL)),

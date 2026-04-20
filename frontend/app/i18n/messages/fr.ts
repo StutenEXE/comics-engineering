@@ -61,6 +61,7 @@ export default {
     "edition.link": "Lien vers le site de l'éditeur",
     "edition.coverType": "Type de couverture",
     "edition.parutionDate": "Date de parution",
+    "edition.npages": "Nombre de pages",
     "edition.price": "Prix",
     "edition.link.book": "Aller au livre",
     "edition.link.publisher": "Aller à l'éditeur",

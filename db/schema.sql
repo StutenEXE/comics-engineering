@@ -79,6 +79,7 @@ CREATE TABLE IF NOT EXISTS editions (
 	book_id INT NOT NULL REFERENCES books(id) ON DELETE CASCADE,
 	isbn VARCHAR(20),
 	ean VARCHAR(20),
+	npages INT,
 	price REAL,
 	url TEXT,
 	img_url TEXT,
