@@ -64,7 +64,7 @@ public class SerieDAO extends DAO {
                 .leftJoin(USERS).on(SERIES.ADDED_BY.eq(USERS.ID));
     }
 
-    public Optional<SerieDTO> create(SerieDTO dto) {
+    public Optional<Integer> create(SerieDTO dto) {
         return DSL().insertInto(SERIES)
                 .set(SERIES.NAME, dto.name())
                 .set(SERIES.ONGOING, dto.ongoing())
@@ -73,8 +73,9 @@ public class SerieDAO extends DAO {
                 .set(SERIES.START_DATE, dto.startDate())
                 .set(SERIES.END_DATE, dto.endDate())
                 .set(SERIES.ADDED_BY, dto.addedBy().id())
-                .returning(SERIES.asterisk())
-                .fetchOptional(SerieMapper::mapToDTO);
+                .returning(SERIES.ID)
+                .fetchOptional()
+                .map(record -> record.get(SERIES.ID));
     }
 
     public Optional<SerieDTO> findById(Integer id) {

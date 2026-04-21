@@ -17,7 +17,8 @@ import io.javalin.http.HttpStatus;
 
 public class UserService {
 
-    private UserService() {}
+    private UserService() {
+    }
 
     private static UserDAO dao = new UserDAO(
             JooqProvider.get());
@@ -108,12 +109,13 @@ public class UserService {
     }
 
     public static void getList(Context ctx) {
-         Integer from, limit;
+        Integer from, limit;
         try {
             from = Integer.parseInt(ctx.queryParam("from"));
             limit = Integer.parseInt(ctx.queryParam("limit"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing 'from' or 'limit' or NaN 'from' or 'limit'");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request",
+                    "Missing 'from' or 'limit' or NaN 'from' or 'limit'");
             return; // For compiler
         }
 

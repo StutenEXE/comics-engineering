@@ -10,7 +10,7 @@ public final class AuthMiddleware {
 
     public static void authenticate(Context ctx) {
 
-        String sessionKey = ctx.cookie("session_id");
+        String sessionKey = ctx.cookie(SessionStore.COOKIE_SESSION_KEY);
         if (sessionKey == null || sessionKey.isEmpty()) {
             throw new HttpResponseException(HttpStatus.UNAUTHORIZED, "Missing token", new HashMap<String,String>());
         };
@@ -29,7 +29,7 @@ public final class AuthMiddleware {
                 session.role()));
     }
 
-    public static Session getCurrentSession(Context ctx) {
+    public static AuthContext getCurrentSession(Context ctx) {
         return ctx.attribute("auth");
     }
 }

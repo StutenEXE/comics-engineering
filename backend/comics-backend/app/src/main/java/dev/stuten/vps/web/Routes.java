@@ -7,6 +7,7 @@ import dev.stuten.vps.web.middleware.AuthMiddleware;
 import dev.stuten.vps.web.middleware.Role;
 import dev.stuten.vps.web.middleware.RoleMiddleware;
 import dev.stuten.vps.web.routers.BookRouter;
+import dev.stuten.vps.web.routers.ContributionRouter;
 import dev.stuten.vps.web.routers.EditionRouter;
 import dev.stuten.vps.web.routers.IssueRouter;
 import dev.stuten.vps.web.routers.IssueSerieRouter;
@@ -24,6 +25,7 @@ public class Routes {
     @SuppressWarnings("null")
     private static List<Router> routers = Arrays.asList(
         new BookRouter(),
+        new ContributionRouter(),
         new EditionRouter(),
         new IssueRouter(),
         new IssueSerieRouter(),

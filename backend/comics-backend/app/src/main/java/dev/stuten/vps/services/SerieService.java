@@ -34,5 +34,4 @@ public class SerieService {
 
         ctx.json(Map.of("serie", serie));
     }
-
 }

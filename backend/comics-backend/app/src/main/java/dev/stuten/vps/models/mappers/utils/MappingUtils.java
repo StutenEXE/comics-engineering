@@ -2,12 +2,17 @@ package dev.stuten.vps.models.mappers.utils;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import org.jooq.JSONB;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.Result;
 import org.jooq.impl.TableImpl;
 import org.jspecify.annotations.Nullable;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public final class MappingUtils {
 
@@ -32,4 +37,23 @@ public final class MappingUtils {
         return dtos;
     }
 
+    private static final TypeReference<Map<String, Object>> MAP_TYPE_REF = new TypeReference<Map<String, Object>>() {};
+
+    public static Map<String, Object> jsonbToMap(JSONB jsonb) {
+        if (jsonb == null) return null;
+        try {
+            return new ObjectMapper().readValue(jsonb.data(), MAP_TYPE_REF);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static JSONB mapToJsonb(Map<String, Object> map) {
+        if (map == null) return null;
+        try {
+            return JSONB.valueOf(new ObjectMapper().writeValueAsString(map));
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

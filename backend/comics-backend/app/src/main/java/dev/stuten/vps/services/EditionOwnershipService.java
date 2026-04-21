@@ -8,9 +8,9 @@ import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.OwnedEditionDAO;
 import dev.stuten.vps.models.dtos.full.OwnedEditionDTO;
 import dev.stuten.vps.web.ErrorResponse;
+import dev.stuten.vps.web.middleware.AuthContext;
+import dev.stuten.vps.web.middleware.AuthMiddleware;
 import dev.stuten.vps.web.middleware.Role;
-import dev.stuten.vps.web.middleware.Session;
-import dev.stuten.vps.web.middleware.SessionStore;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 
@@ -25,12 +25,12 @@ public class EditionOwnershipService {
         OwnedEditionDTO dto = ctx.bodyAsClass(OwnedEditionDTO.class);
 
         // Validate that the person creating the owned edition is the owner or an admin
-        Session session = SessionStore.find(ctx.cookie(SessionStore.COOKIE_SESSION_KEY));
-        if (session == null) {
+        AuthContext auth = AuthMiddleware.getCurrentSession(ctx);
+        if (auth == null) {
             ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid session", "No valid session found");
             return;
         }
-        if (!session.userId().equals(dto.user().id().toString()) && !session.role().equals(Role.ADMIN)) {
+        if (!auth.userId().equals(dto.user().id().toString()) && !auth.role().equals(Role.ADMIN)) {
             ErrorResponse.send(HttpStatus.FORBIDDEN, "Forbidden", "You can only create owned editions for yourself");
             return;
         }
