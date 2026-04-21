@@ -16,19 +16,19 @@ import dev.stuten.vps.models.dtos.simple.SimpleSerieDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 
 public record BookDTO(
-        @JsonProperty("id") Integer id,
-        @JsonProperty("name") String name,
-        @JsonProperty("desc") String desc,
-        @JsonProperty("number") Integer number,
-        @JsonProperty("voContent") String voContent,
-        @JsonProperty("imgUrl") String imgUrl,
-        @JsonProperty("serie") SimpleSerieDTO serie,
-        @JsonProperty("editions") List<SimpleEditionDTO> editions,
-        @JsonProperty("issues") List<SimpleIssueDTO> issues,
+                @JsonProperty("id") Integer id,
+                @JsonProperty("name") String name,
+                @JsonProperty("desc") String desc,
+                @JsonProperty("number") Integer number,
+                @JsonProperty("voContent") String voContent,
+                @JsonProperty("imgUrl") String imgUrl,
+                @JsonProperty("serie") SimpleSerieDTO serie,
+                @JsonProperty("editions") List<SimpleEditionDTO> editions,
+                @JsonProperty("issues") List<SimpleIssueDTO> issues,
 
-        @JsonProperty("createdAt") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss") @JsonSerialize(using = LocalDateTimeSerializer.class) @JsonDeserialize(using = LocalDateTimeDeserializer.class) LocalDateTime createdAt,
+                @JsonProperty("createdAt") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss") @JsonSerialize(using = LocalDateTimeSerializer.class) @JsonDeserialize(using = LocalDateTimeDeserializer.class) LocalDateTime createdAt,
 
-        @JsonProperty("modifiedAt") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss") @JsonSerialize(using = LocalDateTimeSerializer.class) @JsonDeserialize(using = LocalDateTimeDeserializer.class) LocalDateTime modifiedAt,
+                @JsonProperty("modifiedAt") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss") @JsonSerialize(using = LocalDateTimeSerializer.class) @JsonDeserialize(using = LocalDateTimeDeserializer.class) LocalDateTime modifiedAt,
 
-        @JsonProperty("addedBy") SimpleUserDTO addedBy) {
+                @JsonProperty("addedBy") SimpleUserDTO addedBy) {
 }

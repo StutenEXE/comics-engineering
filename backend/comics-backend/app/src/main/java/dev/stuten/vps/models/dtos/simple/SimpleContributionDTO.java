@@ -11,7 +11,7 @@ import dev.stuten.vps.jooq.enums.ContributionTypeEnum;
 public record SimpleContributionDTO(
     @JsonProperty("id") Integer id,
     @JsonProperty("bundleId") Integer bundleId,
-    @JsonProperty("localRef") String localRef,
+    @JsonProperty("localRef") Integer localRef,
     @JsonProperty("entityType") ContributionTypeEnum entityType,
     @JsonProperty("action") ContributionActionEnum action,
     @JsonProperty("entityId") Integer entityId,

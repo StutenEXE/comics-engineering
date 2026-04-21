@@ -47,6 +47,22 @@ public class PublisherMapper {
         return dto;
     }
 
+    public static PublisherDTO mapGenericMapToDTO(Map<String, Object> map) {
+        // Map publisher
+        PublisherDTO dto = new PublisherDTO(
+                (Integer) map.get("id"),
+                (String) map.get("name"),
+                (List<SimpleEditionDTO>) map.get("editions"),
+                MappingUtils.stringToLocalDateTime((String) map.get("createdAt")),
+                MappingUtils.stringToLocalDateTime((String) map.get("modifiedAt")));
+        return dto;
+    }
 
+    public static SimplePublisherDTO mapGenericMapToSimpleDTO(Map<String, Object> map) {
+        SimplePublisherDTO dto = new SimplePublisherDTO(
+                (Integer) map.get("id"),
+                (String) map.get("name"));
+        return dto;
+    }
 
 }

@@ -7,8 +7,10 @@ import static dev.stuten.vps.jooq.tables.Issues.ISSUES;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 import static org.jooq.impl.DSL.multiset;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.jooq.DSLContext;
@@ -20,13 +22,12 @@ import org.jooq.SelectJoinStep;
 import dev.stuten.vps.models.dtos.full.IssueSerieDTO;
 import dev.stuten.vps.models.mappers.IssueSerieMapper;
 
-public class IssueSerieDAO extends DAO {
+public class IssueSerieDAO extends ContributableDAO<IssueSerieDTO> {
 
     public IssueSerieDAO(DSLContext dsl) {
         super(dsl);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected RecordMapper<? super Record, IssueSerieDTO> getDefaultMapper() {
         return IssueSerieMapper::mapToDTO;
@@ -68,19 +69,53 @@ public class IssueSerieDAO extends DAO {
                 .leftJoin(USERS).on(ISSUE_SERIES.ADDED_BY.eq(USERS.ID));
     }
 
-    public Optional<IssueSerieDTO> create(IssueSerieDTO dto) {
+    @Override
+    public void replaceLocalRefs(Map<String, Object> proposedData, Map<Integer, Integer> localRefs) { }
+
+    @Override
+    protected IssueSerieDTO mapProposedDataToDTO(Map<String, Object> proposedData) {
+        return IssueSerieMapper.mapGenericMapToDTO(proposedData);
+    }
+
+    @Override
+    protected Integer getIdFromDTO(IssueSerieDTO dto) {
+        return dto.id();
+    }
+
+    @Override
+    public Optional<Integer> create(IssueSerieDTO dto) {
         return DSL().insertInto(ISSUE_SERIES)
                 .set(ISSUE_SERIES.NAME, dto.name())
                 .set(ISSUE_SERIES.DESC, dto.desc())
                 .set(ISSUE_SERIES.START_DATE, dto.startDate())
                 .set(ISSUE_SERIES.END_DATE, dto.endDate())
                 .set(ISSUE_SERIES.ADDED_BY, dto.addedBy().id())
-                .returning(ISSUE_SERIES.asterisk())
-                .fetchOptional(IssueSerieMapper::mapToDTO);
+                .returning(ISSUE_SERIES.ID)
+                .fetchOptional()
+                .map(record -> record.get(ISSUE_SERIES.ID));
     }
 
+    @Override
+    public boolean update(IssueSerieDTO dto) {
+        return DSL().update(ISSUE_SERIES)
+                .set(ISSUE_SERIES.NAME, dto.name())
+                .set(ISSUE_SERIES.DESC, dto.desc())
+                .set(ISSUE_SERIES.START_DATE, dto.startDate())
+                .set(ISSUE_SERIES.END_DATE, dto.endDate())
+                .set(ISSUE_SERIES.MODIFIED_AT, LocalDateTime.now())
+                .where(ISSUE_SERIES.ID.eq(dto.id()))
+                .execute() > 0;
+    }
+
+    @Override
+    public boolean delete(IssueSerieDTO dto) {
+        return DSL().delete(ISSUE_SERIES)
+                .where(ISSUE_SERIES.ID.eq(dto.id()))
+                .execute() > 0;
+    }
+
+    @Override
     public Optional<IssueSerieDTO> findById(Integer id) {
         return super.selectOne(ISSUE_SERIES.ID.eq(id));
     }
-
 }

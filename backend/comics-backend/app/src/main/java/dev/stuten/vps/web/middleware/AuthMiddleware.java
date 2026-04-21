@@ -32,4 +32,15 @@ public final class AuthMiddleware {
     public static AuthContext getCurrentSession(Context ctx) {
         return ctx.attribute("auth");
     }
+
+    public static boolean isAuthenticated(Context ctx) {
+        return getCurrentSession(ctx) != null;
+    }
+
+    public static boolean hasRole(Context ctx, Role requiredRole) {
+        AuthContext auth = getCurrentSession(ctx);
+        if (auth == null) return false;
+        if (auth.role() == null) return false;
+        return auth.role().equals(requiredRole);
+    }
 }

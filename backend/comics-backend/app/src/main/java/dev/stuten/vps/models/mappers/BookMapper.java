@@ -5,6 +5,7 @@ import static dev.stuten.vps.jooq.tables.Series.SERIES;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -74,6 +75,41 @@ public class BookMapper {
                 r.get(getFieldName(BOOKS.IMG_URL), String.class),
                 r.get(getFieldName(BOOKS.SERIES_ID), Integer.class),
                 r.get(getFieldName(SERIES.NAME), String.class));
+        return dto;
+    }
+
+    public static BookDTO mapGenericMapToDTO(Map<String, Object> map) {
+        // Map book
+        BookDTO dto = new BookDTO(
+                (Integer) map.get("id"),
+                (String) map.get("name"),
+                (String) map.get("desc"),
+                (Integer) map.get("number"),
+                (String) map.get("voContent"),
+                (String) map.get("imgUrl"),
+                SerieMapper.mapGenericMapToSimpleDTO((Map<String, Object>) map.get("serie")),
+                map.get("editions") == null ? Arrays.asList()
+                        : ((List<Map<String, Object>>) map.get("editions")).stream()
+                                .map(EditionMapper::mapGenericMapToSimpleDTO).toList(),
+                map.get("issues") == null ? Arrays.asList()
+                        : ((List<Map<String, Object>>) map.get("issues")).stream()
+                                .map(IssueMapper::mapGenericMapToSimpleDTO).toList(),
+                MappingUtils.stringToLocalDateTime((String) map.get("createdAt")),
+                MappingUtils.stringToLocalDateTime((String) map.get("modifiedAt")),
+                UserMapper.mapGenericMapToSimpleDTO((Map<String, Object>) map.get("addedBy")));
+        return dto;
+    }
+
+    public static SimpleBookDTO mapGenericMapToSimpleDTO(Map<String, Object> map) {
+        SimpleBookDTO dto = new SimpleBookDTO(
+                (Integer) map.get("id"),
+                (String) map.get("name"),
+                (String) map.get("desc"),
+                (Integer) map.get("number"),
+                (String) map.get("voContent"),
+                (String) map.get("imgUrl"),
+                (Integer) map.get("seriesId"),
+                (String) map.get("serieName"));
         return dto;
     }
 }

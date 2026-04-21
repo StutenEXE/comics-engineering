@@ -50,10 +50,11 @@ public class OwnedEditionDAO extends EditionDAO {
                 .leftJoin(EDITION_OWNERSHIP).on(EDITION_OWNERSHIP.EDITION_ID.eq(EDITIONS.ID));
     };
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "rawtypes" })
     @Override
     protected SelectJoinStep getFullFromClause() {
         return super.getFullFromClause()
+                // Special case for editions
                 .leftJoin(EDITION_OWNERSHIP).on(EDITION_OWNERSHIP.EDITION_ID.eq(EDITIONS.ID));
     }
 

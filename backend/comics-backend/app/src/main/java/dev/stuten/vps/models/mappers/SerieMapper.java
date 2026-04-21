@@ -65,4 +65,33 @@ public class SerieMapper {
                 (LocalDate) r.get(getFieldName(SERIES.START_DATE)),
                 (LocalDate) r.get(getFieldName(SERIES.END_DATE)));
     }
+
+    public static SerieDTO mapGenericMapToDTO(Map<String, Object> map) {
+        SerieDTO dto = new SerieDTO(
+                (Integer) map.get("id"),
+                (String) map.get("name"),
+                (Boolean) map.get("ongoing"),
+                (Boolean) map.get("oneshot"),
+                ((Integer) map.get("nvolumes")).shortValue(),
+                MappingUtils.stringToLocalDate((String) map.get("startDate")),
+                MappingUtils.stringToLocalDate((String) map.get("endDate")),
+                (List<SimpleBookDTO>) map.get("books"),
+                MappingUtils.stringToLocalDateTime((String) map.get("createdAt")),
+                MappingUtils.stringToLocalDateTime((String) map.get("modifiedAt")),
+                UserMapper.mapGenericMapToSimpleDTO((Map<String, Object>) map.get("addedBy")));
+        return dto;
+    }
+
+    public static SimpleSerieDTO mapGenericMapToSimpleDTO(Map<String, Object> map) {
+        SimpleSerieDTO dto = new SimpleSerieDTO(
+                (Integer) map.get("id"),
+                (String) map.get("name"),
+                (Boolean) map.get("ongoing"),
+                (Boolean) map.get("oneshot"),
+                map.get("nvolumes") == null ? null
+                        : ((Integer) map.get("nvolumes")).shortValue(),
+                MappingUtils.stringToLocalDate((String) map.get("startDate")),
+                MappingUtils.stringToLocalDate((String) map.get("endDate")));
+        return dto;
+    }
 }

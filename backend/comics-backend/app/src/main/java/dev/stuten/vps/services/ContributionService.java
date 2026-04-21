@@ -1,13 +1,24 @@
 package dev.stuten.vps.services;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.naming.OperationNotSupportedException;
+
 import dev.stuten.vps.db.JooqProvider;
+import dev.stuten.vps.jooq.enums.ContributionActionEnum;
+import dev.stuten.vps.jooq.enums.ContributionStatusEnum;
+import dev.stuten.vps.jooq.enums.ContributionTypeEnum;
+import dev.stuten.vps.models.daos.ContributableDAO;
 import dev.stuten.vps.models.daos.ContributionBundleDAO;
 import dev.stuten.vps.models.daos.ContributionDAO;
 import dev.stuten.vps.models.dtos.full.ContributionBundleDTO;
+import dev.stuten.vps.models.dtos.full.ContributionDTO;
+import dev.stuten.vps.models.dtos.request.UpdateContributionStatusDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 import dev.stuten.vps.web.ErrorResponse;
 import dev.stuten.vps.web.middleware.AuthContext;
 import dev.stuten.vps.web.middleware.AuthMiddleware;
@@ -17,77 +28,105 @@ import io.javalin.http.HttpStatus;
 
 public class ContributionService {
 
-    private ContributionService() {}
+    private ContributionService() {
+    }
 
-    private static ContributionBundleDAO bundleDAO = new ContributionBundleDAO(JooqProvider.get());
     private static ContributionDAO contributionDAO = new ContributionDAO(JooqProvider.get());
-    // private static ContributionReviewDAO reviewDAO = new ContributionReviewDAO(JooqProvider.get());
+    private static ContributionBundleDAO contributionBundleDAO = new ContributionBundleDAO(JooqProvider.get());
 
-    // Entity DAOs for applying contributions
-    // private static BookDAO bookDAO = new BookDAO(JooqProvider.get());
-    // private static SerieDAO serieDAO = new SerieDAO(JooqProvider.get());
-    // private static EditionDAO editionDAO = new EditionDAO(JooqProvider.get());
-    // private static IssueDAO issueDAO = new IssueDAO(JooqProvider.get());
-    // private static IssueSerieDAO issueSerieDAO = new IssueSerieDAO(JooqProvider.get());
-    // private static PublisherDAO publisherDAO = new PublisherDAO(JooqProvider.get());
+    private static ContributableDAO<? extends Record> getDAOFromEntityType(ContributionTypeEnum type) {
+        return switch (type) {
+            case ContributionTypeEnum.book -> BookService.getDAO();
+            case ContributionTypeEnum.serie -> SerieService.getDAO();
+            case ContributionTypeEnum.edition -> EditionService.getDAO();
+            case ContributionTypeEnum.issue -> IssueService.getDAO();
+            case ContributionTypeEnum.issueserie -> IssueSerieService.getDAO();
+            case ContributionTypeEnum.publisher -> PublisherService.getDAO();
+            case ContributionTypeEnum.link_book_issue -> BookService.getDAO(); // TODO CHANGE
+        };
+    }
 
-    /**
-     * Submit a new contribution bundle
-     */
-    public static void submitBundle(Context ctx) {
-        AuthContext auth = AuthMiddleware.getCurrentSession(ctx);
-        if (auth == null) {
+    protected static void createContribution(Integer bundleId, SimpleContributionDTO contrib, AuthContext auth) {
+        // Adding the submitter id
+        SimpleUserDTO submitter = new SimpleUserDTO(Integer.parseInt(auth.userId()), "");
+        contrib.proposedData().put("addedBy", submitter);
+
+        contrib = new SimpleContributionDTO(
+                null, bundleId, contrib.localRef(), contrib.entityType(), contrib.action(), contrib.entityId(),
+                contrib.proposedData(),
+                contrib.entitySnapshot(), contrib.status(), contrib.resolvedEntityId());
+        contributionDAO.create(bundleId, contrib);
+    }
+
+    private static void approveContribution(ContributionDTO contribution) throws OperationNotSupportedException {
+        // Get all local refs of the contribution bundle to check for dependencies
+        // between contributions in the same bundle
+        Optional<ContributionBundleDTO> bundle = contributionBundleDAO.findById(contribution.bundle().id());
+        if (bundle.isEmpty()) {
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error",
+                    "Contribution bundle not found for contribution");
+            return;
+        }
+        Map<Integer, Integer> localRefs = new HashMap<>();
+        bundle.get().contributions().stream()
+                .filter(c -> c.localRef() != null)
+                .forEach(c -> localRefs.put(c.localRef(), c.resolvedEntityId()));
+        // Get target DAO based on contribution entity type
+        ContributableDAO<? extends Record> targetDAO = getDAOFromEntityType(contribution.entityType());
+        // Apply proposed changes to target entity and get resolved entity ID (in case
+        // of creation)
+        Optional<Integer> result = targetDAO.applyContribution(contribution.action(),
+                contribution.proposedData(), localRefs);
+        if (result.isEmpty()) {
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error",
+                    "Failed to apply contribution changes to target entity");
+        }
+        // Applying changes to target entity was successful, update contribution with
+        // resolved entity ID if it was a creation
+        if (contribution.action() == ContributionActionEnum.create) {
+            contributionDAO.updateResolvedEntityId(contribution.id(), result.get());
+        }
+    }
+
+    public static void updateStatus(Context ctx) {
+        if (!AuthMiddleware.isAuthenticated(ctx)) {
             ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Unauthorized", "User must be logged in");
             return;
         }
+        if (!AuthMiddleware.hasRole(ctx, Role.ADMIN)) {
+            ErrorResponse.send(HttpStatus.FORBIDDEN, "Forbidden", "Only admins can update contributions");
+            return;
+        }
 
-        ContributionBundleDTO bundle;
+        UpdateContributionStatusDTO updateDTO;
         try {
-            bundle = ctx.bodyAsClass(ContributionBundleDTO.class);
+            updateDTO = ctx.bodyAsClass(UpdateContributionStatusDTO.class);
         } catch (Exception e) {
-            System.out.println("Error parsing contribution bundle submission: " + e.getMessage());
             ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Invalid JSON body");
             return;
         }
 
-        // Validate bundle
-        if (bundle.contributions() == null || bundle.contributions().isEmpty()) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Contributions cannot be empty");
-            return;
-        }
-        if (bundle.submitter().id() != Integer.parseInt(auth.userId()) && !auth.role().equals(Role.ADMIN)) {
-            ErrorResponse.send(HttpStatus.FORBIDDEN, "Forbidden", "You can only submit contributions for yourself");
-            return;
+        Boolean updated = contributionDAO.updateStatus(updateDTO.contributionId(), updateDTO.newStatus());
+        if (!updated) {
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", "Failed to update contribution status");
         }
 
-        // Validate contributions
-        for (SimpleContributionDTO contrib : bundle.contributions()) {
-            if (contrib.entityType() == null || contrib.action() == null) {
-                ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", 
-                    "Each contribution must have entityType and action");
-                return;
-            }
-        }
+        ContributionDTO contribution;// = contributionDAO.findById(updateDTO.contributionId()).get();
 
-        // Create contribution bundle
-        Optional<Integer> bundleId = bundleDAO.create(bundle);
-        if (bundleId.isEmpty()) {
-            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Contribution bundle not created", "");
-            return;
-        }
-        // Create contributions
-        for (SimpleContributionDTO contrib : bundle.contributions()) {
+        contribution = contributionDAO.findById(updateDTO.contributionId()).get();
+
+        // Special handling for approval - if contribution is approved, we need to apply
+        // the proposed changes to the target entity
+        if (contribution.status() == ContributionStatusEnum.approved) {
             try {
-                contributionDAO.create(bundleId.get(), contrib);
-            } catch (Exception e) {
-                bundleDAO.delete(bundleId.get());
-                ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error creating contribution", e.getMessage());
-                return;
+                approveContribution(contribution);
+            }
+            catch(Exception e) {
+                System.out.print(Arrays.asList(e.getStackTrace()));
+                ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", e.getMessage());
             }
         }
 
-        ContributionBundleDTO newBundle = bundleDAO.findById(bundleId.get()).get();
-
-        ctx.status(HttpStatus.CREATED).json(Map.of("bundle", newBundle));
+        ctx.status(HttpStatus.OK);
     }
 }

@@ -1,5 +1,8 @@
 package dev.stuten.vps.models.mappers.utils;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +28,6 @@ public final class MappingUtils {
         return dto;
     }
 
-    @SuppressWarnings("unchecked")
     public static <R> List<R> getMultipleDTOFromRecord(Record r, String fieldName, RecordMapper<Record, R> mapper) {
         List<R> dtos = Arrays.asList();
         if (r.field(fieldName) != null) {
@@ -55,5 +57,18 @@ public final class MappingUtils {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private static final DateTimeFormatter LOCAL_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter LOCAL_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+    public static LocalDate stringToLocalDate(String date) {
+        if (date == null) return null;
+        return LocalDate.parse(date, LOCAL_DATE_FORMATTER);
+    }
+
+    public static LocalDateTime stringToLocalDateTime(String dateTime) {
+        if (dateTime == null) return null;
+        return LocalDateTime.parse(dateTime, LOCAL_DATETIME_FORMATTER);
     }
 }

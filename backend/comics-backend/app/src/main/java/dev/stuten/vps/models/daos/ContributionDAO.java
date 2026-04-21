@@ -2,6 +2,7 @@ package dev.stuten.vps.models.daos;
 
 import static dev.stuten.vps.jooq.tables.ContributionBundles.CONTRIBUTION_BUNDLES;
 import static dev.stuten.vps.jooq.tables.Contributions.CONTRIBUTIONS;
+import static dev.stuten.vps.jooq.tables.Users.USERS;
 
 import java.util.Collection;
 import java.util.List;
@@ -55,7 +56,9 @@ public class ContributionDAO extends DAO {
         return DSL().select(getSimpleSelectFields())
                 .select(new ContributionBundleDAO(this.DSL()).getSimpleSelectFields())
                 .from(CONTRIBUTIONS)
-                .leftJoin(CONTRIBUTION_BUNDLES).on(CONTRIBUTIONS.BUNDLE_ID.eq(CONTRIBUTION_BUNDLES.ID));
+                .leftJoin(CONTRIBUTION_BUNDLES).on(CONTRIBUTIONS.BUNDLE_ID.eq(CONTRIBUTION_BUNDLES.ID))
+                // Special case for contribution bundles
+                .leftJoin(USERS).on(CONTRIBUTION_BUNDLES.SUBMITTER_ID.eq(USERS.ID));
     }
 
     public Optional<Integer> create(Integer bundleId, SimpleContributionDTO dto) {
@@ -74,4 +77,24 @@ public class ContributionDAO extends DAO {
                     .map(record -> record.get(CONTRIBUTIONS.ID));
             }
 
+    public Boolean updateStatus(Integer contributionId, ContributionStatusEnum newStatus) {
+            return DSL().update(CONTRIBUTIONS)
+                    .set(CONTRIBUTIONS.STATUS, newStatus)
+                    .where(CONTRIBUTIONS.ID.eq(contributionId))
+                    .execute() > 0;
+    }
+
+    public Boolean updateResolvedEntityId(Integer contributionId, Integer resolvedEntityId) {
+        return DSL().update(CONTRIBUTIONS)
+                .set(CONTRIBUTIONS.RESOLVED_ENTITY_ID, resolvedEntityId)
+                .where(CONTRIBUTIONS.ID.eq(contributionId))
+                .execute() > 0;
+    }
+
+    public Optional<ContributionDTO> findById(Integer id) {
+        return getFullFromClause()
+                .where(CONTRIBUTIONS.ID.eq(id))
+                .fetchOptional()
+                .map(getDefaultMapper());
+    }
 }

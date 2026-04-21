@@ -66,4 +66,29 @@ public class IssueSerieMapper {
         return dto;
     }
 
+    public static IssueSerieDTO mapGenericMapToDTO(Map<String, Object> map) {
+        IssueSerieDTO dto = new IssueSerieDTO(
+                (Integer) map.get("id"),
+                (String) map.get("name"),
+                (String) map.get("desc"),
+                MappingUtils.stringToLocalDate((String) map.get("startDate")),
+                MappingUtils.stringToLocalDate((String) map.get("endDate")),
+                ((List<Map<String, Object>>) map.get("issues")).stream().map(IssueMapper::mapGenericMapToSimpleDTO).toList(),
+                ((List<Map<String, Object>>) map.get("books")).stream().map(BookMapper::mapGenericMapToSimpleDTO).toList(),
+                MappingUtils.stringToLocalDateTime((String) map.get("createdAt")),
+                MappingUtils.stringToLocalDateTime((String) map.get("modifiedAt")),
+                UserMapper.mapGenericMapToSimpleDTO((Map<String, Object>) map.get("addedBy")));
+        return dto;
+    }
+
+    public static SimpleIssueSerieDTO mapGenericMapToSimpleDTO(Map<String, Object> map) {
+        SimpleIssueSerieDTO dto = new SimpleIssueSerieDTO(
+                (Integer) map.get("id"),
+                (String) map.get("name"),
+                (String) map.get("desc"),
+                MappingUtils.stringToLocalDate((String) map.get("startDate")),
+                MappingUtils.stringToLocalDate((String) map.get("endDate")));
+        return dto;
+    }
+
 }

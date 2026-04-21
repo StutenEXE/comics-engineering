@@ -8,9 +8,13 @@ import static dev.stuten.vps.jooq.tables.Users.USERS;
 import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.select;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import javax.naming.OperationNotSupportedException;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -21,13 +25,12 @@ import org.jooq.SelectJoinStep;
 import dev.stuten.vps.models.dtos.full.IssueDTO;
 import dev.stuten.vps.models.mappers.IssueMapper;
 
-public class IssueDAO extends DAO {
+public class IssueDAO extends ContributableDAO<IssueDTO> {
 
         public IssueDAO(DSLContext dsl) {
                 super(dsl);
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         protected RecordMapper<? super Record, IssueDTO> getDefaultMapper() {
                 return IssueMapper::mapToDTO;
@@ -50,7 +53,7 @@ public class IssueDAO extends DAO {
 
         protected SelectJoinStep<? extends Record> getSimpleFromClause() {
                 return DSL().select(getSimpleSelectFields()).from(ISSUES)
-                .leftJoin(ISSUE_SERIES).on(ISSUES.SERIES_ID.eq(ISSUE_SERIES.ID));
+                                .leftJoin(ISSUE_SERIES).on(ISSUES.SERIES_ID.eq(ISSUE_SERIES.ID));
         }
 
         @Override
@@ -71,7 +74,25 @@ public class IssueDAO extends DAO {
                                 .leftJoin(USERS).on(ISSUES.ADDED_BY.eq(USERS.ID));
         }
 
-        public Optional<IssueDTO> create(IssueDTO dto) {
+        @Override
+        public void replaceLocalRefs(Map<String, Object> proposedData, Map<Integer, Integer> localRefs) throws OperationNotSupportedException {
+                // IssueSerie id
+                Map<String, Object> publisherMap = (Map<String, Object>) proposedData.get("issueSerie");
+                super.replaceLocalRef(publisherMap, localRefs);
+        }
+
+        @Override
+        protected IssueDTO mapProposedDataToDTO(Map<String, Object> proposedData) {
+                return IssueMapper.mapGenericMapToDTO(proposedData);
+        }
+
+        @Override
+        protected Integer getIdFromDTO(IssueDTO dto) {
+                return dto.id();
+        }
+
+        @Override
+        public Optional<Integer> create(IssueDTO dto) {
                 return DSL().insertInto(ISSUES)
                                 .set(ISSUES.NAME, dto.name())
                                 .set(ISSUES.NUMBER, dto.number())
@@ -79,10 +100,32 @@ public class IssueDAO extends DAO {
                                 .set(ISSUES.PARUTION_DATE, dto.parutionDate())
                                 .set(ISSUES.SERIES_ID, dto.issueSerie().id())
                                 .set(ISSUES.ADDED_BY, dto.addedBy().id())
-                                .returning(ISSUES.asterisk())
-                                .fetchOptional(IssueMapper::mapToDTO);
+                                .returning(ISSUES.ID)
+                                .fetchOptional()
+                                .map(record -> record.get(ISSUES.ID));
         }
 
+        @Override
+        public boolean update(IssueDTO dto) {
+                return DSL().update(ISSUES)
+                                .set(ISSUES.NAME, dto.name())
+                                .set(ISSUES.NUMBER, dto.number())
+                                .set(ISSUES.COVER_DATE, dto.coverDate())
+                                .set(ISSUES.PARUTION_DATE, dto.parutionDate())
+                                .set(ISSUES.SERIES_ID, dto.issueSerie().id())
+                                .set(ISSUES.MODIFIED_AT, LocalDateTime.now())
+                                .where(ISSUES.ID.eq(dto.id()))
+                                .execute() > 0;
+        }
+
+        @Override
+        public boolean delete(IssueDTO dto) {
+                return DSL().delete(ISSUES)
+                                .where(ISSUES.ID.eq(dto.id()))
+                                .execute() > 0;
+        }
+
+        @Override
         public Optional<IssueDTO> findById(Integer id) {
                 return super.selectOne(ISSUES.ID.eq(id));
         }
@@ -93,4 +136,5 @@ public class IssueDAO extends DAO {
                                                 .from(BOOKS_ISSUES)
                                                 .where(BOOKS_ISSUES.BOOK_ID.eq(bookID))));
         }
+
 }

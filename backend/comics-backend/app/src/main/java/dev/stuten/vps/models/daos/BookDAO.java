@@ -8,9 +8,13 @@ import static dev.stuten.vps.jooq.tables.Series.SERIES;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 import static org.jooq.impl.DSL.multiset;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import javax.naming.OperationNotSupportedException;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -22,13 +26,12 @@ import dev.stuten.vps.models.dtos.full.BookDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
 import dev.stuten.vps.models.mappers.BookMapper;
 
-public class BookDAO extends DAO {
+public class BookDAO extends ContributableDAO<BookDTO> {
 
         public BookDAO(DSLContext dsl) {
                 super(dsl);
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         protected RecordMapper<? super Record, BookDTO> getDefaultMapper() {
                 return BookMapper::mapToDTO;
@@ -53,7 +56,7 @@ public class BookDAO extends DAO {
         @Override
         protected SelectJoinStep<? extends Record> getSimpleFromClause() {
                 return DSL().select(getSimpleSelectFields()).from(BOOKS)
-                .leftJoin(SERIES).on(BOOKS.SERIES_ID.eq(SERIES.ID));
+                                .leftJoin(SERIES).on(BOOKS.SERIES_ID.eq(SERIES.ID));
         }
 
         @Override
@@ -78,7 +81,27 @@ public class BookDAO extends DAO {
                                 .leftJoin(USERS).on(BOOKS.ADDED_BY.eq(USERS.ID));
         }
 
-        public Optional<BookDTO> create(BookDTO dto) {
+        @Override
+        public void replaceLocalRefs(Map<String, Object> proposedData, Map<Integer, Integer> localRefs) throws OperationNotSupportedException {
+                // Serie id
+                Map<String, Object> serieMap = (Map<String, Object>) proposedData.get("serie");
+                super.replaceLocalRef(serieMap, localRefs);
+                System.out.println(proposedData);
+        }
+
+
+        @Override
+        protected BookDTO mapProposedDataToDTO(Map<String, Object> proposedData) {
+                return BookMapper.mapGenericMapToDTO(proposedData);
+        }
+
+        @Override
+        protected Integer getIdFromDTO(BookDTO dto) {
+                return dto.id();
+        }
+
+        @Override
+        public Optional<Integer> create(BookDTO dto) {
                 return DSL().insertInto(BOOKS)
                                 .set(BOOKS.NAME, dto.name())
                                 .set(BOOKS.DESC, dto.desc())
@@ -87,10 +110,33 @@ public class BookDAO extends DAO {
                                 .set(BOOKS.IMG_URL, dto.imgUrl())
                                 .set(BOOKS.SERIES_ID, dto.serie().id())
                                 .set(BOOKS.ADDED_BY, dto.addedBy().id())
-                                .returning(BOOKS.asterisk())
-                                .fetchOptional(BookMapper::mapToDTO);
+                                .returning(BOOKS.ID)
+                                .fetchOptional()
+                                .map(record -> record.get(BOOKS.ID));
         }
 
+        @Override
+        public boolean update(BookDTO dto) {
+                return DSL().update(BOOKS)
+                                .set(BOOKS.NAME, dto.name())
+                                .set(BOOKS.DESC, dto.desc())
+                                .set(BOOKS.NUMBER, dto.number())
+                                .set(BOOKS.VO_CONTENT, dto.voContent())
+                                .set(BOOKS.IMG_URL, dto.imgUrl())
+                                .set(BOOKS.SERIES_ID, dto.serie().id())
+                                .set(BOOKS.MODIFIED_AT, LocalDateTime.now())
+                                .where(BOOKS.ID.eq(dto.id()))
+                                .execute() > 0;
+        }
+
+        @Override
+        public boolean delete(BookDTO dto) {
+                return DSL().delete(BOOKS)
+                                .where(BOOKS.ID.eq(dto.id()))
+                                .execute() > 0;
+        }
+
+        @Override
         public Optional<BookDTO> findById(Integer id) {
                 return super.selectOne(BOOKS.ID.eq(id));
         }

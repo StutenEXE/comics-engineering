@@ -13,12 +13,17 @@ import io.javalin.http.HttpStatus;
 
 public class IssueService {
 
-    private IssueService() {}
+    private IssueService() {
+    }
 
     private static IssueDAO dao = new IssueDAO(
             JooqProvider.get());
-    
-     public static void getById(Context ctx) {
+
+    protected static IssueDAO getDAO() {
+        return dao;
+    }
+
+    public static void getById(Context ctx) {
         // Retreive ID from request
         Integer id;
         try {

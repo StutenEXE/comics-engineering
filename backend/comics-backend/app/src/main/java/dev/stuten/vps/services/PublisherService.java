@@ -17,6 +17,10 @@ public class PublisherService {
     private static PublisherDAO dao = new PublisherDAO(
             JooqProvider.get());
 
+    protected static PublisherDAO getDAO() {
+        return dao;
+    }
+
     public static void getByID(Context ctx) {
         // Retreive ID from request
         Integer id;

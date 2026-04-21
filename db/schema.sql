@@ -147,7 +147,7 @@ CREATE TABLE IF NOT EXISTS contribution_bundles (
 CREATE TABLE IF NOT EXISTS contributions (
 	id SERIAL PRIMARY KEY,
 	bundle_id INT NOT NULL REFERENCES contribution_bundles(id) ON DELETE CASCADE,
-	local_ref TEXT, -- Reference to the local entity (e.g., book name, serie name, etc.) if needed
+	local_ref INT, -- Reference to the local entity (e.g., book name, serie name, etc.) if needed
 	entity_type contribution_type_enum NOT NULL,
 	action contribution_action_enum NOT NULL,
 	entity_id INT, -- null for create actions

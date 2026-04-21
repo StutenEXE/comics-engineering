@@ -11,12 +11,16 @@ import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 
 public class IssueSerieService {
+
      private IssueSerieService() {}
 
     private static IssueSerieDAO dao = new IssueSerieDAO(
             JooqProvider.get());
 
-    // TODO : Refactor function ?
+    protected static IssueSerieDAO getDAO() {
+        return dao;
+    }
+
     public static void getByID(Context ctx) {
         // Retreive ID from request
         Integer id;

@@ -47,7 +47,7 @@ public class ContributionMapper {
         ContributionDTO dto = new ContributionDTO(
                 r.get(getFieldName(CONTRIBUTIONS.ID), Integer.class),
                 bundle,
-                r.get(getFieldName(CONTRIBUTIONS.LOCAL_REF), String.class),
+                r.get(getFieldName(CONTRIBUTIONS.LOCAL_REF), Integer.class),
                 r.get(getFieldName(CONTRIBUTIONS.ENTITY_TYPE), ContributionTypeEnum.class),
                 r.get(getFieldName(CONTRIBUTIONS.ACTION), ContributionActionEnum.class),
                 r.get(getFieldName(CONTRIBUTIONS.ENTITY_ID), Integer.class),
@@ -66,7 +66,7 @@ public class ContributionMapper {
         SimpleContributionDTO dto = new SimpleContributionDTO(
                 r.get(getFieldName(CONTRIBUTIONS.ID), Integer.class),
                 r.get(getFieldName(CONTRIBUTIONS.BUNDLE_ID), Integer.class),
-                r.get(getFieldName(CONTRIBUTIONS.LOCAL_REF), String.class),
+                r.get(getFieldName(CONTRIBUTIONS.LOCAL_REF), Integer.class),
                 r.get(getFieldName(CONTRIBUTIONS.ENTITY_TYPE), ContributionTypeEnum.class),
                 r.get(getFieldName(CONTRIBUTIONS.ACTION), ContributionActionEnum.class),
                 r.get(getFieldName(CONTRIBUTIONS.ENTITY_ID), Integer.class),

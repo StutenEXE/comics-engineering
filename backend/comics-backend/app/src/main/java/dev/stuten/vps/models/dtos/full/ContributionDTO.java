@@ -15,7 +15,7 @@ import dev.stuten.vps.models.dtos.simple.SimpleContributionBundleDTO;
 public record ContributionDTO(
     @JsonProperty("id") Integer id,
     @JsonProperty("bundle") SimpleContributionBundleDTO bundle,
-    @JsonProperty("localRef") String localRef,
+    @JsonProperty("localRef") Integer localRef,
     @JsonProperty("entityType") ContributionTypeEnum entityType,
     @JsonProperty("action") ContributionActionEnum action,
     @JsonProperty("entityId") Integer entityId,

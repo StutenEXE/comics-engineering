@@ -6,8 +6,10 @@ import static dev.stuten.vps.jooq.tables.Users.USERS;
 import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.select;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.jooq.DSLContext;
@@ -19,13 +21,12 @@ import org.jooq.SelectJoinStep;
 import dev.stuten.vps.models.dtos.full.SerieDTO;
 import dev.stuten.vps.models.mappers.SerieMapper;
 
-public class SerieDAO extends DAO {
+public class SerieDAO extends ContributableDAO<SerieDTO> {
 
     public SerieDAO(DSLContext dsl) {
         super(dsl);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected RecordMapper<? super Record, SerieDTO> getDefaultMapper() {
         return SerieMapper::mapToDTO;
@@ -64,6 +65,20 @@ public class SerieDAO extends DAO {
                 .leftJoin(USERS).on(SERIES.ADDED_BY.eq(USERS.ID));
     }
 
+    @Override
+    public void replaceLocalRefs(Map<String, Object> proposedData, Map<Integer, Integer> localRefs) { }
+
+    @Override
+    protected SerieDTO mapProposedDataToDTO(Map<String, Object> proposedData) {
+        return SerieMapper.mapGenericMapToDTO(proposedData);
+    }
+
+    @Override
+    protected Integer getIdFromDTO(SerieDTO dto) {
+        return dto.id();
+    }
+
+    @Override
     public Optional<Integer> create(SerieDTO dto) {
         return DSL().insertInto(SERIES)
                 .set(SERIES.NAME, dto.name())
@@ -78,6 +93,28 @@ public class SerieDAO extends DAO {
                 .map(record -> record.get(SERIES.ID));
     }
 
+    @Override
+    public boolean update(SerieDTO dto) {
+        return DSL().update(SERIES)
+                .set(SERIES.NAME, dto.name())
+                .set(SERIES.ONGOING, dto.ongoing())
+                .set(SERIES.ONESHOT, dto.oneshot())
+                .set(SERIES.NVOLUMES, dto.nvolumes())
+                .set(SERIES.START_DATE, dto.startDate())
+                .set(SERIES.END_DATE, dto.endDate())
+                .set(SERIES.MODIFIED_AT, LocalDateTime.now())
+                .where(SERIES.ID.eq(dto.id()))
+                .execute() > 0;
+    }
+
+    @Override
+    public boolean delete(SerieDTO dto) {
+        return DSL().delete(SERIES)
+                .where(SERIES.ID.eq(dto.id()))
+                .execute() > 0;
+    }
+
+    @Override
     public Optional<SerieDTO> findById(Integer id) {
         return super.selectOne(SERIES.ID.eq(id));
     }

@@ -6,9 +6,13 @@ import static dev.stuten.vps.jooq.tables.Publishers.PUBLISHERS;
 import static dev.stuten.vps.jooq.tables.Series.SERIES;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import javax.naming.OperationNotSupportedException;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -19,13 +23,12 @@ import org.jooq.SelectJoinStep;
 import dev.stuten.vps.models.dtos.full.EditionDTO;
 import dev.stuten.vps.models.mappers.EditionMapper;
 
-public class EditionDAO extends DAO {
+public class EditionDAO extends ContributableDAO<EditionDTO> {
 
     public EditionDAO(DSLContext dsl) {
         super(dsl);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected RecordMapper<? super Record, ?> getDefaultMapper() {
         return EditionMapper::mapToDTO;
@@ -54,7 +57,7 @@ public class EditionDAO extends DAO {
     @Override
     protected SelectJoinStep<? extends Record> getSimpleFromClause() {
         return DSL().select(getSimpleSelectFields()).from(EDITIONS)
-            .leftJoin(PUBLISHERS).on(EDITIONS.PUBLISHER_ID.eq(PUBLISHERS.ID));
+                .leftJoin(PUBLISHERS).on(EDITIONS.PUBLISHER_ID.eq(PUBLISHERS.ID));
     }
 
     @Override
@@ -71,7 +74,31 @@ public class EditionDAO extends DAO {
                 .leftJoin(USERS).on(EDITIONS.ADDED_BY.eq(USERS.ID));
     }
 
-    public Optional<EditionDTO> create(EditionDTO dto) {
+    @Override
+    public void replaceLocalRefs(Map<String, Object> proposedData, Map<Integer, Integer> localRefs) throws OperationNotSupportedException {
+        // Publisher id
+        Map<String, Object> publisherMap = (Map<String, Object>) proposedData.get("publisher");
+        super.replaceLocalRef(publisherMap, localRefs);
+        // Book id
+        Map<String, Object> bookMap = (Map<String, Object>) proposedData.get("book");
+        super.replaceLocalRef(bookMap, localRefs);
+        // Serie id
+        Map<String, Object> serieMap = (Map<String, Object>) proposedData.get("serie");
+        super.replaceLocalRef(serieMap, localRefs);
+    }
+
+    @Override
+    protected EditionDTO mapProposedDataToDTO(Map<String, Object> proposedData) {
+        return EditionMapper.mapGenericMapToDTO(proposedData);
+    }
+
+    @Override
+    protected Integer getIdFromDTO(EditionDTO dto) {
+        return dto.id();
+    }
+
+    @Override
+    public Optional<Integer> create(EditionDTO dto) {
         return DSL().insertInto(EDITIONS)
                 .set(EDITIONS.ISBN, dto.isbn())
                 .set(EDITIONS.EAN, dto.ean())
@@ -82,10 +109,35 @@ public class EditionDAO extends DAO {
                 .set(EDITIONS.PUBLISHER_ID, dto.publisher().id())
                 .set(EDITIONS.BOOK_ID, dto.book().id())
                 .set(EDITIONS.ADDED_BY, dto.addedBy().id())
-                .returning(EDITIONS.asterisk())
-                .fetchOptional(EditionMapper::mapToDTO);
+                .returning(EDITIONS.ID)
+                .fetchOptional()
+                .map(record -> record.get(EDITIONS.ID));
     }
 
+    @Override
+    public boolean update(EditionDTO dto) {
+        return DSL().update(EDITIONS)
+                .set(EDITIONS.ISBN, dto.isbn())
+                .set(EDITIONS.EAN, dto.ean())
+                .set(EDITIONS.PRICE, dto.price())
+                .set(EDITIONS.URL, dto.url())
+                .set(EDITIONS.IMG_URL, dto.imgUrl())
+                .set(EDITIONS.PARUTION_DATE, dto.parutionDate())
+                .set(EDITIONS.PUBLISHER_ID, dto.publisher().id())
+                .set(EDITIONS.BOOK_ID, dto.book().id())
+                .set(EDITIONS.MODIFIED_AT, LocalDateTime.now())
+                .where(EDITIONS.ID.eq(dto.id()))
+                .execute() > 0;
+    }
+
+    @Override
+    public boolean delete(EditionDTO dto) {
+        return DSL().delete(EDITIONS)
+                .where(EDITIONS.ID.eq(dto.id()))
+                .execute() > 0;
+    }
+
+    @Override
     public Optional<EditionDTO> findById(Integer id) {
         return super.selectOne(EDITIONS.ID.eq(id));
     }

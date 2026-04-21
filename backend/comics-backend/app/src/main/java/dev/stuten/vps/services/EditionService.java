@@ -16,6 +16,10 @@ public class EditionService {
     private static EditionDAO dao = new EditionDAO(
             JooqProvider.get());
 
+    protected static EditionDAO getDAO() {
+        return dao;
+    }
+
     public static void getByID(Context ctx) {
         // Retreive ID from request
         Integer id;

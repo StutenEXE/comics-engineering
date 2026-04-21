@@ -57,4 +57,11 @@ public class UserMapper {
                 r.get(getFieldName(USERS.MODIFIED_AT), LocalDateTime.class));
         return dto;
     }
+
+    public static SimpleUserDTO mapGenericMapToSimpleDTO(Map<String, Object> map) {
+        SimpleUserDTO dto = new SimpleUserDTO(
+                (Integer) map.get("id"),
+                (String) map.get("username"));
+        return dto;
+    }
 }
