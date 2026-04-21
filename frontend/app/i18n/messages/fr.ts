@@ -14,6 +14,11 @@ export default {
     "generic.actions": "actions",
     "generic.search.placeholder": "Rechercher...",
     // ============================
+    // == Toasts
+    // ============================
+    "toast.adminroute.access_denied": "Accès refusé. Réservé aux admins.",
+    "toast.loggedroute.access_denied": "Accès refusé. Veuillez vous connecter.",
+    // ============================
     // == Loading
     // ============================
     "loader.loading": "Chargement...",

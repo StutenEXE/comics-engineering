@@ -1,13 +1,13 @@
-import { Outlet } from "react-router"
-import { Header } from "./components/headers/Header"
+import { Outlet } from "react-router";
+import { Header } from "./components/headers/Header";
 import { useRefreshQuery } from "./store/services/api";
-import { setUser } from "./store/slices/userSlice";
+import { clearUser, setUser } from "./store/slices/userSlice";
 import { useToast } from "./components/toast/Toast";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 
 export default function App() {
-  const { data, isLoading, isSuccess } = useRefreshQuery({ });
+  const { data, isLoading, isSuccess, isError } = useRefreshQuery({});
   const dispatch = useDispatch();
   const toast = useToast();
 
@@ -17,12 +17,17 @@ export default function App() {
       dispatch(setUser(data.user));
       // toast.success("Login successful"); // Is too much on the screen
     }
-  }, [isSuccess, data]);
+    // Optionally: clear user state if refresh fails (not authenticated)
+    if (isError) {
+      dispatch(clearUser());
+    }
+  }, [isSuccess, isError, data]);
 
-  if (isLoading) {
-    return <div>Loading...</div>; 
+  // Only show loading on initial load, not on background refetches
+  if (isLoading && !data) {
+    return <div>Loading...</div>;
   }
-  
+
   return (
     <div className="wrapper">
       <Header />
@@ -32,4 +37,3 @@ export default function App() {
     </div>
   );
 }
-

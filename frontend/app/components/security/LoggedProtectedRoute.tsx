@@ -6,24 +6,24 @@ import { useToast } from "../toast/Toast";
 import { useEffect } from "react";
 import { useTranslation } from "~/i18n/i18n";
 
-interface AdminProtectedRouteProps {
+interface LoggedProtectedRouteProps {
     children: ReactNode
 }
 
-export function AdminProtectedRoute({ children }: AdminProtectedRouteProps) {
+export function LoggedProtectedRoute({ children }: LoggedProtectedRouteProps) {
   const { t } = useTranslation();
 
 
-  const { user, isAuthenticated } = useSelector((state: RootState) => state.user);
+  const { isAuthenticated } = useSelector((state: RootState) => state.user);
   const toast = useToast();
 
   useEffect(() => {
-    if (!isAuthenticated || !user?.isAdmin) {
-      toast.error(t("toast.adminroute.access_denied"));
+    if (!isAuthenticated) {
+      toast.error(t("toast.loggedroute.access_denied"));
     }
-  }, [isAuthenticated, user?.isAdmin, toast]);
+  }, [isAuthenticated, toast]);
 
-  if (!isAuthenticated || !user?.isAdmin) {
+  if (!isAuthenticated) {
     return <Navigate to="/" replace/>;
   }
 
