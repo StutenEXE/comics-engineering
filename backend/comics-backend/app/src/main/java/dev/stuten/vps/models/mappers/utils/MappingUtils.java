@@ -17,6 +17,15 @@ import org.jspecify.annotations.Nullable;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import dev.stuten.vps.jooq.enums.ContributionTypeEnum;
+import dev.stuten.vps.models.dtos.full.BookDTO;
+import dev.stuten.vps.models.dtos.full.EditionDTO;
+import dev.stuten.vps.models.dtos.full.IssueDTO;
+import dev.stuten.vps.models.dtos.full.IssueSerieDTO;
+import dev.stuten.vps.models.dtos.full.PublisherDTO;
+import dev.stuten.vps.models.dtos.full.SerieDTO;
+import dev.stuten.vps.models.dtos.template.IdDTO;
+
 public final class MappingUtils {
 
     private MappingUtils() {
@@ -39,18 +48,28 @@ public final class MappingUtils {
         return dtos;
     }
 
-    private static final TypeReference<Map<String, Object>> MAP_TYPE_REF = new TypeReference<Map<String, Object>>() {};
+    @SuppressWarnings("null")
+    private static final Map<ContributionTypeEnum, TypeReference<? extends IdDTO>> IDDTO_TYPE_REF = Map.ofEntries(
+        Map.entry(ContributionTypeEnum.book, new TypeReference<BookDTO>() {}),
+        Map.entry(ContributionTypeEnum.serie, new TypeReference<SerieDTO>() {}),
+        Map.entry(ContributionTypeEnum.edition, new TypeReference<EditionDTO>() {}),
+        Map.entry(ContributionTypeEnum.issue, new TypeReference<IssueDTO>() {}),
+        Map.entry(ContributionTypeEnum.issueserie, new TypeReference<IssueSerieDTO>() {}),
+        Map.entry(ContributionTypeEnum.publisher, new TypeReference<PublisherDTO>() {}),
+        Map.entry(ContributionTypeEnum.link_book_issue, new TypeReference<BookDTO>() {}) // TODO REMOVE
+    );
 
-    public static Map<String, Object> jsonbToMap(JSONB jsonb) {
+    public static IdDTO jsonbToIdDTO(JSONB jsonb, ContributionTypeEnum type) {
         if (jsonb == null) return null;
         try {
-            return new ObjectMapper().readValue(jsonb.data(), MAP_TYPE_REF);
+            return new ObjectMapper().readValue(jsonb.data(), IDDTO_TYPE_REF.get(type));
+            // return new ObjectMapper().readValue(jsonb.data(), new TypeReference<IdDTO>() {}); // TODO CHECK IF GOOD
         } catch (Exception e) {
             return null;
         }
     }
 
-    public static JSONB mapToJsonb(Map<String, Object> map) {
+    public static JSONB mapToJsonb(Object map) {
         if (map == null) return null;
         try {
             return JSONB.valueOf(new ObjectMapper().writeValueAsString(map));

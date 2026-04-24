@@ -14,23 +14,58 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
+import dev.stuten.vps.models.dtos.template.IdDTO;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
-public record OwnedEditionDTO (
-    @JsonProperty("id") Integer id,
-    
-    @JsonProperty("date") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss") @JsonSerialize(using = LocalDateTimeSerializer.class) @JsonDeserialize(using = LocalDateTimeDeserializer.class) LocalDateTime date,
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
+@NoArgsConstructor
+public class OwnedEditionDTO extends IdDTO {
 
-    @JsonProperty("read") Boolean read,
+    @JsonProperty("date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    private LocalDateTime date;
 
-    @JsonProperty("dateRead") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") @JsonSerialize(using = LocalDateSerializer.class) @JsonDeserialize(using = LocalDateDeserializer.class) LocalDate dateRead,
+    @JsonProperty("read")
+    private Boolean read;
 
-    @JsonProperty("gift") Boolean gift,
-    @JsonProperty("signed") Boolean signed,
-    @JsonProperty("purchasePrice") BigDecimal purchasePrice,
-    @JsonProperty("fees") BigDecimal fees,
-    @JsonProperty("retailPrice") BigDecimal retailPrice,
-    @JsonProperty("note") String note,
+    @JsonProperty("dateRead")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    private LocalDate dateRead;
 
-    @JsonProperty("edition") EditionDTO edition,
-    @JsonProperty("user") SimpleUserDTO user
-) {}
+    @JsonProperty("gift")
+    private Boolean gift;
+
+    @JsonProperty("signed")
+    private Boolean signed;
+
+    @JsonProperty("purchasePrice")
+    private BigDecimal purchasePrice;
+
+    @JsonProperty("fees")
+    private BigDecimal fees;
+
+    @JsonProperty("retailPrice")
+    private BigDecimal retailPrice;
+
+    @JsonProperty("note")
+    private String note;
+
+    @JsonProperty("edition")
+    private EditionDTO edition;
+
+    @JsonProperty("user")
+    private SimpleUserDTO user;
+}

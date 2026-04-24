@@ -23,6 +23,8 @@ import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.models.dtos.full.IssueDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleIssueSerieDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 import dev.stuten.vps.models.mappers.IssueMapper;
 
 public class IssueDAO extends ContributableDAO<IssueDTO> {
@@ -75,31 +77,27 @@ public class IssueDAO extends ContributableDAO<IssueDTO> {
         }
 
         @Override
-        public void replaceLocalRefs(Map<String, Object> proposedData, Map<Integer, Integer> localRefs) throws OperationNotSupportedException {
+        protected void replaceLocalRefs(IssueDTO proposal, Map<Integer, Integer> localRefs)
+                        throws OperationNotSupportedException {
                 // IssueSerie id
-                Map<String, Object> publisherMap = (Map<String, Object>) proposedData.get("issueSerie");
-                super.replaceLocalRef(publisherMap, localRefs);
+                SimpleIssueSerieDTO issueSerie = proposal.getIssueSerie();
+                super.replaceLocalRef(issueSerie, localRefs);
         }
 
         @Override
-        protected IssueDTO mapProposedDataToDTO(Map<String, Object> proposedData) {
-                return IssueMapper.mapGenericMapToDTO(proposedData);
-        }
-
-        @Override
-        protected Integer getIdFromDTO(IssueDTO dto) {
-                return dto.id();
+        protected void insertUser(IssueDTO proposal, SimpleUserDTO user) {
+                proposal.setAddedBy(user);
         }
 
         @Override
         public Optional<Integer> create(IssueDTO dto) {
                 return DSL().insertInto(ISSUES)
-                                .set(ISSUES.NAME, dto.name())
-                                .set(ISSUES.NUMBER, dto.number())
-                                .set(ISSUES.COVER_DATE, dto.coverDate())
-                                .set(ISSUES.PARUTION_DATE, dto.parutionDate())
-                                .set(ISSUES.SERIES_ID, dto.issueSerie().id())
-                                .set(ISSUES.ADDED_BY, dto.addedBy().id())
+                                .set(ISSUES.NAME, dto.getName())
+                                .set(ISSUES.NUMBER, dto.getNumber())
+                                .set(ISSUES.COVER_DATE, dto.getCoverDate())
+                                .set(ISSUES.PARUTION_DATE, dto.getParutionDate())
+                                .set(ISSUES.SERIES_ID, dto.getIssueSerie().getId())
+                                .set(ISSUES.ADDED_BY, dto.getAddedBy().getId())
                                 .returning(ISSUES.ID)
                                 .fetchOptional()
                                 .map(record -> record.get(ISSUES.ID));
@@ -108,20 +106,20 @@ public class IssueDAO extends ContributableDAO<IssueDTO> {
         @Override
         public boolean update(IssueDTO dto) {
                 return DSL().update(ISSUES)
-                                .set(ISSUES.NAME, dto.name())
-                                .set(ISSUES.NUMBER, dto.number())
-                                .set(ISSUES.COVER_DATE, dto.coverDate())
-                                .set(ISSUES.PARUTION_DATE, dto.parutionDate())
-                                .set(ISSUES.SERIES_ID, dto.issueSerie().id())
+                                .set(ISSUES.NAME, dto.getName())
+                                .set(ISSUES.NUMBER, dto.getNumber())
+                                .set(ISSUES.COVER_DATE, dto.getCoverDate())
+                                .set(ISSUES.PARUTION_DATE, dto.getParutionDate())
+                                .set(ISSUES.SERIES_ID, dto.getIssueSerie().getId())
                                 .set(ISSUES.MODIFIED_AT, LocalDateTime.now())
-                                .where(ISSUES.ID.eq(dto.id()))
+                                .where(ISSUES.ID.eq(dto.getId()))
                                 .execute() > 0;
         }
 
         @Override
         public boolean delete(IssueDTO dto) {
                 return DSL().delete(ISSUES)
-                                .where(ISSUES.ID.eq(dto.id()))
+                                .where(ISSUES.ID.eq(dto.getId()))
                                 .execute() > 0;
         }
 

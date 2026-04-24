@@ -18,9 +18,8 @@ import dev.stuten.vps.models.dtos.full.ContributionBundleDTO;
 import dev.stuten.vps.models.dtos.full.ContributionDTO;
 import dev.stuten.vps.models.dtos.request.UpdateContributionStatusDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionDTO;
-import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
+import dev.stuten.vps.models.dtos.template.IdDTO;
 import dev.stuten.vps.web.ErrorResponse;
-import dev.stuten.vps.web.middleware.AuthContext;
 import dev.stuten.vps.web.middleware.AuthMiddleware;
 import dev.stuten.vps.web.middleware.Role;
 import io.javalin.http.Context;
@@ -34,7 +33,7 @@ public class ContributionService {
     private static ContributionDAO contributionDAO = new ContributionDAO(JooqProvider.get());
     private static ContributionBundleDAO contributionBundleDAO = new ContributionBundleDAO(JooqProvider.get());
 
-    private static ContributableDAO<? extends Record> getDAOFromEntityType(ContributionTypeEnum type) {
+    private static ContributableDAO<? extends IdDTO> getDAOFromEntityType(ContributionTypeEnum type) {
         return switch (type) {
             case ContributionTypeEnum.book -> BookService.getDAO();
             case ContributionTypeEnum.serie -> SerieService.getDAO();
@@ -46,45 +45,53 @@ public class ContributionService {
         };
     }
 
-    protected static void createContribution(Integer bundleId, SimpleContributionDTO contrib, AuthContext auth) {
-        // Adding the submitter id
-        SimpleUserDTO submitter = new SimpleUserDTO(Integer.parseInt(auth.userId()), "");
-        contrib.proposedData().put("addedBy", submitter);
-
-        contrib = new SimpleContributionDTO(
-                null, bundleId, contrib.localRef(), contrib.entityType(), contrib.action(), contrib.entityId(),
-                contrib.proposedData(),
-                contrib.entitySnapshot(), contrib.status(), contrib.resolvedEntityId());
-        contributionDAO.create(bundleId, contrib);
+    protected static <T extends IdDTO> void createContribution(SimpleContributionDTO<T> contrib) {
+        // If we are updating or deleting save previous entity state
+        if (contrib.getAction() != ContributionActionEnum.create) {
+            ContributableDAO<? extends IdDTO> targetDAO = getDAOFromEntityType(contrib.getEntityType());
+            Optional<T> entity = (Optional<T>) targetDAO.findById(contrib.getEntityId());
+            if (entity.isEmpty()) {
+                throw new RuntimeException("Cannot find entity of type %s and of id %d"
+                        .formatted(contrib.getEntityType(), contrib.getId()));
+            }
+            contrib.setEntitySnapshot(entity.get());
+        }
+        // Create
+        contributionDAO.create(contrib);
     }
 
-    private static void approveContribution(ContributionDTO contribution) throws OperationNotSupportedException {
+    private static void approveContribution(ContributionDTO<? extends IdDTO> contribution)
+            throws OperationNotSupportedException {
         // Get all local refs of the contribution bundle to check for dependencies
         // between contributions in the same bundle
-        Optional<ContributionBundleDTO> bundle = contributionBundleDAO.findById(contribution.bundle().id());
+        Optional<ContributionBundleDTO> bundle = contributionBundleDAO.findById(contribution.getBundle().getId());
         if (bundle.isEmpty()) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error",
                     "Contribution bundle not found for contribution");
             return;
         }
         Map<Integer, Integer> localRefs = new HashMap<>();
-        bundle.get().contributions().stream()
-                .filter(c -> c.localRef() != null)
-                .forEach(c -> localRefs.put(c.localRef(), c.resolvedEntityId()));
+        bundle.get().getContributions().stream()
+                .filter(c -> c.getLocalRef() != null)
+                .forEach(c -> localRefs.put(c.getLocalRef(), c.getResolvedEntityId()));
         // Get target DAO based on contribution entity type
-        ContributableDAO<? extends Record> targetDAO = getDAOFromEntityType(contribution.entityType());
+        ContributableDAO<? extends IdDTO> targetDAO = getDAOFromEntityType(contribution.getEntityType());
         // Apply proposed changes to target entity and get resolved entity ID (in case
         // of creation)
-        Optional<Integer> result = targetDAO.applyContribution(contribution.action(),
-                contribution.proposedData(), localRefs);
+        Optional<Integer> result = targetDAO.applyContribution(
+                contribution.getAction(),
+                contribution.getProposedData(),
+                localRefs,
+                bundle.get().getSubmitter());
+
         if (result.isEmpty()) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error",
                     "Failed to apply contribution changes to target entity");
         }
         // Applying changes to target entity was successful, update contribution with
         // resolved entity ID if it was a creation
-        if (contribution.action() == ContributionActionEnum.create) {
-            contributionDAO.updateResolvedEntityId(contribution.id(), result.get());
+        if (contribution.getAction() == ContributionActionEnum.create) {
+            contributionDAO.updateResolvedEntityId(contribution.getId(), result.get());
         }
     }
 
@@ -111,17 +118,14 @@ public class ContributionService {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", "Failed to update contribution status");
         }
 
-        ContributionDTO contribution;// = contributionDAO.findById(updateDTO.contributionId()).get();
-
-        contribution = contributionDAO.findById(updateDTO.contributionId()).get();
+        ContributionDTO<?> contribution = contributionDAO.findById(updateDTO.contributionId()).get();
 
         // Special handling for approval - if contribution is approved, we need to apply
         // the proposed changes to the target entity
-        if (contribution.status() == ContributionStatusEnum.approved) {
+        if (contribution.getStatus() == ContributionStatusEnum.approved) {
             try {
                 approveContribution(contribution);
-            }
-            catch(Exception e) {
+            } catch (Exception e) {
                 System.out.print(Arrays.asList(e.getStackTrace()));
                 ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", e.getMessage());
             }

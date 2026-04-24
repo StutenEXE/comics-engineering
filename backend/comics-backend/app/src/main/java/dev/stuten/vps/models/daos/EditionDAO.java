@@ -21,6 +21,10 @@ import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.models.dtos.full.EditionDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
+import dev.stuten.vps.models.dtos.simple.SimplePublisherDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleSerieDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 import dev.stuten.vps.models.mappers.EditionMapper;
 
 public class EditionDAO extends ContributableDAO<EditionDTO> {
@@ -75,40 +79,36 @@ public class EditionDAO extends ContributableDAO<EditionDTO> {
     }
 
     @Override
-    public void replaceLocalRefs(Map<String, Object> proposedData, Map<Integer, Integer> localRefs) throws OperationNotSupportedException {
+    protected void replaceLocalRefs(EditionDTO proposal, Map<Integer, Integer> localRefs)
+            throws OperationNotSupportedException {
         // Publisher id
-        Map<String, Object> publisherMap = (Map<String, Object>) proposedData.get("publisher");
-        super.replaceLocalRef(publisherMap, localRefs);
+        SimplePublisherDTO publisher = proposal.getPublisher();
+        super.replaceLocalRef(publisher, localRefs);
         // Book id
-        Map<String, Object> bookMap = (Map<String, Object>) proposedData.get("book");
-        super.replaceLocalRef(bookMap, localRefs);
+        SimpleBookDTO book = proposal.getBook();
+        super.replaceLocalRef(book, localRefs);
         // Serie id
-        Map<String, Object> serieMap = (Map<String, Object>) proposedData.get("serie");
-        super.replaceLocalRef(serieMap, localRefs);
+        SimpleSerieDTO serie = proposal.getSerie();
+        super.replaceLocalRef(serie, localRefs);
     }
 
     @Override
-    protected EditionDTO mapProposedDataToDTO(Map<String, Object> proposedData) {
-        return EditionMapper.mapGenericMapToDTO(proposedData);
-    }
-
-    @Override
-    protected Integer getIdFromDTO(EditionDTO dto) {
-        return dto.id();
+    protected void insertUser(EditionDTO proposal, SimpleUserDTO user) {
+        proposal.setAddedBy(user);
     }
 
     @Override
     public Optional<Integer> create(EditionDTO dto) {
         return DSL().insertInto(EDITIONS)
-                .set(EDITIONS.ISBN, dto.isbn())
-                .set(EDITIONS.EAN, dto.ean())
-                .set(EDITIONS.PRICE, dto.price())
-                .set(EDITIONS.URL, dto.url())
-                .set(EDITIONS.IMG_URL, dto.imgUrl())
-                .set(EDITIONS.PARUTION_DATE, dto.parutionDate())
-                .set(EDITIONS.PUBLISHER_ID, dto.publisher().id())
-                .set(EDITIONS.BOOK_ID, dto.book().id())
-                .set(EDITIONS.ADDED_BY, dto.addedBy().id())
+                .set(EDITIONS.ISBN, dto.getIsbn())
+                .set(EDITIONS.EAN, dto.getEan())
+                .set(EDITIONS.PRICE, dto.getPrice())
+                .set(EDITIONS.URL, dto.getUrl())
+                .set(EDITIONS.IMG_URL, dto.getImgUrl())
+                .set(EDITIONS.PARUTION_DATE, dto.getParutionDate())
+                .set(EDITIONS.PUBLISHER_ID, dto.getPublisher().getId())
+                .set(EDITIONS.BOOK_ID, dto.getBook().getId())
+                .set(EDITIONS.ADDED_BY, dto.getAddedBy().getId())
                 .returning(EDITIONS.ID)
                 .fetchOptional()
                 .map(record -> record.get(EDITIONS.ID));
@@ -117,23 +117,23 @@ public class EditionDAO extends ContributableDAO<EditionDTO> {
     @Override
     public boolean update(EditionDTO dto) {
         return DSL().update(EDITIONS)
-                .set(EDITIONS.ISBN, dto.isbn())
-                .set(EDITIONS.EAN, dto.ean())
-                .set(EDITIONS.PRICE, dto.price())
-                .set(EDITIONS.URL, dto.url())
-                .set(EDITIONS.IMG_URL, dto.imgUrl())
-                .set(EDITIONS.PARUTION_DATE, dto.parutionDate())
-                .set(EDITIONS.PUBLISHER_ID, dto.publisher().id())
-                .set(EDITIONS.BOOK_ID, dto.book().id())
+                .set(EDITIONS.ISBN, dto.getIsbn())
+                .set(EDITIONS.EAN, dto.getEan())
+                .set(EDITIONS.PRICE, dto.getPrice())
+                .set(EDITIONS.URL, dto.getUrl())
+                .set(EDITIONS.IMG_URL, dto.getImgUrl())
+                .set(EDITIONS.PARUTION_DATE, dto.getParutionDate())
+                .set(EDITIONS.PUBLISHER_ID, dto.getPublisher().getId())
+                .set(EDITIONS.BOOK_ID, dto.getBook().getId())
                 .set(EDITIONS.MODIFIED_AT, LocalDateTime.now())
-                .where(EDITIONS.ID.eq(dto.id()))
+                .where(EDITIONS.ID.eq(dto.getId()))
                 .execute() > 0;
     }
 
     @Override
     public boolean delete(EditionDTO dto) {
         return DSL().delete(EDITIONS)
-                .where(EDITIONS.ID.eq(dto.id()))
+                .where(EDITIONS.ID.eq(dto.getId()))
                 .execute() > 0;
     }
 

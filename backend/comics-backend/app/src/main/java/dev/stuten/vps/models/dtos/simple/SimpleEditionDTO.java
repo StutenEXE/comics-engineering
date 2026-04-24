@@ -9,20 +9,54 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
-public record SimpleEditionDTO(
-                @JsonProperty("id") Integer id,
-                @JsonProperty("isbn") String isbn,
-                @JsonProperty("ean") String ean,
-                @JsonProperty("npages") Integer npages,
-                @JsonProperty("price") Float price,
-                @JsonProperty("url") String url,
-                @JsonProperty("imgUrl") String imgUrl,
-                @JsonProperty("coverType") String coverType,
+import dev.stuten.vps.models.dtos.template.IdDTO;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
-                @JsonProperty("parutionDate") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") @JsonSerialize(using = LocalDateSerializer.class) @JsonDeserialize(using = LocalDateDeserializer.class) LocalDate parutionDate,
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
+@NoArgsConstructor
+public class SimpleEditionDTO extends IdDTO {
+    @JsonProperty("isbn")
+    private String isbn;
 
-                @JsonProperty("publisherId") Integer publisherId,
-                @JsonProperty("publisherName") String publisherName,
+    @JsonProperty("ean")
+    private String ean;
 
-                @JsonProperty("bookId") Integer bookId) {
+    @JsonProperty("npages")
+    private Integer npages;
+
+    @JsonProperty("price")
+    private Float price;
+
+    @JsonProperty("url")
+    private String url;
+
+    @JsonProperty("imgUrl")
+    private String imgUrl;
+
+    @JsonProperty("coverType")
+    private String coverType;
+
+    @JsonProperty("parutionDate")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    private LocalDate parutionDate;
+
+    @JsonProperty("publisherId")
+    private Integer publisherId;
+
+    @JsonProperty("publisherName")
+    private String publisherName;
+
+    @JsonProperty("bookId")
+    private Integer bookId;
 }

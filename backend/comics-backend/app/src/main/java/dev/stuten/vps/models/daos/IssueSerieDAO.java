@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.naming.OperationNotSupportedException;
+
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
@@ -20,6 +22,7 @@ import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.models.dtos.full.IssueSerieDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 import dev.stuten.vps.models.mappers.IssueSerieMapper;
 
 public class IssueSerieDAO extends ContributableDAO<IssueSerieDTO> {
@@ -70,26 +73,23 @@ public class IssueSerieDAO extends ContributableDAO<IssueSerieDTO> {
     }
 
     @Override
-    public void replaceLocalRefs(Map<String, Object> proposedData, Map<Integer, Integer> localRefs) { }
-
-    @Override
-    protected IssueSerieDTO mapProposedDataToDTO(Map<String, Object> proposedData) {
-        return IssueSerieMapper.mapGenericMapToDTO(proposedData);
+    protected void replaceLocalRefs(IssueSerieDTO proposal, Map<Integer, Integer> localRefs)
+            throws OperationNotSupportedException {
     }
 
     @Override
-    protected Integer getIdFromDTO(IssueSerieDTO dto) {
-        return dto.id();
+    protected void insertUser(IssueSerieDTO proposal, SimpleUserDTO user) {
+        proposal.setAddedBy(user);
     }
 
     @Override
     public Optional<Integer> create(IssueSerieDTO dto) {
         return DSL().insertInto(ISSUE_SERIES)
-                .set(ISSUE_SERIES.NAME, dto.name())
-                .set(ISSUE_SERIES.DESC, dto.desc())
-                .set(ISSUE_SERIES.START_DATE, dto.startDate())
-                .set(ISSUE_SERIES.END_DATE, dto.endDate())
-                .set(ISSUE_SERIES.ADDED_BY, dto.addedBy().id())
+                .set(ISSUE_SERIES.NAME, dto.getName())
+                .set(ISSUE_SERIES.DESC, dto.getDesc())
+                .set(ISSUE_SERIES.START_DATE, dto.getStartDate())
+                .set(ISSUE_SERIES.END_DATE, dto.getEndDate())
+                .set(ISSUE_SERIES.ADDED_BY, dto.getAddedBy().getId())
                 .returning(ISSUE_SERIES.ID)
                 .fetchOptional()
                 .map(record -> record.get(ISSUE_SERIES.ID));
@@ -98,19 +98,19 @@ public class IssueSerieDAO extends ContributableDAO<IssueSerieDTO> {
     @Override
     public boolean update(IssueSerieDTO dto) {
         return DSL().update(ISSUE_SERIES)
-                .set(ISSUE_SERIES.NAME, dto.name())
-                .set(ISSUE_SERIES.DESC, dto.desc())
-                .set(ISSUE_SERIES.START_DATE, dto.startDate())
-                .set(ISSUE_SERIES.END_DATE, dto.endDate())
+                .set(ISSUE_SERIES.NAME, dto.getName())
+                .set(ISSUE_SERIES.DESC, dto.getDesc())
+                .set(ISSUE_SERIES.START_DATE, dto.getStartDate())
+                .set(ISSUE_SERIES.END_DATE, dto.getEndDate())
                 .set(ISSUE_SERIES.MODIFIED_AT, LocalDateTime.now())
-                .where(ISSUE_SERIES.ID.eq(dto.id()))
+                .where(ISSUE_SERIES.ID.eq(dto.getId()))
                 .execute() > 0;
     }
 
     @Override
     public boolean delete(IssueSerieDTO dto) {
         return DSL().delete(ISSUE_SERIES)
-                .where(ISSUE_SERIES.ID.eq(dto.id()))
+                .where(ISSUE_SERIES.ID.eq(dto.getId()))
                 .execute() > 0;
     }
 

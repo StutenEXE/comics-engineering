@@ -28,8 +28,14 @@ public class UserDAO extends DAO {
     }
 
     public static UserDTO removePassword(UserWithPasswordDTO user) {
-        return new UserDTO(
-                user.id(), user.username(), user.email(), user.isAdmin(), user.createdAt(), user.modifiedAt());
+        return UserDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .isAdmin(user.getIsAdmin())
+                .createdAt(user.getCreatedAt())
+                .modifiedAt(user.getModifiedAt())
+                .build();
     }
 
     @SuppressWarnings("unchecked")
@@ -63,10 +69,10 @@ public class UserDAO extends DAO {
 
     public Optional<Integer> create(UserWithPasswordDTO dto) {
         // 12 log rounds for security and performance
-        String hashedPwd = BCrypt.hashpw(dto.password(), BCrypt.gensalt(12));
+        String hashedPwd = BCrypt.hashpw(dto.getPassword(), BCrypt.gensalt(12));
         return DSL().insertInto(USERS)
-                .set(USERS.USERNAME, dto.username())
-                .set(USERS.EMAIL, dto.email())
+                .set(USERS.USERNAME, dto.getUsername())
+                .set(USERS.EMAIL, dto.getEmail())
                 .set(USERS.PASSWORD, hashedPwd)
                 .returning(USERS.ID)
                 .fetchOptional()
@@ -87,9 +93,9 @@ public class UserDAO extends DAO {
 
     public List<UserDTO> getUsers(Integer from, Integer limit) {
         return getFullFromClause()
-                        .offset(from)
-                        .limit(limit)
-                        .fetch(getDefaultMapper());
+                .offset(from)
+                .limit(limit)
+                .fetch(getDefaultMapper());
     }
 
 }

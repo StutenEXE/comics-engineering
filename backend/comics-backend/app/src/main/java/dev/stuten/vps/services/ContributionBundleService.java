@@ -7,6 +7,7 @@ import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.ContributionBundleDAO;
 import dev.stuten.vps.models.dtos.full.ContributionBundleDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionDTO;
+import dev.stuten.vps.models.dtos.template.IdDTO;
 import dev.stuten.vps.web.ErrorResponse;
 import dev.stuten.vps.web.middleware.AuthContext;
 import dev.stuten.vps.web.middleware.AuthMiddleware;
@@ -31,23 +32,24 @@ public class ContributionBundleService {
         try {
             bundle = ctx.bodyAsClass(ContributionBundleDTO.class);
         } catch (Exception e) {
+            e.printStackTrace();
             ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Invalid JSON body");
             return;
         }
 
         // Validate bundle
-        if (bundle.submitter().id() != Integer.parseInt(auth.userId()) && !AuthMiddleware.hasRole(ctx, Role.ADMIN)) {
+        if (bundle.getSubmitter().getId() != Integer.parseInt(auth.userId()) && !AuthMiddleware.hasRole(ctx, Role.ADMIN)) {
             ErrorResponse.send(HttpStatus.FORBIDDEN, "Forbidden", "You can only submit contributions for yourself");
             return;
         }
-        if (bundle.contributions() == null || bundle.contributions().isEmpty()) {
+        if (bundle.getContributions() == null || bundle.getContributions().isEmpty()) {
             ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Contributions cannot be empty");
             return;
         }
 
         // Validate contributions
-        for (SimpleContributionDTO contrib : bundle.contributions()) {
-            if (contrib.entityType() == null || contrib.action() == null) {
+        for (SimpleContributionDTO<? extends IdDTO> contrib : bundle.getContributions()) {
+            if (contrib.getEntityType() == null || contrib.getAction() == null) {
                 ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", 
                     "Each contribution must have entityType and action");
                 return;
@@ -61,9 +63,10 @@ public class ContributionBundleService {
             return;
         }
         // Create contributions
-        for (SimpleContributionDTO contrib : bundle.contributions()) {
+        for (SimpleContributionDTO<? extends IdDTO> contrib : bundle.getContributions()) {
             try {
-                ContributionService.createContribution(bundleId.get(), contrib, auth);
+                contrib.setBundleId(bundleId.get());
+                ContributionService.createContribution(contrib);
             } catch (Exception e) {
                 bundleDAO.delete(bundleId.get());
                 ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error creating contribution", e.getMessage());
@@ -76,15 +79,10 @@ public class ContributionBundleService {
         ctx.status(HttpStatus.CREATED).json(Map.of("bundle", newBundle));
     }
 
-    public static void updateBundle(Context ctx) {
-
-    }
-
     public static void getBundle(Context ctx) {
-        String idParam = ctx.pathParam("id");
         Integer bundleId;
         try {
-            bundleId = Integer.parseInt(idParam);
+            bundleId = Integer.parseInt(ctx.pathParam("id"));
         } catch (NumberFormatException e) {
             ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "ID must be an integer");
             return;

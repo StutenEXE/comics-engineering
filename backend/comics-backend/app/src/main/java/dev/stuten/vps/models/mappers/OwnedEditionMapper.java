@@ -43,19 +43,19 @@ public class OwnedEditionMapper {
         // Map user
         SimpleUserDTO user = MappingUtils.getSingleDTOFromRecord(r, USERS, UserMapper::mapToSimpleDTO);
         // Map edition
-        OwnedEditionDTO dto = new OwnedEditionDTO(
-                r.get(getFieldName(EDITION_OWNERSHIP.ID), Integer.class),
-                r.get(getFieldName(EDITION_OWNERSHIP.DATE), LocalDateTime.class),
-                r.get(getFieldName(EDITION_OWNERSHIP.READ), Boolean.class),
-                r.get(getFieldName(EDITION_OWNERSHIP.DATE_READ), LocalDate.class),
-                r.get(getFieldName(EDITION_OWNERSHIP.GIFT), Boolean.class),
-                r.get(getFieldName(EDITION_OWNERSHIP.SIGNED), Boolean.class),
-                r.get(getFieldName(EDITION_OWNERSHIP.PURCHASE_PRICE), BigDecimal.class),
-                r.get(getFieldName(EDITION_OWNERSHIP.FEES), BigDecimal.class),
-                r.get(getFieldName(EDITION_OWNERSHIP.RETAIL_PRICE), BigDecimal.class),
-                r.get(getFieldName(EDITION_OWNERSHIP.NOTE), String.class),
-                edition,
-                user);
+        OwnedEditionDTO dto = OwnedEditionDTO.builder()
+                .id(r.get(getFieldName(EDITION_OWNERSHIP.ID), Integer.class))
+                .date(r.get(getFieldName(EDITION_OWNERSHIP.DATE), LocalDateTime.class))
+                .read(r.get(getFieldName(EDITION_OWNERSHIP.READ), Boolean.class))
+                .dateRead(r.get(getFieldName(EDITION_OWNERSHIP.DATE_READ), LocalDate.class))
+                .gift(r.get(getFieldName(EDITION_OWNERSHIP.GIFT), Boolean.class))
+                .purchasePrice(r.get(getFieldName(EDITION_OWNERSHIP.PURCHASE_PRICE), BigDecimal.class))
+                .fees(r.get(getFieldName(EDITION_OWNERSHIP.FEES), BigDecimal.class))
+                .retailPrice(r.get(getFieldName(EDITION_OWNERSHIP.RETAIL_PRICE), BigDecimal.class))
+                .note(r.get(getFieldName(EDITION_OWNERSHIP.NOTE), String.class))
+                .edition(edition)
+                .user(user)
+                .build();
         return dto;
     }
 }

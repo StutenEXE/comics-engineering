@@ -1,25 +1,35 @@
 package dev.stuten.vps.models.dtos.full;
 
-import java.time.LocalDateTime;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 import dev.stuten.vps.models.dtos.simple.SimpleContributionDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
+import dev.stuten.vps.models.dtos.template.CreatedAtDTO;
+import dev.stuten.vps.models.dtos.template.IdDTO;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 /**
  * Full DTO for a contribution review
  */
-public record ContributionReviewDTO(
-    @JsonProperty("id") Integer id,
-    @JsonProperty("contribution") SimpleContributionDTO contribution,
-    @JsonProperty("reviewer") SimpleUserDTO reviewer,
-    @JsonProperty("comment") String comment,
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
+@NoArgsConstructor
+public class ContributionReviewDTO extends CreatedAtDTO {
 
-    @JsonProperty("createdAt") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss") @JsonSerialize(using = LocalDateTimeSerializer.class) @JsonDeserialize(using = LocalDateTimeDeserializer.class) LocalDateTime createdAt
-) { }
+    @JsonProperty("contribution")
+    private SimpleContributionDTO<? extends IdDTO> contribution;
+
+    @JsonProperty("reviewer")
+    private SimpleUserDTO reviewer;
+
+    @JsonProperty("comment")
+    private String comment;
+}

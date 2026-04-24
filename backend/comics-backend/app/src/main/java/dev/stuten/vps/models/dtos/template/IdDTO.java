@@ -1,8 +1,7 @@
-package dev.stuten.vps.models.dtos.simple;
+package dev.stuten.vps.models.dtos.template;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import dev.stuten.vps.models.dtos.template.IdDTO;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,11 +12,11 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @SuperBuilder
 @NoArgsConstructor
-public class SimpleUserDTO extends IdDTO {
+public abstract class IdDTO {
 
-    @JsonProperty("username")
-    private String username;
+    @JsonProperty("id")
+    private Integer id;
 }

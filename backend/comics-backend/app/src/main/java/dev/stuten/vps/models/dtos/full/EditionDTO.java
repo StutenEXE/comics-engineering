@@ -1,41 +1,70 @@
 package dev.stuten.vps.models.dtos.full;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
 import dev.stuten.vps.models.dtos.simple.SimplePublisherDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleSerieDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
+import dev.stuten.vps.models.dtos.template.ModifiedAtDTO;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
-public record EditionDTO(
-                @JsonProperty("id") Integer id,
-                @JsonProperty("isbn") String isbn,
-                @JsonProperty("ean") String ean,
-                @JsonProperty("npages") Integer npages,
-                @JsonProperty("price") Float price,
-                @JsonProperty("url") String url,
-                @JsonProperty("imgUrl") String imgUrl,
-                @JsonProperty("coverType") String coverType,
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
+@NoArgsConstructor
+public class EditionDTO extends ModifiedAtDTO {
+    
+    @JsonProperty("isbn")
+    private String isbn;
 
-                @JsonProperty("parutionDate") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") @JsonSerialize(using = LocalDateSerializer.class) @JsonDeserialize(using = LocalDateDeserializer.class) LocalDate parutionDate,
+    @JsonProperty("ean")
+    private String ean;
 
-                @JsonProperty("publisher") SimplePublisherDTO publisher,
-                @JsonProperty("book") SimpleBookDTO book,
-                @JsonProperty("serie") SimpleSerieDTO serie,
+    @JsonProperty("npages")
+    private Integer npages;
 
-                @JsonProperty("createdAt") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss") @JsonSerialize(using = LocalDateTimeSerializer.class) @JsonDeserialize(using = LocalDateTimeDeserializer.class) LocalDateTime createdAt,
+    @JsonProperty("price")
+    private Float price;
 
-                @JsonProperty("modifiedAt") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss") @JsonSerialize(using = LocalDateTimeSerializer.class) @JsonDeserialize(using = LocalDateTimeDeserializer.class) LocalDateTime modifiedAt,
+    @JsonProperty("url")
+    private String url;
 
-                @JsonProperty("addedBy") SimpleUserDTO addedBy) {
+    @JsonProperty("imgUrl")
+    private String imgUrl;
+
+    @JsonProperty("coverType")
+    private String coverType;
+
+    @JsonProperty("parutionDate")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    private LocalDate parutionDate;
+
+    @JsonProperty("publisher")
+    private SimplePublisherDTO publisher;
+
+    @JsonProperty("book")
+    private SimpleBookDTO book;
+    
+    @JsonProperty("serie")
+    private SimpleSerieDTO serie;
+
+    @JsonProperty("addedBy")
+    private SimpleUserDTO addedBy;
 }

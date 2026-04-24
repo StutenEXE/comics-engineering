@@ -17,6 +17,7 @@ import org.jooq.SelectJoinStep;
 import dev.stuten.vps.jooq.enums.ContributionStatusEnum;
 import dev.stuten.vps.models.dtos.full.ContributionDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionDTO;
+import dev.stuten.vps.models.dtos.template.IdDTO;
 import dev.stuten.vps.models.mappers.ContributionMapper;
 import dev.stuten.vps.models.mappers.utils.MappingUtils;
 
@@ -27,7 +28,7 @@ public class ContributionDAO extends DAO {
     }
 
     @Override
-    protected RecordMapper<? super Record, ContributionDTO> getDefaultMapper() {
+    protected RecordMapper<? super Record, ContributionDTO<? extends IdDTO>> getDefaultMapper() {
         return ContributionMapper::mapToDTO;
     }
 
@@ -61,17 +62,17 @@ public class ContributionDAO extends DAO {
                 .leftJoin(USERS).on(CONTRIBUTION_BUNDLES.SUBMITTER_ID.eq(USERS.ID));
     }
 
-    public Optional<Integer> create(Integer bundleId, SimpleContributionDTO dto) {
+    public Optional<Integer> create(SimpleContributionDTO<? extends IdDTO> dto) {
             return DSL().insertInto(CONTRIBUTIONS)
-                    .set(CONTRIBUTIONS.BUNDLE_ID, bundleId)
-                    .set(CONTRIBUTIONS.LOCAL_REF, dto.localRef())
-                    .set(CONTRIBUTIONS.ENTITY_TYPE, dto.entityType())
-                    .set(CONTRIBUTIONS.ACTION, dto.action())
-                    .set(CONTRIBUTIONS.ENTITY_ID, dto.entityId())
-                    .set(CONTRIBUTIONS.PROPOSED_DATA, MappingUtils.mapToJsonb(dto.proposedData()))
-                    .set(CONTRIBUTIONS.ENTITY_SNAPSHOT, MappingUtils.mapToJsonb(dto.entitySnapshot()))
+                    .set(CONTRIBUTIONS.BUNDLE_ID, dto.getBundleId())
+                    .set(CONTRIBUTIONS.LOCAL_REF, dto.getLocalRef())
+                    .set(CONTRIBUTIONS.ENTITY_TYPE, dto.getEntityType())
+                    .set(CONTRIBUTIONS.ACTION, dto.getAction())
+                    .set(CONTRIBUTIONS.ENTITY_ID, dto.getEntityId())
+                    .set(CONTRIBUTIONS.PROPOSED_DATA, MappingUtils.mapToJsonb(dto.getProposedData()))
+                    .set(CONTRIBUTIONS.ENTITY_SNAPSHOT, MappingUtils.mapToJsonb(dto.getEntitySnapshot()))
                     .set(CONTRIBUTIONS.STATUS, ContributionStatusEnum.pending)
-                    .set(CONTRIBUTIONS.RESOLVED_ENTITY_ID, dto.resolvedEntityId())
+                    .set(CONTRIBUTIONS.RESOLVED_ENTITY_ID, dto.getResolvedEntityId())
                     .returning(CONTRIBUTIONS.ID)
                     .fetchOptional()
                     .map(record -> record.get(CONTRIBUTIONS.ID));
@@ -91,7 +92,7 @@ public class ContributionDAO extends DAO {
                 .execute() > 0;
     }
 
-    public Optional<ContributionDTO> findById(Integer id) {
+    public Optional<ContributionDTO<? extends IdDTO>> findById(Integer id) {
         return getFullFromClause()
                 .where(CONTRIBUTIONS.ID.eq(id))
                 .fetchOptional()

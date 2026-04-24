@@ -74,8 +74,8 @@ public class ContributionBundleDAO extends DAO {
         public Optional<Integer> create(ContributionBundleDTO dto) {
                 return DSL().insertInto(CONTRIBUTION_BUNDLES)
                                 .set(CONTRIBUTION_BUNDLES.STATUS, ContributionBundleStatusEnum.pending)
-                                .set(CONTRIBUTION_BUNDLES.NOTE, dto.note())
-                                .set(CONTRIBUTION_BUNDLES.SUBMITTER_ID, dto.submitter().id())
+                                .set(CONTRIBUTION_BUNDLES.NOTE, dto.getNote())
+                                .set(CONTRIBUTION_BUNDLES.SUBMITTER_ID, dto.getSubmitter().getId())
                                 .returning(CONTRIBUTION_BUNDLES.ID)
                                 .fetchOptional()
                                 .map(record -> record.get(CONTRIBUTION_BUNDLES.ID));
