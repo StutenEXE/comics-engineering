@@ -30,7 +30,8 @@ public class OwnedEditionDAO extends EditionDAO {
 
     @Override
     protected Collection<SelectFieldOrAsterisk> getSimpleSelectFields() {
-        Collection<SelectFieldOrAsterisk> editionFields = new ArrayList<SelectFieldOrAsterisk>(super.getSimpleSelectFields());
+        Collection<SelectFieldOrAsterisk> editionFields = new ArrayList<SelectFieldOrAsterisk>(
+                super.getSimpleSelectFields());
         editionFields.addAll(List.of(
                 EDITION_OWNERSHIP.ID.as(OwnedEditionMapper.getFieldName(EDITION_OWNERSHIP.ID)),
                 EDITION_OWNERSHIP.DATE.as(OwnedEditionMapper.getFieldName(EDITION_OWNERSHIP.DATE)),
@@ -60,17 +61,17 @@ public class OwnedEditionDAO extends EditionDAO {
 
     public Optional<Integer> create(OwnedEditionDTO dto) {
         return DSL().insertInto(EDITION_OWNERSHIP)
-                .set(EDITION_OWNERSHIP.EDITION_ID, dto.edition().id())
-                .set(EDITION_OWNERSHIP.USER_ID, dto.user().id())
-                .set(EDITION_OWNERSHIP.DATE, dto.date())
-                .set(EDITION_OWNERSHIP.READ, dto.read())
-                .set(EDITION_OWNERSHIP.DATE_READ, dto.dateRead())
-                .set(EDITION_OWNERSHIP.GIFT, dto.gift())
-                .set(EDITION_OWNERSHIP.SIGNED, dto.signed())
-                .set(EDITION_OWNERSHIP.PURCHASE_PRICE, dto.purchasePrice())
-                .set(EDITION_OWNERSHIP.FEES, dto.fees())
-                .set(EDITION_OWNERSHIP.RETAIL_PRICE, dto.retailPrice())
-                .set(EDITION_OWNERSHIP.NOTE, dto.note())
+                .set(EDITION_OWNERSHIP.EDITION_ID, dto.getEdition().getId())
+                .set(EDITION_OWNERSHIP.USER_ID, dto.getUser().getId())
+                .set(EDITION_OWNERSHIP.DATE, dto.getDate())
+                .set(EDITION_OWNERSHIP.READ, dto.getRead())
+                .set(EDITION_OWNERSHIP.DATE_READ, dto.getDateRead())
+                .set(EDITION_OWNERSHIP.GIFT, dto.getGift())
+                .set(EDITION_OWNERSHIP.SIGNED, dto.getSigned())
+                .set(EDITION_OWNERSHIP.PURCHASE_PRICE, dto.getPurchasePrice())
+                .set(EDITION_OWNERSHIP.FEES, dto.getFees())
+                .set(EDITION_OWNERSHIP.RETAIL_PRICE, dto.getRetailPrice())
+                .set(EDITION_OWNERSHIP.NOTE, dto.getNote())
                 .returning(EDITION_OWNERSHIP.ID)
                 .fetchOptional()
                 .map(record -> record.get(EDITION_OWNERSHIP.ID));

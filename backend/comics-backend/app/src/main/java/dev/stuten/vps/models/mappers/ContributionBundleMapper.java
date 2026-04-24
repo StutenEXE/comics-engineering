@@ -15,6 +15,7 @@ import dev.stuten.vps.models.dtos.full.ContributionBundleDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionBundleDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
+import dev.stuten.vps.models.dtos.template.IdDTO;
 import dev.stuten.vps.models.mappers.utils.MappingUtils;
 
 public class ContributionBundleMapper {
@@ -34,31 +35,33 @@ public class ContributionBundleMapper {
 
     public static ContributionBundleDTO mapToDTO(Record r) {
         // Map contributions
-        List<SimpleContributionDTO> contributions = MappingUtils.getMultipleDTOFromRecord(r, "contributions", ContributionMapper::mapToSimpleDTO);
+        List<SimpleContributionDTO<? extends IdDTO>> contributions = MappingUtils.getMultipleDTOFromRecord(r, "contributions",
+                ContributionMapper::mapToSimpleDTO);
         // Map user
         SimpleUserDTO user = MappingUtils.getSingleDTOFromRecord(r, USERS, UserMapper::mapToSimpleDTO);
         // Map contribution bundle
-        ContributionBundleDTO dto = new ContributionBundleDTO(
-                r.get(getFieldName(CONTRIBUTION_BUNDLES.ID), Integer.class),
-                r.get(getFieldName(CONTRIBUTION_BUNDLES.STATUS), ContributionBundleStatusEnum.class),
-                r.get(getFieldName(CONTRIBUTION_BUNDLES.NOTE), String.class),
-                contributions,
-                user,
-                r.get(getFieldName(CONTRIBUTION_BUNDLES.CREATED_AT), LocalDateTime.class),
-                r.get(getFieldName(CONTRIBUTION_BUNDLES.MODIFIED_AT), LocalDateTime.class));
+        ContributionBundleDTO dto = ContributionBundleDTO.builder()
+                .id(r.get(getFieldName(CONTRIBUTION_BUNDLES.ID), Integer.class))
+                .status(r.get(getFieldName(CONTRIBUTION_BUNDLES.STATUS), ContributionBundleStatusEnum.class))
+                .note(r.get(getFieldName(CONTRIBUTION_BUNDLES.NOTE), String.class))
+                .contributions(contributions)
+                .submitter(user)
+                .createdAt(r.get(getFieldName(CONTRIBUTION_BUNDLES.CREATED_AT), LocalDateTime.class))
+                .modifiedAt(r.get(getFieldName(CONTRIBUTION_BUNDLES.MODIFIED_AT), LocalDateTime.class))
+                .build();
         return dto;
     }
 
     public static SimpleContributionBundleDTO mapToSimpleDTO(Record r) {
-        SimpleContributionBundleDTO dto = new SimpleContributionBundleDTO(
-            r.get(getFieldName(CONTRIBUTION_BUNDLES.ID), Integer.class),
-            r.get(getFieldName(CONTRIBUTION_BUNDLES.SUBMITTER_ID), Integer.class),
-            r.get(getFieldName(USERS.USERNAME), String.class),
-            r.get(getFieldName(CONTRIBUTION_BUNDLES.STATUS), ContributionBundleStatusEnum.class),
-            r.get(getFieldName(CONTRIBUTION_BUNDLES.NOTE), String.class),
-            r.get(getFieldName(CONTRIBUTION_BUNDLES.CREATED_AT), LocalDateTime.class),
-            r.get(getFieldName(CONTRIBUTION_BUNDLES.MODIFIED_AT), LocalDateTime.class)
-        );
+        SimpleContributionBundleDTO dto = SimpleContributionBundleDTO.builder()
+                .id(r.get(getFieldName(CONTRIBUTION_BUNDLES.ID), Integer.class))
+                .submitterId(r.get(getFieldName(CONTRIBUTION_BUNDLES.SUBMITTER_ID), Integer.class))
+                .submitterUsername(r.get(getFieldName(USERS.USERNAME), String.class))
+                .status(r.get(getFieldName(CONTRIBUTION_BUNDLES.STATUS), ContributionBundleStatusEnum.class))
+                .note(r.get(getFieldName(CONTRIBUTION_BUNDLES.NOTE), String.class))
+                .createdAt(r.get(getFieldName(CONTRIBUTION_BUNDLES.CREATED_AT), LocalDateTime.class))
+                .modifiedAt(r.get(getFieldName(CONTRIBUTION_BUNDLES.MODIFIED_AT), LocalDateTime.class))
+                .build();
         return dto;
     }
 }

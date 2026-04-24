@@ -30,7 +30,7 @@ public class EditionOwnershipService {
             ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid session", "No valid session found");
             return;
         }
-        if (!auth.userId().equals(dto.user().id().toString()) && !auth.role().equals(Role.ADMIN)) {
+        if (!auth.userId().equals(dto.getUser().getId().toString()) && !auth.role().equals(Role.ADMIN)) {
             ErrorResponse.send(HttpStatus.FORBIDDEN, "Forbidden", "You can only create owned editions for yourself");
             return;
         }
@@ -56,7 +56,7 @@ public class EditionOwnershipService {
             id = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
             ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
-            return; // For compiler
+            return;
         }
 
         // Get owned edition by id

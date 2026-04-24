@@ -2,14 +2,40 @@ package dev.stuten.vps.models.dtos.simple;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record SimpleBookDTO(
-        @JsonProperty("id") Integer id,
-        @JsonProperty("name") String name,
-        @JsonProperty("desc") String desc,
-        @JsonProperty("number") Integer number,
-        @JsonProperty("voContent") String voContent,
-        @JsonProperty("imgUrl") String imgUrl,
-        @JsonProperty("serieId") Integer serieId,
-        @JsonProperty("serieName") String serieName
-) {
+import dev.stuten.vps.models.dtos.template.IdDTO;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
+
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
+@NoArgsConstructor
+public class SimpleBookDTO extends IdDTO {
+
+        @JsonProperty("name")
+        private String name;
+
+        @JsonProperty("desc")
+        private String desc;
+
+        @JsonProperty("number")
+        private Integer number;
+
+        @JsonProperty("voContent")
+        private String voContent;
+
+        @JsonProperty("imgUrl")
+        private String imgUrl;
+
+        @JsonProperty("serieId")
+        private Integer serieId;
+
+        @JsonProperty("serieName")
+        private String serieName;
 }

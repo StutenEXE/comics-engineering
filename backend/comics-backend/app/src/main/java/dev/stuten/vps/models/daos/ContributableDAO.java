@@ -8,32 +8,31 @@ import javax.naming.OperationNotSupportedException;
 import org.jooq.DSLContext;
 
 import dev.stuten.vps.jooq.enums.ContributionActionEnum;
+import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
+import dev.stuten.vps.models.dtos.template.IdDTO;
 
-public abstract class ContributableDAO<T> extends DAO {
+public abstract class ContributableDAO<T extends IdDTO> extends DAO {
     public ContributableDAO(DSLContext dsl) {
         super(dsl);
     }
 
-    protected void replaceLocalRef(Map<String, Object> objMap, Map<Integer, Integer> localRefs)
+    protected void replaceLocalRef(IdDTO dto, Map<Integer, Integer> localRefs)
             throws OperationNotSupportedException {
-        Integer proposedObjId = (Integer) objMap.get("id");
+        Integer proposedObjId = (Integer) dto.getId();
         Integer replacementObjId = localRefs.get(proposedObjId);
-        System.out.println("TEST ON APPROVAL : " + proposedObjId + " / " + replacementObjId);
         if (proposedObjId < 0) {
             if (replacementObjId == null) {
                 throw new OperationNotSupportedException(
                         "Trying to contribute an item before dependency is contributed (local ref not replaced)");
             }
-            objMap.put("id", replacementObjId);
+            dto.setId(replacementObjId);
         }
     }
 
-    public abstract void replaceLocalRefs(Map<String, Object> proposedData, Map<Integer, Integer> localRefs)
+    protected abstract void replaceLocalRefs(T proposal, Map<Integer, Integer> localRefs)
             throws OperationNotSupportedException;
-
-    protected abstract T mapProposedDataToDTO(Map<String, Object> proposedData);
-
-    protected abstract Integer getIdFromDTO(T dto);
+    
+    protected abstract void insertUser(T proposal, SimpleUserDTO user);
 
     public abstract Optional<Integer> create(T dto);
 
@@ -43,17 +42,18 @@ public abstract class ContributableDAO<T> extends DAO {
 
     public abstract Optional<T> findById(Integer id);
 
-    public Optional<Integer> applyContribution(ContributionActionEnum action, Map<String, Object> proposedData,
-            Map<Integer, Integer> localRefs) throws OperationNotSupportedException {
-        replaceLocalRefs(proposedData, localRefs);
-        T proposal = mapProposedDataToDTO(proposedData);
+    public Optional<Integer> applyContribution(ContributionActionEnum action, IdDTO proposal,
+            Map<Integer, Integer> localRefs, SimpleUserDTO submitter) throws OperationNotSupportedException {
+        T realProposal = (T) proposal;
+        replaceLocalRefs(realProposal, localRefs);
+        insertUser(realProposal, submitter);
         switch (action) {
             case create:
-                return create(proposal);
+                return create(realProposal);
             case update:
-                return update(proposal) ? Optional.of(getIdFromDTO(proposal)) : Optional.empty();
+                return update(realProposal) ? Optional.of(proposal.getId()) : Optional.empty();
             case delete:
-                return delete(proposal) ? Optional.of(getIdFromDTO(proposal)) : Optional.empty();
+                return delete(realProposal) ? Optional.of(proposal.getId()) : Optional.empty();
             default:
                 return Optional.empty();
         }

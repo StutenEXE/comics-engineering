@@ -28,7 +28,7 @@ public class UserService {
         // TODO : Validate email format, password strength, etc.
 
         // If email already in use
-        if (dao.findByEmail(dto.email()).isPresent()) {
+        if (dao.findByEmail(dto.getEmail()).isPresent()) {
             ErrorResponse.send(HttpStatus.CONFLICT, "Email already in use", "");
         }
 
@@ -43,7 +43,7 @@ public class UserService {
 
         // Log in user
         String sessionKey = SessionStore.createSessionKey();
-        SessionStore.save(sessionKey, newUser.id(), newUser.isAdmin() ? Role.ADMIN : Role.USER);
+        SessionStore.save(sessionKey, newUser.getId(), newUser.getIsAdmin() ? Role.ADMIN : Role.USER);
         ctx.cookie(SessionStore.COOKIE_SESSION_KEY, sessionKey);
 
         // Send back account info to the client
@@ -54,7 +54,7 @@ public class UserService {
         UserWithPasswordDTO dto = ctx.bodyAsClass(UserWithPasswordDTO.class);
 
         // Database lookup
-        Optional<UserWithPasswordDTO> optUser = dao.findByEmailWithPassword(dto.email());
+        Optional<UserWithPasswordDTO> optUser = dao.findByEmailWithPassword(dto.getEmail());
         // No user found
         if (optUser.isEmpty()) {
             ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid credentials", "");
@@ -62,7 +62,7 @@ public class UserService {
 
         UserWithPasswordDTO userPwd = optUser.get();
         // Check password validity
-        if (!UserDAO.checkPassword(userPwd.password(), dto.password())) {
+        if (!UserDAO.checkPassword(userPwd.getPassword(), dto.getPassword())) {
             ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid credentials", "");
         }
 
@@ -71,7 +71,7 @@ public class UserService {
 
         // Log in user
         String sessionKey = SessionStore.createSessionKey();
-        SessionStore.save(sessionKey, user.id(), user.isAdmin() ? Role.ADMIN : Role.USER);
+        SessionStore.save(sessionKey, user.getId(), user.getIsAdmin() ? Role.ADMIN : Role.USER);
         ctx.cookie(SessionStore.COOKIE_SESSION_KEY, sessionKey);
 
         // Send back account info to the client
@@ -96,7 +96,6 @@ public class UserService {
 
         // Get user in session
         Optional<UserDTO> user = dao.findById(Integer.parseInt(session.userId()));
-        System.out.println(user.toString());
         if (user.isEmpty()) {
             ctx.removeCookie(SessionStore.COOKIE_SESSION_KEY);
             SessionStore.delete(sessionKey);

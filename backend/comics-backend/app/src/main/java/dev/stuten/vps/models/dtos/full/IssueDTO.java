@@ -1,7 +1,6 @@
 package dev.stuten.vps.models.dtos.full;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -9,29 +8,51 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleIssueSerieDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
+import dev.stuten.vps.models.dtos.template.ModifiedAtDTO;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
-public record IssueDTO(
-        @JsonProperty("id") Integer id,
-        @JsonProperty("name") String name,
-        @JsonProperty("number") Integer number,
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
+@NoArgsConstructor
+public class IssueDTO extends ModifiedAtDTO {
 
-        @JsonProperty("coverDate") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") @JsonSerialize(using = LocalDateSerializer.class) @JsonDeserialize(using = LocalDateDeserializer.class) LocalDate coverDate,
+        @JsonProperty("name")
+        private String name;
 
-        @JsonProperty("parutionDate") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") @JsonSerialize(using = LocalDateSerializer.class) @JsonDeserialize(using = LocalDateDeserializer.class) LocalDate parutionDate,
+        @JsonProperty("number")
+        private Integer number;
 
-        @JsonProperty("issueSerie") SimpleIssueSerieDTO issueSerie,
-        @JsonProperty("books") List<SimpleBookDTO> books,
+        @JsonProperty("coverDate")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+        @JsonSerialize(using = LocalDateSerializer.class)
+        @JsonDeserialize(using = LocalDateDeserializer.class)
+        private LocalDate coverDate;
 
-        @JsonProperty("createdAt") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss") @JsonSerialize(using = LocalDateTimeSerializer.class) @JsonDeserialize(using = LocalDateTimeDeserializer.class) LocalDateTime createdAt,
+        @JsonProperty("parutionDate")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+        @JsonSerialize(using = LocalDateSerializer.class)
+        @JsonDeserialize(using = LocalDateDeserializer.class)
+        private LocalDate parutionDate;
 
-        @JsonProperty("modifiedAt") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss") @JsonSerialize(using = LocalDateTimeSerializer.class) @JsonDeserialize(using = LocalDateTimeDeserializer.class) LocalDateTime modifiedAt,
+        @JsonProperty("issueSerie")
+        private SimpleIssueSerieDTO issueSerie;
 
-        @JsonProperty("addedBy") SimpleUserDTO addedBy) {
+        @JsonProperty("books")
+        private List<SimpleBookDTO> books;
+
+        @JsonProperty("addedBy")
+        private SimpleUserDTO addedBy;
 }

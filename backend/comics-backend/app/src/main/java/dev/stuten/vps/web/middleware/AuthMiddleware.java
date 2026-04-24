@@ -9,7 +9,6 @@ import java.util.HashMap;
 public final class AuthMiddleware {
 
     public static void authenticate(Context ctx) {
-
         String sessionKey = ctx.cookie(SessionStore.COOKIE_SESSION_KEY);
         if (sessionKey == null || sessionKey.isEmpty()) {
             throw new HttpResponseException(HttpStatus.UNAUTHORIZED, "Missing token", new HashMap<String,String>());

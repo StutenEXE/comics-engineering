@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.naming.OperationNotSupportedException;
+
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
@@ -17,6 +19,7 @@ import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.models.dtos.full.PublisherDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 import dev.stuten.vps.models.mappers.PublisherMapper;
 
 public class PublisherDAO extends ContributableDAO<PublisherDTO> {
@@ -56,22 +59,17 @@ public class PublisherDAO extends ContributableDAO<PublisherDTO> {
     }
 
     @Override
-    public void replaceLocalRefs(Map<String, Object> proposedData, Map<Integer, Integer> localRefs) { }
-
-    @Override
-    protected PublisherDTO mapProposedDataToDTO(Map<String, Object> proposedData) {
-        return PublisherMapper.mapGenericMapToDTO(proposedData);
+    protected void replaceLocalRefs(PublisherDTO proposal, Map<Integer, Integer> localRefs)
+            throws OperationNotSupportedException {
     }
 
     @Override
-    protected Integer getIdFromDTO(PublisherDTO dto) {
-        return dto.id();
-    }
+    protected void insertUser(PublisherDTO proposal, SimpleUserDTO user) { }
 
     @Override
     public Optional<Integer> create(PublisherDTO dto) {
         return DSL().insertInto(PUBLISHERS)
-                .set(PUBLISHERS.NAME, dto.name())
+                .set(PUBLISHERS.NAME, dto.getName())
                 .returning(PUBLISHERS.ID)
                 .fetchOptional()
                 .map(record -> record.get(PUBLISHERS.ID));
@@ -80,16 +78,16 @@ public class PublisherDAO extends ContributableDAO<PublisherDTO> {
     @Override
     public boolean update(PublisherDTO dto) {
         return DSL().update(PUBLISHERS)
-                .set(PUBLISHERS.NAME, dto.name())
+                .set(PUBLISHERS.NAME, dto.getName())
                 .set(PUBLISHERS.MODIFIED_AT, LocalDateTime.now())
-                .where(PUBLISHERS.ID.eq(dto.id()))
+                .where(PUBLISHERS.ID.eq(dto.getId()))
                 .execute() > 0;
     }
 
     @Override
     public boolean delete(PublisherDTO dto) {
         return DSL().delete(PUBLISHERS)
-                .where(PUBLISHERS.ID.eq(dto.id()))
+                .where(PUBLISHERS.ID.eq(dto.getId()))
                 .execute() > 0;
     }
 

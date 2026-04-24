@@ -24,6 +24,8 @@ import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.models.dtos.full.BookDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleSerieDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 import dev.stuten.vps.models.mappers.BookMapper;
 
 public class BookDAO extends ContributableDAO<BookDTO> {
@@ -82,34 +84,27 @@ public class BookDAO extends ContributableDAO<BookDTO> {
         }
 
         @Override
-        public void replaceLocalRefs(Map<String, Object> proposedData, Map<Integer, Integer> localRefs) throws OperationNotSupportedException {
+        protected void replaceLocalRefs(BookDTO proposal, Map<Integer, Integer> localRefs) throws OperationNotSupportedException {
                 // Serie id
-                Map<String, Object> serieMap = (Map<String, Object>) proposedData.get("serie");
-                super.replaceLocalRef(serieMap, localRefs);
-                System.out.println(proposedData);
-        }
-
-
-        @Override
-        protected BookDTO mapProposedDataToDTO(Map<String, Object> proposedData) {
-                return BookMapper.mapGenericMapToDTO(proposedData);
+                SimpleSerieDTO serie = proposal.getSerie();
+                super.replaceLocalRef(serie, localRefs);
         }
 
         @Override
-        protected Integer getIdFromDTO(BookDTO dto) {
-                return dto.id();
+        protected void insertUser(BookDTO proposal, SimpleUserDTO user) {
+                proposal.setAddedBy(user);
         }
 
         @Override
         public Optional<Integer> create(BookDTO dto) {
                 return DSL().insertInto(BOOKS)
-                                .set(BOOKS.NAME, dto.name())
-                                .set(BOOKS.DESC, dto.desc())
-                                .set(BOOKS.NUMBER, dto.number())
-                                .set(BOOKS.VO_CONTENT, dto.voContent())
-                                .set(BOOKS.IMG_URL, dto.imgUrl())
-                                .set(BOOKS.SERIES_ID, dto.serie().id())
-                                .set(BOOKS.ADDED_BY, dto.addedBy().id())
+                                .set(BOOKS.NAME, dto.getName())
+                                .set(BOOKS.DESC, dto.getDesc())
+                                .set(BOOKS.NUMBER, dto.getNumber())
+                                .set(BOOKS.VO_CONTENT, dto.getVoContent())
+                                .set(BOOKS.IMG_URL, dto.getImgUrl())
+                                .set(BOOKS.SERIES_ID, dto.getSerie().getId())
+                                .set(BOOKS.ADDED_BY, dto.getAddedBy().getId())
                                 .returning(BOOKS.ID)
                                 .fetchOptional()
                                 .map(record -> record.get(BOOKS.ID));
@@ -118,21 +113,21 @@ public class BookDAO extends ContributableDAO<BookDTO> {
         @Override
         public boolean update(BookDTO dto) {
                 return DSL().update(BOOKS)
-                                .set(BOOKS.NAME, dto.name())
-                                .set(BOOKS.DESC, dto.desc())
-                                .set(BOOKS.NUMBER, dto.number())
-                                .set(BOOKS.VO_CONTENT, dto.voContent())
-                                .set(BOOKS.IMG_URL, dto.imgUrl())
-                                .set(BOOKS.SERIES_ID, dto.serie().id())
+                                .set(BOOKS.NAME, dto.getName())
+                                .set(BOOKS.DESC, dto.getDesc())
+                                .set(BOOKS.NUMBER, dto.getNumber())
+                                .set(BOOKS.VO_CONTENT, dto.getVoContent())
+                                .set(BOOKS.IMG_URL, dto.getImgUrl())
+                                .set(BOOKS.SERIES_ID, dto.getSerie().getId())
                                 .set(BOOKS.MODIFIED_AT, LocalDateTime.now())
-                                .where(BOOKS.ID.eq(dto.id()))
+                                .where(BOOKS.ID.eq(dto.getId()))
                                 .execute() > 0;
         }
 
         @Override
         public boolean delete(BookDTO dto) {
                 return DSL().delete(BOOKS)
-                                .where(BOOKS.ID.eq(dto.id()))
+                                .where(BOOKS.ID.eq(dto.getId()))
                                 .execute() > 0;
         }
 

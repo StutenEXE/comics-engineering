@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.naming.OperationNotSupportedException;
+
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
@@ -19,6 +21,7 @@ import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.models.dtos.full.SerieDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 import dev.stuten.vps.models.mappers.SerieMapper;
 
 public class SerieDAO extends ContributableDAO<SerieDTO> {
@@ -66,28 +69,25 @@ public class SerieDAO extends ContributableDAO<SerieDTO> {
     }
 
     @Override
-    public void replaceLocalRefs(Map<String, Object> proposedData, Map<Integer, Integer> localRefs) { }
-
-    @Override
-    protected SerieDTO mapProposedDataToDTO(Map<String, Object> proposedData) {
-        return SerieMapper.mapGenericMapToDTO(proposedData);
+    protected void replaceLocalRefs(SerieDTO proposal, Map<Integer, Integer> localRefs)
+            throws OperationNotSupportedException {
     }
 
     @Override
-    protected Integer getIdFromDTO(SerieDTO dto) {
-        return dto.id();
+    protected void insertUser(SerieDTO proposal, SimpleUserDTO user) {
+        proposal.setAddedBy(user);
     }
 
     @Override
     public Optional<Integer> create(SerieDTO dto) {
         return DSL().insertInto(SERIES)
-                .set(SERIES.NAME, dto.name())
-                .set(SERIES.ONGOING, dto.ongoing())
-                .set(SERIES.ONESHOT, dto.oneshot())
-                .set(SERIES.NVOLUMES, dto.nvolumes())
-                .set(SERIES.START_DATE, dto.startDate())
-                .set(SERIES.END_DATE, dto.endDate())
-                .set(SERIES.ADDED_BY, dto.addedBy().id())
+                .set(SERIES.NAME, dto.getName())
+                .set(SERIES.ONGOING, dto.getOngoing())
+                .set(SERIES.ONESHOT, dto.getOneshot())
+                .set(SERIES.NVOLUMES, dto.getNvolumes())
+                .set(SERIES.START_DATE, dto.getStartDate())
+                .set(SERIES.END_DATE, dto.getEndDate())
+                .set(SERIES.ADDED_BY, dto.getAddedBy().getId())
                 .returning(SERIES.ID)
                 .fetchOptional()
                 .map(record -> record.get(SERIES.ID));
@@ -96,21 +96,21 @@ public class SerieDAO extends ContributableDAO<SerieDTO> {
     @Override
     public boolean update(SerieDTO dto) {
         return DSL().update(SERIES)
-                .set(SERIES.NAME, dto.name())
-                .set(SERIES.ONGOING, dto.ongoing())
-                .set(SERIES.ONESHOT, dto.oneshot())
-                .set(SERIES.NVOLUMES, dto.nvolumes())
-                .set(SERIES.START_DATE, dto.startDate())
-                .set(SERIES.END_DATE, dto.endDate())
+                .set(SERIES.NAME, dto.getName())
+                .set(SERIES.ONGOING, dto.getOngoing())
+                .set(SERIES.ONESHOT, dto.getOneshot())
+                .set(SERIES.NVOLUMES, dto.getNvolumes())
+                .set(SERIES.START_DATE, dto.getStartDate())
+                .set(SERIES.END_DATE, dto.getEndDate())
                 .set(SERIES.MODIFIED_AT, LocalDateTime.now())
-                .where(SERIES.ID.eq(dto.id()))
+                .where(SERIES.ID.eq(dto.getId()))
                 .execute() > 0;
     }
 
     @Override
     public boolean delete(SerieDTO dto) {
         return DSL().delete(SERIES)
-                .where(SERIES.ID.eq(dto.id()))
+                .where(SERIES.ID.eq(dto.getId()))
                 .execute() > 0;
     }
 

@@ -54,76 +54,81 @@ public class EditionMapper {
                 // Map user
                 SimpleUserDTO user = MappingUtils.getSingleDTOFromRecord(r, USERS, UserMapper::mapToSimpleDTO);
                 // Map edition
-                EditionDTO dto = new EditionDTO(
-                                r.get(getFieldName(EDITIONS.ID), Integer.class),
-                                r.get(getFieldName(EDITIONS.ISBN), String.class),
-                                r.get(getFieldName(EDITIONS.EAN), String.class),
-                                r.get(getFieldName(EDITIONS.NPAGES), Integer.class),
-                                r.get(getFieldName(EDITIONS.PRICE), Float.class),
-                                r.get(getFieldName(EDITIONS.URL), String.class),
-                                r.get(getFieldName(EDITIONS.IMG_URL), String.class),
-                                r.get(getFieldName(EDITIONS.COVER_TYPE), String.class),
-                                r.get(getFieldName(EDITIONS.PARUTION_DATE), LocalDate.class),
-                                publisher,
-                                book,
-                                serie,
-                                r.get(getFieldName(EDITIONS.CREATED_AT), LocalDateTime.class),
-                                r.get(getFieldName(EDITIONS.MODIFIED_AT), LocalDateTime.class),
-                                user);
+                EditionDTO dto = EditionDTO.builder()
+                                .id(r.get(getFieldName(EDITIONS.ID), Integer.class))
+                                .isbn(r.get(getFieldName(EDITIONS.ISBN), String.class))
+                                .ean(r.get(getFieldName(EDITIONS.EAN), String.class))
+                                .npages(r.get(getFieldName(EDITIONS.NPAGES), Integer.class))
+                                .price(r.get(getFieldName(EDITIONS.PRICE), Float.class))
+                                .url(r.get(getFieldName(EDITIONS.URL), String.class))
+                                .imgUrl(r.get(getFieldName(EDITIONS.IMG_URL), String.class))
+                                .coverType(r.get(getFieldName(EDITIONS.COVER_TYPE), String.class))
+                                .parutionDate(r.get(getFieldName(EDITIONS.PARUTION_DATE), LocalDate.class))
+                                .publisher(publisher)
+                                .book(book)
+                                .serie(serie)
+                                .createdAt(r.get(getFieldName(EDITIONS.CREATED_AT), LocalDateTime.class))
+                                .modifiedAt(r.get(getFieldName(EDITIONS.MODIFIED_AT), LocalDateTime.class))
+                                .addedBy(user)
+                                .build();
                 return dto;
         }
 
         public static SimpleEditionDTO mapToSimpleDTO(Record r) {
-                SimpleEditionDTO dto = new SimpleEditionDTO(
-                                r.get(getFieldName(EDITIONS.ID), Integer.class),
-                                r.get(getFieldName(EDITIONS.ISBN), String.class),
-                                r.get(getFieldName(EDITIONS.EAN), String.class),
-                                r.get(getFieldName(EDITIONS.NPAGES), Integer.class),
-                                r.get(getFieldName(EDITIONS.PRICE), Float.class),
-                                r.get(getFieldName(EDITIONS.URL), String.class),
-                                r.get(getFieldName(EDITIONS.IMG_URL), String.class),
-                                r.get(getFieldName(EDITIONS.COVER_TYPE), String.class),
-                                r.get(getFieldName(EDITIONS.PARUTION_DATE), LocalDate.class),
-                                r.get(getFieldName(EDITIONS.PUBLISHER_ID), Integer.class),
-                                r.get(getFieldName(PUBLISHERS.NAME), String.class),
-                                r.get(getFieldName(EDITIONS.BOOK_ID), Integer.class));
+                SimpleEditionDTO dto = SimpleEditionDTO.builder()
+                                .id(r.get(getFieldName(EDITIONS.ID), Integer.class))
+                                .isbn(r.get(getFieldName(EDITIONS.ISBN), String.class))
+                                .ean(r.get(getFieldName(EDITIONS.EAN), String.class))
+                                .npages(r.get(getFieldName(EDITIONS.NPAGES), Integer.class))
+                                .price(r.get(getFieldName(EDITIONS.PRICE), Float.class))
+                                .url(r.get(getFieldName(EDITIONS.URL), String.class))
+                                .imgUrl(r.get(getFieldName(EDITIONS.IMG_URL), String.class))
+                                .coverType(r.get(getFieldName(EDITIONS.COVER_TYPE), String.class))
+                                .parutionDate(r.get(getFieldName(EDITIONS.PARUTION_DATE), LocalDate.class))
+                                .publisherId(r.get(getFieldName(EDITIONS.PUBLISHER_ID), Integer.class))
+                                .publisherName(r.get(getFieldName(PUBLISHERS.NAME), String.class))
+                                .bookId(r.get(getFieldName(EDITIONS.BOOK_ID), Integer.class))
+                                .build();
                 return dto;
         }
 
-        public static EditionDTO mapGenericMapToDTO(Map<String, Object> map) {
-                EditionDTO dto = new EditionDTO(
-                                (Integer) map.get("id"),
-                                (String) map.get("isbn"),
-                                (String) map.get("ean"),
-                                (Integer) map.get("npages"),
-                                (Float) map.get("price"),
-                                (String) map.get("url"),
-                                (String) map.get("imgUrl"),
-                                (String) map.get("coverType"),
-                                MappingUtils.stringToLocalDate((String) map.get("parutionDate")),
-                                PublisherMapper.mapGenericMapToSimpleDTO((Map<String, Object>) map.get("publisher")),
-                                BookMapper.mapGenericMapToSimpleDTO((Map<String, Object>) map.get("book")),
-                                SerieMapper.mapGenericMapToSimpleDTO((Map<String, Object>) map.get("serie")),
-                                MappingUtils.stringToLocalDateTime((String) map.get("createdAt")),
-                                MappingUtils.stringToLocalDateTime((String) map.get("modifiedAt")),
-                                UserMapper.mapGenericMapToSimpleDTO((Map<String, Object>) map.get("addedBy")));
-                return dto;
-        }
+        // public static EditionDTO mapGenericMapToDTO(Map<String, Object> map) {
+        // EditionDTO dto = new EditionDTO(
+        // (Integer) map.get("id"),
+        // (String) map.get("isbn"),
+        // (String) map.get("ean"),
+        // (Integer) map.get("npages"),
+        // (Float) map.get("price"),
+        // (String) map.get("url"),
+        // (String) map.get("imgUrl"),
+        // (String) map.get("coverType"),
+        // MappingUtils.stringToLocalDate((String) map.get("parutionDate")),
+        // PublisherMapper.mapGenericMapToSimpleDTO((Map<String, Object>)
+        // map.get("publisher")),
+        // BookMapper.mapGenericMapToSimpleDTO((Map<String, Object>) map.get("book")),
+        // SerieMapper.mapGenericMapToSimpleDTO((Map<String, Object>) map.get("serie")),
+        // MappingUtils.stringToLocalDateTime((String) map.get("createdAt")),
+        // MappingUtils.stringToLocalDateTime((String) map.get("modifiedAt")),
+        // UserMapper.mapGenericMapToSimpleDTO((Map<String, Object>)
+        // map.get("addedBy")));
+        // return dto;
+        // }
 
-        public static SimpleEditionDTO mapGenericMapToSimpleDTO(Map<String, Object> map) {
-                SimpleEditionDTO dto = new SimpleEditionDTO(
-                                (Integer) map.get("id"),
-                                (String) map.get("isbn"),
-                                (String) map.get("ean"),
-                                (Integer) map.get("npages"),
-                                (Float) map.get("price"),
-                                (String) map.get("url"),
-                                (String) map.get("imgUrl"),
-                                (String) map.get("coverType"),
-                                MappingUtils.stringToLocalDate((String) map.get("parutionDate")),
-                                (Integer) map.get("publisherId"),
-                                (String) map.get("publisherName"),
-                                (Integer) map.get("bookId"));
-                return dto;
-        }
+        // public static SimpleEditionDTO mapGenericMapToSimpleDTO(Map<String, Object>
+        // map) {
+        // SimpleEditionDTO dto = new SimpleEditionDTO(
+        // (Integer) map.get("id"),
+        // (String) map.get("isbn"),
+        // (String) map.get("ean"),
+        // (Integer) map.get("npages"),
+        // (Float) map.get("price"),
+        // (String) map.get("url"),
+        // (String) map.get("imgUrl"),
+        // (String) map.get("coverType"),
+        // MappingUtils.stringToLocalDate((String) map.get("parutionDate")),
+        // (Integer) map.get("publisherId"),
+        // (String) map.get("publisherName"),
+        // (Integer) map.get("bookId"));
+        // return dto;
+        // }
 }
