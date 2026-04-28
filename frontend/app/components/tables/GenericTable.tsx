@@ -1,9 +1,11 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { MdOutlineSearch } from "react-icons/md";
+import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { useTranslation } from "~/i18n/i18n";
 import { type Error } from "~/utils/error";
 import { capitalize } from "~/utils/strings";
 import { ToggleButton } from "../buttons/ToggleButton";
+import { GenericButton } from "../buttons/GenericButton";
 
 interface TableControlsProps {
   searchableKeys: string[];
@@ -63,6 +65,7 @@ export interface ColumnDef<T> {
   header?: string;
   searchable?: boolean;
   cellRenderer?: (arg: T) => ReactNode;
+  getValue?: (arg: T) => string;
 }
 
 interface GenericTableProps<T> {
@@ -74,6 +77,7 @@ interface GenericTableProps<T> {
   emptyMessage?: string;
   error?: Error;
   className?: string;
+  itemsPerPage?: number;
 }
 
 export function GenericTable<T extends Record<string, any>>(
@@ -81,7 +85,25 @@ export function GenericTable<T extends Record<string, any>>(
 ) {
   const { t } = useTranslation();
 
-  const { list = [], columns, addActions, actionGenerator, isLoading } = props;
+  const {
+    list = [],
+    columns,
+    addActions,
+    actionGenerator,
+    isLoading,
+    itemsPerPage = 10,
+  } = props;
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => prev + 1);
+  };
+
+  const handlePreviousPage = () => {
+    setCurrentPage((prev) => Math.max(0, prev - 1));
+  };
 
   // Prepare Columns (memoized to prevent unnecessary re-calculation)
   const tableCols = useMemo(() => {
@@ -123,11 +145,27 @@ export function GenericTable<T extends Record<string, any>>(
     const lowerQuery = searchQuery.toLowerCase();
     return list.filter((item) => {
       return activeSearchKeys.some((key) => {
-        const value = item[key];
-        return String(value).toLowerCase().includes(lowerQuery);
+        const valFunc = columns.find((col) => col.key === key)?.getValue;
+        const value = valFunc ? valFunc(item) : "";
+        return value.toLowerCase().includes(lowerQuery);
       });
     });
   }, [list, searchQuery, activeSearchKeys]);
+
+  // Paginated Data
+  const paginatedList = useMemo(() => {
+    const startIndex = currentPage * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredList.slice(startIndex, endIndex);
+  }, [filteredList, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredList.length / itemsPerPage);
+
+  // Reset to first page when search query changes
+  const handleSearch = (value: string) => {
+    setCurrentPage(0);
+    setSearchQuery(value);
+  };
 
   // Loading & Empty States
   if (isLoading)
@@ -146,7 +184,7 @@ export function GenericTable<T extends Record<string, any>>(
           activeKeys={activeSearchKeys}
           onToggleKey={handleToggleKey}
           searchValue={searchQuery}
-          onSearchChange={setSearchQuery}
+          onSearchChange={handleSearch}
         />
       )}
 
@@ -165,8 +203,8 @@ export function GenericTable<T extends Record<string, any>>(
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-700">
-            {filteredList.length > 0 ? (
-              filteredList.map((row, rowIdx) => (
+            {paginatedList.length > 0 ? (
+              paginatedList.map((row, rowIdx) => (
                 <tr
                   key={row.id ?? rowIdx}
                   className="hover:bg-gray-700/50 transition-colors"
@@ -195,6 +233,42 @@ export function GenericTable<T extends Record<string, any>>(
           </tbody>
         </table>
       </div>
+
+      {filteredList.length > 0 && (
+        <div className="p-4 flex justify-between items-center bg-gray-900 rounded-b-lg border-t border-gray-700">
+          <span className="text-sm text-gray-400">
+            {t("generic.pagination", {
+              parameters: {
+                items: t('generic.items', { capitalize: true }),
+                current: currentPage + 1,
+                total: totalPages,
+                from: currentPage * itemsPerPage + 1,
+                to: Math.min(
+                  (currentPage + 1) * itemsPerPage,
+                  filteredList.length,
+                ),
+                count: filteredList.length,
+              },
+            })}
+          </span>
+          <div className="flex gap-2">
+            <GenericButton
+              onClick={handlePreviousPage}
+              disabled={currentPage === 0}
+              className="px-3 h-9 text-sm"
+            >
+              <BsArrowLeft size={16} />
+            </GenericButton>
+            <GenericButton
+              onClick={handleNextPage}
+              disabled={currentPage >= totalPages - 1}
+              className="px-3 h-9 text-sm"
+            >
+              <BsArrowRight size={16} />
+            </GenericButton>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -13,6 +13,7 @@ export type TranslationKeys = keyof typeof messages.fr;
 interface TranslationOptions {
   capitalize?: boolean;
   allCaps?: boolean;
+  parameters?: Record<string, any>;
 }
 
 export function getMessage(locale: Locale, key: TranslationKeys, fallback?: string): string {
@@ -28,11 +29,20 @@ export function useTranslation() {
 
   function t(key: TranslationKeys, options: TranslationOptions = {}): string {
     let message = getMessage(locale, key);
-    const { capitalize, allCaps } = options;
+    const { capitalize, allCaps, parameters } = options;
+    if (parameters) message = insertParameters(message, parameters);
     if (capitalize) message = capFn(message);
     if (allCaps) message = message.toUpperCase();
     return message;
   }
 
   return { t, locale };
+}
+
+function insertParameters(message: string, parameters: Record<string, any>): string {
+  Object.entries(parameters).forEach(([key, val]) => {
+    const placeholder = `%${key}%`
+    message = message.replaceAll(placeholder, String(val))
+  })
+  return message
 }

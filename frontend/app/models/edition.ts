@@ -1,7 +1,9 @@
+import { useTranslation } from "~/i18n/i18n"
 import { parseToSimpleBook, type SimpleBook } from "./book"
 import { parseToSimplePublisher, type SimplePublisher } from "./publisher"
 import { parseToSimpleSerie, type SimpleSerie } from "./serie"
 import { parseToSimpleUser, type SimpleUser } from "./user"
+import type { ColumnDef } from "~/components/tables/GenericTable"
 
 export interface Edition {
     id: number,

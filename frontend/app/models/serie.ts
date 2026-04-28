@@ -53,3 +53,11 @@ export function parseToSimpleSerie(data: Record<string, any>): SimpleSerie {
         endDate: data.endDate ? new Date(data.endDate) : null, 
     }
 }
+
+export function simplifySerie(ser: Serie): SimpleSerie {
+    return parseToSimpleSerie(ser)
+}
+
+export function simpleSerieToSerie(ser: SimpleSerie): Serie {
+    return parseToSerie(ser)
+}

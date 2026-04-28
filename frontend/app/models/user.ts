@@ -54,16 +54,19 @@ export function getUserColumns(): ColumnDef<User>[] {
       key: 'id',
       header: t('user.id'),
       searchable: true,
+      getValue: (usr) => String(usr.id)
     },
     {
       key: 'email',
       header: t('user.email'),
-      searchable: true
+      searchable: true,
+      getValue: (usr) => usr.email
     },
     {
       key: 'username',
       header: t('user.username'),
-      searchable: true
+      searchable: true,
+      getValue: (usr) => usr.username
     },
     {
       key: 'createdAt',

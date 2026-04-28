@@ -1,4 +1,5 @@
 export default {
+    "flag": "🇫🇷",
     // ============================
     // == Generics
     // ============================
@@ -13,6 +14,9 @@ export default {
     "generic.admin": "admin",
     "generic.actions": "actions",
     "generic.search.placeholder": "Rechercher...",
+    "generic.action.cannotbeundone": "Cette action n'est pas réversible",
+    "generic.pagination": "Page %current%/%total% - %items% %from% à %to% (Total %count%)",
+    "generic.items": "items",
     // ============================
     // == Toasts
     // ============================
@@ -59,6 +63,8 @@ export default {
     "book.editions": "Éditions",
     "book.link.serie": "Aller à la série",
     // Edition page
+    "edition": "édition",
+    "editions": "éditions",
     "edition.header": "Édition",
     "edition.ean": "EAN",
     "edition.isbn": "ISBN",
@@ -82,7 +88,16 @@ export default {
     "issue.story": "Histoire",
     "issue.books": "Livres associés",
     "issue.link.issueserie": "Aller à la série d'issues",
+    // Owned edition
+    "oedition.cover": "Couverture",
+    "oedition.book.name": "Nom du livre",
+    "oedition.serie.name": "Nom de la série",
+    "oedition.book.volume": "Tome n°",
+    "oedition.addDate": "Date d'ajout",
+    "oedition.read": "Lu",
     // Serie page
+    "serie": "série",
+    "series": "séries",
     "serie.header": "Série",
     "serie.books": "Livres",
     // User page
@@ -93,6 +108,9 @@ export default {
     "user.isAdmin": "Admin",
     "user.createdAt": "Créé le",
     "user.updatedAt": "Modifié le",
+    "user.action.delete": "Supprimer l'utilisateur",
+    "user.action.deleted": "Utilisateur %username% supprimé",
+    "user.action.delete.message": "Êtes-vous sur que vous voulez supprimer l'utilisateur %username% ?",
     // Contribute page
     "contribute.title": "Contribuer à la bibliothèque",
     "contribute.loginRequired": "Vous devez être connecté pour contribuer",
@@ -119,6 +137,9 @@ export default {
     "contribute.stats.pending": "En attente",
     "contribute.stats.rejected": "Rejetées",
     "contribute.history": "Historique de vos contributions",
+    // Collection page
+    "collection.title": "Ma collection",
+    "collection.empty": "nothiung",
     // ============================
     // == HEADERS
     // ============================

@@ -14,14 +14,18 @@ export function LoggedProtectedRoute({ children }: LoggedProtectedRouteProps) {
   const { t } = useTranslation();
 
 
-  const { isAuthenticated } = useSelector((state: RootState) => state.user);
+  const { isAuthenticated, isHydrated } = useSelector((state: RootState) => state.user);
   const toast = useToast();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (isHydrated && !isAuthenticated) {
       toast.error(t("toast.loggedroute.access_denied"));
     }
-  }, [isAuthenticated, toast]);
+  }, [isHydrated, isAuthenticated, toast]);
+
+  if (!isHydrated) {
+    return <span>Loading...</span>
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace/>;
