@@ -7,6 +7,8 @@ import { parseToOwnedEdition, type OwnedEdition } from "~/models/ownedEdition";
 import { parseToPublisher, type Publisher } from "~/models/publisher";
 import { parseToSerie, type Serie } from "~/models/serie";
 import { parseToUser, type SignupData, type User, type UserCredentials } from "~/models/user";
+import { parseToContribution, type Contribution, type ContributionActionEnum, type ContributionTypeEnum } from "~/models/contribution";
+import { parseToBundle, type ContributionBundle } from "~/models/contributionBundle";
 
 ////////////////////////////////////
 //////////// PUBLIC API ////////////
@@ -62,7 +64,7 @@ export const publicApi = createApi({
     editionById: build.query<{ edition: Edition }, { id: number }>({
       query: (params) => ({ url: "/editions", method: 'GET', params: params }),
       transformResponse: (resp: { edition: Edition }) => {
-        console.log("Raw edition response:", resp); 
+        console.log("Raw edition response:", resp);
         return ({
           edition: parseToEdition(resp.edition),
         })
@@ -131,6 +133,17 @@ export const publicApi = createApi({
         series: resp.series.map(parseToSerie),
       }),
     }),
+
+    /****************
+   * CONTRIBUTIONS
+   ****************/
+    // Get serie by id
+    contributionBySubmitterId: build.query<{ contributions: Contribution[] }, { id: number }>({
+      query: (params) => ({ url: "/contribution/submitter", method: 'GET', params: params }),
+      transformResponse: (resp: { contributions: Contribution[] }) => ({
+        contributions: resp.contributions.map(parseToContribution),
+      }),
+    }),
   }),
 });
 
@@ -142,9 +155,9 @@ export const {
   useIssueByIdQuery, useIssueByBookIdQuery,
   usePublisherByIdQuery,
   useSerieByIdQuery,
-  useSearchBooksAndSeriesByNameQuery
-}
-  = publicApi;
+  useSearchBooksAndSeriesByNameQuery,
+  useContributionBySubmitterIdQuery
+} = publicApi;
 
 
 ////////////////////////////////////
@@ -167,10 +180,20 @@ export const privateApi = createApi({
         ownedEditions: resp.ownedEditions.map(parseToOwnedEdition),
       }),
     }),
+
+    /****************
+     * CONTRIBUTIONS
+     ****************/
+    submitContributionBundle: build.mutation<
+      { bundleId: number },
+      { note: string; contributions: Array<{ entityType: string; action: string; proposedData: Record<string, any>; entityId?: number | null; localRef?: number | null; entitySnapshot?: Record<string, any> | null }> }
+    >({
+      query: (data) => ({ url: "/contribute", method: 'POST', body: data }),
+    }),
   }),
 });
 
-export const { useCollectionQuery } = privateApi;
+export const { useCollectionQuery, useSubmitContributionBundleMutation } = privateApi;
 
 
 ////////////////////////////////////

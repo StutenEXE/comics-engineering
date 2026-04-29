@@ -2,6 +2,7 @@ package dev.stuten.vps.services;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -132,5 +133,21 @@ public class ContributionService {
         }
 
         ctx.status(HttpStatus.OK);
+    }
+
+    public static void getBySubmitterId(Context ctx) {
+        // Retreive submitter ID from request
+        Integer submitterId;
+        try {
+            submitterId = Integer.parseInt(ctx.queryParam("id"));
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            return; // For compiler
+        }
+
+        // Retreive books
+        List<ContributionDTO<? extends IdDTO>> contributions = contributionDAO.findBySubmitterId(submitterId);
+
+        ctx.json(Map.of("contributions", contributions));
     }
 }

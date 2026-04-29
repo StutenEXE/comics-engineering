@@ -1,70 +1,26 @@
-import { useAppSelector } from "~/store/hooks";
-import type { Route } from "../+types/root";
-import { InfoPageTemplate } from "~/components/templates/InfoPageTemplate";
-import { useTranslation } from "~/i18n/i18n";
+import { useState } from "react";
 import { GenericButton } from "~/components/buttons/GenericButton";
-import { GenericTable, type ColumnDef } from "~/components/tables/GenericTable";
+import { ContributionBundleModal } from "~/components/modals/contribution/ContributionBundleModal";
+import { ContributionTable } from "~/components/tables/ContributionTable";
+import { useToast } from "~/components/toast/Toast";
+import { useTranslation } from "~/i18n/i18n";
+import { ContributionStatusEnum } from "~/models/contribution";
+import { useAppSelector } from "~/store/hooks";
+import { useContributionBySubmitterIdQuery } from "~/store/services/api";
+import { createError } from "~/utils/error";
+import type { Route } from "../+types/root";
 
-interface Contribution {
-  id: number;
-  type: string;
-  item: string;
-  date: string;
-  status: string;
-}
-
-export function meta({ }: Route.MetaArgs) {
+export function meta({}: Route.MetaArgs) {
   return [
     { title: `Contribute` },
     { name: "description", content: `Contribute to the library` },
   ];
 }
 
-
 export default function ContributePage() {
   const { t } = useTranslation();
   const { isAuthenticated, user } = useAppSelector((state) => state.user);
-
-  // Mock data for previous contributions
-  const contributions: Contribution[] = [
-    {
-      id: 1,
-      type: "Book",
-      item: "Batman #1",
-      date: "2024-01-15",
-      status: "Approved",
-    },
-    {
-      id: 2,
-      type: "Serie",
-      item: "Marvel Universe",
-      date: "2024-02-20",
-      status: "Pending",
-    },
-    {
-      id: 3,
-      type: "Edition",
-      item: "Batman #1 - Deluxe",
-      date: "2024-03-10",
-      status: "Approved",
-    },
-  ];
-
-  // Mock statistics
-  const stats = {
-    totalContributions: 42,
-    approved: 35,
-    pending: 5,
-    rejected: 2,
-  };
-
-  const columns: ColumnDef<Contribution>[] = [
-    { key: "type", header: t("contribute.table.type"), searchable: true },
-    { key: "item", header: t("contribute.table.item"), searchable: true },
-    { key: "date", header: t("contribute.table.date"), searchable: true },
-    { key: "status", header: t("contribute.table.status"), searchable: true },
-  ];
-
+  // If not auth
   if (!isAuthenticated) {
     return (
       <main>
@@ -83,10 +39,42 @@ export default function ContributePage() {
     );
   }
 
+  // Fetch contributions
+  const { data, isLoading, error } = useContributionBySubmitterIdQuery({
+    id: user!.id,
+  });
+  const err = createError(error);
+  const contributions = data?.contributions;
+  const stats = {
+    // Calculate stats
+    totalContributions: contributions?.length,
+    approved: 0,
+    pending: 0,
+    rejected: 0,
+  };
+  contributions?.forEach((contrib) => {
+    if (contrib.status === ContributionStatusEnum.APPROVED) stats.approved++;
+    else if(contrib.status === ContributionStatusEnum.PENDING) stats.pending++;
+    else if (contrib.status === ContributionStatusEnum.REJECTED) stats.rejected++;
+  });
+
+  // Handles login modal state
+  const [isContributionModalOpen, setisContributionModalOpen] = useState(false);
+
+  const openContributionModal = () => {
+    setisContributionModalOpen(true);
+  };
+
+  const closeContributionModal = () => {
+    setisContributionModalOpen(false);
+  };
+
   return (
     <main className="flex flex-col items-center pt-8 px-4 lg:px-8 xl:px-12">
       <div className="w-full max-w-6xl space-y-8">
-        <h1 className="text-3xl font-bold text-gray-200 mb-6">{t("contribute.title")}</h1>
+        <h1 className="text-3xl font-bold text-gray-200 mb-6">
+          {t("contribute.title")}
+        </h1>
 
         {/* Welcome message */}
         <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
@@ -98,26 +86,12 @@ export default function ContributePage() {
 
         {/* Contribution options */}
         <div className="flex flex-col gap-5">
-          <h2 className="text-2xl font-semibold text-gray-200">
-            {t("contribute.options")}
-          </h2>
-          <div className="flex flex-wrap gap-4">
-            <GenericButton onClick={() => {}} className="px-6 py-3">
-              {t("contribute.addBook")}
-            </GenericButton>
-            <GenericButton onClick={() => {}} className="px-6 py-3">
-              {t("contribute.addSerie")}
-            </GenericButton>
-            <GenericButton onClick={() => {}} className="px-6 py-3">
-              {t("contribute.addEdition")}
-            </GenericButton>
-            <GenericButton onClick={() => {}} className="px-6 py-3">
-              {t("contribute.addIssue")}
-            </GenericButton>
-            <GenericButton onClick={() => {}} className="px-6 py-3">
-              {t("contribute.addIssueSerie")}
-            </GenericButton>
-          </div>
+          <GenericButton
+            onClick={openContributionModal}
+            className="w-50 px-6 py-3 bg-green-700 hover:bg-green-600"
+          >
+            {t("contribute.contribute")}
+          </GenericButton>
         </div>
 
         {/* Statistics */}
@@ -158,13 +132,18 @@ export default function ContributePage() {
           <h2 className="text-2xl font-semibold text-gray-200">
             {t("contribute.history")}
           </h2>
-          <GenericTable
-            list={contributions}
-            columns={columns}
-            emptyMessage={t("contribute.noContributions")}
+          <ContributionTable
+            contributionList={contributions}
+            isLoading={isLoading}
+            error={err}
           />
         </div>
       </div>
+
+      <ContributionBundleModal
+        isOpen={isContributionModalOpen}
+        onClose={closeContributionModal}
+      ></ContributionBundleModal>
     </main>
   );
 }

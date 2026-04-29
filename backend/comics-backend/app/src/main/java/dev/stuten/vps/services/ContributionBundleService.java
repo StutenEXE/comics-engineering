@@ -1,5 +1,6 @@
 package dev.stuten.vps.services;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -19,9 +20,9 @@ public class ContributionBundleService {
 
     private ContributionBundleService() {}
 
-    private static ContributionBundleDAO bundleDAO = new ContributionBundleDAO(JooqProvider.get());
+    private static ContributionBundleDAO dao = new ContributionBundleDAO(JooqProvider.get());
 
-    public static void submitBundle(Context ctx) {
+    public static void submit(Context ctx) {
         AuthContext auth = AuthMiddleware.getCurrentSession(ctx);
         if (auth == null) {
             ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Unauthorized", "User must be logged in");
@@ -57,7 +58,7 @@ public class ContributionBundleService {
         }
 
         // Create contribution bundle
-        Optional<Integer> bundleId = bundleDAO.create(bundle);
+        Optional<Integer> bundleId = dao.create(bundle);
         if (bundleId.isEmpty()) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Contribution bundle not created", "");
             return;
@@ -68,33 +69,31 @@ public class ContributionBundleService {
                 contrib.setBundleId(bundleId.get());
                 ContributionService.createContribution(contrib);
             } catch (Exception e) {
-                bundleDAO.delete(bundleId.get());
+                dao.delete(bundleId.get());
                 ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error creating contribution", e.getMessage());
                 return;
             }
         }
 
-        ContributionBundleDTO newBundle = bundleDAO.findById(bundleId.get()).get();
+        ContributionBundleDTO newBundle = dao.findById(bundleId.get()).get();
 
         ctx.status(HttpStatus.CREATED).json(Map.of("bundle", newBundle));
     }
 
-    public static void getBundle(Context ctx) {
-        Integer bundleId;
+    public static void getBySubmitterId(Context ctx) {
+        // Retreive submitter ID from request
+        Integer submitterId;
         try {
-            bundleId = Integer.parseInt(ctx.pathParam("id"));
+            submitterId = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "ID must be an integer");
-            return;
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            return; // For compiler
         }
 
-        Optional<ContributionBundleDTO> bundleOpt = bundleDAO.findById(bundleId);
-        if (bundleOpt.isEmpty()) {
-            String message = String.format("Contribution bundle of id %s not found", bundleId);
-            ErrorResponse.send(HttpStatus.NOT_FOUND, "Contribution bundle not found", message);
-            return;
-        }
+        // Retreive books
+        List<ContributionBundleDAO> bundles = dao.findBySubmitterId(submitterId);
 
-        ctx.json(Map.of("bundle", bundleOpt.get()));
+        ctx.json(Map.of("bundles", bundles));
     }
+
 }

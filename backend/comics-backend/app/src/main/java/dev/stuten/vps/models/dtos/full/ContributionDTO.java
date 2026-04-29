@@ -40,8 +40,6 @@ public class ContributionDTO<T extends IdDTO> extends IdDTO {
     @JsonProperty("entityId")
     private Integer entityId;
 
-    // @JsonProperty("proposedData") Map<String, Object> proposedData,
-    // @JsonProperty("entitySnapshot") Map<String, Object> entitySnapshot,
     @JsonProperty("proposedData")
     private T proposedData;
 

@@ -2,7 +2,6 @@ import { useTranslation } from "~/i18n/i18n"
 import { parseToEdition, type Edition } from "./edition"
 import type { ColumnDef } from "~/components/tables/GenericTable"
 import { createElement } from "react"
-import type { Link } from "~/components/lists/LinkButtonList"
 
 export interface OwnedEdition {
     id: number,
@@ -37,7 +36,6 @@ export function parseToOwnedEdition(data: Record<string, any>): OwnedEdition {
 
 export function getOwnedEditionColumns(): ColumnDef<OwnedEdition>[] {
     const { t, locale } = useTranslation()
-
     return [
         {
             key: 'cover',

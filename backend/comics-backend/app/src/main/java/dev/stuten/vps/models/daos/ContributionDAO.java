@@ -98,4 +98,8 @@ public class ContributionDAO extends DAO {
                 .fetchOptional()
                 .map(getDefaultMapper());
     }
+
+    public List<ContributionDTO<? extends IdDTO>> findBySubmitterId(Integer submitterId) {
+        return super.selectMany(CONTRIBUTION_BUNDLES.SUBMITTER_ID.eq(submitterId));
+    }
 }

@@ -90,4 +90,8 @@ public class ContributionBundleDAO extends DAO {
         public Optional<ContributionBundleDTO> findById(Integer id) {
                 return super.selectOne(CONTRIBUTION_BUNDLES.ID.eq(id));
         }
+
+        public List<ContributionBundleDAO> findBySubmitterId(Integer submitterId) {
+                return super.selectMany(CONTRIBUTION_BUNDLES.SUBMITTER_ID.eq(submitterId));
+        }
 }
