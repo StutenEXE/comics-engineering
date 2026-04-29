@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { GenericButton } from "~/components/buttons/GenericButton";
+import { IndentedContributionList } from "~/components/lists/contributionlists/IndentedContributionList";
 import { ContributionBundleModal } from "~/components/modals/contribution/ContributionBundleModal";
 import { ContributionTable } from "~/components/tables/ContributionTable";
-import { useToast } from "~/components/toast/Toast";
 import { useTranslation } from "~/i18n/i18n";
 import { ContributionStatusEnum } from "~/models/contribution";
 import { useAppSelector } from "~/store/hooks";
@@ -20,6 +20,12 @@ export function meta({}: Route.MetaArgs) {
 export default function ContributePage() {
   const { t } = useTranslation();
   const { isAuthenticated, user } = useAppSelector((state) => state.user);
+  // Fetch contributions
+  const { data, isLoading, error } = useContributionBySubmitterIdQuery(
+    { id: user!.id },
+    { skip: !user }, // Doesn't execute if user is undefined
+  );
+
   // If not auth
   if (!isAuthenticated) {
     return (
@@ -39,10 +45,6 @@ export default function ContributePage() {
     );
   }
 
-  // Fetch contributions
-  const { data, isLoading, error } = useContributionBySubmitterIdQuery({
-    id: user!.id,
-  });
   const err = createError(error);
   const contributions = data?.contributions;
   const stats = {
@@ -54,8 +56,9 @@ export default function ContributePage() {
   };
   contributions?.forEach((contrib) => {
     if (contrib.status === ContributionStatusEnum.APPROVED) stats.approved++;
-    else if(contrib.status === ContributionStatusEnum.PENDING) stats.pending++;
-    else if (contrib.status === ContributionStatusEnum.REJECTED) stats.rejected++;
+    else if (contrib.status === ContributionStatusEnum.PENDING) stats.pending++;
+    else if (contrib.status === ContributionStatusEnum.REJECTED)
+      stats.rejected++;
   });
 
   // Handles login modal state

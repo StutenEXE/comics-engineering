@@ -16,7 +16,7 @@ export function SignupForm({ onDone, onCancel }: SignupFormProps) {
     const [signup] = useSignupMutation();
     const toast = useToast();
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
         const username = formData.get("username");

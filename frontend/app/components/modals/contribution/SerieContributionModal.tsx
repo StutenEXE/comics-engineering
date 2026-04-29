@@ -1,20 +1,20 @@
-import { ContributionBundleForm } from "~/components/forms/ContributionBundleForm";
+import { SerieContributionForm } from "~/components/forms/SerieContributionForm";
 import { GenericModal } from "../GenericModal";
 
-interface ContributionBundleModalProps {
+interface SerieContributionModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
 // User will be able to create items that depend on other items
-export function ContributionBundleModal({
+export function SerieContributionModal({
   isOpen,
   onClose,
-}: ContributionBundleModalProps) {
+}: SerieContributionModalProps) {
   return (
     <GenericModal isOpen={isOpen} onClose={onClose}>
       <div className="border border-gray-300 rounded-lg shadow-md bg-black">
-        <ContributionBundleForm></ContributionBundleForm>
+        <SerieContributionForm />
       </div>
     </GenericModal>
   );

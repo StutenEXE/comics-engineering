@@ -125,7 +125,14 @@ export const publicApi = createApi({
     /****************
      * SEARCH
      ****************/
-    // Get serie by id
+    // Search series
+    searchSeriesByName: build.query<{ series: Serie[] }, { query: string }>({
+      query: ({ query }) => ({ url: "/search/series", method: 'GET', params: { query: query.trim().toLowerCase() } }),
+      transformResponse: (resp: { series: Serie[] }) => ({
+        series: resp.series.map(parseToSerie),
+      }),
+    }),
+    // Search books and series
     searchBooksAndSeriesByName: build.query<{ books: Book[], series: Serie[] }, { query: string }>({
       query: ({ query }) => ({ url: "/search/books_and_series", method: 'GET', params: { query: query.trim().toLowerCase() } }),
       transformResponse: (resp: { books: Book[], series: Serie[] }) => ({
@@ -155,6 +162,8 @@ export const {
   useIssueByIdQuery, useIssueByBookIdQuery,
   usePublisherByIdQuery,
   useSerieByIdQuery,
+  useLazySearchSeriesByNameQuery,
+  // Lazyfy ?
   useSearchBooksAndSeriesByNameQuery,
   useContributionBySubmitterIdQuery
 } = publicApi;

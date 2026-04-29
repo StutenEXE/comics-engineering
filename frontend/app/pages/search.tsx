@@ -70,7 +70,7 @@ export default function SearchPage() {
     });
   });
 
-  const handleQueryChange = (event: any) => {
+  const handleQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setQuery(value);
   };

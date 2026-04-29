@@ -49,4 +49,29 @@ public class SearchService {
 
         ctx.json(Map.of("books", books, "series", series));
     }
+
+    public static void searchSeries(Context ctx) {
+        // Retreive query from request
+        String query = "";
+        try {
+            query = ctx.queryParam("query");
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing query");
+            return; // For compiler
+        }
+
+        // Lists of elements to retreive
+        List<SerieDTO> series = Arrays.asList();
+
+        // To broad queries are not handled
+        if (query.length() < 3) {
+            ctx.json(Map.of("series", series));
+            return;
+        }
+
+        // Retreive books
+        series = serieDao.searchByName(query);
+
+        ctx.json(Map.of("series", series));
+    }
 }
