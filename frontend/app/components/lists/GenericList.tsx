@@ -12,7 +12,7 @@ interface GenericListProps<T> {
 export function GenericList<T>({ list, emptyMsg, elemGenerator, vertical, className }: GenericListProps<T>) {
     const divClassName = vertical ? 
         `max-h-40 flex flex-col gap-0 p-2 overflow-y-scroll snap-y snap-proximity ${className}`:
-        `flex gap-2 p-2 overflow-hidden snap-x snap-proximity ${className}`
+        `flex gap-2 p-2 overflow-y-hidden snap-x snap-proximity ${className}`
 
     return(
         <div className={divClassName}>

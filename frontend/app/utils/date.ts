@@ -1,4 +1,5 @@
 import { capitalize } from "@mui/material"
+import z from "zod"
 
 export function compareDates(a: Date, b: Date): number {
     return a.getTime() - b.getTime()
@@ -27,3 +28,13 @@ export function dateToVerboseDateString(lang: string, date: Date | undefined | n
         day: "numeric"
     })
 }
+
+export const zDateRequired = z.preprocess(
+  (val) => (val instanceof Date && isNaN(val.getTime()) ? undefined : val),
+  z.date().min(1)
+);
+
+export const zDateOptional = z.preprocess(
+  (val) => (val instanceof Date && isNaN(val.getTime()) ? null : val),
+  z.date().nullable().optional()
+);

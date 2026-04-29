@@ -16,7 +16,7 @@ export function LoginForm({ onDone, onCancel }: LoginFormProps) {
     const [login] = useLoginMutation();
     const toast = useToast();
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
         const email = formData.get("email");

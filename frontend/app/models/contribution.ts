@@ -7,6 +7,7 @@ import type { Serie } from "./serie";
 import { buildIssueShortName, type Issue } from "./issue";
 import type { IssueSerie } from "./issue-serie";
 import type { Publisher } from "./publisher";
+import type { Locale } from "~/store/slices/localeSlice";
 
 export enum ContributionTypeEnum {
     BOOK = "book",
@@ -61,16 +62,21 @@ export function parseToContribution(data: Record<string, any>): Contribution {
 
 export interface SimpleContribution {
     id: number,
-    bundleId: number,
-    localRef: number | null,
+    bundleId?: number,
+    localRef?: number,
     entityType: ContributionTypeEnum,
     action: ContributionActionEnum,
-    entityId: number | null,
+    entityId?: number,
     proposedData: Record<string, any>,
-    entitySnapshot: Record<string, any> | null,
-    status: ContributionStatusEnum,
-    resolvedEntityId: number | null,
+    entitySnapshot?: Record<string, any>,
+    status?: ContributionStatusEnum,
+    resolvedEntityId?: number,
 }
+
+export interface ContributionTree extends SimpleContribution {
+  children: ContributionTree[];
+}
+
 
 export function parseToSimpleContribution(data: Record<string, any>): SimpleContribution {
     return {
@@ -87,6 +93,38 @@ export function parseToSimpleContribution(data: Record<string, any>): SimpleCont
     }
 }
 
+export function isSimpleContribution(c: Contribution | SimpleContribution): c is SimpleContribution {
+    return (c as SimpleContribution).bundleId !== undefined;
+}
+
+export function contributionToSimpleContribution(c: Contribution): SimpleContribution {
+    return {
+        id: c.id,
+        bundleId: c.bundle?.id,
+        localRef: c.localRef,
+        entityType: c.entityType as ContributionTypeEnum,
+        action: c.action as ContributionActionEnum,
+        entityId: c.entityId,
+        proposedData: c.proposedData,
+        entitySnapshot: c.entitySnapshot,
+        status: c.status as ContributionStatusEnum,
+        resolvedEntityId: c.resolvedEntityId,
+    }
+}
+
+export function getContributionName(c: SimpleContribution | Contribution, locale: Locale): string {
+    switch (c.entityType) {
+        case ContributionTypeEnum.BOOK: return (c.proposedData as Book).name
+        case ContributionTypeEnum.EDITION:
+            const ed = (c.proposedData as Edition)
+            return `${ed.book?.name} (${ed.parutionDate.toLocaleDateString(locale)})`
+        case ContributionTypeEnum.SERIE: return (c.proposedData as Serie).name
+        case ContributionTypeEnum.ISSUE: return buildIssueShortName(c.proposedData as Issue)
+        case ContributionTypeEnum.ISSUE_SERIE: return (c.proposedData as IssueSerie).name
+        case ContributionTypeEnum.PUBLISHER: return (c.proposedData as Publisher).name
+    }
+}
+
 export function getContributionColumns(): ColumnDef<Contribution>[] {
     const { t, locale } = useTranslation()
     return [
@@ -98,13 +136,6 @@ export function getContributionColumns(): ColumnDef<Contribution>[] {
             getValue: (c) => String(c.id)
         },
         {
-            key: 'type',
-            header: t('contribution.type'),
-            searchable: true,
-            cellRenderer: (c) => t(c.entityType, { capitalize: true }),
-            getValue: (c) => c.entityType
-        },
-        {
             key: 'action',
             header: t('contribution.action'),
             searchable: true,
@@ -112,21 +143,17 @@ export function getContributionColumns(): ColumnDef<Contribution>[] {
             getValue: (c) => c.action
         },
         {
+            key: 'type',
+            header: t('contribution.type'),
+            searchable: true,
+            cellRenderer: (c) => t(c.entityType, { capitalize: true }),
+            getValue: (c) => c.entityType
+        },
+        {
             key: 'item',
             header: t('contribution.item'),
             searchable: true,
-            cellRenderer: (c) => {
-                switch (c.entityType) {
-                    case ContributionTypeEnum.BOOK: return (c.proposedData as Book).name
-                    case ContributionTypeEnum.EDITION:
-                        const ed = (c.proposedData as Edition)
-                        return `${ed.book?.name} (${ed.parutionDate.toLocaleDateString(locale)})`
-                    case ContributionTypeEnum.SERIE: return (c.proposedData as Serie).name
-                    case ContributionTypeEnum.ISSUE: return buildIssueShortName(c.proposedData as Issue)
-                    case ContributionTypeEnum.ISSUE_SERIE: return (c.proposedData as IssueSerie).name
-                    case ContributionTypeEnum.PUBLISHER: return (c.proposedData as Publisher).name
-                }
-            },
+            cellRenderer: (c) => getContributionName(c, locale),
             getValue: (c) => c.entityType
         },
         {

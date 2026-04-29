@@ -1,6 +1,5 @@
-import { LoginForm } from "~/components/forms/LoginForm";
-import { GenericModal } from "../GenericModal";
 import { ContributionBundleForm } from "~/components/forms/ContributionBundleForm";
+import { GenericModal } from "../GenericModal";
 
 interface ContributionBundleModalProps {
   isOpen: boolean;
