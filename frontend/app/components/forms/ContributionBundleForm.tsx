@@ -1,25 +1,21 @@
+import { useState, type SetStateAction } from "react";
 import { useTranslation } from "~/i18n/i18n";
-import type {
-  Contribution,
-  ContributionTree,
-  SimpleContribution,
-} from "~/models/contribution";
 import {
-  ContributionBundleStatusEnum,
-  type ContributionBundle,
-} from "~/models/contributionBundle";
-import { GenericButton } from "../buttons/GenericButton";
-import { useConfirm } from "../modals/ConfirmModalProvider";
-import { IndentedContributionList } from "../lists/contributionlists/IndentedContributionList";
-import { deepCopy } from "~/utils/object";
+  ContributionTypeEnum,
+  type ContributionTree,
+  type SimpleContribution,
+} from "~/models/contribution";
+import { type ContributionBundle } from "~/models/contributionBundle";
 import { noPropagationEvt, preventDefaultEvt } from "~/utils/events";
+import { GenericButton } from "../buttons/GenericButton";
+import { IndentedContributionList } from "../lists/contributionlists/IndentedContributionList";
+import { useConfirm } from "../modals/ConfirmModalProvider";
 import { SerieContributionModal } from "../modals/contribution/SerieContributionModal";
-import { useState } from "react";
+import { parseToSerie, type Serie } from "~/models/serie";
+import { parseToBook } from "~/models/book";
+import { BookContributionModal } from "../modals/contribution/BookContributionModal";
 
 interface ContributionBundleFormProps {
-  bundle?: ContributionBundle;
-  onSubmit?: () => {};
-  onCancel?: () => {};
   bundle?: ContributionBundle;
   onSubmit?: () => {};
   onCancel?: () => {};
@@ -32,46 +28,54 @@ export function ContributionBundleForm({
 }: ContributionBundleFormProps) {
   const { t } = useTranslation();
   const confirm = useConfirm();
+  // TODO : react hook forms
 
+  // Modal states
   const [isSerieOpen, setIsSerieOpen] = useState(false);
+  const [isBookOpen, setIsBookOpen] = useState(false);
 
+  // Bundle data
   const [contributions, setContributions] = useState(
     [] as SimpleContribution[],
   );
 
-  const openModal = (
-    type: string,
-  ) => {
+  // Contribution data
+  const [contribToModify, setContribToModify] = useState<
+    SimpleContribution | undefined
+  >(undefined);
+  const [localRef, setLocalRef] = useState<number | undefined>(undefined);
+
+  const openModal = (type: ContributionTypeEnum) => {
+    setIsBookOpen(false);
     setIsSerieOpen(false);
     switch (type) {
-      case "serie":
-        setIsSerieOpen(true);
+      case ContributionTypeEnum.BOOK:
+        return setIsBookOpen(true);
+      case ContributionTypeEnum.SERIE:
+        return setIsSerieOpen(true);
     }
   };
 
   const addContribution = (c: Partial<SimpleContribution>) => {
-    alert("adding");
     const localRef = -(contributions.length + 1);
     c.id = -localRef; // Used to identify locally
     c.localRef = localRef;
     contributions.push(c as SimpleContribution);
-    setContributions(contributions);
   };
 
   const createDependantContribution = (c: SimpleContribution) => {
-    switch (
-      c.entityType
-      // TODO
-    ) {
+    setContribToModify(undefined);
+    switch (c.entityType) {
+      case ContributionTypeEnum.SERIE:
+        setLocalRef(c.localRef);
+        return setIsBookOpen(true);
     }
   };
 
   const editContribution = (c: SimpleContribution) => {
-    switch (
-      c.entityType
-      // TODO
-    ) {
-    }
+    setContribToModify(c);
+    setLocalRef(undefined);
+    openModal(c.entityType);
   };
 
   const removeContribution = (c: ContributionTree) => {
@@ -82,15 +86,26 @@ export function ContributionBundleForm({
         // Remove all dependencies
         c.children.forEach((c2) => {
           const idx = contributions.findIndex((nc) => nc.id === c2.id);
-          if (!idx) return;
+          if (idx < 0) return;
           contributions.splice(idx, 1);
         });
         // Remove contribution
         const idx = contributions.findIndex((nc) => nc.id === c.id);
-        if (!idx) return;
+        if (idx < 0) return;
         contributions.splice(idx, 1);
       },
     });
+  };
+
+  const handleContributionSubmission = (c: Partial<SimpleContribution>) => {
+    if (!contribToModify) {
+      addContribution(c);
+      return;
+    }
+    c.id = contribToModify.id;
+    c.localRef = contribToModify.localRef;
+    const idx = contributions.findIndex((c2) => contribToModify.id === c2.id);
+    contributions[idx] = c as SimpleContribution;
   };
 
   // TODO
@@ -102,7 +117,6 @@ export function ContributionBundleForm({
       note: note,
     };
     console.log(newBundle);
-    alert("submission");
     onSubmit && onSubmit();
   };
 
@@ -128,15 +142,34 @@ export function ContributionBundleForm({
           </span>
           <div className="flex flex-wrap gap-2">
             {[
-              { key: "edition", label: t("contribute.addEdition") },
-              { key: "book", label: t("contribute.addBook") },
-              { key: "serie", label: t("contribute.addSerie") },
-              { key: "issue", label: t("contribute.addIssue") },
-              { key: "issueSerie", label: t("contribute.addIssueSerie") },
+              {
+                key: ContributionTypeEnum.EDITION,
+                label: t("contribute.addEdition"),
+              },
+              {
+                key: ContributionTypeEnum.BOOK,
+                label: t("contribute.addBook"),
+              },
+              {
+                key: ContributionTypeEnum.SERIE,
+                label: t("contribute.addSerie"),
+              },
+              {
+                key: ContributionTypeEnum.ISSUE,
+                label: t("contribute.addIssue"),
+              },
+              {
+                key: ContributionTypeEnum.ISSUE_SERIE,
+                label: t("contribute.addIssueSerie"),
+              },
             ].map(({ key, label }) => (
               <GenericButton
                 key={key}
-                onClick={noPropagationEvt(() => openModal(key))}
+                onClick={noPropagationEvt(() => {
+                  setContribToModify(undefined);
+                  setLocalRef(undefined);
+                  openModal(key);
+                })}
                 className="bg-white/5 border border-white/10 text-white/60 text-xs font-medium px-3 py-1.5 rounded-md hover:bg-indigo-500/20 hover:border-indigo-500/40 hover:text-indigo-300 transition-all"
               >
                 <span className="mr-1 opacity-50">+</span>
@@ -194,9 +227,29 @@ export function ContributionBundleForm({
           </GenericButton>
         </div>
       </form>
+      <BookContributionModal
+        book={
+          contribToModify &&
+          contribToModify.entityType === ContributionTypeEnum.BOOK
+            ? parseToBook(contribToModify.proposedData)
+            : undefined
+        }
+        serieLocalRef={localRef}
+        action="create"
+        isOpen={isBookOpen}
+        onSubmit={handleContributionSubmission}
+        onClose={() => setIsBookOpen(false)}
+      />
       <SerieContributionModal
+        serie={
+          contribToModify &&
+          contribToModify.entityType === ContributionTypeEnum.SERIE
+            ? parseToSerie(contribToModify.proposedData)
+            : undefined
+        }
+        action="create"
         isOpen={isSerieOpen}
-        onSubmit={addContribution}
+        onSubmit={handleContributionSubmission}
         onClose={() => setIsSerieOpen(false)}
       />
     </>

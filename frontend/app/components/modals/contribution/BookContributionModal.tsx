@@ -1,10 +1,12 @@
 import { SerieContributionForm } from "~/components/forms/SerieContributionForm";
 import { GenericModal } from "../GenericModal";
 import type { SimpleContribution } from "~/models/contribution";
-import type { Serie } from "~/models/serie";
+import type { Book } from "~/models/book";
+import { BookContributionForm } from "~/components/forms/BookContributionForm";
 
-interface SerieContributionModalProps {
-  serie?: Serie;
+interface BookContributionModalProps {
+  book?: Book;
+  serieLocalRef?: number
   action: "create" | "update";
   isOpen: boolean;
   onSubmit: (c: Partial<SimpleContribution>) => void;
@@ -12,13 +14,14 @@ interface SerieContributionModalProps {
 }
 
 // User will be able to create items that depend on other items
-export function SerieContributionModal({
-  serie,
+export function BookContributionModal({
+  book,
+  serieLocalRef,
   action,
   isOpen,
   onSubmit,
   onClose,
-}: SerieContributionModalProps) {
+}: BookContributionModalProps) {
   const handleSubmit = (c: Partial<SimpleContribution>) => {
     onSubmit(c);
     onClose();
@@ -27,8 +30,9 @@ export function SerieContributionModal({
   return (
     <GenericModal isOpen={isOpen} onClose={onClose}>
       <div className="border border-gray-300 rounded-lg shadow-md bg-black">
-        <SerieContributionForm
-          serie={serie}
+        <BookContributionForm
+          book={book}
+          serieLocalRef={serieLocalRef}
           action={action}
           onSubmit={handleSubmit}
           onCancel={onClose}

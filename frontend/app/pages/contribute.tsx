@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { GenericButton } from "~/components/buttons/GenericButton";
-import { IndentedContributionList } from "~/components/lists/contributionlists/IndentedContributionList";
-import { IndentedContributionList } from "~/components/lists/contributionlists/IndentedContributionList";
 import { ContributionBundleModal } from "~/components/modals/contribution/ContributionBundleModal";
 import { ContributionTable } from "~/components/tables/ContributionTable";
 import { useTranslation } from "~/i18n/i18n";

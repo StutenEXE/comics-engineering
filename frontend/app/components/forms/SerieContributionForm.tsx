@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, type FieldValues } from "react-hook-form";
 import { useTranslation } from "~/i18n/i18n";
 import {
@@ -9,27 +9,20 @@ import {
 import type { Serie } from "~/models/serie";
 import { noPropagationEvt } from "~/utils/events";
 import { GenericButton } from "../buttons/GenericButton";
-import z from "zod";
+import z, { date } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { zDateOptional, zDateRequired } from "~/utils/date";
+import { toHtmlInputString, zDateOptional, zDateRequired } from "~/utils/date";
 
 interface SerieFormProps {
   serie?: Serie;
+  action: "create" | "update";
   onSubmit?: (c: Partial<SimpleContribution>) => void;
   onCancel?: () => void;
 }
 
-/*
-  const [search, { data, isLoading }] = useLazySearchSeriesByNameQuery();
-
-  const handleSearch = (evt: React.ChangeEvent<HTMLInputElement>) => {
-    const value = evt.target.value;
-    search({ query: value });
-  };
-  */
-
 export function SerieContributionForm({
   serie,
+  action,
   onSubmit,
   onCancel,
 }: SerieFormProps) {
@@ -41,8 +34,8 @@ export function SerieContributionForm({
       name: z.string().min(1, t("serie.form.name.required")),
       ongoing: z.boolean(),
       oneshot: z.boolean(),
-      startDate: zDateRequired,
-      endDate: zDateOptional,
+      startDate: zDateRequired(t("form.required")).default(serie?.startDate || new Date()),
+      endDate: zDateOptional(),
     })
     .refine(
       (data) => {
@@ -58,10 +51,41 @@ export function SerieContributionForm({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+  } = useForm<FormData>({
+    resolver: zodResolver(schema) as any,
+    defaultValues: {
+      name: serie?.name,
+      ongoing: serie?.ongoing,
+      oneshot: serie?.oneshot,
+      // dates set manually
+    },
+  });
 
-  const [endDateDisabled, setEndDateDisabled] = useState(true);
-  const [minEndDate, setMinEndDate] = useState("");
+  const triggerSubmission = (data: FieldValues) => {
+    const newSerie: Partial<Serie> = {
+      id: serie?.id,
+      name: data.name,
+      ongoing: data.ongoing,
+      oneshot: data.oneshot,
+      startDate: data.startDate,
+      endDate: data.endDate,
+    };
+    const contrib: Partial<SimpleContribution> = {
+      action:
+        action === "create"
+          ? ContributionActionEnum.CREATE
+          : ContributionActionEnum.UPDATE,
+      entityType: ContributionTypeEnum.SERIE,
+      proposedData: newSerie,
+      entityId: newSerie.id,
+    };
+
+    onSubmit && onSubmit(contrib);
+  };
+
+  // Handle specific UX case : endDate always after startDate 
+  const [endDateDisabled, setEndDateDisabled] = useState(serie === undefined);
+  const [minEndDate, setMinEndDate] = useState(toHtmlInputString(serie?.startDate));
 
   const onStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -69,19 +93,6 @@ export function SerieContributionForm({
     if (val) {
       setMinEndDate(val);
     }
-  };
-
-  const triggerSubmission = (data: FieldValues) => {
-    const contrib: Partial<SimpleContribution> = {
-      action: !serie
-        ? ContributionActionEnum.CREATE
-        : ContributionActionEnum.UPDATE,
-      entityType: ContributionTypeEnum.SERIE,
-      proposedData: data,
-      entityId: serie?.id || undefined,
-    };
-
-    onSubmit && onSubmit(contrib);
   };
 
   return (
@@ -104,9 +115,7 @@ export function SerieContributionForm({
           className="bg-white/5 border border-white/10 rounded-md px-3 py-2 text-sm text-white placeholder-white/20 outline-none focus:border-indigo-500/70 focus:ring-1 focus:ring-indigo-500/30 transition-all"
         />
         {errors.name && (
-          <p className="text-xs text-rose-400/80">
-            {errors.name.message as string}
-          </p>
+          <p className="text-xs text-rose-400/80">{errors.name.message}</p>
         )}
       </div>
 
@@ -175,10 +184,18 @@ export function SerieContributionForm({
           </label>
           <input
             type="date"
-            {...register("startDate", { onChange: onStartDateChange, valueAsDate: true })}
+            {...register("startDate", {
+              onChange: onStartDateChange,
+              valueAsDate: true,
+            })}
+            defaultValue={toHtmlInputString(serie?.startDate)}
             className="bg-white/5 border border-white/10 rounded-md px-3 py-2 text-sm text-white/80 outline-none focus:border-indigo-500/70 focus:ring-1 focus:ring-indigo-500/30 transition-all [color-scheme:dark] w-full"
           />
-          {errors.startDate && errors.startDate.message}
+          {errors.startDate && (
+            <p className="text-xs text-rose-400/80">
+              {errors.startDate.message}
+            </p>
+          )}
         </div>
 
         <span className="text-white/20 mt-5 text-lg">→</span>
@@ -191,10 +208,15 @@ export function SerieContributionForm({
             type="date"
             disabled={endDateDisabled}
             min={minEndDate}
-            {...register("endDate", { valueAsDate: true })}
+            defaultValue={serie?.endDate ? toHtmlInputString(serie?.endDate) : undefined}
+            {...register("endDate", {
+              valueAsDate: true,
+            })}
             className="bg-white/5 border border-white/10 rounded-md px-3 py-2 text-sm text-white/80 outline-none focus:border-indigo-500/70 focus:ring-1 focus:ring-indigo-500/30 transition-all [color-scheme:dark] w-full disabled:opacity-30 disabled:cursor-not-allowed"
           />
-          {errors.endDate && errors.endDate.message}
+          {errors.endDate && (
+            <p className="text-xs text-rose-400/80">{errors.endDate.message}</p>
+          )}
         </div>
       </div>
 
@@ -211,7 +233,7 @@ export function SerieContributionForm({
           onClick={noPropagationEvt()}
           className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm py-2 rounded-md transition-all shadow-lg shadow-indigo-900/40"
         >
-          {t("serie.form.create")}
+          { serie ?  t("serie.form.modify") : t("serie.form.create")}
         </GenericButton>
       </div>
     </form>

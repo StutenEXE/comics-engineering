@@ -8,7 +8,6 @@ import { buildIssueShortName, type Issue } from "./issue";
 import type { IssueSerie } from "./issue-serie";
 import type { Publisher } from "./publisher";
 import type { Locale } from "~/store/slices/localeSlice";
-import type { Locale } from "~/store/slices/localeSlice";
 
 export enum ContributionTypeEnum {
     BOOK = "book",
@@ -67,7 +66,6 @@ export interface SimpleContribution {
     localRef?: number,
     entityType: ContributionTypeEnum,
     action: ContributionActionEnum,
-    entityId?: number,
     entityId?: number,
     proposedData: Record<string, any>,
     entitySnapshot?: Record<string, any>,
@@ -146,13 +144,6 @@ export function getContributionColumns(): ColumnDef<Contribution>[] {
             getValue: (c) => c.action
         },
         {
-            key: 'action',
-            header: t('contribution.action'),
-            searchable: true,
-            cellRenderer: (c) => t(c.action, { capitalize: true }),
-            getValue: (c) => c.action
-        },
-        {
             key: 'type',
             header: t('contribution.type'),
             searchable: true,
@@ -163,7 +154,6 @@ export function getContributionColumns(): ColumnDef<Contribution>[] {
             key: 'item',
             header: t('contribution.item'),
             searchable: true,
-            cellRenderer: (c) => getContributionName(c, locale),
             cellRenderer: (c) => getContributionName(c, locale),
             getValue: (c) => c.entityType
         },

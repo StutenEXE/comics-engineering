@@ -8,7 +8,7 @@ export function compareDates(a: Date, b: Date): number {
 export function dateToMonthYearString(lang: string, date: Date | undefined | null): string {
     if (date === undefined || date === null) {
         return ""
-    } 
+    }
     return capitalize(date.toLocaleDateString(lang, {
         weekday: undefined,
         year: "numeric",
@@ -20,7 +20,7 @@ export function dateToMonthYearString(lang: string, date: Date | undefined | nul
 export function dateToVerboseDateString(lang: string, date: Date | undefined | null): string {
     if (date === undefined || date === null) {
         return ""
-    } 
+    }
     return date.toLocaleDateString(lang, {
         weekday: undefined,
         year: "numeric",
@@ -29,12 +29,23 @@ export function dateToVerboseDateString(lang: string, date: Date | undefined | n
     })
 }
 
-export const zDateRequired = z.preprocess(
-  (val) => (val instanceof Date && isNaN(val.getTime()) ? undefined : val),
-  z.date().min(1)
-);
+export function zDateRequired(error: string) {
+    return z.preprocess(
+        (val) => (val instanceof Date && isNaN(val.getTime()) ? undefined : val),
+        z.date({ error: error })
+    ) as z.ZodType<Date>;
+}
 
-export const zDateOptional = z.preprocess(
-  (val) => (val instanceof Date && isNaN(val.getTime()) ? null : val),
-  z.date().nullable().optional()
-);
+export function zDateOptional() {
+    return z.preprocess(
+        (val) => (val instanceof Date && isNaN(val.getTime()) ? null : val),
+        z.date().nullable().optional()
+    ) as z.ZodType<Date | null | undefined>;
+}
+
+export function toHtmlInputString(d: Date | undefined | null): string {
+    if (!d) {
+        return ""
+    }
+    return d.toISOString().substring(0, 10);
+}

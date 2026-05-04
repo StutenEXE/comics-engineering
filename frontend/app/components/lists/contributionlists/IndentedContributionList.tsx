@@ -59,7 +59,7 @@ export function IndentedContributionList({
   };
 
   const mapper = (c: ContributionTree, indent: number) => (
-  <div key={c.id} className="py-1">
+  <div key={c.id} className="pb-1">
     <div className="flex items-center gap-1 group">
       {/* Action buttons */}
       <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
