@@ -20,6 +20,9 @@ interface ContributionBundleFormProps {
   bundle?: ContributionBundle;
   onSubmit?: () => {};
   onCancel?: () => {};
+  bundle?: ContributionBundle;
+  onSubmit?: () => {};
+  onCancel?: () => {};
 }
 
 export function ContributionBundleForm({
