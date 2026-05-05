@@ -102,6 +102,7 @@ export function EditionContributionForm({
       book: { id: (bookLocalRef?.id ?? selectedBook?.id)! },
       publisher: { id: selectedPublisher?.id! },
     };
+    console.log(newEdition)
     const contrib: Partial<SimpleContribution> = {
       action:
         action === "create"

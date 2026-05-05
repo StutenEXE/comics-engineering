@@ -142,6 +142,7 @@ public class BookDAO extends ContributableDAO<BookDTO> {
 
         public List<SimpleBookDTO> findLatest(Integer from, Integer limit) {
                 return getSimpleFromClause()
+                                .orderBy(BOOKS.CREATED_AT.desc())
                                 .offset(from)
                                 .limit(limit)
                                 .fetch(BookMapper::mapToSimpleDTO);

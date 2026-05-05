@@ -56,6 +56,12 @@ export default function BookPage({ params }: { params : { id: number}}) {
               {book?.desc}
             </p>
           </div>
+          <div className="flex flex-col gap-2">
+            <h3 className="text-xl text-gray-200 font-semibold">{t("book.voContent")} :</h3>
+            <p>
+              {book?.voContent}
+            </p>
+          </div>
           <div className="flex gap-2 flex-col">
             <h3 className="text-xl text-gray-200 font-semibold">{t("book.sameseries")} :</h3>
             <BookListBySerieId serieId={book?.serie?.id} toIgnore={book}  className="border border-gray-500 rounded-lg" />
