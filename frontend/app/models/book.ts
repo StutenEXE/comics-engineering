@@ -60,6 +60,16 @@ export function parseToSimpleBook(data: Record<string, any>): SimpleBook {
 	}
 }
 
+export interface ContributionBook {
+	id?: number,
+	name: string,
+	desc?: string,
+	number?: number,
+	voContent?: string,
+	imgUrl: string,
+	serie: { id: number },
+}
+
 export function isSimpleBook(book: Book | SimpleBook): book is SimpleBook {
 	return (book as SimpleBook).serieId !== undefined;
 }

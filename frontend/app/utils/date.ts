@@ -49,3 +49,10 @@ export function toHtmlInputString(d: Date | undefined | null): string {
     }
     return d.toISOString().substring(0, 10);
 }
+
+export function toYYYYmmDD(d: Date | undefined | null): string {
+    if (!d) {
+        return ""
+    }
+    return d.toISOString().split('T')[0];
+}

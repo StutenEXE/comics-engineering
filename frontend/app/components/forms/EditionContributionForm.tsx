@@ -9,7 +9,7 @@ import {
   ContributionTypeEnum,
   type SimpleContribution,
 } from "~/models/contribution";
-import type { Edition } from "~/models/edition";
+import type { ContributionEdition, Edition } from "~/models/edition";
 import {
   publisherToSimplePublisher,
   type SimplePublisher,
@@ -18,7 +18,7 @@ import {
   useLazySearchBooksByNameQuery,
   useLazySearchPublishersByNameQuery,
 } from "~/store/services/api";
-import { toHtmlInputString, zDateRequired } from "~/utils/date";
+import { toHtmlInputString, toYYYYmmDD, zDateRequired } from "~/utils/date";
 import { noPropagationEvt } from "~/utils/events";
 import { GenericButton } from "../buttons/GenericButton";
 import { DateRhfInput } from "./fields/DateRhfInput";
@@ -89,7 +89,7 @@ export function EditionContributionForm({
   });
 
   const triggerSubmission = (data: FieldValues) => {
-    const newEdition: Partial<Edition> = {
+    const newEdition: ContributionEdition = {
       id: edition?.id,
       isbn: data?.isbn,
       ean: data?.ean,
@@ -98,9 +98,9 @@ export function EditionContributionForm({
       url: data?.url,
       imgUrl: data?.imgUrl,
       coverType: data?.coverType,
-      parutionDate: data?.parutionDate,
-      book: (bookLocalRef ?? selectedBook) as SimpleBook,
-      publisher: selectedPublisher,
+      parutionDate: toYYYYmmDD(data?.parutionDate),
+      book: { id: (bookLocalRef?.id ?? selectedBook?.id)! },
+      publisher: { id: selectedPublisher?.id! },
     };
     const contrib: Partial<SimpleContribution> = {
       action:
@@ -245,6 +245,7 @@ export function EditionContributionForm({
           registration={register("price")}
           inputProps={{
             type: "number",
+            step: ".01",
             inputMode: "numeric",
           }}
           error={errors.price}

@@ -1,13 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GenericButton } from "~/components/buttons/GenericButton";
 import { ContributionBundleModal } from "~/components/modals/contribution/ContributionBundleModal";
 import { ContributionTable } from "~/components/tables/ContributionTable";
 import { useTranslation } from "~/i18n/i18n";
 import { ContributionStatusEnum } from "~/models/contribution";
 import { useAppSelector } from "~/store/hooks";
-import { useContributionBySubmitterIdQuery } from "~/store/services/api";
+import {
+  useContributionBySubmitterIdQuery,
+  useSubmitContributionBundleMutation,
+} from "~/store/services/api";
 import { createError } from "~/utils/error";
 import type { Route } from "../+types/root";
+import { useToast } from "~/components/toast/Toast";
+import type { ContributionBundle } from "~/models/contributionBundle";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -18,23 +23,32 @@ export function meta({}: Route.MetaArgs) {
 
 export default function ContributePage() {
   const { t } = useTranslation();
+  const toast = useToast();
   const { isAuthenticated, user } = useAppSelector((state) => state.user);
+
   // Fetch contributions
-  const { data, isLoading, error } = useContributionBySubmitterIdQuery(
+  const { data, isLoading, error, refetch } = useContributionBySubmitterIdQuery(
     user ? { id: user.id } : { id: 0 },
     { skip: !user }, // Doesn't execute if user is undefined
   );
 
-  // Handles login modal state
+  // Submit a contribution bundle
+  const [submitBundle, { isError, isSuccess }] =
+    useSubmitContributionBundleMutation();
+
+  // Handles contribution modal state
   const [isContributionModalOpen, setisContributionModalOpen] = useState(false);
 
-  const openContributionModal = () => {
-    setisContributionModalOpen(true);
-  };
-
-  const closeContributionModal = () => {
-    setisContributionModalOpen(false);
-  };
+  // If error or success occurs during contribution submission
+  useEffect(() => {
+    if (isError) toast.error(t("contribute.fail"));
+  }, [isError]);
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success(t("contribute.success"));
+      refetch();
+    }
+  }, [isSuccess]);
 
   // If not auth
   if (!isAuthenticated) {
@@ -55,6 +69,14 @@ export default function ContributePage() {
     );
   }
 
+  const openContributionModal = () => {
+    setisContributionModalOpen(true);
+  };
+
+  const closeContributionModal = () => {
+    setisContributionModalOpen(false);
+  };
+
   const err = createError(error);
   const contributions = data?.contributions;
   const stats = {
@@ -70,6 +92,12 @@ export default function ContributePage() {
     else if (contrib.status === ContributionStatusEnum.REJECTED)
       stats.rejected++;
   });
+
+  const submitContributionBundle = async (
+    bundle: Partial<ContributionBundle>,
+  ) => {
+    submitBundle(bundle);
+  };
 
   return (
     <main className="flex flex-col items-center pt-8 px-4 lg:px-8 xl:px-12">
@@ -144,6 +172,7 @@ export default function ContributePage() {
 
       <ContributionBundleModal
         isOpen={isContributionModalOpen}
+        onSubmit={submitContributionBundle}
         onClose={closeContributionModal}
       ></ContributionBundleModal>
     </main>

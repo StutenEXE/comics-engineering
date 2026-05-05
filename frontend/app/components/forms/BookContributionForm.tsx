@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useForm, type FieldValues } from "react-hook-form";
 import z from "zod";
 import { useTranslation } from "~/i18n/i18n";
-import type { Book } from "~/models/book";
+import type { Book, ContributionBook } from "~/models/book";
 import {
   ContributionActionEnum,
   ContributionTypeEnum,
@@ -63,13 +63,13 @@ export function BookContributionForm({
   });
 
   const triggerSubmission = (data: FieldValues) => {
-    const newBook: Partial<Book> = {
+    const newBook: ContributionBook = {
       id: book?.id,
       name: data?.name,
       desc: data?.desc,
       voContent: data?.voContent,
       imgUrl: data?.imgUrl,
-      serie: (serieLocalRef ?? selectedSerie) as SimpleSerie,
+      serie: { id: (serieLocalRef?.id ?? selectedSerie?.id)! },
     };
     const contrib: Partial<SimpleContribution> = {
       action:

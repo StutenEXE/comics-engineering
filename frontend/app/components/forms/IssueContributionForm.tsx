@@ -7,8 +7,13 @@ import {
   ContributionTypeEnum,
   type SimpleContribution,
 } from "~/models/contribution";
-import type { Issue } from "~/models/issue";
-import { toHtmlInputString, zDateOptional, zDateRequired } from "~/utils/date";
+import type { ContributionIssue, Issue } from "~/models/issue";
+import {
+  toHtmlInputString,
+  toYYYYmmDD,
+  zDateOptional,
+  zDateRequired,
+} from "~/utils/date";
 import { noPropagationEvt } from "~/utils/events";
 import { GenericButton } from "../buttons/GenericButton";
 import { TextRhfInput } from "./fields/TextRhfInput";
@@ -59,13 +64,13 @@ export function IssueContributionForm({
   });
 
   const triggerSubmission = (data: FieldValues) => {
-    const newIssue: Partial<Issue> = {
+    const newIssue: ContributionIssue = {
       id: issue?.id,
       name: data.name,
       number: data.number,
-      coverDate: data.coverDate,
-      parutionDate: data.parutionDate,
-      issueSerie: (issueSerieLocalRef ?? selectedIssueSerie) as SimpleIssueSerie,
+      coverDate: toYYYYmmDD(data.coverDate),
+      parutionDate: toYYYYmmDD(data.parutionDate),
+      issueSerie: { id: (issueSerieLocalRef?.id ?? selectedIssueSerie?.id)! },
     };
     const contrib: Partial<SimpleContribution> = {
       action:

@@ -24,10 +24,11 @@ import { IssueSerieContributionModal } from "../modals/contribution/IssueSerieCo
 import { parseToIssueSerie } from "~/models/issue-serie";
 import { IssueContributionModal } from "../modals/contribution/IssueContributionModal";
 import { parseToIssue } from "~/models/issue";
+import { useAppSelector } from "~/store/hooks";
 
 interface ContributionBundleFormProps {
   bundle?: ContributionBundle;
-  onSubmit?: () => void;
+  onSubmit?: (bundle: Partial<ContributionBundle>) => void;
   onCancel?: () => void;
 }
 
@@ -38,6 +39,7 @@ export function ContributionBundleForm({
 }: ContributionBundleFormProps) {
   const { t } = useTranslation();
   const confirm = useConfirm();
+  const { user } = useAppSelector((state) => state.user);
 
   // Validation schema
   const schema = z.object({
@@ -162,9 +164,10 @@ export function ContributionBundleForm({
     const newBundle: Partial<ContributionBundle> = {
       contributions: contributions,
       note: data?.note,
+      submitter: user!
     };
     console.log(newBundle);
-    onSubmit?.();
+    onSubmit?.(newBundle);
   };
 
   const handleCancel = () => {

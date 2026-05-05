@@ -74,6 +74,20 @@ export function parseToSimpleEdition(data: Record<string, any>): SimpleEdition {
     }
 }
 
+export interface ContributionEdition {
+    id?: number,
+    isbn: string,
+    ean?: string,
+    npages?: number,
+    price?: number,
+    url: string,
+    imgUrl: string,
+    coverType: string,
+    parutionDate: string,
+    publisher: { id: number },
+    book: { id: number }
+}
+
 export function isSimpleEdition(edition: Edition | SimpleEdition): edition is SimpleEdition {
     return (edition as SimpleEdition).publisherId !== undefined && (edition as SimpleEdition).bookId !== undefined
 }

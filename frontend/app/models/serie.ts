@@ -54,6 +54,16 @@ export function parseToSimpleSerie(data: Record<string, any>): SimpleSerie {
     }
 }
 
+export interface ContributionSerie {
+    id?: number,
+    name: string,
+    ongoing: boolean,
+    oneshot: boolean,
+    nvolumes?: number,
+    startDate: string,
+    endDate?: string,
+}
+
 export function simplifySerie(ser: Serie): SimpleSerie {
     return parseToSimpleSerie(ser)
 }

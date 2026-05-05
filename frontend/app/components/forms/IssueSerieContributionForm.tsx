@@ -9,13 +9,13 @@ import {
   type SimpleContribution,
 } from "~/models/contribution";
 import type { Serie } from "~/models/serie";
-import { toHtmlInputString, zDateOptional, zDateRequired } from "~/utils/date";
+import { toHtmlInputString, toYYYYmmDD, zDateOptional, zDateRequired } from "~/utils/date";
 import { noPropagationEvt } from "~/utils/events";
 import { GenericButton } from "../buttons/GenericButton";
 import { CheckboxRhfInput } from "./fields/CheckboxRhfInput";
 import { DateRangeRhfInput } from "./fields/DateRangeRhfInput";
 import { TextRhfInput } from "./fields/TextRhfInput";
-import type { IssueSerie } from "~/models/issue-serie";
+import type { ContributionIssueSerie, IssueSerie } from "~/models/issue-serie";
 import { TextAreaRhfInput } from "./fields/TextAreaRhfInput";
 
 interface IssueSerieFormProps {
@@ -65,12 +65,12 @@ export function IssueSerieContributionForm({
   });
 
   const triggerSubmission = (data: FieldValues) => {
-    const newIssueSerie: Partial<IssueSerie> = {
+    const newIssueSerie: ContributionIssueSerie = {
       id: issueSerie?.id,
       name: data.name,
       desc: data.desc,
-      startDate: data.startDate,
-      endDate: data.endDate,
+      startDate: toYYYYmmDD(data.startDate),
+      endDate: toYYYYmmDD(data.endDate),
     };
     const contrib: Partial<SimpleContribution> = {
       action:

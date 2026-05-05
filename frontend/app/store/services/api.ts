@@ -217,7 +217,7 @@ export const privateApi = createApi({
     /****************
      * CONTRIBUTIONS
      ****************/
-    submitContributionBundle: build.mutation<{ bundleId: number }, ContributionBundle>({
+    submitContributionBundle: build.mutation<{ bundleId: number }, Partial<ContributionBundle>>({
         query: (data) => ({ url: "/contribute", method: 'POST', body: data }),
       }),
   }),

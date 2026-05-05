@@ -48,3 +48,11 @@ export function parseToSimpleIssueSerie(data: Record<string, any>): SimpleIssueS
         endDate: data.endDate ? new Date(data.endDate) : null
     }
 }
+
+export interface ContributionIssueSerie {
+    id?: number,
+    name: string,
+    desc?: string,
+    startDate: string,
+    endDate?: string,
+}

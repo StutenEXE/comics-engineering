@@ -1,5 +1,6 @@
 package dev.stuten.vps.models.dtos.simple;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -22,6 +23,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @JsonDeserialize(using = SimpleContributionDTODeserializer.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SimpleContributionDTO<T extends IdDTO> extends IdDTO {
     @JsonProperty("bundleId")
     private Integer bundleId;

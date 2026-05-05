@@ -1,5 +1,6 @@
 package dev.stuten.vps.models.dtos.simple;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import dev.stuten.vps.models.dtos.template.IdDTO;
@@ -16,6 +17,7 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SimpleUserDTO extends IdDTO {
 
     @JsonProperty("username")

@@ -44,7 +44,7 @@ public class SimpleContributionDTODeserializer extends JsonDeserializer<SimpleCo
         IdDTO proposedData = deserializeNode(node.get("proposedData"), dataClass, codec);
         IdDTO entitySnapshot = deserializeNode(node.get("entitySnapshot"), dataClass, codec);
 
-        // dBuild the DTO manually
+        // Build the DTO manually
         return SimpleContributionDTO.builder()
                 .bundleId(nullableInt(node, "bundleId"))
                 .localRef(nullableInt(node, "localRef"))

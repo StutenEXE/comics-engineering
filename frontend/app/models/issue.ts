@@ -53,6 +53,15 @@ export function parseToSimpleIssue(data: Record<string, any>): SimpleIssue {
     }
 }
 
+export interface ContributionIssue {
+    id?: number,
+    name: string,
+    number: number,
+    coverDate: string,
+    parutionDate: string,
+    issueSerie: { id: number }
+}
+
 export function isSimpleIssue(issue: Issue | SimpleIssue): issue is SimpleIssue {
     return (issue as SimpleIssue).issueSerieId !== undefined;
 }

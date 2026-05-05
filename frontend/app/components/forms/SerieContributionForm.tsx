@@ -8,8 +8,8 @@ import {
   ContributionTypeEnum,
   type SimpleContribution,
 } from "~/models/contribution";
-import type { Serie } from "~/models/serie";
-import { toHtmlInputString, zDateOptional, zDateRequired } from "~/utils/date";
+import type { ContributionSerie, Serie } from "~/models/serie";
+import { toHtmlInputString, toYYYYmmDD, zDateOptional, zDateRequired } from "~/utils/date";
 import { noPropagationEvt } from "~/utils/events";
 import { GenericButton } from "../buttons/GenericButton";
 import { CheckboxRhfInput } from "./fields/CheckboxRhfInput";
@@ -65,13 +65,13 @@ export function SerieContributionForm({
   });
 
   const triggerSubmission = (data: FieldValues) => {
-    const newSerie: Partial<Serie> = {
+    const newSerie: ContributionSerie = {
       id: serie?.id,
       name: data.name,
       ongoing: data.ongoing,
       oneshot: data.oneshot,
-      startDate: data.startDate,
-      endDate: data.endDate,
+      startDate: toYYYYmmDD(data.startDate),
+      endDate: toYYYYmmDD(data.endDate),
     };
     const contrib: Partial<SimpleContribution> = {
       action:

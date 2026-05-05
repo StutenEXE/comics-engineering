@@ -1,10 +1,10 @@
+import { useTranslation } from "~/i18n/i18n";
 import {
   getContributionColumns,
   type Contribution,
 } from "~/models/contribution";
-import { GenericTable } from "./GenericTable";
 import type { Error } from "~/utils/error";
-import { useTranslation } from "~/i18n/i18n";
+import { GenericTable } from "./GenericTable";
 
 interface ContributionTableProps {
   contributionList: Contribution[] | null | undefined;
@@ -14,14 +14,21 @@ interface ContributionTableProps {
 }
 
 export function ContributionTable({
-  contributionList: bundleList,
+  contributionList,
   isLoading,
   error,
 }: ContributionTableProps) {
   const { t } = useTranslation();
   return (
     <GenericTable
-      list={bundleList}
+      list={
+        contributionList
+          ? [...contributionList]?.sort(
+              (c1, c2) =>
+                c2.bundle.createdAt.getTime() - c1.bundle.createdAt.getTime(),
+            )
+          : []
+      }
       columns={getContributionColumns()}
       isLoading={isLoading}
       emptyMessage={t("contribution.table.empty")}
