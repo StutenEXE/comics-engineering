@@ -69,7 +69,7 @@ export function BookContributionForm({
       desc: data?.desc,
       voContent: data?.voContent,
       imgUrl: data?.imgUrl,
-      serie: (!serieLocalRef ? selectedSerie : serieLocalRef) as SimpleSerie,
+      serie: (serieLocalRef ?? selectedSerie) as SimpleSerie,
     };
     const contrib: Partial<SimpleContribution> = {
       action:

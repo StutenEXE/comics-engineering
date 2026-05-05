@@ -118,4 +118,9 @@ public class IssueSerieDAO extends ContributableDAO<IssueSerieDTO> {
     public Optional<IssueSerieDTO> findById(Integer id) {
         return super.selectOne(ISSUE_SERIES.ID.eq(id));
     }
+
+    public List<IssueSerieDTO> searchByName(String query) {
+        String searchPattern = toSearchPattern(query);
+        return super.selectMany(ISSUE_SERIES.NAME.likeIgnoreCase(searchPattern));
+    }
 }

@@ -146,6 +146,13 @@ export const publicApi = createApi({
         publishers: resp.publishers.map(parseToPublisher),
       }),
     }),
+    // Search issue series
+    searchIssueSeriesByName: build.query<{ issueSeries: IssueSerie[] }, { query: string }>({
+      query: ({ query }) => ({ url: "/search/issueseries", method: 'GET', params: { query: query.trim().toLowerCase() } }),
+      transformResponse: (resp: { issueSeries: IssueSerie[] }) => ({
+        issueSeries: resp.issueSeries.map(parseToIssueSerie),
+      }),
+    }),
     // Search books and series
     searchBooksAndSeriesByName: build.query<{ books: Book[], series: Serie[] }, { query: string }>({
       query: ({ query }) => ({ url: "/search/books_and_series", method: 'GET', params: { query: query.trim().toLowerCase() } }),
@@ -179,6 +186,7 @@ export const {
   useLazySearchBooksByNameQuery,
   useLazySearchSeriesByNameQuery,
   useLazySearchPublishersByNameQuery,
+  useLazySearchIssueSeriesByNameQuery,
   // Lazyfy ?
   useSearchBooksAndSeriesByNameQuery,
   useContributionBySubmitterIdQuery

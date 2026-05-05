@@ -11,6 +11,7 @@ public class SearchRouter implements Router {
         app.get(APIPathBuilder.buildPublicPath("/search/books"), SearchService::searchBooks);
         app.get(APIPathBuilder.buildPublicPath("/search/series"), SearchService::searchSeries);
         app.get(APIPathBuilder.buildPublicPath("/search/publishers"), SearchService::searchPublishers);
+        app.get(APIPathBuilder.buildPublicPath("/search/issueseries"), SearchService::searchIssueSeries);
         app.get(APIPathBuilder.buildPublicPath("/search/books_and_series"), SearchService::searchBooksAndSeries);
     }
     

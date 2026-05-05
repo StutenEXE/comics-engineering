@@ -99,7 +99,7 @@ export function EditionContributionForm({
       imgUrl: data?.imgUrl,
       coverType: data?.coverType,
       parutionDate: data?.parutionDate,
-      book: (!bookLocalRef ? selectedBook : bookLocalRef) as SimpleBook,
+      book: (bookLocalRef ?? selectedBook) as SimpleBook,
       publisher: selectedPublisher,
     };
     const contrib: Partial<SimpleContribution> = {

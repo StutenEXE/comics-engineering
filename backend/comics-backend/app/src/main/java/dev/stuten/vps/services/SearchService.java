@@ -6,9 +6,11 @@ import java.util.Map;
 
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.BookDAO;
+import dev.stuten.vps.models.daos.IssueSerieDAO;
 import dev.stuten.vps.models.daos.PublisherDAO;
 import dev.stuten.vps.models.daos.SerieDAO;
 import dev.stuten.vps.models.dtos.full.BookDTO;
+import dev.stuten.vps.models.dtos.full.IssueSerieDTO;
 import dev.stuten.vps.models.dtos.full.PublisherDTO;
 import dev.stuten.vps.models.dtos.full.SerieDTO;
 import dev.stuten.vps.web.ErrorResponse;
@@ -27,6 +29,9 @@ public class SearchService {
             JooqProvider.get());
 
     private static PublisherDAO publisherDao = new PublisherDAO(
+            JooqProvider.get());
+
+    private static IssueSerieDAO issueSeriesDao = new IssueSerieDAO(
             JooqProvider.get());
 
     public static void searchBooksAndSeries(Context ctx) {
@@ -116,12 +121,34 @@ public class SearchService {
             return; // For compiler
         }
 
-        // Lists of elements to retreive
-        List<PublisherDTO> publishers = Arrays.asList();
-
         // Retreive series - Here broad queries are handled
-        publishers = publisherDao.searchByName(query);
+        List<PublisherDTO> publishers = publisherDao.searchByName(query);
 
         ctx.json(Map.of("publishers", publishers));
+    }
+    
+    public static void searchIssueSeries(Context ctx) {
+        // Retreive query from request
+        String query = "";
+        try {
+            query = ctx.queryParam("query");
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing query");
+            return; // For compiler
+        }
+
+        // Lists of elements to retreive
+        List<IssueSerieDTO> issueSeries = Arrays.asList();
+
+        // To broad queries are not handled
+        if (query.length() < 3) {
+            ctx.json(Map.of("issueSeries", issueSeries));
+            return;
+        }
+
+        // Retreive series - Here broad queries are handled
+        issueSeries = issueSeriesDao.searchByName(query);
+
+        ctx.json(Map.of("issueSeries", issueSeries));
     }
 }

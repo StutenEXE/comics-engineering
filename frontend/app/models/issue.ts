@@ -73,6 +73,6 @@ export function buildIssueShortName(is: Issue | SimpleIssue | null): string {
     if (!is) {
         return "";
     }
-    let shortTitle =`${isSimpleIssue(is) ? is.issueSerieName :is.issueSerie?.name}`
+    let shortTitle =`${isSimpleIssue(is) ? is.issueSerieName : is.issueSerie?.name}`
     return `${shortTitle} #${is.number}`
 }

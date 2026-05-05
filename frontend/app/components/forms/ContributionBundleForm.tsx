@@ -22,6 +22,8 @@ import { EditionContributionModal } from "../modals/contribution/EditionContribu
 import { parseToEdition } from "~/models/edition";
 import { IssueSerieContributionModal } from "../modals/contribution/IssueSerieContributionModal";
 import { parseToIssueSerie } from "~/models/issue-serie";
+import { IssueContributionModal } from "../modals/contribution/IssueContributionModal";
+import { parseToIssue } from "~/models/issue";
 
 interface ContributionBundleFormProps {
   bundle?: ContributionBundle;
@@ -59,6 +61,7 @@ export function ContributionBundleForm({
   const [isEditionOpen, setIsEditionOpen] = useState(false);
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [isSerieOpen, setIsSerieOpen] = useState(false);
+  const [isIssueOpen, setIsIssueOpen] = useState(false);
   const [isIssueSerieOpen, setIsIssueSerieOpen] = useState(false);
 
   // Bundle data
@@ -78,6 +81,7 @@ export function ContributionBundleForm({
     setIsEditionOpen(false);
     setIsBookOpen(false);
     setIsSerieOpen(false);
+    setIsIssueOpen(false);
     setIsIssueSerieOpen(false);
     switch (type) {
       case ContributionTypeEnum.EDITION:
@@ -86,6 +90,8 @@ export function ContributionBundleForm({
         return setIsBookOpen(true);
       case ContributionTypeEnum.SERIE:
         return setIsSerieOpen(true);
+      case ContributionTypeEnum.ISSUE:
+        return setIsIssueOpen(true);
       case ContributionTypeEnum.ISSUE_SERIE:
         return setIsIssueSerieOpen(true);
     }
@@ -109,6 +115,8 @@ export function ContributionBundleForm({
         return setIsEditionOpen(true);
       case ContributionTypeEnum.SERIE:
         return setIsBookOpen(true);
+      case ContributionTypeEnum.ISSUE_SERIE:
+        return setIsIssueOpen(true);
     }
     setLocalRef(undefined);
   };
@@ -295,6 +303,19 @@ export function ContributionBundleForm({
         isOpen={isSerieOpen}
         onSubmit={handleContributionSubmission}
         onClose={() => setIsSerieOpen(false)}
+      />
+      <IssueContributionModal
+        issue={
+          contribToModify &&
+          contribToModify.entityType === ContributionTypeEnum.ISSUE
+            ? parseToIssue(contribToModify.proposedData)
+            : undefined
+        }
+        issueSerieLocalRef={localRef}
+        action="create"
+        isOpen={isIssueOpen}
+        onSubmit={handleContributionSubmission}
+        onClose={() => setIsIssueOpen(false)}
       />
       <IssueSerieContributionModal
         issueSerie={

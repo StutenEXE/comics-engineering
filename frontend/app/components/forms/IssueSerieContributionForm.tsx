@@ -108,7 +108,7 @@ export function IssueSerieContributionForm({
     >
       {/* Title */}
       <h2 className="text-lg font-semibold tracking-wide text-white/90 text-center border-b border-white/10 pb-4">
-        {t("serie.form.title")}
+        {t("issueserie.form.title")}
       </h2>
 
       {/* Name field */}
