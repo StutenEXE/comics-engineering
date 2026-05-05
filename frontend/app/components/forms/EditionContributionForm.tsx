@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useForm, type FieldValues } from "react-hook-form";
 import z from "zod";
 import { useTranslation } from "~/i18n/i18n";
-import { bookToSimpleBook, type Book, type SimpleBook } from "~/models/book";
+import { bookToSimpleBook, type SimpleBook } from "~/models/book";
 import {
   ContributionActionEnum,
   ContributionTypeEnum,
@@ -11,25 +11,24 @@ import {
 } from "~/models/contribution";
 import type { Edition } from "~/models/edition";
 import {
+  publisherToSimplePublisher,
+  type SimplePublisher,
+} from "~/models/publisher";
+import {
   useLazySearchBooksByNameQuery,
   useLazySearchPublishersByNameQuery,
 } from "~/store/services/api";
 import { toHtmlInputString, zDateRequired } from "~/utils/date";
 import { noPropagationEvt } from "~/utils/events";
 import { GenericButton } from "../buttons/GenericButton";
-import { SearchSelectInput } from "./fields/SearchSelectInput";
-import {
-  publisherToSimplePublisher,
-  type SimplePublisher,
-} from "~/models/publisher";
-import { TextRhfInput } from "./fields/TextRhfInput";
-import { formatToIsbn } from "~/utils/strings";
 import { DateRhfInput } from "./fields/DateRhfInput";
+import { SearchSelectInput } from "./fields/SearchSelectInput";
 import { SelectRhfInput } from "./fields/SelectRhfInput";
+import { TextRhfInput } from "./fields/TextRhfInput";
 
 interface EditionFormProps {
   edition?: Edition;
-  bookLocalRef?: number;
+  bookLocalRef?: { id: number; name: string };
   action: "create" | "update";
   onSubmit?: (c: Partial<SimpleContribution>) => void;
   onCancel?: () => void;
@@ -45,30 +44,36 @@ export function EditionContributionForm({
   const { t } = useTranslation();
 
   // Validation schema
-  const schema = z.object({
-    isbn: z
-      .string()
-      .min(1, t("edition.form.isbn.required"))
-      .regex(/^\d{13}$/, t("edition.form.isbn.13digits")),
-    ean: z
-      .string()
-      .regex(/^\d{13}$/, t("edition.form.ean.13digits"))
-      .optional()
-      .or(z.literal("")),
-    npages: z.coerce.number().gte(0, t("edition.form.npages.gte0")).optional(),
-    price: z.coerce.number().gte(0, t("edition.form.price.gte0")).optional(),
-    url: z.httpUrl().min(1, "edition.form.url.required"),
-    imgUrl: z.httpUrl().min(1, "edition.form.img.required"),
-    coverType: z.string(), //z.literal(["Hardcover", "Paperback", "Single issue"]),
-    parutionDate: zDateRequired(t("form.required")),
-  });
+  const schema = z
+    .object({
+      isbn: z
+        .string()
+        .min(1, t("edition.form.isbn.required"))
+        .regex(/^\d{13}$/, t("edition.form.isbn.13digits")),
+      ean: z
+        .string()
+        .regex(/^\d{13}$/, t("edition.form.ean.13digits"))
+        .optional()
+        .or(z.literal("")),
+      npages: z.coerce
+        .number()
+        .gte(0, t("edition.form.npages.gte0"))
+        .optional(),
+      price: z.coerce.number().gte(0, t("edition.form.price.gte0")).optional(),
+      url: z.httpUrl().min(1, "edition.form.url.required"),
+      imgUrl: z.httpUrl().min(1, "edition.form.img.required"),
+      coverType: z.string(), //z.literal(["Hardcover", "Paperback", "Single issue"]),
+      parutionDate: zDateRequired(t("form.required")),
+    })
+    .refine(() => bookLocalRef || selectedBook)
+    .refine(() => selectedPublisher);
 
   type FormData = z.infer<typeof schema>;
   // Form operations
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<FormData>({
     resolver: zodResolver(schema) as any,
     defaultValues: {
@@ -94,11 +99,7 @@ export function EditionContributionForm({
       imgUrl: data?.imgUrl,
       coverType: data?.coverType,
       parutionDate: data?.parutionDate,
-      book: (!bookLocalRef
-        ? selectedBook
-        : {
-            id: bookLocalRef,
-          }) as SimpleBook,
+      book: (!bookLocalRef ? selectedBook : bookLocalRef) as SimpleBook,
       publisher: selectedPublisher,
     };
     const contrib: Partial<SimpleContribution> = {
@@ -157,6 +158,11 @@ export function EditionContributionForm({
         onSearch={handleBookSearch}
         onSelect={setSelectedBook}
         onClear={() => setSelectedBook(undefined)}
+        error={
+          !isValid && !bookLocalRef && !selectedBook
+            ? t("edition.form.book.required")
+            : undefined
+        }
       />
 
       {/* Publisher selection */}
@@ -168,6 +174,11 @@ export function EditionContributionForm({
         onSearch={handlePublisherSearch}
         onSelect={setSelectedPublisher}
         onClear={() => setSelectedPublisher(undefined)}
+        error={
+          !isValid && !selectedPublisher
+            ? t("edition.form.publisher.required")
+            : undefined
+        }
       />
 
       {/* ISBN */}

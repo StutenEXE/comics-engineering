@@ -19,7 +19,7 @@ import { TextRhfInput } from "./fields/TextRhfInput";
 
 interface BookFormProps {
   book?: Book;
-  serieLocalRef?: number;
+  serieLocalRef?: { id: number; name: string };
   action: "create" | "update";
   onSubmit?: (c: Partial<SimpleContribution>) => void;
   onCancel?: () => void;
@@ -35,20 +35,22 @@ export function BookContributionForm({
   const { t } = useTranslation();
 
   // Validation schema
-  const schema = z.object({
-    name: z.string().min(1, t("book.form.name.required")),
-    desc: z.string().optional(),
-    number: z.coerce.number().optional(),
-    voContent: z.string().optional(),
-    imgUrl: z.httpUrl().min(1, "book.form.img.required"),
-  });
+  const schema = z
+    .object({
+      name: z.string().min(1, t("book.form.name.required")),
+      desc: z.string().optional(),
+      number: z.coerce.number().optional(),
+      voContent: z.string().optional(),
+      imgUrl: z.httpUrl().min(1, "book.form.img.required"),
+    })
+    .refine(() => serieLocalRef || selectedSerie);
 
   type FormData = z.infer<typeof schema>;
   // Form operations
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<FormData>({
     resolver: zodResolver(schema) as any,
     defaultValues: {
@@ -67,11 +69,7 @@ export function BookContributionForm({
       desc: data?.desc,
       voContent: data?.voContent,
       imgUrl: data?.imgUrl,
-      serie: (!serieLocalRef
-        ? selectedSerie
-        : {
-            id: serieLocalRef,
-          }) as SimpleSerie,
+      serie: (!serieLocalRef ? selectedSerie : serieLocalRef) as SimpleSerie,
     };
     const contrib: Partial<SimpleContribution> = {
       action:
@@ -128,6 +126,11 @@ export function BookContributionForm({
           onSearch={handleSearch}
           onSelect={setSelectedSerie}
           onClear={() => setSelectedSerie(undefined)}
+          error={
+            !isValid && !serieLocalRef && !selectedSerie
+              ? t("book.form.serie.required")
+              : undefined
+          }
         />
 
         <TextRhfInput

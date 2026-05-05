@@ -1,6 +1,7 @@
-// Component made by AI (Claude Sonnet 4.6) from a code snippet I gave him 
+// Component made by AI (Claude Sonnet 4.6) from a code snippet I gave him
 
 import { useState } from "react";
+import type { FieldError } from "react-hook-form";
 import { MdDelete } from "react-icons/md";
 
 export interface SearchSelectItem {
@@ -25,7 +26,7 @@ export interface SearchSelectInputProps<T extends SearchSelectItem> {
    * When truthy the component renders a "local ref present" badge instead of
    * the normal selected-item badge and disables the input.
    */
-  localRef?: number;
+  localRef?: { id: number; name: string };
 
   /** Text shown inside the badge when `localRef` is set */
   localRefLabel?: string;
@@ -50,6 +51,11 @@ export interface SearchSelectInputProps<T extends SearchSelectItem> {
    * Falls back to `name` + `#id` when omitted.
    */
   renderSelected?: (item: T) => React.ReactNode;
+
+  /**
+   * Optional error coming from the form
+   */
+  error?: string;
 }
 
 export function SearchSelectInput<T extends SearchSelectItem>({
@@ -64,6 +70,7 @@ export function SearchSelectInput<T extends SearchSelectItem>({
   onSelect,
   renderResult,
   renderSelected,
+  error,
 }: SearchSelectInputProps<T>) {
   const [inputValue, setInputValue] = useState("");
 
@@ -180,6 +187,7 @@ export function SearchSelectInput<T extends SearchSelectItem>({
           )}
         </>
       )}
+      {error && <p className="text-xs text-rose-400/80">{error}</p>}
     </div>
   );
 }

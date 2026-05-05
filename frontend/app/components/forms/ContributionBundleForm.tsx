@@ -70,7 +70,9 @@ export function ContributionBundleForm({
   const [contribToModify, setContribToModify] = useState<
     SimpleContribution | undefined
   >(undefined);
-  const [localRef, setLocalRef] = useState<number | undefined>(undefined);
+  const [localRef, setLocalRef] = useState<
+    { id: number; name: string } | undefined
+  >(undefined);
 
   const openModal = (type: ContributionTypeEnum) => {
     setIsEditionOpen(false);
@@ -98,7 +100,10 @@ export function ContributionBundleForm({
 
   const createDependantContribution = (c: SimpleContribution) => {
     setContribToModify(undefined);
-    setLocalRef(c.localRef);
+    setLocalRef({
+      id: c.localRef!,
+      name: c.proposedData.name
+    });
     switch (c.entityType) {
       case ContributionTypeEnum.BOOK:
         return setIsEditionOpen(true);

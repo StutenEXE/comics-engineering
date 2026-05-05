@@ -1,14 +1,11 @@
-import { SerieContributionForm } from "~/components/forms/SerieContributionForm";
-import { GenericModal } from "../GenericModal";
-import type { SimpleContribution } from "~/models/contribution";
-import type { Book } from "~/models/book";
-import { BookContributionForm } from "~/components/forms/BookContributionForm";
-import type { Edition } from "~/models/edition";
 import { EditionContributionForm } from "~/components/forms/EditionContributionForm";
+import type { SimpleContribution } from "~/models/contribution";
+import type { Edition } from "~/models/edition";
+import { GenericModal } from "../GenericModal";
 
 interface EditionContributionModalProps {
   edition?: Edition;
-  bookLocalRef?: number
+  bookLocalRef?: { id: number; name: string };
   action: "create" | "update";
   isOpen: boolean;
   onSubmit: (c: Partial<SimpleContribution>) => void;
