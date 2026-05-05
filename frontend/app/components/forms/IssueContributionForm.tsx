@@ -70,7 +70,7 @@ export function IssueContributionForm({
       number: data.number,
       coverDate: toYYYYmmDD(data.coverDate),
       parutionDate: toYYYYmmDD(data.parutionDate),
-      issueSerie: { id: (issueSerieLocalRef?.id ?? selectedIssueSerie?.id)! },
+      issueSerie: issueSerieLocalRef ?? { id: selectedIssueSerie?.id!, name: selectedIssueSerie?.name! },
     };
     const contrib: Partial<SimpleContribution> = {
       action:

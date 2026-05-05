@@ -59,7 +59,7 @@ export interface ContributionIssue {
     number: number,
     coverDate: string,
     parutionDate: string,
-    issueSerie: { id: number }
+    issueSerie: { id: number, name: string }
 }
 
 export function isSimpleIssue(issue: Issue | SimpleIssue): issue is SimpleIssue {

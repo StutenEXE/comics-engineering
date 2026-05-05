@@ -84,8 +84,8 @@ export interface ContributionEdition {
     imgUrl: string,
     coverType: string,
     parutionDate: string,
-    publisher: { id: number },
-    book: { id: number }
+    publisher: { id: number, name: string },
+    book: { id: number, name: string }
 }
 
 export function isSimpleEdition(edition: Edition | SimpleEdition): edition is SimpleEdition {
