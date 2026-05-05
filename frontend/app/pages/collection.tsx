@@ -1,13 +1,12 @@
 import { useMemo } from "react";
-import { useTranslation } from "~/i18n/i18n";
-import type { Route } from "../+types/root";
-import { useCollectionQuery } from "~/store/services/api";
-import { useAppSelector } from "~/store/hooks";
-import { createError } from "~/utils/error";
 import { LoggedProtectedRoute } from "~/components/security/LoggedProtectedRoute";
-import { Tabs, type TabItem } from "~/components/tabs/Tabs";
-import { OwnedEditionTable } from "~/components/tables/OwnedEditionTable";
 import { OwnedEditionTab } from "~/components/tabs/collection/OwnedEditionTab";
+import { Tabs, type TabItem } from "~/components/tabs/Tabs";
+import { useTranslation } from "~/i18n/i18n";
+import { useAppSelector } from "~/store/hooks";
+import { useCollectionQuery } from "~/store/services/api";
+import { createError } from "~/utils/error";
+import type { Route } from "../+types/root";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -18,9 +17,12 @@ export function meta({}: Route.MetaArgs) {
 
 export default function CollectionPage() {
   const { t } = useTranslation();
-  const { user } = useAppSelector((state) => state.user);
+  const { user, isAuthenticated } = useAppSelector((state) => state.user);
 
-  const { data, isLoading, error } = useCollectionQuery({ id: user!.id });
+  const { data, isLoading, error } = useCollectionQuery(
+    user ? { id: user.id } : { id: 0 },
+    { skip: !user },
+  );
   const ownedEd = data?.ownedEditions ?? null;
   const err = createError(error);
 

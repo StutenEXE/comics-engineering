@@ -14,11 +14,15 @@ import { SerieContributionModal } from "../modals/contribution/SerieContribution
 import { parseToSerie, type Serie } from "~/models/serie";
 import { parseToBook } from "~/models/book";
 import { BookContributionModal } from "../modals/contribution/BookContributionModal";
+import z from "zod";
+import { useForm, type FieldValues } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { TextAreaRhfInput } from "./fields/TextAreaRhfInput";
 
 interface ContributionBundleFormProps {
   bundle?: ContributionBundle;
-  onSubmit?: () => {};
-  onCancel?: () => {};
+  onSubmit?: () => void;
+  onCancel?: () => void;
 }
 
 export function ContributionBundleForm({
@@ -28,7 +32,24 @@ export function ContributionBundleForm({
 }: ContributionBundleFormProps) {
   const { t } = useTranslation();
   const confirm = useConfirm();
-  // TODO : react hook forms
+
+  // Validation schema
+  const schema = z.object({
+    note: z.string(),
+  });
+
+  type FormData = z.infer<typeof schema>;
+  // Form operations
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(schema) as any,
+    defaultValues: {
+      note: bundle?.note,
+    },
+  });
 
   // Modal states
   const [isSerieOpen, setIsSerieOpen] = useState(false);
@@ -109,25 +130,23 @@ export function ContributionBundleForm({
   };
 
   // TODO
-  const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
-    const formData = new FormData(event.currentTarget);
-    const note = formData.get("note")?.toString();
+  const triggerSubmission = (data: FieldValues) => {
     const newBundle: Partial<ContributionBundle> = {
       contributions: contributions,
-      note: note,
+      note: data?.note,
     };
     console.log(newBundle);
-    onSubmit && onSubmit();
+    onSubmit?.();
   };
 
   const handleCancel = () => {
-    onCancel && onCancel();
+    onCancel?.();
   };
 
   return (
     <>
       <form
-        onSubmit={preventDefaultEvt(handleSubmit)}
+        onSubmit={handleSubmit(triggerSubmission)}
         className="flex flex-col gap-6 p-6"
       >
         {/* Title */}
@@ -195,21 +214,12 @@ export function ContributionBundleForm({
         </div>
 
         {/* Note */}
-        <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="note"
-            className="text-xs font-medium uppercase tracking-widest text-white/40"
-          >
-            {t("cbundle.form.note")}
-          </label>
-          <textarea
-            name="note"
-            id="note"
-            rows={3}
-            className="bg-white/5 border border-white/10 rounded-md px-3 py-2 text-sm text-white/80 placeholder-white/20 outline-none focus:border-indigo-500/70 focus:ring-1 focus:ring-indigo-500/30 transition-all resize-none w-full"
-          />
-        </div>
-
+        <TextAreaRhfInput 
+          label={t("cbundle.form.note")}
+          registration={register("note")}
+          error={errors.note}
+        />
+        
         {/* Actions */}
         <div className="flex justify-between gap-3 pt-2 border-t border-white/10">
           <GenericButton
@@ -220,8 +230,9 @@ export function ContributionBundleForm({
           </GenericButton>
           <GenericButton
             type="submit"
+            disabled={contributions.length <= 0}
             onClick={noPropagationEvt()}
-            className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm py-2 rounded-md transition-all shadow-lg shadow-indigo-900/40"
+            className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm py-2 rounded-md transition-all shadow-lg shadow-indigo-900/40 disabled:opacity-30 disabled:cursor-not-allowed"
           >
             {t("bundle.form.submit")}
           </GenericButton>

@@ -14,7 +14,7 @@ export function ContributionBundleModal({
   return (
     <GenericModal isOpen={isOpen} onClose={onClose}>
       <div className="border border-gray-300 rounded-lg shadow-md bg-black">
-        <ContributionBundleForm></ContributionBundleForm>
+        <ContributionBundleForm onCancel={onClose}></ContributionBundleForm>
       </div>
     </GenericModal>
   );
