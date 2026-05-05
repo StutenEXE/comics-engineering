@@ -18,6 +18,10 @@ import z from "zod";
 import { useForm, type FieldValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TextAreaRhfInput } from "./fields/TextAreaRhfInput";
+import { EditionContributionModal } from "../modals/contribution/EditionContributionModal";
+import { parseToEdition } from "~/models/edition";
+import { IssueSerieContributionModal } from "../modals/contribution/IssueSerieContributionModal";
+import { parseToIssueSerie } from "~/models/issue-serie";
 
 interface ContributionBundleFormProps {
   bundle?: ContributionBundle;
@@ -52,8 +56,10 @@ export function ContributionBundleForm({
   });
 
   // Modal states
-  const [isSerieOpen, setIsSerieOpen] = useState(false);
+  const [isEditionOpen, setIsEditionOpen] = useState(false);
   const [isBookOpen, setIsBookOpen] = useState(false);
+  const [isSerieOpen, setIsSerieOpen] = useState(false);
+  const [isIssueSerieOpen, setIsIssueSerieOpen] = useState(false);
 
   // Bundle data
   const [contributions, setContributions] = useState(
@@ -67,13 +73,19 @@ export function ContributionBundleForm({
   const [localRef, setLocalRef] = useState<number | undefined>(undefined);
 
   const openModal = (type: ContributionTypeEnum) => {
+    setIsEditionOpen(false);
     setIsBookOpen(false);
     setIsSerieOpen(false);
+    setIsIssueSerieOpen(false);
     switch (type) {
+      case ContributionTypeEnum.EDITION:
+        return setIsEditionOpen(true);
       case ContributionTypeEnum.BOOK:
         return setIsBookOpen(true);
       case ContributionTypeEnum.SERIE:
         return setIsSerieOpen(true);
+      case ContributionTypeEnum.ISSUE_SERIE:
+        return setIsIssueSerieOpen(true);
     }
   };
 
@@ -86,11 +98,14 @@ export function ContributionBundleForm({
 
   const createDependantContribution = (c: SimpleContribution) => {
     setContribToModify(undefined);
+    setLocalRef(c.localRef);
     switch (c.entityType) {
+      case ContributionTypeEnum.BOOK:
+        return setIsEditionOpen(true);
       case ContributionTypeEnum.SERIE:
-        setLocalRef(c.localRef);
         return setIsBookOpen(true);
     }
+    setLocalRef(undefined);
   };
 
   const editContribution = (c: SimpleContribution) => {
@@ -214,12 +229,12 @@ export function ContributionBundleForm({
         </div>
 
         {/* Note */}
-        <TextAreaRhfInput 
+        <TextAreaRhfInput
           label={t("cbundle.form.note")}
           registration={register("note")}
           error={errors.note}
         />
-        
+
         {/* Actions */}
         <div className="flex justify-between gap-3 pt-2 border-t border-white/10">
           <GenericButton
@@ -238,6 +253,19 @@ export function ContributionBundleForm({
           </GenericButton>
         </div>
       </form>
+      <EditionContributionModal
+        edition={
+          contribToModify &&
+          contribToModify.entityType === ContributionTypeEnum.EDITION
+            ? parseToEdition(contribToModify.proposedData)
+            : undefined
+        }
+        bookLocalRef={localRef}
+        action="create"
+        isOpen={isEditionOpen}
+        onSubmit={handleContributionSubmission}
+        onClose={() => setIsEditionOpen(false)}
+      />
       <BookContributionModal
         book={
           contribToModify &&
@@ -262,6 +290,18 @@ export function ContributionBundleForm({
         isOpen={isSerieOpen}
         onSubmit={handleContributionSubmission}
         onClose={() => setIsSerieOpen(false)}
+      />
+      <IssueSerieContributionModal
+        issueSerie={
+          contribToModify &&
+          contribToModify.entityType === ContributionTypeEnum.ISSUE_SERIE
+            ? parseToIssueSerie(contribToModify.proposedData)
+            : undefined
+        }
+        action="create"
+        isOpen={isIssueSerieOpen}
+        onSubmit={handleContributionSubmission}
+        onClose={() => setIsIssueSerieOpen(false)}
       />
     </>
   );

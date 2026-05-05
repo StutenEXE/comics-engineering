@@ -1,10 +1,12 @@
 import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
+import { twMerge } from "tailwind-merge";
 
 interface TextRhfInputProps {
   label: string;
   registration?: UseFormRegisterReturn;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   error?: FieldError;
+  className?: string;
 }
 
 export function TextRhfInput({
@@ -12,9 +14,10 @@ export function TextRhfInput({
   registration,
   inputProps,
   error,
+  className
 }: TextRhfInputProps) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className={twMerge("flex flex-col gap-1.5", className)}>
       <label className="text-xs font-medium uppercase tracking-widest text-white/40">
         {label}
       </label>

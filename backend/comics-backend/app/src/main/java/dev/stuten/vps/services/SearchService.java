@@ -6,21 +6,27 @@ import java.util.Map;
 
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.BookDAO;
+import dev.stuten.vps.models.daos.PublisherDAO;
 import dev.stuten.vps.models.daos.SerieDAO;
 import dev.stuten.vps.models.dtos.full.BookDTO;
+import dev.stuten.vps.models.dtos.full.PublisherDTO;
 import dev.stuten.vps.models.dtos.full.SerieDTO;
 import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 
 public class SearchService {
-    
-    private SearchService() {}
+
+    private SearchService() {
+    }
 
     private static BookDAO bookDao = new BookDAO(
             JooqProvider.get());
 
     private static SerieDAO serieDao = new SerieDAO(
+            JooqProvider.get());
+
+    private static PublisherDAO publisherDao = new PublisherDAO(
             JooqProvider.get());
 
     public static void searchBooksAndSeries(Context ctx) {
@@ -50,6 +56,31 @@ public class SearchService {
         ctx.json(Map.of("books", books, "series", series));
     }
 
+    public static void searchBooks(Context ctx) {
+        // Retreive query from request
+        String query = "";
+        try {
+            query = ctx.queryParam("query");
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing query");
+            return; // For compiler
+        }
+
+        // Lists of elements to retreive
+        List<BookDTO> books = Arrays.asList();
+
+        // To broad queries are not handled
+        if (query.length() < 3) {
+            ctx.json(Map.of("books", books));
+            return;
+        }
+
+        // Retreive books
+        books = bookDao.searchByName(query);
+
+        ctx.json(Map.of("books", books));
+    }
+
     public static void searchSeries(Context ctx) {
         // Retreive query from request
         String query = "";
@@ -69,9 +100,28 @@ public class SearchService {
             return;
         }
 
-        // Retreive books
+        // Retreive series
         series = serieDao.searchByName(query);
 
         ctx.json(Map.of("series", series));
+    }
+
+    public static void searchPublishers(Context ctx) {
+        // Retreive query from request
+        String query = "";
+        try {
+            query = ctx.queryParam("query");
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing query");
+            return; // For compiler
+        }
+
+        // Lists of elements to retreive
+        List<PublisherDTO> publishers = Arrays.asList();
+
+        // Retreive series - Here broad queries are handled
+        publishers = publisherDao.searchByName(query);
+
+        ctx.json(Map.of("publishers", publishers));
     }
 }

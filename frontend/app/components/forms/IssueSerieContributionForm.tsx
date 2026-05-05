@@ -15,28 +15,29 @@ import { GenericButton } from "../buttons/GenericButton";
 import { CheckboxRhfInput } from "./fields/CheckboxRhfInput";
 import { DateRangeRhfInput } from "./fields/DateRangeRhfInput";
 import { TextRhfInput } from "./fields/TextRhfInput";
+import type { IssueSerie } from "~/models/issue-serie";
+import { TextAreaRhfInput } from "./fields/TextAreaRhfInput";
 
-interface SerieFormProps {
-  serie?: Serie;
+interface IssueSerieFormProps {
+  issueSerie?: IssueSerie;
   action: "create" | "update";
   onSubmit?: (c: Partial<SimpleContribution>) => void;
   onCancel?: () => void;
 }
 
-export function SerieContributionForm({
-  serie,
+export function IssueSerieContributionForm({
+  issueSerie,
   action,
   onSubmit,
   onCancel,
-}: SerieFormProps) {
+}: IssueSerieFormProps) {
   const { t } = useTranslation();
 
   // Validation schema
   const schema = z
     .object({
-      name: z.string().min(1, t("serie.form.name.required")),
-      ongoing: z.boolean(),
-      oneshot: z.boolean(),
+      name: z.string().min(1, t("issueserie.form.name.required")),
+      desc: z.string().optional(),
       startDate: zDateRequired(t("form.required")),
       endDate: zDateOptional(),
     })
@@ -57,19 +58,17 @@ export function SerieContributionForm({
   } = useForm<FormData>({
     resolver: zodResolver(schema) as any,
     defaultValues: {
-      name: serie?.name,
-      ongoing: serie?.ongoing,
-      oneshot: serie?.oneshot,
+      name: issueSerie?.name,
+      desc: issueSerie?.desc
       // dates set manually
     },
   });
 
   const triggerSubmission = (data: FieldValues) => {
-    const newSerie: Partial<Serie> = {
-      id: serie?.id,
+    const newIssueSerie: Partial<IssueSerie> = {
+      id: issueSerie?.id,
       name: data.name,
-      ongoing: data.ongoing,
-      oneshot: data.oneshot,
+      desc: data.desc,
       startDate: data.startDate,
       endDate: data.endDate,
     };
@@ -78,18 +77,20 @@ export function SerieContributionForm({
         action === "create"
           ? ContributionActionEnum.CREATE
           : ContributionActionEnum.UPDATE,
-      entityType: ContributionTypeEnum.SERIE,
-      proposedData: newSerie,
-      entityId: newSerie.id,
+      entityType: ContributionTypeEnum.ISSUE_SERIE,
+      proposedData: newIssueSerie,
+      entityId: newIssueSerie.id,
     };
 
     onSubmit?.(contrib);
   };
 
   // Handle specific UX case : endDate always after startDate
-  const [endDateDisabled, setEndDateDisabled] = useState(serie === undefined);
+  const [endDateDisabled, setEndDateDisabled] = useState(
+    issueSerie === undefined,
+  );
   const [minEndDate, setMinEndDate] = useState(
-    toHtmlInputString(serie?.startDate),
+    toHtmlInputString(issueSerie?.startDate),
   );
 
   const onStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,51 +113,45 @@ export function SerieContributionForm({
 
       {/* Name field */}
       <TextRhfInput
-        label={t("serie.name")}
+        label={t("issueserie.name")}
         registration={register("name")}
         error={errors.name}
       />
 
-      {/* Checkboxes */}
-      <div className="flex gap-6">
-        <CheckboxRhfInput
-          label={t("serie.ongoing")}
-          registration={register("ongoing")}
-          error={errors.ongoing}
-        />
-
-        <CheckboxRhfInput
-          label={t("serie.oneshot")}
-          registration={register("oneshot")}
-          error={errors.oneshot}
-        />
-      </div>
-
       {/* Date range */}
       <DateRangeRhfInput
         startProps={{
-          label: t("serie.startDate"),
+          label: t("issueserie.startDate"),
           registration: register("startDate", {
             onChange: onStartDateChange,
             valueAsDate: true,
           }),
-          inputProps: { defaultValue: toHtmlInputString(serie?.startDate) },
+          inputProps: {
+            defaultValue: toHtmlInputString(issueSerie?.startDate),
+          },
           error: errors.startDate,
         }}
         endProps={{
-          label: t("serie.endDate"),
+          label: t("issueserie.endDate"),
           registration: register("endDate", {
             valueAsDate: true,
           }),
           inputProps: {
             disabled: endDateDisabled,
             min: minEndDate,
-            defaultValue: serie?.endDate
-              ? toHtmlInputString(serie?.endDate)
+            defaultValue: issueSerie?.endDate
+              ? toHtmlInputString(issueSerie?.endDate)
               : undefined,
           },
           error: errors.startDate,
         }}
+      />
+
+      {/* Description field */}
+      <TextAreaRhfInput
+        label={t("issueserie.desc")}
+        registration={register("desc")}
+        error={errors.desc}
       />
 
       {/* Actions */}
@@ -172,7 +167,9 @@ export function SerieContributionForm({
           onClick={noPropagationEvt()}
           className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm py-2 rounded-md transition-all shadow-lg shadow-indigo-900/40 disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          {serie ? t("serie.form.modify") : t("serie.form.create")}
+          {issueSerie
+            ? t("issueserie.form.modify")
+            : t("issueserie.form.create")}
         </GenericButton>
       </div>
     </form>

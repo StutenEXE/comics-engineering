@@ -118,7 +118,7 @@ export function getContributionName(c: SimpleContribution | Contribution, locale
         case ContributionTypeEnum.BOOK: return (c.proposedData as Book).name
         case ContributionTypeEnum.EDITION:
             const ed = (c.proposedData as Edition)
-            return `${ed.book?.name} (${ed.parutionDate.toLocaleDateString(locale)})`
+            return `${ `${ed.book?.name} - ` || ""}${ed.isbn} - (${ed.parutionDate.toLocaleDateString(locale)})`
         case ContributionTypeEnum.SERIE: return (c.proposedData as Serie).name
         case ContributionTypeEnum.ISSUE: return buildIssueShortName(c.proposedData as Issue)
         case ContributionTypeEnum.ISSUE_SERIE: return (c.proposedData as IssueSerie).name

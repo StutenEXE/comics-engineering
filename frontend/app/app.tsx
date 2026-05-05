@@ -24,7 +24,7 @@ export default function App() {
   }, [isSuccess, isError, data]);
 
   // Only show loading on initial load, not on background refetches
-  if (isLoading && !data) {
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 

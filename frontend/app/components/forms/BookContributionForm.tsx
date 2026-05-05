@@ -38,7 +38,7 @@ export function BookContributionForm({
   const schema = z.object({
     name: z.string().min(1, t("book.form.name.required")),
     desc: z.string().optional(),
-    number: z.number().optional(),
+    number: z.coerce.number().optional(),
     voContent: z.string().optional(),
     imgUrl: z.httpUrl().min(1, "book.form.img.required"),
   });
@@ -116,18 +116,28 @@ export function BookContributionForm({
         error={errors.name}
       />
 
-      {/* Serie selection */}
-      <SearchSelectInput
-        label={t("book.serie")}
-        placeholder={t("book.form.serieSearchPlaceholder")}
-        localRefLabel={t("book.form.localRefPresent")}
-        selectedItem={selectedSerie}
-        localRef={serieLocalRef}
-        results={data?.series}
-        onSearch={handleSearch}
-        onSelect={setSelectedSerie}
-        onClear={() => setSelectedSerie(undefined)}
-      />
+      <div className="flex items-start gap-3">
+        {/* Serie selection */}
+        <SearchSelectInput
+          label={t("book.serie")}
+          placeholder={t("book.form.serieSearchPlaceholder")}
+          localRefLabel={t("book.form.localRefPresent")}
+          selectedItem={selectedSerie}
+          localRef={serieLocalRef}
+          results={data?.series}
+          onSearch={handleSearch}
+          onSelect={setSelectedSerie}
+          onClear={() => setSelectedSerie(undefined)}
+        />
+
+        <TextRhfInput
+          label={t("book.number")}
+          registration={register("number")}
+          inputProps={{ type: "number", inputMode: "numeric" }}
+          error={errors.number}
+          className="w-25"
+        />
+      </div>
 
       {/* Description field */}
       <TextAreaRhfInput
@@ -151,6 +161,7 @@ export function BookContributionForm({
             onChange: (e) => setNewImgUrl(e.target.value),
           })}
           error={errors.imgUrl}
+          className="w-[100%]"
         />
         {!errors.imgUrl && newImgUrl && (
           <img
@@ -172,7 +183,7 @@ export function BookContributionForm({
         <GenericButton
           type="submit"
           // onClick={noPropagationEvt()}
-          className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm py-2 rounded-md transition-all shadow-lg shadow-indigo-900/40"
+          className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm py-2 rounded-md transition-all shadow-lg shadow-indigo-900/40 disabled:opacity-30 disabled:cursor-not-allowed"
         >
           {book ? t("book.form.modify") : t("book.form.create")}
         </GenericButton>

@@ -95,4 +95,9 @@ public class PublisherDAO extends ContributableDAO<PublisherDTO> {
     public Optional<PublisherDTO> findById(Integer id) {
         return super.selectOne(PUBLISHERS.ID.eq(id));
     }
+
+    public List<PublisherDTO> searchByName(String query) {
+        String searchPattern = toSearchPattern(query);
+        return super.selectMany(PUBLISHERS.NAME.likeIgnoreCase(searchPattern));
+    }
 }

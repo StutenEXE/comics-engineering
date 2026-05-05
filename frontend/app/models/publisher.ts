@@ -29,3 +29,7 @@ export function parseToSimplePublisher(data: Record<string, any>): SimplePublish
         name: data.name
     }
 }
+
+export function publisherToSimplePublisher(pub: Publisher): SimplePublisher {
+    return parseToSimplePublisher(pub)
+}

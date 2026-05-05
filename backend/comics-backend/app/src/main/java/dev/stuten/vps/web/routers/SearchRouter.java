@@ -8,7 +8,9 @@ public class SearchRouter implements Router {
 
     @Override
     public void register(Javalin app) {
+        app.get(APIPathBuilder.buildPublicPath("/search/books"), SearchService::searchBooks);
         app.get(APIPathBuilder.buildPublicPath("/search/series"), SearchService::searchSeries);
+        app.get(APIPathBuilder.buildPublicPath("/search/publishers"), SearchService::searchPublishers);
         app.get(APIPathBuilder.buildPublicPath("/search/books_and_series"), SearchService::searchBooksAndSeries);
     }
     

@@ -125,11 +125,25 @@ export const publicApi = createApi({
     /****************
      * SEARCH
      ****************/
+    // Search books
+    searchBooksByName: build.query<{ books: Book[] }, { query: string }>({
+      query: ({ query }) => ({ url: "/search/books", method: 'GET', params: { query: query.trim().toLowerCase() } }),
+      transformResponse: (resp: { books: Book[] }) => ({
+        books: resp.books.map(parseToBook),
+      }),
+    }),
     // Search series
     searchSeriesByName: build.query<{ series: Serie[] }, { query: string }>({
       query: ({ query }) => ({ url: "/search/series", method: 'GET', params: { query: query.trim().toLowerCase() } }),
       transformResponse: (resp: { series: Serie[] }) => ({
         series: resp.series.map(parseToSerie),
+      }),
+    }),
+    // Search publishers
+    searchPublishersByName: build.query<{ publishers: Publisher[] }, { query: string }>({
+      query: ({ query }) => ({ url: "/search/publishers", method: 'GET', params: { query: query.trim().toLowerCase() } }),
+      transformResponse: (resp: { publishers: Publisher[] }) => ({
+        publishers: resp.publishers.map(parseToPublisher),
       }),
     }),
     // Search books and series
@@ -162,7 +176,9 @@ export const {
   useIssueByIdQuery, useIssueByBookIdQuery,
   usePublisherByIdQuery,
   useSerieByIdQuery,
+  useLazySearchBooksByNameQuery,
   useLazySearchSeriesByNameQuery,
+  useLazySearchPublishersByNameQuery,
   // Lazyfy ?
   useSearchBooksAndSeriesByNameQuery,
   useContributionBySubmitterIdQuery
@@ -193,12 +209,9 @@ export const privateApi = createApi({
     /****************
      * CONTRIBUTIONS
      ****************/
-    submitContributionBundle: build.mutation<
-      { bundleId: number },
-      { note: string; contributions: Array<{ entityType: string; action: string; proposedData: Record<string, any>; entityId?: number | null; localRef?: number | null; entitySnapshot?: Record<string, any> | null }> }
-    >({
-      query: (data) => ({ url: "/contribute", method: 'POST', body: data }),
-    }),
+    submitContributionBundle: build.mutation<{ bundleId: number }, ContributionBundle>({
+        query: (data) => ({ url: "/contribute", method: 'POST', body: data }),
+      }),
   }),
 });
 

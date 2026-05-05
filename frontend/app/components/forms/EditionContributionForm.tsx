@@ -3,44 +3,64 @@ import { useState } from "react";
 import { useForm, type FieldValues } from "react-hook-form";
 import z from "zod";
 import { useTranslation } from "~/i18n/i18n";
-import type { Book } from "~/models/book";
+import { bookToSimpleBook, type Book, type SimpleBook } from "~/models/book";
 import {
   ContributionActionEnum,
   ContributionTypeEnum,
   type SimpleContribution,
 } from "~/models/contribution";
-import type { SimpleSerie } from "~/models/serie";
-import { useLazySearchSeriesByNameQuery } from "~/store/services/api";
+import type { Edition } from "~/models/edition";
+import {
+  useLazySearchBooksByNameQuery,
+  useLazySearchPublishersByNameQuery,
+} from "~/store/services/api";
+import { toHtmlInputString, zDateRequired } from "~/utils/date";
 import { noPropagationEvt } from "~/utils/events";
 import { GenericButton } from "../buttons/GenericButton";
 import { SearchSelectInput } from "./fields/SearchSelectInput";
-import { TextAreaRhfInput } from "./fields/TextAreaRhfInput";
+import {
+  publisherToSimplePublisher,
+  type SimplePublisher,
+} from "~/models/publisher";
 import { TextRhfInput } from "./fields/TextRhfInput";
+import { formatToIsbn } from "~/utils/strings";
+import { DateRhfInput } from "./fields/DateRhfInput";
+import { SelectRhfInput } from "./fields/SelectRhfInput";
 
-interface BookFormProps {
-  book?: Book;
-  serieLocalRef?: number;
+interface EditionFormProps {
+  edition?: Edition;
+  bookLocalRef?: number;
   action: "create" | "update";
   onSubmit?: (c: Partial<SimpleContribution>) => void;
   onCancel?: () => void;
 }
 
-export function BookContributionForm({
-  book,
-  serieLocalRef,
+export function EditionContributionForm({
+  edition,
+  bookLocalRef,
   action,
   onSubmit,
   onCancel,
-}: BookFormProps) {
+}: EditionFormProps) {
   const { t } = useTranslation();
 
   // Validation schema
   const schema = z.object({
-    name: z.string().min(1, t("book.form.name.required")),
-    desc: z.string().optional(),
-    number: z.number().optional(),
-    voContent: z.string().optional(),
-    imgUrl: z.httpUrl().min(1, "book.form.img.required"),
+    isbn: z
+      .string()
+      .min(1, t("edition.form.isbn.required"))
+      .regex(/^\d{13}$/, t("edition.form.isbn.13digits")),
+    ean: z
+      .string()
+      .regex(/^\d{13}$/, t("edition.form.ean.13digits"))
+      .optional()
+      .or(z.literal("")),
+    npages: z.coerce.number().gte(0, t("edition.form.npages.gte0")).optional(),
+    price: z.coerce.number().gte(0, t("edition.form.price.gte0")).optional(),
+    url: z.httpUrl().min(1, "edition.form.url.required"),
+    imgUrl: z.httpUrl().min(1, "edition.form.img.required"),
+    coverType: z.string(), //z.literal(["Hardcover", "Paperback", "Single issue"]),
+    parutionDate: zDateRequired(t("form.required")),
   });
 
   type FormData = z.infer<typeof schema>;
@@ -52,52 +72,69 @@ export function BookContributionForm({
   } = useForm<FormData>({
     resolver: zodResolver(schema) as any,
     defaultValues: {
-      name: book?.name,
-      desc: book?.desc,
-      number: book?.number,
-      voContent: book?.voContent,
-      imgUrl: book?.imgUrl,
+      isbn: edition?.isbn,
+      ean: edition?.ean,
+      npages: edition?.npages,
+      price: edition?.price,
+      url: edition?.url,
+      imgUrl: edition?.imgUrl,
+      coverType: edition?.coverType,
+      // dates set manually
     },
   });
 
   const triggerSubmission = (data: FieldValues) => {
-    const newBook: Partial<Book> = {
-      id: book?.id,
-      name: data?.name,
-      desc: data?.desc,
-      voContent: data?.voContent,
+    const newEdition: Partial<Edition> = {
+      id: edition?.id,
+      isbn: data?.isbn,
+      ean: data?.ean,
+      npages: data?.npages,
+      price: data?.price,
+      url: data?.url,
       imgUrl: data?.imgUrl,
-      serie: (!serieLocalRef
-        ? selectedSerie
+      coverType: data?.coverType,
+      parutionDate: data?.parutionDate,
+      book: (!bookLocalRef
+        ? selectedBook
         : {
-            id: serieLocalRef,
-          }) as SimpleSerie,
+            id: bookLocalRef,
+          }) as SimpleBook,
+      publisher: selectedPublisher,
     };
     const contrib: Partial<SimpleContribution> = {
       action:
         action === "create"
           ? ContributionActionEnum.CREATE
           : ContributionActionEnum.UPDATE,
-      entityType: ContributionTypeEnum.BOOK,
-      proposedData: newBook,
-      entityId: newBook.id,
+      entityType: ContributionTypeEnum.EDITION,
+      proposedData: newEdition,
+      entityId: newEdition.id,
     };
 
     onSubmit?.(contrib);
   };
 
   // UX : show selected image preview to user
-  const [newImgUrl, setNewImgUrl] = useState<string>(book?.imgUrl || "");
+  const [newImgUrl, setNewImgUrl] = useState<string>(edition?.imgUrl || "");
 
-  // Searching for series
-  const [search, { data }] = useLazySearchSeriesByNameQuery();
-  const handleSearch = (query: string) => {
-    search({ query: query });
+  // Searching for books
+  const [searchBook, { data: booksData }] = useLazySearchBooksByNameQuery();
+  const handleBookSearch = (query: string) => {
+    searchBook({ query: query });
   };
-
-  const [selectedSerie, setSelectedSerie] = useState<SimpleSerie | undefined>(
-    book?.serie ?? undefined,
+  const [selectedBook, setSelectedBook] = useState<SimpleBook | undefined>(
+    edition?.book ?? undefined,
   );
+
+  // Get all publishers
+  const [searchPublisher, { data: pubsData }] =
+    useLazySearchPublishersByNameQuery({});
+  const handlePublisherSearch = (query: string) => {
+    searchPublisher({ query: query });
+  };
+  const [selectedPublisher, setSelectedPublisher] = useState<
+    SimplePublisher | undefined
+  >(edition?.publisher ?? undefined);
 
   return (
     <form
@@ -106,56 +143,136 @@ export function BookContributionForm({
     >
       {/* Title */}
       <h2 className="text-lg font-semibold tracking-wide text-white/90 text-center border-b border-white/10 pb-4">
-        {t("book.form.title")}
+        {t("edition.form.title")}
       </h2>
 
-      {/* Name field */}
-      <TextRhfInput
-        label={t("book.name")}
-        registration={register("name")}
-        error={errors.name}
-      />
-
-      {/* Serie selection */}
+      {/* Book selection */}
       <SearchSelectInput
-        label={t("book.serie")}
-        placeholder={t("book.form.serieSearchPlaceholder")}
-        localRefLabel={t("book.form.localRefPresent")}
-        selectedItem={selectedSerie}
-        localRef={serieLocalRef}
-        results={data?.series}
-        onSearch={handleSearch}
-        onSelect={setSelectedSerie}
-        onClear={() => setSelectedSerie(undefined)}
+        label={t("edition.book")}
+        placeholder={t("edition.form.bookSearchPlaceholder")}
+        localRefLabel={t("edition.form.localRefPresent")}
+        selectedItem={selectedBook}
+        localRef={bookLocalRef}
+        results={booksData?.books.map(bookToSimpleBook)}
+        onSearch={handleBookSearch}
+        onSelect={setSelectedBook}
+        onClear={() => setSelectedBook(undefined)}
       />
 
-      {/* Description field */}
-      <TextAreaRhfInput
-        label={t("book.desc")}
-        registration={register("desc")}
-        error={errors.desc}
+      {/* Publisher selection */}
+      <SearchSelectInput
+        label={t("edition.publisher")}
+        placeholder={t("edition.form.publisherSearchPlaceholder")}
+        selectedItem={selectedPublisher}
+        results={pubsData?.publishers.map(publisherToSimplePublisher)}
+        onSearch={handlePublisherSearch}
+        onSelect={setSelectedPublisher}
+        onClear={() => setSelectedPublisher(undefined)}
       />
 
-      {/* VO Content field */}
-      <TextAreaRhfInput
-        label={t("book.voContent")}
-        registration={register("voContent")}
-        error={errors.voContent}
-      />
+      {/* ISBN */}
+      <div className="flex items-end gap-3">
+        <TextRhfInput
+          label={t("edition.isbn")}
+          registration={register(
+            "isbn",
+            // {
+            // onChange: (e) => {
+            //   const raw = e.target.value.replace(/\D/g, ""); // Replace anything that is not a digit
+            //   setIsbnDisplay(formatToIsbn(raw));
+            // },}
+          )}
+          inputProps={{
+            // maxLength: 17,
+            maxLength: 13,
+            inputMode: "numeric",
+          }}
+          error={errors.isbn}
+        />
+        <GenericButton disabled>{t("edition.form.autofill")}</GenericButton>
+      </div>
 
-      {/* Image field */}
+      <div className="flex items-start gap-3">
+        {/* EAN */}
+        <TextRhfInput
+          label={t("edition.ean")}
+          registration={register("ean")}
+          inputProps={{
+            maxLength: 13,
+            inputMode: "numeric",
+          }}
+          error={errors.ean}
+        />
+
+        {/* Parution date */}
+        <DateRhfInput
+          label={t("edition.parutionDate")}
+          registration={register("parutionDate", {
+            valueAsDate: true,
+          })}
+          inputProps={{
+            defaultValue: toHtmlInputString(edition?.parutionDate),
+          }}
+          error={errors.parutionDate}
+        />
+      </div>
+
+      <div className="flex items-start gap-3">
+        {/* nPages */}
+        <TextRhfInput
+          label={t("edition.npages")}
+          registration={register("npages")}
+          inputProps={{
+            type: "number",
+            inputMode: "numeric",
+          }}
+          error={errors.npages}
+        />
+        {/* Price */}
+        <TextRhfInput
+          label={t("edition.price")}
+          registration={register("price")}
+          inputProps={{
+            type: "number",
+            inputMode: "numeric",
+          }}
+          error={errors.price}
+        />
+      </div>
+
+      <div className="flex gap-3">
+        {/* Url */}
+        <TextRhfInput
+          label={t("edition.url")}
+          registration={register("url")}
+          error={errors.url}
+        />
+
+        {/* CoverType*/}
+        <SelectRhfInput
+          label={t("edition.coverType")}
+          options={[
+            { label: t("edition.hardcover"), value: "hardcover" },
+            { label: t("edition.paperback"), value: "paperback" },
+            { label: t("edition.singleissue"), value: "singleissue" },
+          ]}
+          registration={register("coverType")}
+        />
+      </div>
+
       <div className="flex gap-3">
         <TextRhfInput
-          label={t("book.imgUrl")}
+          label={t("edition.imgUrl")}
           registration={register("imgUrl", {
             onChange: (e) => setNewImgUrl(e.target.value),
           })}
           error={errors.imgUrl}
+          className="w-[100%]"
         />
         {!errors.imgUrl && newImgUrl && (
           <img
             src={newImgUrl}
-            alt={t("book.form.altNewImage")}
+            alt={t("edition.form.altNewImage")}
             className="w-[100px]"
           />
         )}
@@ -172,9 +289,9 @@ export function BookContributionForm({
         <GenericButton
           type="submit"
           // onClick={noPropagationEvt()}
-          className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm py-2 rounded-md transition-all shadow-lg shadow-indigo-900/40"
+          className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm py-2 rounded-md transition-all shadow-lg shadow-indigo-900/40 "
         >
-          {book ? t("book.form.modify") : t("book.form.create")}
+          {edition ? t("edition.form.modify") : t("edition.form.create")}
         </GenericButton>
       </div>
     </form>
