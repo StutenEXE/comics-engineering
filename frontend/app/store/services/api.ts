@@ -28,6 +28,11 @@ export const publicApi = createApi({
     signup: build.mutation<{ user: User }, SignupData>({
       query: (data) => ({ url: '/signup', method: 'POST', body: data }),
     }),
+    // Disconnect
+    disconnect: build.query({
+      query: () => ({ url: '/disconnect', method: 'GET' })
+    }),
+    // Refresh 
     refresh: build.query({
       query: () => ({ url: '/refresh', method: 'GET' }),
     }),
@@ -176,7 +181,7 @@ export const publicApi = createApi({
 });
 
 export const {
-  useLoginMutation, useSignupMutation, useRefreshQuery,
+  useLoginMutation, useSignupMutation, useLazyDisconnectQuery, useRefreshQuery,
   useBookByIdQuery, useBookBySerieIdQuery, useLatestBooksQuery,
   useEditionByIdQuery,
   useIssueSerieByIdQuery,
@@ -218,8 +223,8 @@ export const privateApi = createApi({
      * CONTRIBUTIONS
      ****************/
     submitContributionBundle: build.mutation<{ bundleId: number }, Partial<ContributionBundle>>({
-        query: (data) => ({ url: "/contribute", method: 'POST', body: data }),
-      }),
+      query: (data) => ({ url: "/contribute", method: 'POST', body: data }),
+    }),
   }),
 });
 

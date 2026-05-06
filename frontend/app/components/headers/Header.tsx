@@ -7,12 +7,16 @@ import { LoginModal } from "../modals/LoginModal";
 import { SignupModal } from "../modals/SignupModal";
 import { MdLogout } from "react-icons/md";
 import { clearUser } from "~/store/slices/userSlice";
+import { useLazyDisconnectQuery } from "~/store/services/api";
 
 export function Header() {
   const { t } = useTranslation();
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.user,
   );
+
+  const [disconnect] = useLazyDisconnectQuery();
+
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
 
@@ -108,7 +112,7 @@ export function Header() {
                 <span className="w-px h-4 bg-white/10" />
                 <button
                   onClick={() => {
-                    store.dispatch(clearUser());
+                    disconnect({}).then(() => store.dispatch(clearUser()));
                   }}
                   className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-white/40 rounded-md hover:bg-rose-500/10 hover:text-rose-400 transition-all"
                 >

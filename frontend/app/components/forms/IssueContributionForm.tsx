@@ -22,6 +22,7 @@ import type { SimpleIssueSerie } from "~/models/issue-serie";
 import { useState } from "react";
 import { useLazySearchIssueSeriesByNameQuery } from "~/store/services/api";
 import { DateRhfInput } from "./fields/DateRhfInput";
+import { GenericForm } from "./GenericForm";
 
 interface IssueFormProps {
   issue?: Issue;
@@ -70,7 +71,10 @@ export function IssueContributionForm({
       number: data.number,
       coverDate: toYYYYmmDD(data.coverDate),
       parutionDate: toYYYYmmDD(data.parutionDate),
-      issueSerie: issueSerieLocalRef ?? { id: selectedIssueSerie?.id!, name: selectedIssueSerie?.name! },
+      issueSerie: issueSerieLocalRef ?? {
+        id: selectedIssueSerie?.id!,
+        name: selectedIssueSerie?.name!,
+      },
     };
     const contrib: Partial<SimpleContribution> = {
       action:
@@ -96,15 +100,12 @@ export function IssueContributionForm({
   >(issue?.issueSerie ?? undefined);
 
   return (
-    <form
+    <GenericForm
+      title={t("issue.form.title")}
+      onCancel={noPropagationEvt(onCancel)}
+      submitLabel={issue ? t("issue.form.modify") : t("issue.form.create")}
       onSubmit={handleSubmit(triggerSubmission)}
-      className="flex flex-col gap-6 p-6"
     >
-      {/* Title */}
-      <h2 className="text-lg font-semibold tracking-wide text-white/90 text-center border-b border-white/10 pb-4">
-        {t("issue.form.title")}
-      </h2>
-
       {/* Name field */}
       <TextRhfInput
         label={t("issue.name")}
@@ -162,23 +163,6 @@ export function IssueContributionForm({
           error={errors.coverDate}
         />
       </div>
-
-      {/* Actions */}
-      <div className="flex justify-between gap-3 pt-2 border-t border-white/10">
-        <GenericButton
-          onClick={noPropagationEvt(onCancel)}
-          className="flex-1 bg-white/5 border border-white/10 text-white/60 font-medium text-sm py-2 rounded-md hover:bg-white/10 hover:text-white/80 transition-all"
-        >
-          {t("generic.cancel", { capitalize: true })}
-        </GenericButton>
-        <GenericButton
-          type="submit"
-          onClick={noPropagationEvt()}
-          className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm py-2 rounded-md transition-all shadow-lg shadow-indigo-900/40 disabled:opacity-30 disabled:cursor-not-allowed"
-        >
-          {issue ? t("issue.form.modify") : t("issue.form.create")}
-        </GenericButton>
-      </div>
-    </form>
+    </GenericForm>
   );
 }

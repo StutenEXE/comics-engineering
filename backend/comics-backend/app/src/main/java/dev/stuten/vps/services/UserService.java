@@ -78,6 +78,11 @@ public class UserService {
         ctx.json(Map.of("user", user));
     }
 
+    public static void disconnect(Context ctx) {
+        String sessionKey = ctx.cookie(SessionStore.COOKIE_SESSION_KEY);
+        SessionStore.delete(sessionKey);
+    }
+
     public static void refreshAuth(Context ctx) {
         // Retreive session key
         String sessionKey = ctx.cookie(SessionStore.COOKIE_SESSION_KEY);

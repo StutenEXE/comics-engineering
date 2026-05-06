@@ -4,117 +4,100 @@ import { setUser } from "~/store/slices/userSlice";
 import { store } from "~/store/store";
 import { useToast } from "../toast/Toast";
 import { useTranslation } from "~/i18n/i18n";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, type FieldValues } from "react-hook-form";
+import { GenericForm } from "./GenericForm";
+import { TextRhfInput } from "./fields/TextRhfInput";
+import { PasswordRhfInput } from "./fields/PasswordRhfInput";
 
 type SignupFormProps = {
-    onDone?: () => void;
-    onCancel?: () => void;
+  onDone?: () => void;
+  onCancel?: () => void;
 };
 
 export function SignupForm({ onDone, onCancel }: SignupFormProps) {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
+  const toast = useToast();
 
-    const [signup] = useSignupMutation();
-    const toast = useToast();
+  // Validation schema
+  const schema = z.object({
+    username: z.string().min(1, t("signup.username.required")),
+    email: z
+      .email(t("signup.email.invalidFormat"))
+      .min(1, t("signup.email.required")),
+    password: z
+      .string()
+      .min(1, t("signup.password.required"))
+      .min(8, t("login.password.8chars")),
+  });
 
-    const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-        const username = formData.get("username");
-        const email = formData.get("email");
-        const password = formData.get("password");
+  type FormData = z.infer<typeof schema>;
+  // Form operations
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<FormData>({ resolver: zodResolver(schema) as any });
 
-        if (!username || !email || !password 
-            || username === "" || email === "" || password === ""
-        ) {
-            toast.error(t("signup.error.emptyFields"));
-            return;
-        }   
+  const [signup] = useSignupMutation();
 
-        const data: SignupData = {
-            username: username as string,
-            email: email as string,
-            password: password as string,
-        };
+  const triggerSubmission = (data: FieldValues) => {
+    const username = data.username;
+    const email = data.email;
+    const password = data.password;
 
-        if (!data.email || !data.password || !data.username) return;
+    const payload: SignupData = { username, email, password };
 
-        // Perform login mutation
-        signup(data).unwrap()
-            .then((response) => {
-                store.dispatch(setUser(response.user));
-                toast.success(t("signup.success"));
-                // Execute onDone callback if provided
-                if (onDone) onDone();
-            })
-            .catch((error) => {
-                const msg = error.data?.error || t("signup.error");
-                toast.error(String(msg));
-            });
-        
-    };
+    if (!payload.username || !payload.email || !payload.password) return;
 
-    const handleCancel = () => {
-        // Execute onCancel callback if provided
-        if (onCancel) onCancel();
-    }
+    // Perform login mutation
+    signup(payload)
+      .unwrap()
+      .then((response) => {
+        store.dispatch(setUser(response.user));
+        toast.success(t("signup.success"));
+        // Execute onDone callback if provided
+        onDone?.();
+      })
+      .catch((error) => {
+        const msg = error.data?.error || t("signup.error");
+        toast.error(String(msg));
+      });
+  };
 
-    return (
-        <form
-            onSubmit={handleSubmit}
-            className="w-100 mx-auto mt-8 p-6"
-        >
-            <h2 className="text-2xl font-bold mb-6 text-center">{t("signup.header")}</h2>
-            <div className="mb-4">
-                <label htmlFor="username" className="block font-semibold mb-2">{t("signup.username")}</label>
-                <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder={t("signup.placeholder.username")}
-                    required
-                />
-            </div>
-            <div className="mb-4">
-                <label htmlFor="email" className="block font-semibold mb-2">{t("signup.email")}</label>
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder={t("signup.placeholder.email")}
-                    required
-                />
-            </div>
-            <div className="mb-6">
-                <label htmlFor="password" className="block font-semibold mb-2">{t("signup.password")}</label>
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    minLength={8}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder={t("signup.placeholder.password")}
-                    required
-                />
-            </div>
+  const handleCancel = () => {
+    // Execute onCancel callback if provided
+    onCancel?.();
+  };
 
-            <div className="flex justify-between">
-                <button
-                    type="button"
-                    onClick={handleCancel}
-                    className="w-30 bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-md hover:bg-gray-400 transition"
-                >
-                    {t("generic.cancel", { capitalize: true })}
-                </button>
-                <button
-                    type="submit"
-                    className="w-30 bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600 transition"
-                >
-                    {t("signup.submit")}
-                </button>
-            </div>
+  return (
+    <GenericForm
+      title={t("signup.header")}
+      onCancel={handleCancel}
+      submitLabel={t("signup.submit")}
+      onSubmit={handleSubmit(triggerSubmission)}
+    >
+      <TextRhfInput
+        label={t("signup.username")}
+        registration={register("username")}
+        inputProps={{ placeholder: t("signup.placeholder.username") }}
+        error={errors.email}
+      />
 
-        </form>
-    );
+      <TextRhfInput
+        label={t("signup.email")}
+        registration={register("email")}
+        inputProps={{ placeholder: t("signup.placeholder.email") }}
+        error={errors.email}
+      />
+
+      <PasswordRhfInput
+        label={t("signup.password")}
+        registration={register("password")}
+        inputProps={{ placeholder: t("signup.placeholder.password") }}
+        error={errors.password}
+      />
+    </GenericForm>
+  );
 }

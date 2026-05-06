@@ -25,6 +25,7 @@ import { parseToIssueSerie } from "~/models/issue-serie";
 import { IssueContributionModal } from "../modals/contribution/IssueContributionModal";
 import { parseToIssue } from "~/models/issue";
 import { useAppSelector } from "~/store/hooks";
+import { GenericForm } from "./GenericForm";
 
 interface ContributionBundleFormProps {
   bundle?: ContributionBundle;
@@ -110,7 +111,7 @@ export function ContributionBundleForm({
     setContribToModify(undefined);
     setLocalRef({
       id: c.localRef!,
-      name: c.proposedData.name
+      name: c.proposedData.name,
     });
     switch (c.entityType) {
       case ContributionTypeEnum.BOOK:
@@ -159,12 +160,11 @@ export function ContributionBundleForm({
     contributions[idx] = c as SimpleContribution;
   };
 
-  // TODO
   const triggerSubmission = (data: FieldValues) => {
     const newBundle: Partial<ContributionBundle> = {
       contributions: contributions,
       note: data?.note,
-      submitter: user!
+      submitter: user!,
     };
     console.log(newBundle);
     onSubmit?.(newBundle);
@@ -176,15 +176,13 @@ export function ContributionBundleForm({
 
   return (
     <>
-      <form
+      <GenericForm
+        title={t("cbundle.create")}
+        onCancel={noPropagationEvt(onCancel)}
+        submitLabel={t("bundle.form.submit")}
         onSubmit={handleSubmit(triggerSubmission)}
-        className="flex flex-col gap-6 p-6"
+        disabled={contributions.length <= 0}
       >
-        {/* Title */}
-        <h2 className="text-lg font-semibold tracking-wide text-white/90 text-center border-b border-white/10 pb-4">
-          {t("cbundle.create")}
-        </h2>
-
         {/* Add contribution buttons */}
         <div className="flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-widest text-white/40">
@@ -250,25 +248,7 @@ export function ContributionBundleForm({
           registration={register("note")}
           error={errors.note}
         />
-
-        {/* Actions */}
-        <div className="flex justify-between gap-3 pt-2 border-t border-white/10">
-          <GenericButton
-            onClick={noPropagationEvt(handleCancel)}
-            className="flex-1 bg-white/5 border border-white/10 text-white/60 font-medium text-sm py-2 rounded-md hover:bg-white/10 hover:text-white/80 transition-all"
-          >
-            {t("generic.cancel", { capitalize: true })}
-          </GenericButton>
-          <GenericButton
-            type="submit"
-            disabled={contributions.length <= 0}
-            onClick={noPropagationEvt()}
-            className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm py-2 rounded-md transition-all shadow-lg shadow-indigo-900/40 disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            {t("bundle.form.submit")}
-          </GenericButton>
-        </div>
-      </form>
+      </GenericForm>
       <EditionContributionModal
         edition={
           contribToModify &&

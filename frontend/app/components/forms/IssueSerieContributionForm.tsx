@@ -9,7 +9,12 @@ import {
   type SimpleContribution,
 } from "~/models/contribution";
 import type { Serie } from "~/models/serie";
-import { toHtmlInputString, toYYYYmmDD, zDateOptional, zDateRequired } from "~/utils/date";
+import {
+  toHtmlInputString,
+  toYYYYmmDD,
+  zDateOptional,
+  zDateRequired,
+} from "~/utils/date";
 import { noPropagationEvt } from "~/utils/events";
 import { GenericButton } from "../buttons/GenericButton";
 import { CheckboxRhfInput } from "./fields/CheckboxRhfInput";
@@ -17,6 +22,7 @@ import { DateRangeRhfInput } from "./fields/DateRangeRhfInput";
 import { TextRhfInput } from "./fields/TextRhfInput";
 import type { ContributionIssueSerie, IssueSerie } from "~/models/issue-serie";
 import { TextAreaRhfInput } from "./fields/TextAreaRhfInput";
+import { GenericForm } from "./GenericForm";
 
 interface IssueSerieFormProps {
   issueSerie?: IssueSerie;
@@ -59,7 +65,7 @@ export function IssueSerieContributionForm({
     resolver: zodResolver(schema) as any,
     defaultValues: {
       name: issueSerie?.name,
-      desc: issueSerie?.desc
+      desc: issueSerie?.desc,
       // dates set manually
     },
   });
@@ -102,15 +108,14 @@ export function IssueSerieContributionForm({
   };
 
   return (
-    <form
+    <GenericForm
+      title={t("issueserie.form.title")}
+      onCancel={noPropagationEvt(onCancel)}
+      submitLabel={
+        issueSerie ? t("issueserie.form.modify") : t("issueserie.form.create")
+      }
       onSubmit={handleSubmit(triggerSubmission)}
-      className="flex flex-col gap-6 p-6"
     >
-      {/* Title */}
-      <h2 className="text-lg font-semibold tracking-wide text-white/90 text-center border-b border-white/10 pb-4">
-        {t("issueserie.form.title")}
-      </h2>
-
       {/* Name field */}
       <TextRhfInput
         label={t("issueserie.name")}
@@ -153,25 +158,6 @@ export function IssueSerieContributionForm({
         registration={register("desc")}
         error={errors.desc}
       />
-
-      {/* Actions */}
-      <div className="flex justify-between gap-3 pt-2 border-t border-white/10">
-        <GenericButton
-          onClick={noPropagationEvt(onCancel)}
-          className="flex-1 bg-white/5 border border-white/10 text-white/60 font-medium text-sm py-2 rounded-md hover:bg-white/10 hover:text-white/80 transition-all"
-        >
-          {t("generic.cancel", { capitalize: true })}
-        </GenericButton>
-        <GenericButton
-          type="submit"
-          onClick={noPropagationEvt()}
-          className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm py-2 rounded-md transition-all shadow-lg shadow-indigo-900/40 disabled:opacity-30 disabled:cursor-not-allowed"
-        >
-          {issueSerie
-            ? t("issueserie.form.modify")
-            : t("issueserie.form.create")}
-        </GenericButton>
-      </div>
-    </form>
+    </GenericForm>
   );
 }
