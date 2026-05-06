@@ -52,7 +52,9 @@ export default {
     // == PAGES 
     // ============================
     // Landing page
-    "landing.title": "Dernières additions à notre bibliothèque",
+    "landing.title": "Bienvenue sur Know Your Stash",
+    "landing.subtitle": "Une bilbiothèques de comics collaborative et gratuite",
+    "landing.latestBooks": "Dernières additions à notre bibliothèque",
     // Search page
     "search.header": "Rechercher",
     "search.placeholder": "Rechercher des livres ou des séries...",
