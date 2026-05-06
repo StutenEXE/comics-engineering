@@ -1,30 +1,30 @@
-import { useState, type SetStateAction } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm, type FieldValues } from "react-hook-form";
+import z from "zod";
 import { useTranslation } from "~/i18n/i18n";
+import { parseToBook } from "~/models/book";
 import {
   ContributionTypeEnum,
   type ContributionTree,
   type SimpleContribution,
 } from "~/models/contribution";
 import { type ContributionBundle } from "~/models/contributionBundle";
-import { noPropagationEvt, preventDefaultEvt } from "~/utils/events";
+import { parseToEdition } from "~/models/edition";
+import { parseToIssue } from "~/models/issue";
+import { parseToIssueSerie } from "~/models/issue-serie";
+import { parseToSerie } from "~/models/serie";
+import { useAppSelector } from "~/store/hooks";
+import { noPropagationEvt } from "~/utils/events";
 import { GenericButton } from "../buttons/GenericButton";
 import { IndentedContributionList } from "../lists/contributionlists/IndentedContributionList";
 import { useConfirm } from "../modals/ConfirmModalProvider";
-import { SerieContributionModal } from "../modals/contribution/SerieContributionModal";
-import { parseToSerie, type Serie } from "~/models/serie";
-import { parseToBook } from "~/models/book";
 import { BookContributionModal } from "../modals/contribution/BookContributionModal";
-import z from "zod";
-import { useForm, type FieldValues } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { TextAreaRhfInput } from "./fields/TextAreaRhfInput";
 import { EditionContributionModal } from "../modals/contribution/EditionContributionModal";
-import { parseToEdition } from "~/models/edition";
-import { IssueSerieContributionModal } from "../modals/contribution/IssueSerieContributionModal";
-import { parseToIssueSerie } from "~/models/issue-serie";
 import { IssueContributionModal } from "../modals/contribution/IssueContributionModal";
-import { parseToIssue } from "~/models/issue";
-import { useAppSelector } from "~/store/hooks";
+import { IssueSerieContributionModal } from "../modals/contribution/IssueSerieContributionModal";
+import { SerieContributionModal } from "../modals/contribution/SerieContributionModal";
+import { TextAreaRhfInput } from "./fields/TextAreaRhfInput";
 import { GenericForm } from "./GenericForm";
 
 interface ContributionBundleFormProps {
@@ -177,38 +177,38 @@ export function ContributionBundleForm({
   return (
     <>
       <GenericForm
-        title={t("cbundle.create")}
+        title={t("cbundle.form.create")}
         onCancel={noPropagationEvt(onCancel)}
-        submitLabel={t("bundle.form.submit")}
+        submitLabel={t("cbundle.form.submit")}
         onSubmit={handleSubmit(triggerSubmission)}
         disabled={contributions.length <= 0}
       >
         {/* Add contribution buttons */}
         <div className="flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-widest text-white/40">
-            {t("contribute.add")}
+            {t("cbundle.form.add")}
           </span>
           <div className="flex flex-wrap gap-2">
             {[
               {
                 key: ContributionTypeEnum.EDITION,
-                label: t("contribute.addEdition"),
+                label: t("cbundle.form.addEdition"),
               },
               {
                 key: ContributionTypeEnum.BOOK,
-                label: t("contribute.addBook"),
+                label: t("cbundle.form.addBook"),
               },
               {
                 key: ContributionTypeEnum.SERIE,
-                label: t("contribute.addSerie"),
+                label: t("cbundle.form.addSerie"),
               },
               {
                 key: ContributionTypeEnum.ISSUE,
-                label: t("contribute.addIssue"),
+                label: t("cbundle.form.addIssue"),
               },
               {
                 key: ContributionTypeEnum.ISSUE_SERIE,
-                label: t("contribute.addIssueSerie"),
+                label: t("cbundle.form.addIssueSerie"),
               },
             ].map(({ key, label }) => (
               <GenericButton
@@ -244,7 +244,7 @@ export function ContributionBundleForm({
 
         {/* Note */}
         <TextAreaRhfInput
-          label={t("cbundle.form.note")}
+          label={t("cbundle.note")}
           registration={register("note")}
           error={errors.note}
         />

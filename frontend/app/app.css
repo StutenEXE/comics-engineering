@@ -23,3 +23,42 @@ body {
     color-scheme: dark;
   }
 }
+
+/* ===== Global Glass Scrollbar ===== */
+
+/* WebKit browsers (Chrome, Edge, Safari) */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px; /* for horizontal scrollbars */
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(6px);
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.35),
+    rgba(255, 255, 255, 0.15)
+  );
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.5),
+    rgba(255, 255, 255, 0.25)
+  );
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.35) rgba(255, 255, 255, 0.05);
+}

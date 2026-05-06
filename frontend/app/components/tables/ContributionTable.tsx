@@ -31,7 +31,7 @@ export function ContributionTable({
       }
       columns={getContributionColumns()}
       isLoading={isLoading}
-      emptyMessage={t("contribution.table.empty")}
+      emptyMessage={t("contribution.nonefound")}
       error={error}
     />
   );

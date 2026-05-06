@@ -3,7 +3,6 @@ import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 
-
 interface PasswordRhfInputProps {
   label: string;
   registration?: UseFormRegisterReturn;
@@ -29,6 +28,7 @@ export function PasswordRhfInput({
       <div className="relative">
         <input
           type={visible ? "text" : "password"}
+          autoComplete="off"
           {...registration}
           {...inputProps}
           className="w-full bg-white/5 border border-white/10 rounded-md px-3 py-2 pr-10 text-sm text-white placeholder-white/20 outline-none focus:border-indigo-500/70 focus:ring-1 focus:ring-indigo-500/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed"

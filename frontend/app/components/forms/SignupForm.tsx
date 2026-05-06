@@ -29,7 +29,7 @@ export function SignupForm({ onDone, onCancel }: SignupFormProps) {
     password: z
       .string()
       .min(1, t("signup.password.required"))
-      .min(8, t("login.password.8chars")),
+      .min(8, t("signup.password.gte8chars")),
   });
 
   type FormData = z.infer<typeof schema>;
@@ -81,21 +81,21 @@ export function SignupForm({ onDone, onCancel }: SignupFormProps) {
       <TextRhfInput
         label={t("signup.username")}
         registration={register("username")}
-        inputProps={{ placeholder: t("signup.placeholder.username") }}
-        error={errors.email}
+        inputProps={{ placeholder: t("signup.username.placeholder") }}
+        error={errors.username}
       />
 
       <TextRhfInput
         label={t("signup.email")}
         registration={register("email")}
-        inputProps={{ placeholder: t("signup.placeholder.email") }}
+        inputProps={{ placeholder: t("signup.email.placeholder") }}
         error={errors.email}
       />
 
       <PasswordRhfInput
         label={t("signup.password")}
         registration={register("password")}
-        inputProps={{ placeholder: t("signup.placeholder.password") }}
+        inputProps={{ placeholder: t("signup.password.placeholder") }}
         error={errors.password}
       />
     </GenericForm>

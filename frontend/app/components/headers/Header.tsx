@@ -114,7 +114,7 @@ export function Header() {
                   onClick={() => {
                     disconnect({}).then(() => store.dispatch(clearUser()));
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-white/40 rounded-md hover:bg-rose-500/10 hover:text-rose-400 transition-all"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-white/40 rounded-md hover:bg-red-500/10 hover:text-red-400 transition-all  cursor-pointer"
                 >
                   <MdLogout size={15} />
                   <span className="text-xs">{t("header.logout")}</span>
@@ -124,13 +124,13 @@ export function Header() {
               <>
                 <button
                   onClick={openLoginModal}
-                  className="px-3 py-1.5 text-sm text-white/50 rounded-md hover:bg-white/5 hover:text-white/80 transition-all"
+                  className="px-3 py-1.5 text-sm text-white/50 rounded-md cursor-pointer hover:bg-white/5 hover:text-white/80 transition-all"
                 >
                   {t("header.login")}
                 </button>
                 <button
                   onClick={openSignupModal}
-                  className="px-3 py-1.5 text-sm bg-indigo-600 hover:bg-indigo-500 text-white rounded-md transition-all shadow-lg shadow-indigo-900/40"
+                  className="px-3 py-1.5 text-sm bg-indigo-600 cursor-pointer hover:bg-indigo-500 text-white rounded-md transition-all shadow-lg shadow-indigo-900/40"
                 >
                   {t("header.signup")}
                 </button>

@@ -81,14 +81,14 @@ export function LoginForm({ onDone, onCancel }: LoginFormProps) {
       <TextRhfInput
         label={t("login.email")}
         registration={register("email")}
-        inputProps={{ placeholder: t("login.placeholder.email") }}
+        inputProps={{ placeholder: t("login.email.placeholder") }}
         error={errors.email}
       />
 
       <PasswordRhfInput
         label={t("login.password")}
         registration={register("password")}
-        inputProps={{ placeholder: t("login.placeholder.password") }}
+        inputProps={{ placeholder: t("login.password.placeholder") }}
         error={errors.password}
       />
     </GenericForm>

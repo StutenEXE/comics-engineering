@@ -49,7 +49,7 @@ export function EditionContributionForm({
     .object({
       isbn: z
         .string()
-        .min(1, t("edition.form.isbn.required"))
+        .min(1, t("generic.required", { capitalize: true }))
         .regex(/^\d{13}$/, t("edition.form.isbn.13digits")),
       ean: z
         .string()
@@ -61,10 +61,14 @@ export function EditionContributionForm({
         .gte(0, t("edition.form.npages.gte0"))
         .optional(),
       price: z.coerce.number().gte(0, t("edition.form.price.gte0")).optional(),
-      url: z.httpUrl().min(1, "edition.form.url.required"),
-      imgUrl: z.httpUrl().min(1, "edition.form.img.required"),
+      url: z
+        .httpUrl(t("generic.invalidUrl"))
+        .min(1, t("generic.required", { capitalize: true })),
+      imgUrl: z
+        .httpUrl(t("generic.invalidUrl"))
+        .min(1, t("generic.required", { capitalize: true })),
       coverType: z.string(), //z.literal(["Hardcover", "Paperback", "Single issue"]),
-      parutionDate: zDateRequired(t("form.required")),
+      parutionDate: zDateRequired(t("generic.required", { capitalize: true })),
     })
     .refine(() => bookLocalRef || selectedBook)
     .refine(() => selectedPublisher);
@@ -121,6 +125,8 @@ export function EditionContributionForm({
 
   // UX : show selected image preview to user
   const [newImgUrl, setNewImgUrl] = useState<string>(edition?.imgUrl || "");
+  // UX : Copy paste isbns with dashes
+  const [isbnDisplay, setIsbnDisplay] = useState<string>(edition?.isbn || "");
 
   // Searching for books
   const [searchBook, { data: booksData }] = useLazySearchBooksByNameQuery();
@@ -153,7 +159,7 @@ export function EditionContributionForm({
       {/* Book selection */}
       <SearchSelectInput
         label={t("edition.book")}
-        placeholder={t("edition.form.bookSearchPlaceholder")}
+        placeholder={t("generic.search.placeholder")}
         localRefLabel={t("edition.form.localRefPresent")}
         selectedItem={selectedBook}
         localRef={bookLocalRef}
@@ -171,7 +177,7 @@ export function EditionContributionForm({
       {/* Publisher selection */}
       <SearchSelectInput
         label={t("edition.publisher")}
-        placeholder={t("edition.form.publisherSearchPlaceholder")}
+        placeholder={t("generic.search.placeholder")}
         selectedItem={selectedPublisher}
         results={pubsData?.publishers.map(publisherToSimplePublisher)}
         onSearch={handlePublisherSearch}
@@ -188,17 +194,14 @@ export function EditionContributionForm({
       <div className="flex items-end gap-3">
         <TextRhfInput
           label={t("edition.isbn")}
-          registration={register(
-            "isbn",
-            // {
-            // onChange: (e) => {
-            //   const raw = e.target.value.replace(/\D/g, ""); // Replace anything that is not a digit
-            //   setIsbnDisplay(formatToIsbn(raw));
-            // },}
-          )}
+          registration={register("isbn", {
+            onChange: (e) => {
+              const raw = e.target.value.replace(/\D/g, ""); // Replace anything that is not a digit
+              setIsbnDisplay(raw);
+            },
+          })}
           inputProps={{
-            // maxLength: 17,
-            maxLength: 13,
+            value: isbnDisplay,
             inputMode: "numeric",
           }}
           error={errors.isbn}
@@ -212,7 +215,6 @@ export function EditionContributionForm({
           label={t("edition.ean")}
           registration={register("ean")}
           inputProps={{
-            maxLength: 13,
             inputMode: "numeric",
           }}
           error={errors.ean}
@@ -239,6 +241,7 @@ export function EditionContributionForm({
           inputProps={{
             type: "number",
             inputMode: "numeric",
+            min: 0,
           }}
           error={errors.npages}
         />
@@ -250,6 +253,7 @@ export function EditionContributionForm({
             type: "number",
             step: ".01",
             inputMode: "numeric",
+            min: 0,
           }}
           error={errors.price}
         />
@@ -267,9 +271,9 @@ export function EditionContributionForm({
         <SelectRhfInput
           label={t("edition.coverType")}
           options={[
-            { label: t("edition.hardcover"), value: "hardcover" },
-            { label: t("edition.paperback"), value: "paperback" },
-            { label: t("edition.singleissue"), value: "singleissue" },
+            { label: t("edition.coverType.hardcover"), value: "hardcover" },
+            { label: t("edition.coverType.paperback"), value: "paperback" },
+            { label: t("edition.coverType.singleissue"), value: "singleissue" },
           ]}
           registration={register("coverType")}
         />

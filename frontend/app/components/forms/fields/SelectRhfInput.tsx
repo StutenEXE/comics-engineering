@@ -1,6 +1,6 @@
 // Component made by AI (Claude Sonnet 4.6)
 
-import type { FieldValues, UseFormRegisterReturn } from "react-hook-form";
+import type { UseFormRegisterReturn } from "react-hook-form";
 
 interface SelectRhfInputProps{
   label?: string;
@@ -33,7 +33,7 @@ export function SelectRhfInput({
           </option>
         )}
         {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
+          <option key={opt.value} value={opt.value} className="cursor-pointer">
             {opt.label}
           </option>
         ))}

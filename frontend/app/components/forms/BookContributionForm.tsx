@@ -38,11 +38,13 @@ export function BookContributionForm({
   // Validation schema
   const schema = z
     .object({
-      name: z.string().min(1, t("book.form.name.required")),
+      name: z.string().min(1, t("generic.required", { capitalize: true })),
       desc: z.string().optional(),
-      number: z.coerce.number().optional(),
+      number: z.coerce.number().gte(0, t("book.form.number.gte0")).optional(),
       voContent: z.string().optional(),
-      imgUrl: z.httpUrl().min(1, "book.form.img.required"),
+      imgUrl: z
+        .httpUrl(t("generic.invalidUrl"))
+        .min(1, t("generic.required", { capitalize: true })),
     })
     .refine(() => serieLocalRef || selectedSerie);
 
@@ -71,7 +73,10 @@ export function BookContributionForm({
       number: data?.number,
       voContent: data?.voContent,
       imgUrl: data?.imgUrl,
-      serie: serieLocalRef ?? { id: selectedSerie?.id!, name: selectedSerie?.name! },
+      serie: serieLocalRef ?? {
+        id: selectedSerie?.id!,
+        name: selectedSerie?.name!,
+      },
     };
     const contrib: Partial<SimpleContribution> = {
       action:
@@ -117,7 +122,7 @@ export function BookContributionForm({
         {/* Serie selection */}
         <SearchSelectInput
           label={t("book.serie")}
-          placeholder={t("book.form.serieSearchPlaceholder")}
+          placeholder={t("generic.search.placeholder")}
           localRefLabel={t("book.form.localRefPresent")}
           selectedItem={selectedSerie}
           localRef={serieLocalRef}
@@ -132,10 +137,11 @@ export function BookContributionForm({
           }
         />
 
+        {/* Number */}
         <TextRhfInput
           label={t("book.number")}
           registration={register("number")}
-          inputProps={{ type: "number", inputMode: "numeric" }}
+          inputProps={{ type: "number", inputMode: "numeric", min: 0 }}
           error={errors.number}
           className="w-25"
         />
@@ -143,7 +149,7 @@ export function BookContributionForm({
 
       {/* Description field */}
       <TextAreaRhfInput
-        label={t("book.desc")}
+        label={t("book.description")}
         registration={register("desc")}
         error={errors.desc}
       />

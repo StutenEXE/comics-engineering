@@ -40,66 +40,40 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
   }
 
   return (
-    <InfoPageTemplate hasImg={false}>
-      {/* Loading */}
-      {isLoading && (
-        <div className="flex items-center justify-center py-12">
-          <p className="text-sm text-white/30 animate-pulse">
-            {t("loader.issueserie.loading")}
+    <InfoPageTemplate hasImg={false} isLoading={isLoading} error={err}>
+      <InfoPageHeaderComponent
+        headerTitle={t("page.issueserie.header")}
+        title={issueSerie?.name || ""}
+        subtitle={subtitle}
+        createdAt={issueSerie?.createdAt}
+        modifiedAt={issueSerie?.modifiedAt}
+        addedBy={issueSerie?.addedBy?.username}
+      />
+
+      {issueSerie?.desc && (
+        <InfoPageSection label={t("issueserie.description")}>
+          <p className="text-sm text-white/60 leading-relaxed">
+            {issueSerie.desc}
           </p>
-        </div>
+        </InfoPageSection>
       )}
 
-      {/* Error */}
-      {err && (
-        <div className="flex flex-col gap-1 py-12">
-          <p className="text-sm text-white/40">
-            {t("loader.issueserie.error")}
-          </p>
-          <p className="text-xs text-rose-400/70 font-mono">
-            [{err.status}] {err.details.message}
-          </p>
-        </div>
-      )}
+      <InfoPageSection label={t("issueserie.issues")}>
+        <IssueList
+          issueList={issueSerie?.issues.map((is) => ({
+            ...is,
+            issueSerie: { ...issueSerie },
+          }))}
+          className="border border-white/8 rounded-lg"
+        />
+      </InfoPageSection>
 
-      {/* Content */}
-      {!isLoading && !error && (
-        <>
-          <InfoPageHeaderComponent
-            headerTitle={t("issueserie.header")}
-            title={issueSerie?.name || ""}
-            subtitle={subtitle}
-            createdAt={issueSerie?.createdAt}
-            modifiedAt={issueSerie?.modifiedAt}
-            addedBy={issueSerie?.addedBy?.username}
-          />
-
-          {issueSerie?.desc && (
-            <InfoPageSection label={t("issueserie.description")}>
-              <p className="text-sm text-white/60 leading-relaxed">
-                {issueSerie.desc}
-              </p>
-            </InfoPageSection>
-          )}
-
-          <InfoPageSection label={t("issueserie.issues")}>
-            <IssueList
-              issueList={issueSerie?.issues.map((is) => ({
-                ...is,
-                issueSerie: { ...issueSerie },
-              }))}
-              className="border border-white/8 rounded-lg"
-            />
-          </InfoPageSection>
-
-          <InfoPageSection label={t("issueserie.books")}>
-            <BookList
-              bookList={books}
-              className="border border-white/8 rounded-lg"
-            />
-          </InfoPageSection>
-        </>
-      )}
+      <InfoPageSection label={t("page.issueserie.books")}>
+        <BookList
+          bookList={books}
+          className="border border-white/8 rounded-lg"
+        />
+      </InfoPageSection>
     </InfoPageTemplate>
   );
 }

@@ -18,6 +18,7 @@ export function CheckboxRhfInput({
       <div className="relative">
         <input
           type="checkbox"
+            autoComplete="off"
           {...registration}
           {...inputProps}
           className="peer sr-only"

@@ -167,7 +167,7 @@ export function IndentedContributionList({
   return (
     <GenericList
       list={parentList}
-      emptyMsg={t("cbundle.form.nocontributions")}
+      emptyMsg={t("contribution.nonefound")}
       elemGenerator={(c: ContributionTree) => mapper(c, 0)}
       vertical
       className={className}

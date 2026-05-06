@@ -19,6 +19,7 @@ export function TextAreaRhfInput({
         {label}
       </label>
       <textarea
+        autoComplete="off"
         rows={3}
         {...registration}
         {...inputProps}

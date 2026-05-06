@@ -1,11 +1,14 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "~/i18n/i18n";
+import type { Error } from "~/utils/error";
 
 interface PageTemplateProps {
   hasImg?: boolean;
   imgUrl?: string;
   imgAlt?: string;
+  isLoading?: boolean;
+  error?: Error;
   children?: ReactNode;
 }
 
@@ -13,8 +16,12 @@ export function InfoPageTemplate({
   hasImg,
   imgUrl,
   imgAlt,
+  isLoading,
+  error,
   children,
 }: PageTemplateProps) {
+  const { t } = useTranslation();
+
   return (
     <main className="flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-4xl">
@@ -28,7 +35,29 @@ export function InfoPageTemplate({
               />
             </div>
           )}
-          <div className="flex-1 flex flex-col gap-6 min-w-0">{children}</div>
+          <div className="flex-1 flex flex-col gap-6 min-w-0">
+            {/* Loading */}
+            {isLoading && (
+              <div className="flex items-center justify-center py-12">
+                <p className="text-sm text-white/30 animate-pulse">
+                  {t("loader.loading")}
+                </p>
+              </div>
+            )}
+
+            {/* Error */}
+            {error && (
+              <div className="flex flex-col gap-1 py-12">
+                <p className="text-sm text-white/40">{t("loader.error")}</p>
+                <p className="text-xs text-rose-400/70 font-mono">
+                  [{error.status}] {error.details.message}
+                </p>
+              </div>
+            )}
+
+            {/* Content */}
+            {!isLoading && !error && children}
+          </div>
         </div>
       </div>
     </main>
@@ -69,10 +98,10 @@ export function InfoPageField({
 }: InfoPageFieldProps) {
   const { t } = useTranslation();
 
-  if (hide) return <></>
+  if (hide) return <></>;
 
-  const displayValue = value ?? t("generic.uknown")
-  
+  const displayValue = value ?? t("generic.uknown");
+
   return (
     <>
       <span className="text-xs font-medium uppercase tracking-widest text-white/30 whitespace-nowrap">
@@ -98,5 +127,19 @@ export function InfoPageField({
         <span className="text-sm text-white/70">{displayValue}</span>
       )}
     </>
+  );
+}
+
+export function InfoPageFields({
+  fieldProps,
+}: {
+  fieldProps: InfoPageFieldProps[];
+}) {
+  return (
+    <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2.5 items-baseline">
+      {fieldProps.map((props) => (
+        <InfoPageField {...props} />
+      ))}
+    </div>
   );
 }

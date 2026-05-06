@@ -163,6 +163,7 @@ export function SearchSelectInput<T extends SearchSelectItem>({
         <>
           <input
             type="text"
+            autoComplete="off"
             id="search-select-input"
             name="search-select-input"
             value={inputValue}
