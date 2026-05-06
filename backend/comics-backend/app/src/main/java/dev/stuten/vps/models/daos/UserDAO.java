@@ -58,7 +58,7 @@ public class UserDAO extends DAO {
 
     @Override
     protected SelectJoinStep<? extends Record> getSimpleFromClause() {
-        return DSL().select(getSimpleSelectFields()).from(USERS);
+        return DSL().selectDistinct(getSimpleSelectFields()).from(USERS);
     }
 
     @Override

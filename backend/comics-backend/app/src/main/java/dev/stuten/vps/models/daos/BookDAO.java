@@ -57,7 +57,7 @@ public class BookDAO extends ContributableDAO<BookDTO> {
 
         @Override
         protected SelectJoinStep<? extends Record> getSimpleFromClause() {
-                return DSL().select(getSimpleSelectFields()).from(BOOKS)
+                return DSL().selectDistinct(getSimpleSelectFields()).from(BOOKS)
                                 .leftJoin(SERIES).on(BOOKS.SERIES_ID.eq(SERIES.ID));
         }
 

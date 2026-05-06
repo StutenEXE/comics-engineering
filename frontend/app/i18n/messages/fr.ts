@@ -8,6 +8,7 @@ export default {
     "generic.cancel": "annuler",
     "generic.submit": "soumettre",
     "generic.confirm": "confirmer",
+    "generic.uknown": "inconnu",
     "generic.the": "le",
     "generic.present": "présent",
     "generic.oneshot": "oneshot",

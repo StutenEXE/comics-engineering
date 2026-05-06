@@ -60,7 +60,7 @@ public class EditionDAO extends ContributableDAO<EditionDTO> {
 
     @Override
     protected SelectJoinStep<? extends Record> getSimpleFromClause() {
-        return DSL().select(getSimpleSelectFields()).from(EDITIONS)
+        return DSL().selectDistinct(getSimpleSelectFields()).from(EDITIONS)
                 .leftJoin(PUBLISHERS).on(EDITIONS.PUBLISHER_ID.eq(PUBLISHERS.ID));
     }
 

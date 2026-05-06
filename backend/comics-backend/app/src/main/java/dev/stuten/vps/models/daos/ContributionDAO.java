@@ -49,7 +49,7 @@ public class ContributionDAO extends DAO {
 
     @Override
     protected SelectJoinStep<? extends Record> getSimpleFromClause() {
-        return DSL().select(getSimpleSelectFields()).from(CONTRIBUTIONS);
+        return DSL().selectDistinct(getSimpleSelectFields()).from(CONTRIBUTIONS);
     }
 
     @Override

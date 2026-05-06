@@ -18,7 +18,7 @@ export function IssueList({ issueList, descOrder, isLoading, error, className }:
     const { t } = useTranslation()
 
     const mapper = (is: SimpleIssue) => (
-        <IssueCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
+        <IssueCard className="w-100 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
                 key={is?.id} issue={is} />
     ) 
     

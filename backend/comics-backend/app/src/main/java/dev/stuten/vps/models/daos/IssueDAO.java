@@ -54,7 +54,7 @@ public class IssueDAO extends ContributableDAO<IssueDTO> {
         }
 
         protected SelectJoinStep<? extends Record> getSimpleFromClause() {
-                return DSL().select(getSimpleSelectFields()).from(ISSUES)
+                return DSL().selectDistinct(getSimpleSelectFields()).from(ISSUES)
                                 .leftJoin(ISSUE_SERIES).on(ISSUES.SERIES_ID.eq(ISSUE_SERIES.ID));
         }
 

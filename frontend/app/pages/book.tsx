@@ -2,7 +2,7 @@ import { useBookByIdQuery } from "~/store/services/api";
 import type { Route } from "../+types/root";
 import { createError } from "~/utils/error";
 import { InfoPageHeaderComponent } from "~/components/headers/InfoPageHeader";
-import { InfoPageTemplate } from "~/components/templates/InfoPageTemplate";
+import { InfoPageSection, InfoPageTemplate } from "~/components/templates/InfoPageTemplate";
 import { EditionList } from "~/components/lists/editionlists/EditionList";
 import type { Link } from "~/components/lists/LinkButtonList";
 import { BookListBySerieId } from "~/components/lists/booklists/BookListBySerieId";
@@ -16,64 +16,88 @@ export function meta({ params }: Route.MetaArgs) {
   ];
 }
 
-export default function BookPage({ params }: { params : { id: number}}) {
+export default function BookPage({ params }: { params: { id: number } }) {
   const { t } = useTranslation();
-  
-  // No issues to limit lag, refetch in other component
   const { data, isLoading, error } = useBookByIdQuery({ id: params.id });
   const book = data?.book ?? null;
-  const err = createError(error)
-
-  const links: Link[] = [
-    { name: t("book.link.serie"), path: `/serie/${book?.serie?.id}`, disabled: isLoading }
-  ]
+  const err = createError(error);
 
   return (
-    <InfoPageTemplate hasImg={true} imgUrl={book?.imgUrl} imgAlt={book?.name} links={links}>
-      { isLoading && (
-        <div className="flex items-center justify-center">
-            <h1 className="text-3xl text-gray-500">{t("loader.book.loading")}</h1>
+    <InfoPageTemplate hasImg={true} imgUrl={book?.imgUrl} imgAlt={book?.name}>
+      {/* Loading */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <p className="text-sm text-white/30 animate-pulse">
+            {t("loader.book.loading")}
+          </p>
         </div>
       )}
-      { err && (
-        <div className="flex flex-col items-center justify-center">
-            <h1 className="text-3xl text-gray-500">{t("loader.book.error")}</h1>
-            <h3 className="text-xl text-red-400">
-              [Code: {err.status}] { err.details.message }
-            </h3> 
+
+      {/* Error */}
+      {err && (
+        <div className="flex flex-col gap-1 py-12">
+          <p className="text-sm text-white/40">{t("loader.book.error")}</p>
+          <p className="text-xs text-rose-400/70 font-mono">
+            [{err.status}] {err.details.message}
+          </p>
         </div>
       )}
-      { (!isLoading && !error) && (
+
+      {/* Content */}
+      {!isLoading && !error && (
         <>
-          <InfoPageHeaderComponent headerTitle={t("book.header")} title={book?.name} 
-            subtitle={`${book?.serie?.name} (#${book?.number}/${book?.serie?.nvolumes})`} 
-            createdAt={book?.createdAt} modifiedAt={book?.modifiedAt} addedBy={book?.addedBy?.username} 
-            links={links}
+          <InfoPageHeaderComponent
+            headerTitle={t("book.header")}
+            title={book?.name || ""}
+            subtitle={`${book?.serie?.name} (#${book?.number}/${book?.serie?.nvolumes})`}
+            subtitleTo={`/serie/${book?.serie?.id}`}
+            createdAt={book?.createdAt}
+            modifiedAt={book?.modifiedAt}
+            addedBy={book?.addedBy?.username}
           />
-          <div className="flex flex-col gap-2">
-            <h3 className="text-xl text-gray-200 font-semibold">{t("book.description")} :</h3>
-            <p>
-              {book?.desc}
-            </p>
-          </div>
-          <div className="flex flex-col gap-2">
-            <h3 className="text-xl text-gray-200 font-semibold">{t("book.voContent")} :</h3>
-            <p>
-              {book?.voContent}
-            </p>
-          </div>
-          <div className="flex gap-2 flex-col">
-            <h3 className="text-xl text-gray-200 font-semibold">{t("book.sameseries")} :</h3>
-            <BookListBySerieId serieId={book?.serie?.id} toIgnore={book}  className="border border-gray-500 rounded-lg" />
-          </div>
-          <div className="flex gap-2 flex-col">
-            <h3 className="text-xl text-gray-200 font-semibold">{t("book.issues")} :</h3>
-            <IssueListByBookId bookId={book?.id} className="border border-gray-500 rounded-lg" />
-          </div>
-          <div className="flex gap-2 flex-col">
-            <h3 className="text-xl text-gray-200 font-semibold">{t("book.editions")} :</h3>
-            <EditionList editionList={book?.editions} className="border border-gray-500 rounded-lg"/>
-          </div>
+
+          {/* Description */}
+          {book?.desc && (
+            <InfoPageSection label={t("book.description")}>
+              <p className="text-sm text-white/60 leading-relaxed">
+                {book.desc}
+              </p>
+            </InfoPageSection>
+          )}
+
+          {/* VO Content */}
+          {book?.voContent && (
+            <InfoPageSection label={t("book.voContent")}>
+              <p className="text-sm text-white/60 leading-relaxed">
+                {book.voContent}
+              </p>
+            </InfoPageSection>
+          )}
+
+          {/* Same series */}
+          <InfoPageSection label={t("book.sameseries")}>
+            <BookListBySerieId
+              serieId={book?.serie?.id}
+              toIgnore={book}
+              className="border border-white/8 rounded-lg"
+            />
+          </InfoPageSection>
+
+          {/* Issues */}
+          <InfoPageSection label={t("book.issues")}>
+            <IssueListByBookId
+              bookId={book?.id}
+              className="border border-white/8 rounded-lg"
+            />
+          </InfoPageSection>
+
+          {/* Editions */}
+          <InfoPageSection label={t("book.editions")}>
+            <EditionList
+              editionList={book?.editions}
+              className="border border-white/8 rounded-lg"
+            />
+          </InfoPageSection>
         </>
       )}
     </InfoPageTemplate>

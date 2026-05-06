@@ -53,7 +53,7 @@ public class ContributionBundleDAO extends DAO {
 
         @Override
         protected SelectJoinStep<? extends Record> getSimpleFromClause() {
-                return DSL().select(getSimpleSelectFields()).from(CONTRIBUTION_BUNDLES)
+                return DSL().selectDistinct(getSimpleSelectFields()).from(CONTRIBUTION_BUNDLES)
                                 .leftJoin(USERS).on(CONTRIBUTION_BUNDLES.SUBMITTER_ID.eq(USERS.ID));
         }
 

@@ -17,7 +17,7 @@ export function meta({}: Route.MetaArgs) {
 
 export default function CollectionPage() {
   const { t } = useTranslation();
-  const { user, isAuthenticated } = useAppSelector((state) => state.user);
+  const { user } = useAppSelector((state) => state.user);
 
   const { data, isLoading, error } = useCollectionQuery(
     user ? { id: user.id } : { id: 0 },

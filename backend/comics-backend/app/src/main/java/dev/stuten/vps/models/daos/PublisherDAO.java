@@ -44,7 +44,7 @@ public class PublisherDAO extends ContributableDAO<PublisherDTO> {
 
     @Override
     protected SelectJoinStep<? extends Record> getSimpleFromClause() {
-        return DSL().select(getSimpleSelectFields()).from(PUBLISHERS);
+        return DSL().selectDistinct(getSimpleSelectFields()).from(PUBLISHERS);
     }
 
     @Override

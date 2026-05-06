@@ -1,9 +1,12 @@
 import { InfoPageHeaderComponent } from "~/components/headers/InfoPageHeader";
 import { BookList } from "~/components/lists/booklists/BookList";
 import { IssueList } from "~/components/lists/issuelists/IssueList";
-import { InfoPageTemplate } from "~/components/templates/InfoPageTemplate";
+import {
+  InfoPageSection,
+  InfoPageTemplate,
+} from "~/components/templates/InfoPageTemplate";
 import { useTranslation } from "~/i18n/i18n";
-import type { Book, SimpleBook } from "~/models/book";
+import type { SimpleBook } from "~/models/book";
 import { useIssueSerieByIdQuery } from "~/store/services/api";
 import { dateToMonthYearString } from "~/utils/date";
 import { createError } from "~/utils/error";
@@ -16,67 +19,85 @@ export function meta({ params }: Route.MetaArgs) {
   ];
 }
 
-export default function IssueSeriePage({ params }: { params : { id: number}}) {
+export default function IssueSeriePage({ params }: { params: { id: number } }) {
   const { t, locale } = useTranslation();
 
   const { data, isLoading, error } = useIssueSerieByIdQuery({ id: params.id });
   const issueSerie = data?.issueSerie ?? null;
-  const err = createError(error)
+  const err = createError(error);
 
-  // Remove duplicate books by id
-  const ids = new Set();
-  const books: SimpleBook[] | undefined = issueSerie?.books
+  const books: SimpleBook[] | undefined = issueSerie?.books;
 
-  let subtitle = dateToMonthYearString(locale, issueSerie?.startDate)
-  if (!issueSerie?.endDate) { subtitle += ` - ${t("generic.present", { capitalize: true })}` }
-  else if (issueSerie?.startDate.getTime() === issueSerie?.endDate.getTime()) {
-    subtitle += ` - ${t("generic.oneshot", { capitalize: true })}`
-  }
-  else {
-    subtitle += ` - ${dateToMonthYearString(locale, issueSerie?.endDate)}`
+  let subtitle = dateToMonthYearString(locale, issueSerie?.startDate);
+  if (!issueSerie?.endDate) {
+    subtitle += ` - ${t("generic.present", { capitalize: true })}`;
+  } else if (
+    issueSerie?.startDate.getTime() === issueSerie?.endDate.getTime()
+  ) {
+    subtitle += ` - ${t("generic.oneshot", { capitalize: true })}`;
+  } else {
+    subtitle += ` - ${dateToMonthYearString(locale, issueSerie?.endDate)}`;
   }
 
   return (
     <InfoPageTemplate hasImg={false}>
-      { isLoading && (
-        <div className="flex items-center justify-center">
-            <h1 className="text-3xl text-gray-500">{t("loader.issueserie.loading")}</h1>
+      {/* Loading */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <p className="text-sm text-white/30 animate-pulse">
+            {t("loader.issueserie.loading")}
+          </p>
         </div>
       )}
-      { err && (
-        <div className="flex flex-col items-center justify-center">
-            <h1 className="text-3xl text-gray-500">{t("loader.issueserie.error")}</h1>
-            <h3 className="text-xl text-red-400">
-              [Code: {err.status}] { err.details.message }
-            </h3> 
+
+      {/* Error */}
+      {err && (
+        <div className="flex flex-col gap-1 py-12">
+          <p className="text-sm text-white/40">
+            {t("loader.issueserie.error")}
+          </p>
+          <p className="text-xs text-rose-400/70 font-mono">
+            [{err.status}] {err.details.message}
+          </p>
         </div>
       )}
-      { (!isLoading && !error) && (
+
+      {/* Content */}
+      {!isLoading && !error && (
         <>
-          <InfoPageHeaderComponent headerTitle="Issue Serie" title={issueSerie?.name} subtitle={subtitle} 
-            createdAt={issueSerie?.createdAt} modifiedAt={issueSerie?.modifiedAt} addedBy={issueSerie?.addedBy?.username} />
-          <div className="flex flex-col gap-2">
-            <h3 className="text-xl text-gray-200 font-semibold">{t("issueserie.description")} :</h3>
-            <p>
-              {issueSerie?.desc}
-            </p>
-          </div>
-          <div className="flex gap-2 flex-col">
-            <h3 className="text-xl text-gray-200 font-semibold">{t("issueserie.issues")}</h3>
-              <IssueList issueList={
-                issueSerie?.issues.map((is) => {
-                  // Since issueSerie is read-only, it's children are too, and we need to have a defined issueSerie here
-                  // it is not sent back by the API (infinite loops in this case)
-                  return {
-                    ...is,
-                    issueSerie: {...issueSerie}
-                  }
-              })} className="border border-gray-500 rounded-lg"/>
-          </div>
-          <div className="flex gap-2 flex-col">
-            <h3 className="text-xl text-gray-200 font-semibold">{t("issueserie.books")}</h3>
-            <BookList bookList={books} className="border border-gray-500 rounded-lg"/>
-          </div>
+          <InfoPageHeaderComponent
+            headerTitle={t("issueserie.header")}
+            title={issueSerie?.name || ""}
+            subtitle={subtitle}
+            createdAt={issueSerie?.createdAt}
+            modifiedAt={issueSerie?.modifiedAt}
+            addedBy={issueSerie?.addedBy?.username}
+          />
+
+          {issueSerie?.desc && (
+            <InfoPageSection label={t("issueserie.description")}>
+              <p className="text-sm text-white/60 leading-relaxed">
+                {issueSerie.desc}
+              </p>
+            </InfoPageSection>
+          )}
+
+          <InfoPageSection label={t("issueserie.issues")}>
+            <IssueList
+              issueList={issueSerie?.issues.map((is) => ({
+                ...is,
+                issueSerie: { ...issueSerie },
+              }))}
+              className="border border-white/8 rounded-lg"
+            />
+          </InfoPageSection>
+
+          <InfoPageSection label={t("issueserie.books")}>
+            <BookList
+              bookList={books}
+              className="border border-white/8 rounded-lg"
+            />
+          </InfoPageSection>
         </>
       )}
     </InfoPageTemplate>

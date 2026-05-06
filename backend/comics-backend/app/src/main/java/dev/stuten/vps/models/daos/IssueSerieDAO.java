@@ -50,23 +50,23 @@ public class IssueSerieDAO extends ContributableDAO<IssueSerieDTO> {
     }
 
     protected SelectJoinStep<? extends Record> getSimpleFromClause() {
-        return DSL().select(getSimpleSelectFields()).from(ISSUE_SERIES);
+        return DSL().selectDistinct(getSimpleSelectFields()).from(ISSUE_SERIES);
     }
 
     @Override
     protected SelectJoinStep<? extends Record> getFullFromClause() {
         return DSL().select(getSimpleSelectFields())
                 .select(new UserDAO(this.DSL()).getSimpleSelectFields())
-                .select(multiset( // Issues (1 to many)
-                        new IssueDAO(this.DSL())
-                                .getSimpleFromClause()
+                .select(multiset( // Issues (1 to many) (we use a custom select clause because the simpleFromClause joins issueserie)
+                        this.DSL().selectDistinct(new IssueDAO(this.DSL()).getSimpleSelectFields()).from(ISSUES)
                                 .where(ISSUES.SERIES_ID.eq(ISSUE_SERIES.ID)))
                         .as("issues"))
                 .select(multiset( // Books (1 to many through Issues)
                         new BookDAO(this.DSL()).getSimpleFromClause()
                                 .join(BOOKS_ISSUES).on(BOOKS.ID.eq(BOOKS_ISSUES.BOOK_ID))
                                 .join(ISSUES).on(BOOKS_ISSUES.ISSUE_ID.eq(ISSUES.ID))
-                                .where(ISSUES.SERIES_ID.eq(ISSUE_SERIES.ID)))
+                                .where(ISSUES.SERIES_ID.eq(ISSUE_SERIES.ID))
+                            )
                         .as("books"))
                 .from(ISSUE_SERIES)
                 .leftJoin(USERS).on(ISSUE_SERIES.ADDED_BY.eq(USERS.ID));

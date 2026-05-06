@@ -52,7 +52,7 @@ public class SerieDAO extends ContributableDAO<SerieDTO> {
 
     @Override
     protected SelectJoinStep<? extends Record> getSimpleFromClause() {
-        return DSL().select(getSimpleSelectFields()).from(SERIES);
+        return DSL().selectDistinct(getSimpleSelectFields()).from(SERIES);
     }
 
     @Override
