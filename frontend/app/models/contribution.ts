@@ -8,6 +8,7 @@ import { buildIssueShortName, type Issue } from "./issue";
 import type { IssueSerie } from "./issue-serie";
 import type { Publisher } from "./publisher";
 import type { Locale } from "~/store/slices/localeSlice";
+import React from "react";
 
 export enum ContributionTypeEnum {
     BOOK = "book",
@@ -154,7 +155,18 @@ export function getContributionColumns(): ColumnDef<Contribution>[] {
             key: 'item',
             header: t('contribution.item'),
             searchable: true,
-            cellRenderer: (c) => getContributionName(c, locale),
+            cellRenderer: (c) => {
+                const name = getContributionName(c, locale) 
+                // If the action has a link to something
+                if (c.resolvedEntityId || c.entityId) {
+                    return React.createElement('a', {
+                        className: "hover:underline",
+                        href: `${c.entityType}/${c.resolvedEntityId || c.entityId}`
+                    }, name)
+                }
+                return name;
+                
+            },
             getValue: (c) => c.entityType
         },
         {
