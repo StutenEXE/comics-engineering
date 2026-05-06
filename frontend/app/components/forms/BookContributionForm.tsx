@@ -67,9 +67,10 @@ export function BookContributionForm({
       id: book?.id,
       name: data?.name,
       desc: data?.desc,
+      number: data?.number,
       voContent: data?.voContent,
       imgUrl: data?.imgUrl,
-      serie: { id: (serieLocalRef?.id ?? selectedSerie?.id)! },
+      serie: serieLocalRef ?? { id: selectedSerie?.id!, name: selectedSerie?.name! },
     };
     const contrib: Partial<SimpleContribution> = {
       action:

@@ -114,19 +114,32 @@ public class ContributionService {
             return;
         }
 
+        Optional<ContributionDTO<? extends IdDTO>> contribution = contributionDAO.findById(updateDTO.contributionId());
+        if (contribution.isEmpty()) {
+            String message = String.format("Contributino of id %s not found", updateDTO.contributionId());
+            ErrorResponse.send(HttpStatus.NOT_FOUND, "Contribution not found", message);
+        }
+        // If the new status changes nothing
+        ContributionStatusEnum previousStatus = contribution.get().getStatus();
+        if (previousStatus == updateDTO.newStatus()) {
+            String message = "Contribution already has this status %s".formatted(previousStatus);
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Contribution already has status", message);
+        }
+        // Update status
         Boolean updated = contributionDAO.updateStatus(updateDTO.contributionId(), updateDTO.newStatus());
         if (!updated) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", "Failed to update contribution status");
         }
 
-        ContributionDTO<?> contribution = contributionDAO.findById(updateDTO.contributionId()).get();
+        ContributionDTO<?> updatedContrib = contributionDAO.findById(updateDTO.contributionId()).get();
 
         // Special handling for approval - if contribution is approved, we need to apply
         // the proposed changes to the target entity
-        if (contribution.getStatus() == ContributionStatusEnum.approved) {
+        if (updatedContrib.getStatus() == ContributionStatusEnum.approved) {
             try {
-                approveContribution(contribution);
+                approveContribution(updatedContrib);
             } catch (Exception e) {
+                contributionDAO.updateStatus(updateDTO.contributionId(), previousStatus);
                 System.out.print(Arrays.asList(e.getStackTrace()));
                 ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", e.getMessage());
             }

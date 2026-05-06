@@ -67,7 +67,7 @@ export interface ContributionBook {
 	number?: number,
 	voContent?: string,
 	imgUrl: string,
-	serie: { id: number },
+	serie: { id: number, name: string },
 }
 
 export function isSimpleBook(book: Book | SimpleBook): book is SimpleBook {
