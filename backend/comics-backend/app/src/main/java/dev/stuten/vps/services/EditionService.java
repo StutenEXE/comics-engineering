@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.EditionDAO;
-import dev.stuten.vps.models.dtos.EditionDTO;
+import dev.stuten.vps.models.dtos.full.EditionDTO;
 import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -15,6 +15,10 @@ public class EditionService {
 
     private static EditionDAO dao = new EditionDAO(
             JooqProvider.get());
+
+    protected static EditionDAO getDAO() {
+        return dao;
+    }
 
     public static void getByID(Context ctx) {
         // Retreive ID from request

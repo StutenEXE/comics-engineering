@@ -1,12 +1,16 @@
 import { useBookByIdQuery } from "~/store/services/api";
 import type { Route } from "../+types/root";
 import { createError } from "~/utils/error";
-import { PageHeaderComponent } from "~/components/headers/PageHeader";
-import { PageTemplate } from "~/components/templates/PageTemplate";
+import { InfoPageHeaderComponent } from "~/components/headers/InfoPageHeader";
+import {
+  InfoPageSection,
+  InfoPageTemplate,
+} from "~/components/templates/InfoPageTemplate";
 import { EditionList } from "~/components/lists/editionlists/EditionList";
 import type { Link } from "~/components/lists/LinkButtonList";
 import { BookListBySerieId } from "~/components/lists/booklists/BookListBySerieId";
 import { IssueListByBookId } from "~/components/lists/issuelists/IssueListByBookId";
+import { useTranslation } from "~/i18n/i18n";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -15,59 +19,70 @@ export function meta({ params }: Route.MetaArgs) {
   ];
 }
 
-export default function BookPage({ params }: { params : { id: number}}) {
-  
-  // No issues to limit lag, refetch in other component
+export default function BookPage({ params }: { params: { id: number } }) {
+  const { t } = useTranslation();
   const { data, isLoading, error } = useBookByIdQuery({ id: params.id });
   const book = data?.book ?? null;
-  const err = createError(error)
-
-  const links: Link[] = [
-    { name: "Go to serie", path: `/serie/${book?.serie?.id}`, disabled: isLoading }
-  ]
+  const err = createError(error);
 
   return (
-    <PageTemplate hasImg={true} imgUrl={book?.imgUrl} imgAlt={book?.name} links={links}>
-      { isLoading && (
-        <div className="flex items-center justify-center">
-            <h1 className="text-3xl text-gray-500">Loading book...</h1>
-        </div>
+    <InfoPageTemplate
+      hasImg={true}
+      imgUrl={book?.imgUrl}
+      imgAlt={book?.name}
+      isLoading={isLoading}
+      error={err}
+    >
+      <InfoPageHeaderComponent
+        headerTitle={t("page.book.header")}
+        title={book?.name || ""}
+        subtitle={`${book?.serie?.name} (#${book?.number}/${book?.serie?.nvolumes})`}
+        subtitleTo={`/serie/${book?.serie?.id}`}
+        createdAt={book?.createdAt}
+        modifiedAt={book?.modifiedAt}
+        addedBy={book?.addedBy?.username}
+      />
+
+      {/* Description */}
+      {book?.desc && (
+        <InfoPageSection label={t("book.description")}>
+          <p className="text-sm text-white/60 leading-relaxed">{book.desc}</p>
+        </InfoPageSection>
       )}
-      { err && (
-        <div className="flex flex-col items-center justify-center">
-            <h1 className="text-3xl text-gray-500">Error while fetching book</h1>
-            <h3 className="text-xl text-red-400">
-              [Code: {err.status}] { err.details.message }
-            </h3> 
-        </div>
+
+      {/* VO Content */}
+      {book?.voContent && (
+        <InfoPageSection label={t("book.voContent")}>
+          <p className="text-sm text-white/60 leading-relaxed">
+            {book.voContent}
+          </p>
+        </InfoPageSection>
       )}
-      { (!isLoading && !error) && (
-        <>
-          <PageHeaderComponent headerTitle="Book" title={book?.name} 
-            subtitle={`${book?.serie?.name} (#${book?.number}/${book?.serie?.nvolumes})`} 
-            createdAt={book?.createdAt} modifiedAt={book?.modifiedAt} addedBy={book?.addedBy?.username} 
-            links={links}
-          />
-          <div className="flex flex-col gap-2">
-            <h3 className="text-xl text-gray-200 font-semibold">Description :</h3>
-            <p>
-              {book?.desc}
-            </p>
-          </div>
-          <div className="flex gap-2 flex-col">
-            <h3 className="text-xl text-gray-200 font-semibold">From the same series :</h3>
-            <BookListBySerieId serieId={book?.serie?.id} toIgnore={book}  className="border border-gray-500 rounded-lg" />
-          </div>
-          <div className="flex gap-2 flex-col">
-            <h3 className="text-xl text-gray-200 font-semibold">Issues :</h3>
-            <IssueListByBookId bookId={book?.id} className="border border-gray-500 rounded-lg" />
-          </div>
-          <div className="flex gap-2 flex-col">
-            <h3 className="text-xl text-gray-200 font-semibold">Editions :</h3>
-            <EditionList editionList={book?.editions} className="border border-gray-500 rounded-lg"/>
-          </div>
-        </>
-      )}
-    </PageTemplate>
+
+      {/* Editions */}
+      <InfoPageSection label={t("book.editions")}>
+        <EditionList
+          editionList={book?.editions}
+          className="border border-white/8 rounded-lg"
+        />
+      </InfoPageSection>
+
+      {/* Same series */}
+      <InfoPageSection label={t("page.book.sameseries")}>
+        <BookListBySerieId
+          serieId={book?.serie?.id}
+          toIgnore={book}
+          className="border border-white/8 rounded-lg"
+        />
+      </InfoPageSection>
+
+      {/* Issues */}
+      <InfoPageSection label={t("book.issues")}>
+        <IssueListByBookId
+          bookId={book?.id}
+          className="border border-white/8 rounded-lg"
+        />
+      </InfoPageSection>
+    </InfoPageTemplate>
   );
 }

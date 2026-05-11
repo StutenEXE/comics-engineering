@@ -33,7 +33,8 @@ dependencies {
     // JSON
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.15.2' // Optional<T> handling
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2' // java.time.OffsetDateTime handling
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.0' // java.time.LocalDateTime handling
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
     // BCrypt
     implementation 'org.mindrot:jbcrypt:0.4'

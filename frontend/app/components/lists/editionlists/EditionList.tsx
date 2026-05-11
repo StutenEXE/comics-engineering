@@ -1,22 +1,27 @@
-import type { Edition } from "~/models/edition";
+import { editionToSimpleEdition, isSimpleEdition, type Edition, type SimpleEdition } from "~/models/edition";
 import { EditionCard } from "../../cards/EditionCard";
 import { compareDates } from "~/utils/date";
 import { GenericList } from "../GenericList";
+import { useTranslation } from "~/i18n/i18n";
 
 
 interface EditionListProps {
-    editionList: Edition[] | null | undefined
+    editionList: Edition[] | SimpleEdition[] | null | undefined
     descOrder?: boolean
     className?: string
 }
 
 export function EditionList({ editionList, descOrder, className }: EditionListProps) {
-    const mapper = (ed: Edition) =>  (
+    const { t } = useTranslation()
+
+    const mapper = (ed: SimpleEdition) =>  (
         <EditionCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
             key={ed.id} edition={ed} /> 
     )
         
-    const list = !editionList ? [] : [...editionList]
+    const list = (!editionList || editionList.length === 0 ? []  
+        : isSimpleEdition(editionList[0]) ? editionList as SimpleEdition[]
+        : (editionList as Edition[]).map(editionToSimpleEdition))
         // Sorting list
         .sort((ed1, ed2) => {
             if (descOrder) {
@@ -31,7 +36,7 @@ export function EditionList({ editionList, descOrder, className }: EditionListPr
         <>
             <GenericList 
                 list={list} 
-                emptyMsg="No editions linked"
+                emptyMsg={t("loader.edition.nodata")}
                 elemGenerator={mapper}
                 className={className}
             />

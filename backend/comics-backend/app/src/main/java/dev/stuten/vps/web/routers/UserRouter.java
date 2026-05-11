@@ -11,6 +11,7 @@ public class UserRouter implements Router {
         // Public
         app.post(APIPathBuilder.buildPublicPath("/signup"), UserService::signupService);
         app.post(APIPathBuilder.buildPublicPath("/login"), UserService::loginService);
+        app.get(APIPathBuilder.buildPublicPath("/disconnect"), UserService::disconnect);
         app.get(APIPathBuilder.buildPublicPath("/refresh"), UserService::refreshAuth);
 
         // Admin

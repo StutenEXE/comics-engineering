@@ -7,13 +7,15 @@ export interface UserState {
   isLoading: boolean;
   error: string | null;
   isAuthenticated: boolean;
+  isHydrated: boolean;
 }
 
 const initialState: UserState = {
   user: null,
-  isLoading: false,
+  isLoading: true,
   error: null,
   isAuthenticated: false,
+  isHydrated: false,
 };
 
 const userSlice = createSlice({
@@ -49,13 +51,16 @@ const userSlice = createSlice({
       publicApi.endpoints.refresh.matchFulfilled,
       (state, { payload }) => {
         state.user = payload.user;
+        state.isAuthenticated = true;
         state.isLoading = false;
+        state.isHydrated = true;
       }
     );
     builder.addMatcher(
       publicApi.endpoints.refresh.matchRejected,
       (state) => {
         state.isLoading = false;
+        state.isHydrated = true;
       }
     );
   },

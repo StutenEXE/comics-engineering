@@ -7,6 +7,8 @@ import io.lettuce.core.api.sync.RedisCommands;
 
 public final class SessionStore {
 
+    public static final String COOKIE_SESSION_KEY = "session_id";
+
     public static final String SESSION_PREFIX = "comics-session:";
 
     private static final RedisClient redisClient = RedisClient.create(System.getenv("COMICS_REDIS_URL"));

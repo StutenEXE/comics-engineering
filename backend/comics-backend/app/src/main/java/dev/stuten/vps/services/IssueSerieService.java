@@ -5,18 +5,22 @@ import java.util.Optional;
 
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.IssueSerieDAO;
-import dev.stuten.vps.models.dtos.IssueSerieDTO;
+import dev.stuten.vps.models.dtos.full.IssueSerieDTO;
 import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 
 public class IssueSerieService {
+
      private IssueSerieService() {}
 
     private static IssueSerieDAO dao = new IssueSerieDAO(
             JooqProvider.get());
 
-    // TODO : Refactor function ?
+    protected static IssueSerieDAO getDAO() {
+        return dao;
+    }
+
     public static void getByID(Context ctx) {
         // Retreive ID from request
         Integer id;

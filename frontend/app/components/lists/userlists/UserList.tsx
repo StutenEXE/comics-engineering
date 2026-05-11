@@ -4,6 +4,7 @@ import { compareDates } from "~/utils/date";
 import type { Error } from "~/utils/error";
 import { UserCard } from "../../cards/UserCard";
 import { GenericList } from "../GenericList";
+import { useTranslation } from "~/i18n/i18n";
 
 
 interface UserListProps {
@@ -15,6 +16,8 @@ interface UserListProps {
 }
 
 export function UserList({ userList, isLoading, error, showActions, className }: UserListProps) {
+    const { t } = useTranslation()     
+
     const mapper = (usr: User) => (
         <UserCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
                 key={usr?.id} user={usr} showActions={showActions}/>
@@ -24,9 +27,9 @@ export function UserList({ userList, isLoading, error, showActions, className }:
         <>
             <GenericList 
                 list={userList} 
-                emptyMsg={isLoading ? "Loading user..." : 
+                emptyMsg={isLoading ?  t("loader.user.loading") : 
                     error ? error.details.error :  
-                    "No users found"}
+                    t("loader.user.nodata")}
                 elemGenerator={mapper}
                 vertical
                 className={className}

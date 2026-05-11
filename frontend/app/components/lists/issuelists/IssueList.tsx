@@ -1,12 +1,13 @@
-import { type Issue } from "~/models/issue";
+import { isSimpleIssue, issueToSimpleIssue, type Issue, type SimpleIssue } from "~/models/issue";
 import { compareDates } from "~/utils/date";
 import { IssueCard } from "../../cards/IssueCard";
 import { GenericList } from "../GenericList";
 import type { Error } from "~/utils/error";
+import { useTranslation } from "~/i18n/i18n";
 
 
 interface IssueListProps {
-    issueList: Issue[] | null | undefined
+    issueList: Issue[] | SimpleIssue[] | null | undefined
     descOrder?: boolean
     isLoading?: boolean
     error?: Error
@@ -14,12 +15,16 @@ interface IssueListProps {
 }
 
 export function IssueList({ issueList, descOrder, isLoading, error, className }: IssueListProps) {
-    const mapper = (is: Issue) => (
-        <IssueCard className="w-25 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
+    const { t } = useTranslation()
+
+    const mapper = (is: SimpleIssue) => (
+        <IssueCard className="w-100 snap-center hover:bg-gray-700 pb-1 rounded-sm" 
                 key={is?.id} issue={is} />
     ) 
     
-    const list = !issueList ? [] : [...issueList]
+    const list = (!issueList || issueList.length === 0 ? []
+     : isSimpleIssue(issueList[0]) ? issueList as SimpleIssue[]
+     : (issueList as Issue[]).map(issueToSimpleIssue))
         // Sorting list
         .sort((is1, is2) => {
             if (descOrder) {
@@ -34,9 +39,9 @@ export function IssueList({ issueList, descOrder, isLoading, error, className }:
         <>
             <GenericList 
                 list={list} 
-                emptyMsg={isLoading ? "Loading issues..." : 
+                emptyMsg={isLoading ? t("loader.issue.loading") : 
                     error ? error.details.error :  
-                    "No issues linked"}
+                    t("loader.issue.nodata")}
                 elemGenerator={mapper}
                 vertical
                 className={className}

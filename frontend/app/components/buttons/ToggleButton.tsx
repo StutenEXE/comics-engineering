@@ -1,6 +1,4 @@
-import { Link } from "react-router";
 import { GenericButton, type ButtonProps } from "./GenericButton";
-import { useState, type MouseEventHandler } from "react";
 
 export interface ToggleButtonProps extends ButtonProps {
     selected?: boolean

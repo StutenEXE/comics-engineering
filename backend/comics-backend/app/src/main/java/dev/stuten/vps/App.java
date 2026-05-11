@@ -29,10 +29,26 @@ public class App {
                 cors.addRule(it -> {
                     // Dev rule
                     it.allowHost("http://localhost:5173");
-                    it.allowCredentials = true; 
+                    it.allowCredentials = true;
+                    it.exposeHeader("Authorization");
                 });
             });
+            config.router.ignoreTrailingSlashes = true;
         });
+
+        app.before(ctx -> {
+            if (ctx.method().toString().equals("OPTIONS")) {
+                ctx.header("Access-Control-Allow-Origin", "http://localhost:5173");
+                ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+                ctx.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+                ctx.header("Access-Control-Allow-Credentials", "true");
+                ctx.status(200);
+                ctx.skipRemainingHandlers();
+            }
+        });
+
+        // Authorize POST
+        app.options("/*", ctx -> ctx.status(204));
 
         Routes.register(app);
 
