@@ -69,7 +69,7 @@ public class Contributions extends TableImpl<ContributionsRecord> {
     /**
      * The column <code>public.contributions.local_ref</code>.
      */
-    public final TableField<ContributionsRecord, String> LOCAL_REF = createField(DSL.name("local_ref"), SQLDataType.CLOB, this, "");
+    public final TableField<ContributionsRecord, Integer> LOCAL_REF = createField(DSL.name("local_ref"), SQLDataType.INTEGER, this, "");
 
     /**
      * The column <code>public.contributions.entity_type</code>.
@@ -216,14 +216,14 @@ public class Contributions extends TableImpl<ContributionsRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row10<Integer, Integer, String, ContributionTypeEnum, ContributionActionEnum, Integer, JSONB, JSONB, ContributionStatusEnum, Integer> fieldsRow() {
+    public Row10<Integer, Integer, Integer, ContributionTypeEnum, ContributionActionEnum, Integer, JSONB, JSONB, ContributionStatusEnum, Integer> fieldsRow() {
         return (Row10) super.fieldsRow();
     }
 
     /**
      * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
      */
-    public <U> SelectField<U> mapping(Function10<? super Integer, ? super Integer, ? super String, ? super ContributionTypeEnum, ? super ContributionActionEnum, ? super Integer, ? super JSONB, ? super JSONB, ? super ContributionStatusEnum, ? super Integer, ? extends U> from) {
+    public <U> SelectField<U> mapping(Function10<? super Integer, ? super Integer, ? super Integer, ? super ContributionTypeEnum, ? super ContributionActionEnum, ? super Integer, ? super JSONB, ? super JSONB, ? super ContributionStatusEnum, ? super Integer, ? extends U> from) {
         return convertFrom(Records.mapping(from));
     }
 
@@ -231,7 +231,7 @@ public class Contributions extends TableImpl<ContributionsRecord> {
      * Convenience mapping calling {@link SelectField#convertFrom(Class,
      * Function)}.
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function10<? super Integer, ? super Integer, ? super String, ? super ContributionTypeEnum, ? super ContributionActionEnum, ? super Integer, ? super JSONB, ? super JSONB, ? super ContributionStatusEnum, ? super Integer, ? extends U> from) {
+    public <U> SelectField<U> mapping(Class<U> toType, Function10<? super Integer, ? super Integer, ? super Integer, ? super ContributionTypeEnum, ? super ContributionActionEnum, ? super Integer, ? super JSONB, ? super JSONB, ? super ContributionStatusEnum, ? super Integer, ? extends U> from) {
         return convertFrom(toType, Records.mapping(from));
     }
 }

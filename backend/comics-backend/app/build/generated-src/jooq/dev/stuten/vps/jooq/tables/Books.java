@@ -8,7 +8,7 @@ import dev.stuten.vps.jooq.Keys;
 import dev.stuten.vps.jooq.Public;
 import dev.stuten.vps.jooq.tables.records.BooksRecord;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
@@ -96,12 +96,12 @@ public class Books extends TableImpl<BooksRecord> {
     /**
      * The column <code>public.books.created_at</code>.
      */
-    public final TableField<BooksRecord, OffsetDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<BooksRecord, LocalDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
 
     /**
      * The column <code>public.books.modified_at</code>.
      */
-    public final TableField<BooksRecord, OffsetDateTime> MODIFIED_AT = createField(DSL.name("modified_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<BooksRecord, LocalDateTime> MODIFIED_AT = createField(DSL.name("modified_at"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
 
     private Books(Name alias, Table<BooksRecord> aliased) {
         this(alias, aliased, null);
@@ -223,14 +223,14 @@ public class Books extends TableImpl<BooksRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row10<Integer, String, String, Integer, String, String, Integer, Integer, OffsetDateTime, OffsetDateTime> fieldsRow() {
+    public Row10<Integer, String, String, Integer, String, String, Integer, Integer, LocalDateTime, LocalDateTime> fieldsRow() {
         return (Row10) super.fieldsRow();
     }
 
     /**
      * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
      */
-    public <U> SelectField<U> mapping(Function10<? super Integer, ? super String, ? super String, ? super Integer, ? super String, ? super String, ? super Integer, ? super Integer, ? super OffsetDateTime, ? super OffsetDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Function10<? super Integer, ? super String, ? super String, ? super Integer, ? super String, ? super String, ? super Integer, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
         return convertFrom(Records.mapping(from));
     }
 
@@ -238,7 +238,7 @@ public class Books extends TableImpl<BooksRecord> {
      * Convenience mapping calling {@link SelectField#convertFrom(Class,
      * Function)}.
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function10<? super Integer, ? super String, ? super String, ? super Integer, ? super String, ? super String, ? super Integer, ? super Integer, ? super OffsetDateTime, ? super OffsetDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Class<U> toType, Function10<? super Integer, ? super String, ? super String, ? super Integer, ? super String, ? super String, ? super Integer, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
         return convertFrom(toType, Records.mapping(from));
     }
 }

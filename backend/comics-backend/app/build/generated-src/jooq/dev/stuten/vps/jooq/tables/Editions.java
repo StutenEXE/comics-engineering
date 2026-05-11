@@ -9,19 +9,19 @@ import dev.stuten.vps.jooq.Public;
 import dev.stuten.vps.jooq.tables.records.EditionsRecord;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Function13;
+import org.jooq.Function14;
 import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Records;
-import org.jooq.Row13;
+import org.jooq.Row14;
 import org.jooq.Schema;
 import org.jooq.SelectField;
 import org.jooq.Table;
@@ -80,6 +80,11 @@ public class Editions extends TableImpl<EditionsRecord> {
     public final TableField<EditionsRecord, String> EAN = createField(DSL.name("ean"), SQLDataType.VARCHAR(20), this, "");
 
     /**
+     * The column <code>public.editions.npages</code>.
+     */
+    public final TableField<EditionsRecord, Integer> NPAGES = createField(DSL.name("npages"), SQLDataType.INTEGER, this, "");
+
+    /**
      * The column <code>public.editions.price</code>.
      */
     public final TableField<EditionsRecord, Float> PRICE = createField(DSL.name("price"), SQLDataType.REAL, this, "");
@@ -112,12 +117,12 @@ public class Editions extends TableImpl<EditionsRecord> {
     /**
      * The column <code>public.editions.created_at</code>.
      */
-    public final TableField<EditionsRecord, OffsetDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<EditionsRecord, LocalDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
 
     /**
      * The column <code>public.editions.modified_at</code>.
      */
-    public final TableField<EditionsRecord, OffsetDateTime> MODIFIED_AT = createField(DSL.name("modified_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<EditionsRecord, LocalDateTime> MODIFIED_AT = createField(DSL.name("modified_at"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
 
     private Editions(Name alias, Table<EditionsRecord> aliased) {
         this(alias, aliased, null);
@@ -246,18 +251,18 @@ public class Editions extends TableImpl<EditionsRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row13 type methods
+    // Row14 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row13<Integer, Integer, Integer, String, String, Float, String, String, String, LocalDate, Integer, OffsetDateTime, OffsetDateTime> fieldsRow() {
-        return (Row13) super.fieldsRow();
+    public Row14<Integer, Integer, Integer, String, String, Integer, Float, String, String, String, LocalDate, Integer, LocalDateTime, LocalDateTime> fieldsRow() {
+        return (Row14) super.fieldsRow();
     }
 
     /**
      * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
      */
-    public <U> SelectField<U> mapping(Function13<? super Integer, ? super Integer, ? super Integer, ? super String, ? super String, ? super Float, ? super String, ? super String, ? super String, ? super LocalDate, ? super Integer, ? super OffsetDateTime, ? super OffsetDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Function14<? super Integer, ? super Integer, ? super Integer, ? super String, ? super String, ? super Integer, ? super Float, ? super String, ? super String, ? super String, ? super LocalDate, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
         return convertFrom(Records.mapping(from));
     }
 
@@ -265,7 +270,7 @@ public class Editions extends TableImpl<EditionsRecord> {
      * Convenience mapping calling {@link SelectField#convertFrom(Class,
      * Function)}.
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function13<? super Integer, ? super Integer, ? super Integer, ? super String, ? super String, ? super Float, ? super String, ? super String, ? super String, ? super LocalDate, ? super Integer, ? super OffsetDateTime, ? super OffsetDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Class<U> toType, Function14<? super Integer, ? super Integer, ? super Integer, ? super String, ? super String, ? super Integer, ? super Float, ? super String, ? super String, ? super String, ? super LocalDate, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
         return convertFrom(toType, Records.mapping(from));
     }
 }

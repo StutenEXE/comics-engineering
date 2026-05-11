@@ -10,7 +10,7 @@ import dev.stuten.vps.jooq.tables.records.EditionOwnershipRecord;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
@@ -73,7 +73,7 @@ public class EditionOwnership extends TableImpl<EditionOwnershipRecord> {
     /**
      * The column <code>public.edition_ownership.date</code>.
      */
-    public final TableField<EditionOwnershipRecord, OffsetDateTime> DATE = createField(DSL.name("date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<EditionOwnershipRecord, LocalDateTime> DATE = createField(DSL.name("date"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
 
     /**
      * The column <code>public.edition_ownership.read</code>.
@@ -235,14 +235,14 @@ public class EditionOwnership extends TableImpl<EditionOwnershipRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row12<Integer, Integer, Integer, OffsetDateTime, Boolean, LocalDate, Boolean, Boolean, BigDecimal, BigDecimal, BigDecimal, String> fieldsRow() {
+    public Row12<Integer, Integer, Integer, LocalDateTime, Boolean, LocalDate, Boolean, Boolean, BigDecimal, BigDecimal, BigDecimal, String> fieldsRow() {
         return (Row12) super.fieldsRow();
     }
 
     /**
      * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
      */
-    public <U> SelectField<U> mapping(Function12<? super Integer, ? super Integer, ? super Integer, ? super OffsetDateTime, ? super Boolean, ? super LocalDate, ? super Boolean, ? super Boolean, ? super BigDecimal, ? super BigDecimal, ? super BigDecimal, ? super String, ? extends U> from) {
+    public <U> SelectField<U> mapping(Function12<? super Integer, ? super Integer, ? super Integer, ? super LocalDateTime, ? super Boolean, ? super LocalDate, ? super Boolean, ? super Boolean, ? super BigDecimal, ? super BigDecimal, ? super BigDecimal, ? super String, ? extends U> from) {
         return convertFrom(Records.mapping(from));
     }
 
@@ -250,7 +250,7 @@ public class EditionOwnership extends TableImpl<EditionOwnershipRecord> {
      * Convenience mapping calling {@link SelectField#convertFrom(Class,
      * Function)}.
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function12<? super Integer, ? super Integer, ? super Integer, ? super OffsetDateTime, ? super Boolean, ? super LocalDate, ? super Boolean, ? super Boolean, ? super BigDecimal, ? super BigDecimal, ? super BigDecimal, ? super String, ? extends U> from) {
+    public <U> SelectField<U> mapping(Class<U> toType, Function12<? super Integer, ? super Integer, ? super Integer, ? super LocalDateTime, ? super Boolean, ? super LocalDate, ? super Boolean, ? super Boolean, ? super BigDecimal, ? super BigDecimal, ? super BigDecimal, ? super String, ? extends U> from) {
         return convertFrom(toType, Records.mapping(from));
     }
 }

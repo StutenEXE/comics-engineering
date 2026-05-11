@@ -9,7 +9,7 @@ import dev.stuten.vps.jooq.Public;
 import dev.stuten.vps.jooq.tables.records.IssueSeriesRecord;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
@@ -87,12 +87,12 @@ public class IssueSeries extends TableImpl<IssueSeriesRecord> {
     /**
      * The column <code>public.issue_series.created_at</code>.
      */
-    public final TableField<IssueSeriesRecord, OffsetDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<IssueSeriesRecord, LocalDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
 
     /**
      * The column <code>public.issue_series.modified_at</code>.
      */
-    public final TableField<IssueSeriesRecord, OffsetDateTime> MODIFIED_AT = createField(DSL.name("modified_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<IssueSeriesRecord, LocalDateTime> MODIFIED_AT = createField(DSL.name("modified_at"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
 
     private IssueSeries(Name alias, Table<IssueSeriesRecord> aliased) {
         this(alias, aliased, null);
@@ -203,14 +203,14 @@ public class IssueSeries extends TableImpl<IssueSeriesRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row8<Integer, String, String, LocalDate, LocalDate, Integer, OffsetDateTime, OffsetDateTime> fieldsRow() {
+    public Row8<Integer, String, String, LocalDate, LocalDate, Integer, LocalDateTime, LocalDateTime> fieldsRow() {
         return (Row8) super.fieldsRow();
     }
 
     /**
      * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
      */
-    public <U> SelectField<U> mapping(Function8<? super Integer, ? super String, ? super String, ? super LocalDate, ? super LocalDate, ? super Integer, ? super OffsetDateTime, ? super OffsetDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Function8<? super Integer, ? super String, ? super String, ? super LocalDate, ? super LocalDate, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
         return convertFrom(Records.mapping(from));
     }
 
@@ -218,7 +218,7 @@ public class IssueSeries extends TableImpl<IssueSeriesRecord> {
      * Convenience mapping calling {@link SelectField#convertFrom(Class,
      * Function)}.
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function8<? super Integer, ? super String, ? super String, ? super LocalDate, ? super LocalDate, ? super Integer, ? super OffsetDateTime, ? super OffsetDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Class<U> toType, Function8<? super Integer, ? super String, ? super String, ? super LocalDate, ? super LocalDate, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
         return convertFrom(toType, Records.mapping(from));
     }
 }

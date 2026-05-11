@@ -8,7 +8,7 @@ import dev.stuten.vps.jooq.Keys;
 import dev.stuten.vps.jooq.Public;
 import dev.stuten.vps.jooq.tables.records.ContributionReviewsRecord;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
@@ -76,7 +76,7 @@ public class ContributionReviews extends TableImpl<ContributionReviewsRecord> {
     /**
      * The column <code>public.contribution_reviews.created_at</code>.
      */
-    public final TableField<ContributionReviewsRecord, OffsetDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<ContributionReviewsRecord, LocalDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
 
     private ContributionReviews(Name alias, Table<ContributionReviewsRecord> aliased) {
         this(alias, aliased, null);
@@ -201,14 +201,14 @@ public class ContributionReviews extends TableImpl<ContributionReviewsRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row5<Integer, Integer, Integer, String, OffsetDateTime> fieldsRow() {
+    public Row5<Integer, Integer, Integer, String, LocalDateTime> fieldsRow() {
         return (Row5) super.fieldsRow();
     }
 
     /**
      * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
      */
-    public <U> SelectField<U> mapping(Function5<? super Integer, ? super Integer, ? super Integer, ? super String, ? super OffsetDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Function5<? super Integer, ? super Integer, ? super Integer, ? super String, ? super LocalDateTime, ? extends U> from) {
         return convertFrom(Records.mapping(from));
     }
 
@@ -216,7 +216,7 @@ public class ContributionReviews extends TableImpl<ContributionReviewsRecord> {
      * Convenience mapping calling {@link SelectField#convertFrom(Class,
      * Function)}.
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function5<? super Integer, ? super Integer, ? super Integer, ? super String, ? super OffsetDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Class<U> toType, Function5<? super Integer, ? super Integer, ? super Integer, ? super String, ? super LocalDateTime, ? extends U> from) {
         return convertFrom(toType, Records.mapping(from));
     }
 }

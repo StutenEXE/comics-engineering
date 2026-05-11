@@ -9,7 +9,7 @@ import dev.stuten.vps.jooq.Public;
 import dev.stuten.vps.jooq.enums.ContributionBundleStatusEnum;
 import dev.stuten.vps.jooq.tables.records.ContributionBundlesRecord;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
@@ -77,12 +77,12 @@ public class ContributionBundles extends TableImpl<ContributionBundlesRecord> {
     /**
      * The column <code>public.contribution_bundles.created_at</code>.
      */
-    public final TableField<ContributionBundlesRecord, OffsetDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<ContributionBundlesRecord, LocalDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
 
     /**
      * The column <code>public.contribution_bundles.modified_at</code>.
      */
-    public final TableField<ContributionBundlesRecord, OffsetDateTime> MODIFIED_AT = createField(DSL.name("modified_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<ContributionBundlesRecord, LocalDateTime> MODIFIED_AT = createField(DSL.name("modified_at"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
 
     private ContributionBundles(Name alias, Table<ContributionBundlesRecord> aliased) {
         this(alias, aliased, null);
@@ -195,14 +195,14 @@ public class ContributionBundles extends TableImpl<ContributionBundlesRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row6<Integer, Integer, ContributionBundleStatusEnum, String, OffsetDateTime, OffsetDateTime> fieldsRow() {
+    public Row6<Integer, Integer, ContributionBundleStatusEnum, String, LocalDateTime, LocalDateTime> fieldsRow() {
         return (Row6) super.fieldsRow();
     }
 
     /**
      * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
      */
-    public <U> SelectField<U> mapping(Function6<? super Integer, ? super Integer, ? super ContributionBundleStatusEnum, ? super String, ? super OffsetDateTime, ? super OffsetDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Function6<? super Integer, ? super Integer, ? super ContributionBundleStatusEnum, ? super String, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
         return convertFrom(Records.mapping(from));
     }
 
@@ -210,7 +210,7 @@ public class ContributionBundles extends TableImpl<ContributionBundlesRecord> {
      * Convenience mapping calling {@link SelectField#convertFrom(Class,
      * Function)}.
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function6<? super Integer, ? super Integer, ? super ContributionBundleStatusEnum, ? super String, ? super OffsetDateTime, ? super OffsetDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Class<U> toType, Function6<? super Integer, ? super Integer, ? super ContributionBundleStatusEnum, ? super String, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
         return convertFrom(toType, Records.mapping(from));
     }
 }

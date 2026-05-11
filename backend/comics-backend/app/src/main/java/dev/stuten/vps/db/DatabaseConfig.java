@@ -11,9 +11,9 @@ public class DatabaseConfig {
 
     public static DataSource createDataSource() {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(System.getenv("COMICS_DB_URL"));
-        config.setUsername(System.getenv("COMICS_DB_USER"));
-        config.setPassword(System.getenv("COMICS_DB_PASSWORD"));
+        config.setJdbcUrl(System.getenv("PG_URL"));
+        config.setUsername(System.getenv("PG_USER"));
+        config.setPassword(System.getenv("PG_PASSWORD"));
 
         config.setMaximumPoolSize(
             Integer.parseInt(System.getProperty("db.pool.max", "5"))

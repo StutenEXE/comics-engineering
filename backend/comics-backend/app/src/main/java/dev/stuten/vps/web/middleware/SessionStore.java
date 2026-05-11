@@ -1,8 +1,10 @@
 package dev.stuten.vps.web.middleware;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisURI;
 import io.lettuce.core.api.sync.RedisCommands;
 
 public final class SessionStore {
@@ -11,7 +13,22 @@ public final class SessionStore {
 
     public static final String SESSION_PREFIX = "comics-session:";
 
-    private static final RedisClient redisClient = RedisClient.create(System.getenv("COMICS_REDIS_URL"));
+    // private static final RedisClient redisClient = RedisClient.create(
+    // RedisURI.Builder.redis(System.getenv("REDIS_URL"))
+    // .withAuthentication(System.getenv("REDIS_USER"),
+    // System.getenv("REDIS_PASSWORD"))
+    // .build());
+
+    public static final RedisURI uri = RedisURI.Builder
+            .redis(Objects.requireNonNull(System.getenv("REDIS_HOST"), "REDIS_HOST not set"))
+            .withPort(6379)
+            .withAuthentication(
+                    Objects.requireNonNull(System.getenv("REDIS_USER"), "REDIS_USER not set"),
+                    Objects.requireNonNull(System.getenv("REDIS_PASSWORD"), "REDIS_PASSWORD not set").toCharArray())
+            .build();
+
+    private static final RedisClient redisClient = RedisClient.create(uri);
+
     private static final RedisCommands<String, String> redis = redisClient.connect().sync();
 
     private static final int TTL_SECONDS = 30 * 60; // 30 minutes sliding session

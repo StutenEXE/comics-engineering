@@ -2,7 +2,7 @@
 .gradle
 
 # Ignore build output directory (except Jooq)
-./build
+build
 app/build/classes
 app/build/resources
 app/build/tmp
@@ -11,4 +11,5 @@ app/build/tmp
 app/bin
 
 # Ignore env file
-.env
+.env.dev
+.env.prod
