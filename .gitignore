@@ -1,21 +1,3 @@
 # Ignore environment files and VSCode settings
 .vscode/
 **/.env
-
-# Backend - Go
-## Go binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-## Ignore log files
-backend/src/comics-backend/app.log
-
-# Frontend - React
-## Ignore node modules
-# frontend/node_modules/
-## Ignore package lock files
-# frontend/package-lock.json
-## Ignore build output
-# frontend/public/
