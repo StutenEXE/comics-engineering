@@ -26,6 +26,7 @@ public class PublisherMapper {
         return fieldMapping.get(field);
     }
 
+    @SuppressWarnings("null")
     public static PublisherDTO mapToDTO(Record r) {
         // Map editions
         List<SimpleEditionDTO> editions = MappingUtils.getMultipleDTOFromRecord(r, "editions",
@@ -41,6 +42,7 @@ public class PublisherMapper {
         return dto;
     }
 
+    @SuppressWarnings("null")
     public static SimplePublisherDTO mapToSimpleDTO(Record r) {
         SimplePublisherDTO dto = SimplePublisherDTO.builder()
                 .id(r.get(getFieldName(PUBLISHERS.ID), Integer.class))

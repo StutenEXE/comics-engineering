@@ -27,6 +27,7 @@ public class UserDAO extends DAO {
         return BCrypt.checkpw(password, hash);
     }
 
+    @SuppressWarnings("null")
     public static UserDTO removePassword(UserWithPasswordDTO user) {
         return UserDTO.builder()
                 .id(user.getId())

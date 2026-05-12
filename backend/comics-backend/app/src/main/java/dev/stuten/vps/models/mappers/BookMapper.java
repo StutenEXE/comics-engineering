@@ -37,6 +37,7 @@ public class BookMapper {
                 return fieldMapping.get(field);
         }
 
+        @SuppressWarnings("null")
         public static BookDTO mapToDTO(Record r) {
                 // Map serie
                 SimpleSerieDTO serie = MappingUtils.getSingleDTOFromRecord(r, SERIES, SerieMapper::mapToSimpleDTO);
@@ -66,6 +67,7 @@ public class BookMapper {
                 return dto;
         }
 
+        @SuppressWarnings("null")
         public static SimpleBookDTO mapToSimpleDTO(Record r) {
                 SimpleBookDTO dto = SimpleBookDTO.builder()
                                 .id(r.get(getFieldName(BOOKS.ID), Integer.class))
@@ -81,37 +83,41 @@ public class BookMapper {
         }
 
         // public static BookDTO mapGenericMapToDTO(Map<String, Object> map) {
-        //         // Map book
-        //         BookDTO dto = BookDTO.builder()
-        //                         .id((Integer) map.get("id"))
-        //                         .desc((String) map.get("desc"))
-        //                         .number((Integer) map.get("number"))
-        //                         .voContent((String) map.get("voContent"))
-        //                         .imgUrl((String) map.get("imgUrl"))
-        //                         .serie(SerieMapper.mapGenericMapToSimpleDTO((Map<String, Object>) map.get("serie")))
-        //                         .editions(map.get("editions") == null ? Arrays.asList()
-        //                                         : ((List<Map<String, Object>>) map.get("editions")).stream()
-        //                                                         .map(EditionMapper::mapGenericMapToSimpleDTO).toList())
-        //                         .issues(map.get("issues") == null ? Arrays.asList()
-        //                                         : ((List<Map<String, Object>>) map.get("issues")).stream()
-        //                                                         .map(IssueMapper::mapGenericMapToSimpleDTO).toList())
-        //                         .createdAt(MappingUtils.stringToLocalDateTime((String) map.get("createdAt")))
-        //                         .modifiedAt(MappingUtils.stringToLocalDateTime((String) map.get("modifiedAt")))
-        //                         .addedBy(UserMapper.mapGenericMapToSimpleDTO((Map<String, Object>) map.get("addedBy")))
-        //                         .build();
-        //         return dto;
+        // // Map book
+        // BookDTO dto = BookDTO.builder()
+        // .id((Integer) map.get("id"))
+        // .desc((String) map.get("desc"))
+        // .number((Integer) map.get("number"))
+        // .voContent((String) map.get("voContent"))
+        // .imgUrl((String) map.get("imgUrl"))
+        // .serie(SerieMapper.mapGenericMapToSimpleDTO((Map<String, Object>)
+        // map.get("serie")))
+        // .editions(map.get("editions") == null ? Arrays.asList()
+        // : ((List<Map<String, Object>>) map.get("editions")).stream()
+        // .map(EditionMapper::mapGenericMapToSimpleDTO).toList())
+        // .issues(map.get("issues") == null ? Arrays.asList()
+        // : ((List<Map<String, Object>>) map.get("issues")).stream()
+        // .map(IssueMapper::mapGenericMapToSimpleDTO).toList())
+        // .createdAt(MappingUtils.stringToLocalDateTime((String) map.get("createdAt")))
+        // .modifiedAt(MappingUtils.stringToLocalDateTime((String)
+        // map.get("modifiedAt")))
+        // .addedBy(UserMapper.mapGenericMapToSimpleDTO((Map<String, Object>)
+        // map.get("addedBy")))
+        // .build();
+        // return dto;
         // }
 
-        // public static SimpleBookDTO mapGenericMapToSimpleDTO(Map<String, Object> map) {
-        //         SimpleBookDTO dto = new SimpleBookDTO(
-        //                         (Integer) map.get("id"),
-        //                         (String) map.get("name"),
-        //                         (String) map.get("desc"),
-        //                         (Integer) map.get("number"),
-        //                         (String) map.get("voContent"),
-        //                         (String) map.get("imgUrl"),
-        //                         (Integer) map.get("seriesId"),
-        //                         (String) map.get("serieName"));
-        //         return dto;
+        // public static SimpleBookDTO mapGenericMapToSimpleDTO(Map<String, Object> map)
+        // {
+        // SimpleBookDTO dto = new SimpleBookDTO(
+        // (Integer) map.get("id"),
+        // (String) map.get("name"),
+        // (String) map.get("desc"),
+        // (Integer) map.get("number"),
+        // (String) map.get("voContent"),
+        // (String) map.get("imgUrl"),
+        // (Integer) map.get("seriesId"),
+        // (String) map.get("serieName"));
+        // return dto;
         // }
 }

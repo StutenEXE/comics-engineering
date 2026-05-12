@@ -34,6 +34,7 @@ public class IssueSerieMapper {
         return fieldMapping.get(field);
     }
 
+    @SuppressWarnings("null")
     public static IssueSerieDTO mapToDTO(Record r) {
         // Map issues
         List<SimpleIssueDTO> issues = MappingUtils.getMultipleDTOFromRecord(r, "issues", IssueMapper::mapToSimpleDTO);
@@ -57,6 +58,7 @@ public class IssueSerieMapper {
         return dto;
     }
 
+    @SuppressWarnings("null")
     public static SimpleIssueSerieDTO mapToSimpleDTO(Record r) {
         SimpleIssueSerieDTO dto = SimpleIssueSerieDTO.builder()
                 .id(r.get(getFieldName(ISSUE_SERIES.ID), Integer.class))

@@ -27,6 +27,7 @@ public class UserMapper {
         return fieldMapping.get(field);
     }
 
+    @SuppressWarnings("null")
     public static UserDTO mapToDTO(Record r) {
         UserDTO dto = UserDTO.builder()
                 .id(r.get(getFieldName(USERS.ID), Integer.class))
@@ -39,6 +40,7 @@ public class UserMapper {
         return dto;
     }
 
+    @SuppressWarnings("null")
     public static SimpleUserDTO mapToSimpleDTO(Record r) {
         SimpleUserDTO dto = SimpleUserDTO.builder()
                 .id(r.get(getFieldName(USERS.ID), Integer.class))
@@ -47,6 +49,7 @@ public class UserMapper {
         return dto;
     }
 
+    @SuppressWarnings("null")
     public static UserWithPasswordDTO mapToPasswordDTO(Record r) {
         UserWithPasswordDTO dto = UserWithPasswordDTO.builder()
                 .id(r.get(getFieldName(USERS.ID), Integer.class))

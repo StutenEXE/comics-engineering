@@ -43,6 +43,7 @@ public class EditionMapper {
                 return fieldMapping.get(field);
         }
 
+        @SuppressWarnings("null")
         public static EditionDTO mapToDTO(Record r) {
                 // Map publisher
                 SimplePublisherDTO publisher = MappingUtils.getSingleDTOFromRecord(r, PUBLISHERS,
@@ -74,6 +75,7 @@ public class EditionMapper {
                 return dto;
         }
 
+        @SuppressWarnings("null")
         public static SimpleEditionDTO mapToSimpleDTO(Record r) {
                 SimpleEditionDTO dto = SimpleEditionDTO.builder()
                                 .id(r.get(getFieldName(EDITIONS.ID), Integer.class))

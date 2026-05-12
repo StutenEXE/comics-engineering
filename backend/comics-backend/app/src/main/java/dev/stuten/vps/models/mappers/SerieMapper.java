@@ -35,6 +35,7 @@ public class SerieMapper {
         return fieldMapping.get(field);
     }
 
+    @SuppressWarnings("null")
     public static SerieDTO mapToDTO(Record r) {
         // Map books
         List<SimpleBookDTO> books = MappingUtils.getMultipleDTOFromRecord(r, "books", BookMapper::mapToSimpleDTO);

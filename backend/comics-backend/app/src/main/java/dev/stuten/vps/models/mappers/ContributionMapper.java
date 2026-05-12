@@ -36,11 +36,12 @@ public class ContributionMapper {
         return fieldMapping.get(field);
     }
 
+    @SuppressWarnings("null")
     public static ContributionDTO<? extends IdDTO> mapToDTO(Record r) {
         // Map bundle
         SimpleContributionBundleDTO bundle = MappingUtils.getSingleDTOFromRecord(r, CONTRIBUTION_BUNDLES,
                 ContributionBundleMapper::mapToSimpleDTO);
-        // Convert to jsonb 
+        // Convert to jsonb
         JSONB proposedDataJsonb = r.get(getFieldName(CONTRIBUTIONS.PROPOSED_DATA), JSONB.class);
         JSONB entitySnapshotJsonb = r.get(getFieldName(CONTRIBUTIONS.ENTITY_SNAPSHOT), JSONB.class);
         // Entity type
@@ -61,8 +62,9 @@ public class ContributionMapper {
         return dto;
     }
 
+    @SuppressWarnings("null")
     public static SimpleContributionDTO<? extends IdDTO> mapToSimpleDTO(Record r) {
-        // Convert to jsonb 
+        // Convert to jsonb
         JSONB proposedDataJsonb = r.get(getFieldName(CONTRIBUTIONS.PROPOSED_DATA), JSONB.class);
         JSONB entitySnapshotJsonb = r.get(getFieldName(CONTRIBUTIONS.ENTITY_SNAPSHOT), JSONB.class);
         // Entity type
