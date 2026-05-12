@@ -32,6 +32,7 @@ public class SimpleContributionDTODeserializer extends JsonDeserializer<SimpleCo
             Map.entry(ContributionTypeEnum.issueserie, IssueSerieDTO.class),
             Map.entry(ContributionTypeEnum.publisher, PublisherDTO.class));
 
+    @SuppressWarnings("null")
     @Override
     public SimpleContributionDTO<?> deserialize(JsonParser p, DeserializationContext ctx) throws IOException {
         ObjectCodec codec = p.getCodec();
@@ -60,7 +61,8 @@ public class SimpleContributionDTODeserializer extends JsonDeserializer<SimpleCo
                 .build();
     }
 
-    private IdDTO deserializeNode(JsonNode node, Class<? extends IdDTO> clazz, ObjectCodec codec) throws JsonProcessingException {
+    private IdDTO deserializeNode(JsonNode node, Class<? extends IdDTO> clazz, ObjectCodec codec)
+            throws JsonProcessingException {
         if (node == null || node.isNull())
             return null;
         return codec.treeToValue(node, clazz);

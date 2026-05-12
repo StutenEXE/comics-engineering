@@ -37,6 +37,7 @@ public class OwnedEditionMapper {
         return fieldMapping.get(field);
     }
 
+    @SuppressWarnings("null")
     public static OwnedEditionDTO mapToDTO(Record r) {
         // Map edition
         EditionDTO edition = MappingUtils.getSingleDTOFromRecord(r, EDITIONS, EditionMapper::mapToDTO);

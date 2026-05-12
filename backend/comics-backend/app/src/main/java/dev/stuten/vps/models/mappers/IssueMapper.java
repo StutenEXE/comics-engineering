@@ -36,6 +36,7 @@ public class IssueMapper {
         return fieldMapping.get(field);
     }
 
+    @SuppressWarnings("null")
     public static IssueDTO mapToDTO(Record r) {
         // Map issue serie
         SimpleIssueSerieDTO issueSerie = MappingUtils.getSingleDTOFromRecord(r, ISSUE_SERIES,
@@ -60,6 +61,7 @@ public class IssueMapper {
         return dto;
     }
 
+    @SuppressWarnings("null")
     public static SimpleIssueDTO mapToSimpleDTO(Record r) {
         SimpleIssueDTO dto = SimpleIssueDTO.builder()
                 .id(r.get(getFieldName(ISSUES.ID), Integer.class))
