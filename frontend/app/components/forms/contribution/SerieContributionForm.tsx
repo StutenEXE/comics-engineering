@@ -16,10 +16,10 @@ import {
   zDateRequired,
 } from "~/utils/date";
 import { noPropagationEvt } from "~/utils/events";
-import { CheckboxRhfInput } from "./fields/CheckboxRhfInput";
-import { DateRangeRhfInput } from "./fields/DateRangeRhfInput";
-import { TextRhfInput } from "./fields/TextRhfInput";
-import { GenericForm } from "./GenericForm";
+import { CheckboxRhfInput } from "../fields/CheckboxRhfInput";
+import { DateRangeRhfInput } from "../fields/DateRangeRhfInput";
+import { TextRhfInput } from "../fields/TextRhfInput";
+import { GenericForm } from "../GenericForm";
 
 interface SerieFormProps {
   serie?: Serie;

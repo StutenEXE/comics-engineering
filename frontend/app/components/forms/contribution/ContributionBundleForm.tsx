@@ -16,16 +16,16 @@ import { parseToIssueSerie } from "~/models/issue-serie";
 import { parseToSerie } from "~/models/serie";
 import { useAppSelector } from "~/store/hooks";
 import { noPropagationEvt } from "~/utils/events";
-import { GenericButton } from "../buttons/GenericButton";
-import { IndentedContributionList } from "../lists/contributionlists/IndentedContributionList";
-import { useConfirm } from "../modals/ConfirmModalProvider";
-import { BookContributionModal } from "../modals/contribution/BookContributionModal";
-import { EditionContributionModal } from "../modals/contribution/EditionContributionModal";
-import { IssueContributionModal } from "../modals/contribution/IssueContributionModal";
-import { IssueSerieContributionModal } from "../modals/contribution/IssueSerieContributionModal";
-import { SerieContributionModal } from "../modals/contribution/SerieContributionModal";
-import { TextAreaRhfInput } from "./fields/TextAreaRhfInput";
-import { GenericForm } from "./GenericForm";
+import { GenericButton } from "../../buttons/GenericButton";
+import { IndentedContributionList } from "../../lists/contributionlists/IndentedContributionList";
+import { useConfirm } from "../../modals/ConfirmModalProvider";
+import { BookContributionModal } from "../../modals/contribution/BookContributionModal";
+import { EditionContributionModal } from "../../modals/contribution/EditionContributionModal";
+import { IssueContributionModal } from "../../modals/contribution/IssueContributionModal";
+import { IssueSerieContributionModal } from "../../modals/contribution/IssueSerieContributionModal";
+import { SerieContributionModal } from "../../modals/contribution/SerieContributionModal";
+import { TextAreaRhfInput } from "../fields/TextAreaRhfInput";
+import { GenericForm } from "../GenericForm";
 
 interface ContributionBundleFormProps {
   bundle?: ContributionBundle;

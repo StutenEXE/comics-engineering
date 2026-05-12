@@ -62,6 +62,8 @@ export default {
     "contribution.date": "Date de contribution",
     // Contribution Bundle
     "cbundle.note": "Note",
+    "cbundle.contributions": "Contributions",
+    "cbundle.modified": "Dernière modification",
     "cbundle.form.create": "Créer un lot de contributions",
     "cbundle.form.add": "Ajouter une contribution",
     "cbundle.form.addEdition": "Edition",

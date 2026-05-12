@@ -1,7 +1,7 @@
 import type { SimpleContribution } from "~/models/contribution";
 import { GenericModal } from "../GenericModal";
 import type { Issue } from "~/models/issue";
-import { IssueContributionForm } from "~/components/forms/IssueContributionForm";
+import { IssueContributionForm } from "~/components/forms/contribution/IssueContributionForm";
 
 interface IssueContributionModalProps {
   issue?: Issue;

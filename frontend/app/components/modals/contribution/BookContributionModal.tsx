@@ -1,4 +1,4 @@
-import { BookContributionForm } from "~/components/forms/BookContributionForm";
+import { BookContributionForm } from "~/components/forms/contribution/BookContributionForm";
 import type { Book } from "~/models/book";
 import type { SimpleContribution } from "~/models/contribution";
 import { GenericModal } from "../GenericModal";

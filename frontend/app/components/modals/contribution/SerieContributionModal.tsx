@@ -1,4 +1,4 @@
-import { SerieContributionForm } from "~/components/forms/SerieContributionForm";
+import { SerieContributionForm } from "~/components/forms/contribution/SerieContributionForm";
 import { GenericModal } from "../GenericModal";
 import type { SimpleContribution } from "~/models/contribution";
 import type { Serie } from "~/models/serie";

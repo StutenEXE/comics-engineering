@@ -7,14 +7,15 @@ import { useEffect } from "react";
 import { useTranslation } from "~/i18n/i18n";
 
 interface AdminProtectedRouteProps {
-    children: ReactNode
+  children: ReactNode;
 }
 
 export function AdminProtectedRoute({ children }: AdminProtectedRouteProps) {
   const { t } = useTranslation();
 
-
-  const { user, isAuthenticated } = useSelector((state: RootState) => state.user);
+  const { user, isAuthenticated, isHydrated } = useSelector(
+    (state: RootState) => state.user,
+  );
   const toast = useToast();
 
   useEffect(() => {
@@ -23,8 +24,12 @@ export function AdminProtectedRoute({ children }: AdminProtectedRouteProps) {
     }
   }, [isAuthenticated, user?.isAdmin, toast]);
 
+  if (!isHydrated) {
+    return <span>Loading...</span>;
+  }
+
   if (!isAuthenticated || !user?.isAdmin) {
-    return <Navigate to="/" replace/>;
+    return <Navigate to="/" replace />;
   }
 
   return children;

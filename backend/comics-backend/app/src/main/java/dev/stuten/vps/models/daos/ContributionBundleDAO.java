@@ -91,7 +91,14 @@ public class ContributionBundleDAO extends DAO {
                 return super.selectOne(CONTRIBUTION_BUNDLES.ID.eq(id));
         }
 
-        public List<ContributionBundleDAO> findBySubmitterId(Integer submitterId) {
+        public List<ContributionBundleDTO> findBySubmitterId(Integer submitterId) {
                 return super.selectMany(CONTRIBUTION_BUNDLES.SUBMITTER_ID.eq(submitterId));
+        }
+
+        public List<ContributionBundleDTO> getBundles(Integer from, Integer limit) {
+                return getFullFromClause()
+                                .offset(from)
+                                .limit(limit)
+                                .fetch(getDefaultMapper());
         }
 }

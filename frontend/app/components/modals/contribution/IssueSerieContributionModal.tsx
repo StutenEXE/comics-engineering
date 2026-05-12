@@ -1,8 +1,8 @@
-import { SerieContributionForm } from "~/components/forms/SerieContributionForm";
+import { SerieContributionForm } from "~/components/forms/contribution/SerieContributionForm";
 import type { SimpleContribution } from "~/models/contribution";
 import type { IssueSerie } from "~/models/issue-serie";
 import { GenericModal } from "../GenericModal";
-import { IssueSerieContributionForm } from "~/components/forms/IssueSerieContributionForm";
+import { IssueSerieContributionForm } from "~/components/forms/contribution/IssueSerieContributionForm";
 
 interface IssueSerieContributionModalProps {
   issueSerie?: IssueSerie;

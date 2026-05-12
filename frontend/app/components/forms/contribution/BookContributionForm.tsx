@@ -12,11 +12,11 @@ import {
 import type { SimpleSerie } from "~/models/serie";
 import { useLazySearchSeriesByNameQuery } from "~/store/services/api";
 import { noPropagationEvt } from "~/utils/events";
-import { GenericButton } from "../buttons/GenericButton";
-import { SearchSelectInput } from "./fields/SearchSelectInput";
-import { TextAreaRhfInput } from "./fields/TextAreaRhfInput";
-import { TextRhfInput } from "./fields/TextRhfInput";
-import { GenericForm } from "./GenericForm";
+import { GenericButton } from "../../buttons/GenericButton";
+import { SearchSelectInput } from "../fields/SearchSelectInput";
+import { TextAreaRhfInput } from "../fields/TextAreaRhfInput";
+import { TextRhfInput } from "../fields/TextRhfInput";
+import { GenericForm } from "../GenericForm";
 
 interface BookFormProps {
   book?: Book;

@@ -1,4 +1,4 @@
-import { ContributionBundleForm } from "~/components/forms/ContributionBundleForm";
+import { ContributionBundleForm } from "~/components/forms/contribution/ContributionBundleForm";
 import { GenericModal } from "../GenericModal";
 import type { ContributionBundle } from "~/models/contributionBundle";
 
@@ -17,7 +17,10 @@ export function ContributionBundleModal({
   return (
     <GenericModal isOpen={isOpen} onClose={onClose}>
       <div className="border border-gray-300 rounded-lg shadow-md bg-black">
-        <ContributionBundleForm onSubmit={onSubmit} onCancel={onClose}></ContributionBundleForm>
+        <ContributionBundleForm
+          onSubmit={onSubmit}
+          onCancel={onClose}
+        ></ContributionBundleForm>
       </div>
     </GenericModal>
   );

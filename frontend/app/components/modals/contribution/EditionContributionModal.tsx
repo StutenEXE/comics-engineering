@@ -1,4 +1,4 @@
-import { EditionContributionForm } from "~/components/forms/EditionContributionForm";
+import { EditionContributionForm } from "~/components/forms/contribution/EditionContributionForm";
 import type { SimpleContribution } from "~/models/contribution";
 import type { Edition } from "~/models/edition";
 import { GenericModal } from "../GenericModal";

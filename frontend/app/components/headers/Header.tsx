@@ -77,7 +77,7 @@ export function Header() {
                   <Link
                     key={to}
                     to={to}
-                    className="px-3 py-1.5 text-md text-white/50 rounded-md hover:bg-white/5 hover:text-white/80 transition-all"
+                    className="px-3 py-1.5 text-md text-cyan-400/70 rounded-md hover:bg-cyan-400/10 hover:text-cyan-400 transition-all"
                   >
                     {label}
                   </Link>
@@ -87,12 +87,22 @@ export function Header() {
                 {user?.isAdmin && (
                   <>
                     <span className="w-px h-4 bg-white/10 mx-1" />
-                    <Link
-                      to="/users"
-                      className="px-3 py-1.5 text-md text-amber-400/70 rounded-md hover:bg-amber-400/10 hover:text-amber-400 transition-all"
-                    >
-                      {t("header.users")}
-                    </Link>
+                    {/* Admin links */}
+                    {[
+                      { to: "/users", label: t("header.users") },
+                      {
+                        to: "/contributions",
+                        label: t("header.contributions"),
+                      },
+                    ].map(({ to, label }) => (
+                      <Link
+                        key={to}
+                        to={to}
+                        className="px-3 py-1.5 text-md text-amber-400/70 rounded-md hover:bg-amber-400/10 hover:text-amber-400 transition-all"
+                      >
+                        {label}
+                      </Link>
+                    ))}
                   </>
                 )}
               </>

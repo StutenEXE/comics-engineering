@@ -91,9 +91,9 @@ export default function CollectionPage() {
 
   return (
     <LoggedProtectedRoute>
-      <main>
-        <div className="flex flex-col items-center min-h-[50vh] gap-4 mt-12">
-          <h1 className="text-3xl font-bold text-gray-200">
+      <main className="flex flex-col items-center pt-8 px-4 lg:px-8 xl:px-12">
+        <div className="w-full max-w-6xl space-y-8">
+          <h1 className="text-3xl font-bold text-gray-200 mb-6">
             {t("collection.title")}
           </h1>
           {isLoading && <p>{t("loader.collection.loading")}</p>}

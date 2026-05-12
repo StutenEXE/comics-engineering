@@ -13,10 +13,10 @@ import type { SimpleIssueSerie } from "~/models/issue-serie";
 import { useLazySearchIssueSeriesByNameQuery } from "~/store/services/api";
 import { toHtmlInputString, toYYYYmmDD, zDateRequired } from "~/utils/date";
 import { noPropagationEvt } from "~/utils/events";
-import { DateRhfInput } from "./fields/DateRhfInput";
-import { SearchSelectInput } from "./fields/SearchSelectInput";
-import { TextRhfInput } from "./fields/TextRhfInput";
-import { GenericForm } from "./GenericForm";
+import { DateRhfInput } from "../fields/DateRhfInput";
+import { SearchSelectInput } from "../fields/SearchSelectInput";
+import { TextRhfInput } from "../fields/TextRhfInput";
+import { GenericForm } from "../GenericForm";
 
 interface IssueFormProps {
   issue?: Issue;

@@ -20,12 +20,12 @@ import {
 } from "~/store/services/api";
 import { toHtmlInputString, toYYYYmmDD, zDateRequired } from "~/utils/date";
 import { noPropagationEvt } from "~/utils/events";
-import { GenericButton } from "../buttons/GenericButton";
-import { DateRhfInput } from "./fields/DateRhfInput";
-import { SearchSelectInput } from "./fields/SearchSelectInput";
-import { SelectRhfInput } from "./fields/SelectRhfInput";
-import { TextRhfInput } from "./fields/TextRhfInput";
-import { GenericForm } from "./GenericForm";
+import { GenericButton } from "../../buttons/GenericButton";
+import { DateRhfInput } from "../fields/DateRhfInput";
+import { SearchSelectInput } from "../fields/SearchSelectInput";
+import { SelectRhfInput } from "../fields/SelectRhfInput";
+import { TextRhfInput } from "../fields/TextRhfInput";
+import { GenericForm } from "../GenericForm";
 
 interface EditionFormProps {
   edition?: Edition;

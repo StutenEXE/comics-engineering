@@ -170,9 +170,9 @@ export const publicApi = createApi({
     /****************
    * CONTRIBUTIONS
    ****************/
-    // Get serie by id
+    // Get contribution by id
     contributionBySubmitterId: build.query<{ contributions: Contribution[] }, { id: number }>({
-      query: (params) => ({ url: "/contribution/submitter", method: 'GET', params: params }),
+      query: (params) => ({ url: "/contributions/submitter", method: 'GET', params: params }),
       transformResponse: (resp: { contributions: Contribution[] }) => ({
         contributions: resp.contributions.map(parseToContribution),
       }),
@@ -252,9 +252,17 @@ export const adminApi = createApi({
         users: resp.users.map((usr) => parseToUser(usr)),
       }),
     }),
+    // Get list of contribution bundles
+    bundleList: build.query<{ bundles: ContributionBundle[] }, { from: number, limit: number }>({
+      query: (params) => ({ url: "/contributions/all", method: 'GET', params: params }),
+      transformResponse: (resp: { bundles: ContributionBundle[] }) => ({
+        bundles: resp.bundles.map((b) => parseToBundle(b)),
+      }),
+    }),
   }),
 });
 
 export const {
-  useUserListQuery
+  useUserListQuery,
+  useLazyBundleListQuery
 } = adminApi;

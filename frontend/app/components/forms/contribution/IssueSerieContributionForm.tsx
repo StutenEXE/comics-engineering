@@ -16,10 +16,10 @@ import {
   zDateRequired,
 } from "~/utils/date";
 import { noPropagationEvt } from "~/utils/events";
-import { DateRangeRhfInput } from "./fields/DateRangeRhfInput";
-import { TextAreaRhfInput } from "./fields/TextAreaRhfInput";
-import { TextRhfInput } from "./fields/TextRhfInput";
-import { GenericForm } from "./GenericForm";
+import { DateRangeRhfInput } from "../fields/DateRangeRhfInput";
+import { TextAreaRhfInput } from "../fields/TextAreaRhfInput";
+import { TextRhfInput } from "../fields/TextRhfInput";
+import { GenericForm } from "../GenericForm";
 
 interface IssueSerieFormProps {
   issueSerie?: IssueSerie;
