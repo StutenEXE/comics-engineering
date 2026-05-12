@@ -57,6 +57,7 @@ public class SerieMapper {
         return dto;
     }
 
+    @SuppressWarnings("null")
     public static SimpleSerieDTO mapToSimpleDTO(Record r) {
         return SimpleSerieDTO.builder()
                 .id(r.get(getFieldName(SERIES.ID), Integer.class))

@@ -33,9 +33,11 @@ public class ContributionBundleMapper {
         return fieldMapping.get(field);
     }
 
+    @SuppressWarnings("null")
     public static ContributionBundleDTO mapToDTO(Record r) {
         // Map contributions
-        List<SimpleContributionDTO<? extends IdDTO>> contributions = MappingUtils.getMultipleDTOFromRecord(r, "contributions",
+        List<SimpleContributionDTO<? extends IdDTO>> contributions = MappingUtils.getMultipleDTOFromRecord(r,
+                "contributions",
                 ContributionMapper::mapToSimpleDTO);
         // Map user
         SimpleUserDTO user = MappingUtils.getSingleDTOFromRecord(r, USERS, UserMapper::mapToSimpleDTO);
@@ -52,6 +54,7 @@ public class ContributionBundleMapper {
         return dto;
     }
 
+    @SuppressWarnings("null")
     public static SimpleContributionBundleDTO mapToSimpleDTO(Record r) {
         SimpleContributionBundleDTO dto = SimpleContributionBundleDTO.builder()
                 .id(r.get(getFieldName(CONTRIBUTION_BUNDLES.ID), Integer.class))
