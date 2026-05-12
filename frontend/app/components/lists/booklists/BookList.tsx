@@ -28,9 +28,9 @@ export function BookList({ bookList, isLoading, error, className }: BookListProp
         <>
             <GenericList 
                 list={list} 
-                emptyMsg={isLoading ? t("loader.book.loading") : 
+                emptyMsg={isLoading ? t("loader.loading") : 
                     error ? error.details.error :  
-                    t("loader.book.nodata")}
+                    t("book.nonefound")}
                 elemGenerator={mapper}
                 className={className}
             />

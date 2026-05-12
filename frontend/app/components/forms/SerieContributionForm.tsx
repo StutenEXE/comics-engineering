@@ -16,7 +16,6 @@ import {
   zDateRequired,
 } from "~/utils/date";
 import { noPropagationEvt } from "~/utils/events";
-import { GenericButton } from "../buttons/GenericButton";
 import { CheckboxRhfInput } from "./fields/CheckboxRhfInput";
 import { DateRangeRhfInput } from "./fields/DateRangeRhfInput";
 import { TextRhfInput } from "./fields/TextRhfInput";
@@ -40,10 +39,14 @@ export function SerieContributionForm({
   // Validation schema
   const schema = z
     .object({
-      name: z.string().min(1, t("serie.form.name.required")),
+      name: z.string().min(1, t("generic.required", { capitalize: true })),
       ongoing: z.boolean(),
       oneshot: z.boolean(),
-      startDate: zDateRequired(t("form.required")),
+      nvolumes: z.coerce
+        .number()
+        .gte(0, t("serie.form.nvolumes.gte0"))
+        .optional(),
+      startDate: zDateRequired(t("generic.required", { capitalize: true })),
       endDate: zDateOptional(),
     })
     .refine(
@@ -66,6 +69,7 @@ export function SerieContributionForm({
       name: serie?.name,
       ongoing: serie?.ongoing,
       oneshot: serie?.oneshot,
+      nvolumes: serie?.nvolumes,
       // dates set manually
     },
   });
@@ -76,6 +80,7 @@ export function SerieContributionForm({
       name: data.name,
       ongoing: data.ongoing,
       oneshot: data.oneshot,
+      nvolumes: data.nvolumes,
       startDate: toYYYYmmDD(data.startDate),
       endDate: toYYYYmmDD(data.endDate),
     };
@@ -108,7 +113,9 @@ export function SerieContributionForm({
 
   return (
     <GenericForm
-      title={t("serie.form.title")}
+      title={
+        serie ? t("serie.form.title.modify") : t("serie.form.title.create")
+      }
       onCancel={noPropagationEvt(onCancel)}
       submitLabel={serie ? t("serie.form.modify") : t("serie.form.create")}
       onSubmit={handleSubmit(triggerSubmission)}
@@ -120,18 +127,28 @@ export function SerieContributionForm({
         error={errors.name}
       />
 
-      {/* Checkboxes */}
-      <div className="flex gap-6">
-        <CheckboxRhfInput
-          label={t("serie.ongoing")}
-          registration={register("ongoing")}
-          error={errors.ongoing}
-        />
+      <div className="w-[100%] flex gap-12">
+        {/* Checkboxes */}
+        <div className="flex gap-6">
+          <CheckboxRhfInput
+            label={t("serie.ongoing")}
+            registration={register("ongoing")}
+            error={errors.ongoing}
+          />
 
-        <CheckboxRhfInput
-          label={t("serie.oneshot")}
-          registration={register("oneshot")}
-          error={errors.oneshot}
+          <CheckboxRhfInput
+            label={t("serie.oneshot")}
+            registration={register("oneshot")}
+            error={errors.oneshot}
+          />
+        </div>
+
+        {/* Nvolumes */}
+        <TextRhfInput
+          label={t("serie.nvolumes")}
+          registration={register("nvolumes")}
+          inputProps={{ type: "number", inputMode: "numeric", min: 0 }}
+          error={errors.nvolumes}
         />
       </div>
 

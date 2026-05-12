@@ -167,7 +167,7 @@ export function getContributionColumns(): ColumnDef<Contribution>[] {
                 return name;
                 
             },
-            getValue: (c) => c.entityType
+            getValue: (c) => getContributionName(c, locale)
         },
         {
             key: 'date',

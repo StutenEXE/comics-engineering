@@ -46,6 +46,7 @@ export default function ContributePage() {
   useEffect(() => {
     if (isSuccess) {
       toast.success(t("contribute.success"));
+      closeContributionModal();
       refetch();
     }
   }, [isSuccess]);
@@ -54,7 +55,7 @@ export default function ContributePage() {
   if (!isAuthenticated) {
     return (
       <main>
-        <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+        <div className="flex flex-col items-center min-h-[50vh] gap-4 mt-12">
           <h1 className="text-3xl font-bold text-gray-200">
             {t("contribute.title")}
           </h1>

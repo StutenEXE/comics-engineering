@@ -149,7 +149,11 @@ export function EditionContributionForm({
 
   return (
     <GenericForm
-      title={t("edition.form.title")}
+      title={
+        edition
+          ? t("edition.form.title.modify")
+          : t("edition.form.title.create")
+      }
       onCancel={noPropagationEvt(onCancel)}
       submitLabel={
         edition ? t("edition.form.modify") : t("edition.form.create")
@@ -259,7 +263,7 @@ export function EditionContributionForm({
         />
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex items-end gap-3">
         {/* Url */}
         <TextRhfInput
           label={t("edition.url")}

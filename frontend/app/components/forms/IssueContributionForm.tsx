@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm, type FieldValues } from "react-hook-form";
 import z from "zod";
 import { useTranslation } from "~/i18n/i18n";
@@ -8,20 +9,13 @@ import {
   type SimpleContribution,
 } from "~/models/contribution";
 import type { ContributionIssue, Issue } from "~/models/issue";
-import {
-  toHtmlInputString,
-  toYYYYmmDD,
-  zDateOptional,
-  zDateRequired,
-} from "~/utils/date";
-import { noPropagationEvt } from "~/utils/events";
-import { GenericButton } from "../buttons/GenericButton";
-import { TextRhfInput } from "./fields/TextRhfInput";
-import { SearchSelectInput } from "./fields/SearchSelectInput";
 import type { SimpleIssueSerie } from "~/models/issue-serie";
-import { useState } from "react";
 import { useLazySearchIssueSeriesByNameQuery } from "~/store/services/api";
+import { toHtmlInputString, toYYYYmmDD, zDateRequired } from "~/utils/date";
+import { noPropagationEvt } from "~/utils/events";
 import { DateRhfInput } from "./fields/DateRhfInput";
+import { SearchSelectInput } from "./fields/SearchSelectInput";
+import { TextRhfInput } from "./fields/TextRhfInput";
 import { GenericForm } from "./GenericForm";
 
 interface IssueFormProps {
@@ -43,10 +37,13 @@ export function IssueContributionForm({
 
   // Validation schema
   const schema = z.object({
-    name: z.string().min(1, t("issue.form.name.required")),
-    number: z.coerce.number().min(1, t("issue.form.number.required")),
-    coverDate: zDateRequired(t("form.required")),
-    parutionDate: zDateRequired(t("form.required")),
+    name: z.string().min(1, t("generic.required", { capitalize: true })),
+    number: z.coerce
+      .number()
+      .gte(0, t("issue.form.number.gte0"))
+      .min(1, t("generic.required", { capitalize: true })),
+    coverDate: zDateRequired(t("generic.required", { capitalize: true })),
+    parutionDate: zDateRequired(t("generic.required", { capitalize: true })),
   });
 
   type FormData = z.infer<typeof schema>;
@@ -101,7 +98,9 @@ export function IssueContributionForm({
 
   return (
     <GenericForm
-      title={t("issue.form.title")}
+      title={
+        issue ? t("issue.form.title.modify") : t("issue.form.title.create")
+      }
       onCancel={noPropagationEvt(onCancel)}
       submitLabel={issue ? t("issue.form.modify") : t("issue.form.create")}
       onSubmit={handleSubmit(triggerSubmission)}
@@ -133,7 +132,7 @@ export function IssueContributionForm({
         />
 
         <TextRhfInput
-          label={t("book.number")}
+          label={t("issue.number")}
           registration={register("number")}
           inputProps={{ type: "number", inputMode: "numeric" }}
           error={errors.number}

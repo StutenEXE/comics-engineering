@@ -85,7 +85,7 @@ export default function LandingPage() {
         {!isFetching && books.length === 0 && (
           <div className="flex items-center justify-center py-24 border border-white/8 rounded-lg">
             <p className="text-sm text-white/25 italic">
-              {t("loader.book.nodata")}
+              {t("book.nonefound")}
             </p>
           </div>
         )}

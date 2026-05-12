@@ -106,7 +106,7 @@ export function BookContributionForm({
 
   return (
     <GenericForm
-      title={t("book.form.title")}
+      title={book ? t("book.form.title.modify") : t("book.form.title.create")}
       onCancel={noPropagationEvt(onCancel)}
       submitLabel={book ? t("book.form.modify") : t("book.form.create")}
       onSubmit={handleSubmit(triggerSubmission)}

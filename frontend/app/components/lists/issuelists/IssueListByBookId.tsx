@@ -18,7 +18,7 @@ export function IssueListByBookId({ bookId, toIgnore, descOrder, className }: Is
         return(<IssueList issueList={[]} error={{
             status: 0,
             details: {
-                error: t("loader.book.nodata")
+                error: t("book.nonefound")
             }
         }} className={className}/>)
     }

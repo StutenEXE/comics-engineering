@@ -8,7 +8,7 @@ import {
   ContributionTypeEnum,
   type SimpleContribution,
 } from "~/models/contribution";
-import type { Serie } from "~/models/serie";
+import type { ContributionIssueSerie, IssueSerie } from "~/models/issue-serie";
 import {
   toHtmlInputString,
   toYYYYmmDD,
@@ -16,12 +16,9 @@ import {
   zDateRequired,
 } from "~/utils/date";
 import { noPropagationEvt } from "~/utils/events";
-import { GenericButton } from "../buttons/GenericButton";
-import { CheckboxRhfInput } from "./fields/CheckboxRhfInput";
 import { DateRangeRhfInput } from "./fields/DateRangeRhfInput";
-import { TextRhfInput } from "./fields/TextRhfInput";
-import type { ContributionIssueSerie, IssueSerie } from "~/models/issue-serie";
 import { TextAreaRhfInput } from "./fields/TextAreaRhfInput";
+import { TextRhfInput } from "./fields/TextRhfInput";
 import { GenericForm } from "./GenericForm";
 
 interface IssueSerieFormProps {
@@ -42,9 +39,9 @@ export function IssueSerieContributionForm({
   // Validation schema
   const schema = z
     .object({
-      name: z.string().min(1, t("issueserie.form.name.required")),
+      name: z.string().min(1, t("generic.required", { capitalize: true })),
       desc: z.string().optional(),
-      startDate: zDateRequired(t("form.required")),
+      startDate: zDateRequired(t("generic.required", { capitalize: true })),
       endDate: zDateOptional(),
     })
     .refine(
@@ -52,7 +49,7 @@ export function IssueSerieContributionForm({
         if (!data.endDate) return true;
         return data.endDate > data.startDate;
       },
-      { message: t("serie.form.endDate.afterStart"), path: ["endDate"] },
+      { message: t("issueserie.form.endDate.afterStart"), path: ["endDate"] },
     );
 
   type FormData = z.infer<typeof schema>;
@@ -109,7 +106,11 @@ export function IssueSerieContributionForm({
 
   return (
     <GenericForm
-      title={t("issueserie.form.title")}
+      title={
+        issueSerie
+          ? t("issueserie.form.title.modify")
+          : t("issueserie.form.title.create")
+      }
       onCancel={noPropagationEvt(onCancel)}
       submitLabel={
         issueSerie ? t("issueserie.form.modify") : t("issueserie.form.create")
@@ -154,7 +155,7 @@ export function IssueSerieContributionForm({
 
       {/* Description field */}
       <TextAreaRhfInput
-        label={t("issueserie.desc")}
+        label={t("issueserie.description")}
         registration={register("desc")}
         error={errors.desc}
       />
