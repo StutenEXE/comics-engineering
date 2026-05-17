@@ -15,7 +15,6 @@ interface TableControlsProps {
   searchValue: string;
   onSearchChange: (arg0: string) => void;
 }
-
 function TableControls({
   searchableKeys,
   searchableKeysDisplay,
@@ -27,33 +26,38 @@ function TableControls({
   const { t } = useTranslation();
 
   return (
-    <div className="p-4 flex flex-wrap justify-between items-center gap-4 bg-gray-900 rounded-t-lg">
-      <div className="flex flex-wrap gap-2">
+    <div className="px-4 py-3 flex flex-wrap justify-between items-center gap-3 border-b border-white/8">
+      {/* Filter toggles */}
+      <div className="flex flex-wrap gap-1.5">
         {searchableKeys.map((key: string, index: number) => (
           <ToggleButton
             key={key}
             selected={activeKeys.includes(key)}
             onClick={() => onToggleKey(key, !activeKeys.includes(key))}
-            className="px-3 h-9 text-sm"
+            className={`px-3 h-7 text-xs rounded-md border transition-all
+              ${activeKeys.includes(key)
+                ? "bg-indigo-500/20 border-indigo-500/30 text-indigo-300"
+                : "bg-white/5 border-white/10 text-white/40 hover:text-white/60 hover:border-white/20"
+              }`}
           >
             {searchableKeysDisplay[index] ?? capitalize(key)}
           </ToggleButton>
         ))}
       </div>
-      <div
-        className="flex items-center gap-2 bg-gray-900 border border-gray-600 px-3 py-1 
-            rounded-md focus:border-white-500 transition-colors"
-      >
-        <label htmlFor="search">
-          <MdOutlineSearch size={20} className="text-gray-400" />
-        </label>
+
+      {/* Search input */}
+      <div className="relative">
+        <MdOutlineSearch
+          size={15}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none"
+        />
         <input
           id="search"
           type="text"
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={t("generic.search.placeholder")}
-          className="bg-transparent border-none outline-none text-sm text-white w-48 md:w-64"
+          className="bg-white/5 border border-white/10 rounded-md pl-8 pr-3 py-1.5 text-sm text-white/70 placeholder-white/20 outline-none focus:border-indigo-500/70 focus:ring-1 focus:ring-indigo-500/30 transition-all w-48 md:w-64"
         />
       </div>
     </div>
@@ -84,7 +88,6 @@ export function GenericTable<T extends Record<string, any>>(
   props: GenericTableProps<T>,
 ) {
   const { t } = useTranslation();
-
   const {
     list = [],
     columns,
@@ -94,18 +97,10 @@ export function GenericTable<T extends Record<string, any>>(
     itemsPerPage = 10,
   } = props;
 
-  // Pagination State
   const [currentPage, setCurrentPage] = useState(0);
+  const handleNextPage = () => setCurrentPage((p) => p + 1);
+  const handlePreviousPage = () => setCurrentPage((p) => Math.max(0, p - 1));
 
-  const handleNextPage = () => {
-    setCurrentPage((prev) => prev + 1);
-  };
-
-  const handlePreviousPage = () => {
-    setCurrentPage((prev) => Math.max(0, prev - 1));
-  };
-
-  // Prepare Columns (memoized to prevent unnecessary re-calculation)
   const tableCols = useMemo(() => {
     const cols = [...columns];
     if (addActions && actionGenerator) {
@@ -117,18 +112,12 @@ export function GenericTable<T extends Record<string, any>>(
     return cols;
   }, [columns, addActions, actionGenerator]);
 
-  // Search State
   const searchableKeys = useMemo(
-    () =>
-      columns
-        .filter((col) => col.searchable && col.key)
-        .map((col) => col.key as string),
+    () => columns.filter((col) => col.searchable && col.key).map((col) => col.key as string),
     [columns],
   );
 
-  // Search keys
-  const [activeSearchKeys, setActiveSearchKeys] =
-    useState<string[]>(searchableKeys);
+  const [activeSearchKeys, setActiveSearchKeys] = useState<string[]>(searchableKeys);
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleToggleKey = (key: string, isSelected: boolean) => {
@@ -137,44 +126,60 @@ export function GenericTable<T extends Record<string, any>>(
     );
   };
 
-  // Filtered Data (calculated on render, memoized for performance)
   const filteredList = useMemo(() => {
     if (!list) return [];
     if (!searchQuery) return list;
-
     const lowerQuery = searchQuery.toLowerCase();
-    return list.filter((item) => {
-      return activeSearchKeys.some((key) => {
+    return list.filter((item) =>
+      activeSearchKeys.some((key) => {
         const valFunc = columns.find((col) => col.key === key)?.getValue;
         const value = valFunc ? valFunc(item) : "";
         return value.toLowerCase().includes(lowerQuery);
-      });
-    });
+      }),
+    );
   }, [list, searchQuery, activeSearchKeys]);
 
-  // Paginated Data
   const paginatedList = useMemo(() => {
-    const startIndex = currentPage * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return filteredList.slice(startIndex, endIndex);
+    const start = currentPage * itemsPerPage;
+    return filteredList.slice(start, start + itemsPerPage);
   }, [filteredList, currentPage, itemsPerPage]);
 
   const totalPages = Math.ceil(filteredList.length / itemsPerPage);
 
-  // Reset to first page when search query changes
   const handleSearch = (value: string) => {
     setCurrentPage(0);
     setSearchQuery(value);
   };
 
-  // Loading & Empty States
-  if (isLoading)
-    return <div className="p-8 text-center">{t("loader.loading")}</div>;
+  if (isLoading) {
+    return (
+      <div className={`border border-white/8 rounded-lg overflow-hidden ${props.className}`}>
+        {/* Skeleton header */}
+        <div className="px-4 py-3 border-b border-white/8 flex gap-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-7 w-20 rounded-md bg-white/5 animate-pulse" />
+          ))}
+        </div>
+        {/* Skeleton rows */}
+        {Array.from({ length: itemsPerPage }).map((_, i) => (
+          <div key={i} className="flex gap-4 px-4 py-3 border-b border-white/5">
+            {Array.from({ length: columns.length }).map((_, j) => (
+              <div
+                key={j}
+                className="h-4 rounded bg-white/5 animate-pulse"
+                style={{ width: `${60 + Math.random() * 40}%` }}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
-    <div
-      className={`overflow-x border border-gray-700 rounded-lg ${props.className}`}
-    >
+    <div className={`border border-white/8 rounded-lg overflow-hidden ${props.className}`}>
+
+      {/* Controls */}
       {searchableKeys.length > 0 && (
         <TableControls
           searchableKeys={searchableKeys}
@@ -188,29 +193,33 @@ export function GenericTable<T extends Record<string, any>>(
         />
       )}
 
+      {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full table-auto border-collapse">
           <thead>
-            <tr className="bg-gray-800 text-gray-300">
+            <tr className="border-b border-white/8">
               {tableCols.map((col, idx) => (
                 <th
                   key={col.header ?? idx}
-                  className="p-3 text-left font-semibold border-b border-gray-700"
+                  className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-widest text-white/30"
                 >
                   {col.header}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-700">
+          <tbody>
             {paginatedList.length > 0 ? (
               paginatedList.map((row, rowIdx) => (
                 <tr
                   key={row.id ?? rowIdx}
-                  className="hover:bg-gray-700/50 transition-colors"
+                  className="border-b border-white/5 last:border-none hover:bg-white/3 transition-colors group"
                 >
                   {tableCols.map((col, colIdx) => (
-                    <td key={`${rowIdx}-${colIdx}`} className="p-3 text-sm">
+                    <td
+                      key={`${rowIdx}-${colIdx}`}
+                      className="px-4 py-3 text-sm text-white/60 group-hover:text-white/80 transition-colors"
+                    >
                       {col.cellRenderer
                         ? col.cellRenderer(row)
                         : col.key
@@ -222,11 +231,10 @@ export function GenericTable<T extends Record<string, any>>(
               ))
             ) : (
               <tr>
-                <td
-                  colSpan={tableCols.length}
-                  className="p-8 text-center text-gray-500"
-                >
-                  {props.emptyMessage ?? t("loader.nodata")}
+                <td colSpan={tableCols.length} className="px-4 py-12 text-center">
+                  <p className="text-sm text-white/25 italic">
+                    {props.emptyMessage ?? t("loader.nodata")}
+                  </p>
                 </td>
               </tr>
             )}
@@ -234,41 +242,40 @@ export function GenericTable<T extends Record<string, any>>(
         </table>
       </div>
 
+      {/* Pagination */}
       {filteredList.length > 0 && (
-        <div className="p-4 flex justify-between items-center bg-gray-900 rounded-b-lg border-t border-gray-700">
-          <span className="text-sm text-gray-400">
+        <div className="px-4 py-3 flex justify-between items-center border-t border-white/8">
+          <span className="text-xs text-white/25 tabular-nums">
             {t("generic.pagination", {
               parameters: {
-                items: t('generic.items', { capitalize: true }),
+                items: t("generic.items", { capitalize: true }),
                 current: currentPage + 1,
                 total: totalPages,
                 from: currentPage * itemsPerPage + 1,
-                to: Math.min(
-                  (currentPage + 1) * itemsPerPage,
-                  filteredList.length,
-                ),
+                to: Math.min((currentPage + 1) * itemsPerPage, filteredList.length),
                 count: filteredList.length,
               },
             })}
           </span>
-          <div className="flex gap-2">
+          <div className="flex gap-1.5">
             <GenericButton
               onClick={handlePreviousPage}
               disabled={currentPage === 0}
-              className="px-3 h-9 text-sm"
+              className="bg-white/5 border border-white/10 text-white/50 hover:bg-white/10 hover:text-white/80 disabled:opacity-20 disabled:cursor-not-allowed px-3 py-1.5 rounded-md transition-all"
             >
-              <BsArrowLeft size={16} />
+              <BsArrowLeft size={14} />
             </GenericButton>
             <GenericButton
               onClick={handleNextPage}
               disabled={currentPage >= totalPages - 1}
-              className="px-3 h-9 text-sm"
+              className="bg-white/5 border border-white/10 text-white/50 hover:bg-white/10 hover:text-white/80 disabled:opacity-20 disabled:cursor-not-allowed px-3 py-1.5 rounded-md transition-all"
             >
-              <BsArrowRight size={16} />
+              <BsArrowRight size={14} />
             </GenericButton>
           </div>
         </div>
       )}
+
     </div>
   );
 }

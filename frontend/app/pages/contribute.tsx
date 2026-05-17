@@ -15,7 +15,7 @@ import { useToast } from "~/components/toast/Toast";
 import type { ContributionBundle } from "~/models/contributionBundle";
 import { LoggedProtectedRoute } from "~/components/security/LoggedProtectedRoute";
 
-export function meta({}: Route.MetaArgs) {
+export function meta({ }: Route.MetaArgs) {
   return [
     { title: `Contribute` },
     { name: "description", content: `Contribute to the library` },
@@ -179,10 +179,11 @@ export default function ContributePage() {
         </div>
 
         <ContributionBundleModal
+          action="create"
           isOpen={isContributionModalOpen}
           onSubmit={submitContributionBundle}
           onClose={closeContributionModal}
-        ></ContributionBundleModal>
+        />
       </main>
     </LoggedProtectedRoute>
   );

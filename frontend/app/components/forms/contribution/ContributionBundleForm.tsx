@@ -26,15 +26,18 @@ import { IssueSerieContributionModal } from "../../modals/contribution/IssueSeri
 import { SerieContributionModal } from "../../modals/contribution/SerieContributionModal";
 import { TextAreaRhfInput } from "../fields/TextAreaRhfInput";
 import { GenericForm } from "../GenericForm";
+import { deepCopy } from "~/utils/object";
 
 interface ContributionBundleFormProps {
   bundle?: ContributionBundle;
+  action: "create" | "update";
   onSubmit?: (bundle: Partial<ContributionBundle>) => void;
   onCancel?: () => void;
 }
 
 export function ContributionBundleForm({
   bundle,
+  action,
   onSubmit,
   onCancel,
 }: ContributionBundleFormProps) {
@@ -68,8 +71,8 @@ export function ContributionBundleForm({
   const [isIssueSerieOpen, setIsIssueSerieOpen] = useState(false);
 
   // Bundle data
-  const [contributions, setContributions] = useState(
-    [] as SimpleContribution[],
+  const [contributions, setContributions] = useState<SimpleContribution[]>(
+    bundle ? deepCopy(bundle?.contributions) : []
   );
 
   // Contribution data
@@ -166,7 +169,6 @@ export function ContributionBundleForm({
       note: data?.note,
       submitter: user!,
     };
-    console.log(newBundle);
     onSubmit?.(newBundle);
   };
 
@@ -177,9 +179,9 @@ export function ContributionBundleForm({
   return (
     <>
       <GenericForm
-        title={t("cbundle.form.create")}
-        onCancel={noPropagationEvt(onCancel)}
-        submitLabel={t("cbundle.form.submit")}
+        title={bundle ? t("cbundle.form.title.modify") : t("cbundle.form.title.create")}
+        onCancel={noPropagationEvt(handleCancel)}
+        submitLabel={bundle ? t("cbundle.form.modify") : t("cbundle.form.create")}
         onSubmit={handleSubmit(triggerSubmission)}
         disabled={contributions.length <= 0}
       >
@@ -252,7 +254,7 @@ export function ContributionBundleForm({
       <EditionContributionModal
         edition={
           contribToModify &&
-          contribToModify.entityType === ContributionTypeEnum.EDITION
+            contribToModify.entityType === ContributionTypeEnum.EDITION
             ? parseToEdition(contribToModify.proposedData)
             : undefined
         }
@@ -265,7 +267,7 @@ export function ContributionBundleForm({
       <BookContributionModal
         book={
           contribToModify &&
-          contribToModify.entityType === ContributionTypeEnum.BOOK
+            contribToModify.entityType === ContributionTypeEnum.BOOK
             ? parseToBook(contribToModify.proposedData)
             : undefined
         }
@@ -278,7 +280,7 @@ export function ContributionBundleForm({
       <SerieContributionModal
         serie={
           contribToModify &&
-          contribToModify.entityType === ContributionTypeEnum.SERIE
+            contribToModify.entityType === ContributionTypeEnum.SERIE
             ? parseToSerie(contribToModify.proposedData)
             : undefined
         }
@@ -290,7 +292,7 @@ export function ContributionBundleForm({
       <IssueContributionModal
         issue={
           contribToModify &&
-          contribToModify.entityType === ContributionTypeEnum.ISSUE
+            contribToModify.entityType === ContributionTypeEnum.ISSUE
             ? parseToIssue(contribToModify.proposedData)
             : undefined
         }
@@ -303,7 +305,7 @@ export function ContributionBundleForm({
       <IssueSerieContributionModal
         issueSerie={
           contribToModify &&
-          contribToModify.entityType === ContributionTypeEnum.ISSUE_SERIE
+            contribToModify.entityType === ContributionTypeEnum.ISSUE_SERIE
             ? parseToIssueSerie(contribToModify.proposedData)
             : undefined
         }

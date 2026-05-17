@@ -7,7 +7,6 @@ import java.util.Optional;
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.ContributionBundleDAO;
 import dev.stuten.vps.models.dtos.full.ContributionBundleDTO;
-import dev.stuten.vps.models.dtos.full.UserDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionDTO;
 import dev.stuten.vps.models.dtos.template.IdDTO;
 import dev.stuten.vps.web.ErrorResponse;

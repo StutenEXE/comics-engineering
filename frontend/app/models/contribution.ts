@@ -178,7 +178,7 @@ export function getContributionColumns(): ColumnDef<Contribution>[] {
             key: 'status',
             header: t('contribution.status'),
             searchable: true,
-            cellRenderer: (c) => c.status,
+            cellRenderer: (c) => t(`contribution.enum.status.${c.status}`),
             getValue: (c) => c.status
         }
     ]
