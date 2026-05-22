@@ -18,9 +18,9 @@ public abstract class ContributableDAO<T extends IdDTO> extends DAO {
 
     protected void replaceLocalRef(IdDTO dto, Map<Integer, Integer> localRefs)
             throws OperationNotSupportedException {
-        Integer proposedObjId = (Integer) dto.getId();
-        Integer replacementObjId = localRefs.get(proposedObjId);
+        Integer proposedObjId = dto.getId();
         if (proposedObjId < 0) {
+            Integer replacementObjId = localRefs.get(proposedObjId);
             if (replacementObjId == null) {
                 throw new OperationNotSupportedException(
                         "Trying to contribute an item before dependency is contributed (local ref not replaced)");

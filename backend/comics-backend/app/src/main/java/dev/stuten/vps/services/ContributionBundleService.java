@@ -7,6 +7,7 @@ import java.util.Optional;
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.ContributionBundleDAO;
 import dev.stuten.vps.models.dtos.full.ContributionBundleDTO;
+import dev.stuten.vps.models.dtos.request.UpdateContributionBundleStatusDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionDTO;
 import dev.stuten.vps.models.dtos.template.IdDTO;
 import dev.stuten.vps.web.ErrorResponse;
@@ -80,6 +81,67 @@ public class ContributionBundleService {
         ContributionBundleDTO newBundle = dao.findById(bundleId.get()).get();
 
         ctx.status(HttpStatus.CREATED).json(Map.of("bundle", newBundle));
+    }
+
+    public static void update(Context ctx) {
+        AuthContext auth = AuthMiddleware.getCurrentSession(ctx);
+        if (auth == null) {
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Unauthorized", "User must be logged in");
+            return;
+        }
+
+        ContributionBundleDTO bundle;
+        try {
+            bundle = ctx.bodyAsClass(ContributionBundleDTO.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Invalid JSON body");
+            return;
+        }
+
+        // Validate bundle
+        if (bundle.getSubmitter().getId() != Integer.parseInt(auth.userId())
+                && !AuthMiddleware.hasRole(ctx, Role.ADMIN)) {
+            ErrorResponse.send(HttpStatus.FORBIDDEN, "Forbidden", "You can only submit contributions for yourself");
+            return;
+        }
+
+        // Update contribution bundle
+        boolean updated = dao.update(bundle);
+        if (!updated) {
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Contribution bundle not updated", "");
+            return;
+        }
+
+        ctx.status(HttpStatus.CREATED).json(Map.of("bundle", bundle));
+    }
+
+    public static void updateStatus(Context ctx) {
+        if (!AuthMiddleware.isAuthenticated(ctx)) {
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Unauthorized", "User must be logged in");
+            return;
+        }
+        if (!AuthMiddleware.hasRole(ctx, Role.ADMIN)) {
+            ErrorResponse.send(HttpStatus.FORBIDDEN, "Forbidden", "Only admins can update bundle status");
+            return;
+        }
+
+        UpdateContributionBundleStatusDTO statusDTO;
+        try {
+            statusDTO = ctx.bodyAsClass(UpdateContributionBundleStatusDTO.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Invalid JSON body");
+            return;
+        }
+
+        boolean updated = dao.updateStatus(statusDTO.bundleId(), statusDTO.newStatus());
+        if (!updated) {
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Contribution bundle status not updated", "");
+            return;
+        }
+
+        ctx.status(HttpStatus.OK);
     }
 
     public static void getBySubmitterId(Context ctx) {

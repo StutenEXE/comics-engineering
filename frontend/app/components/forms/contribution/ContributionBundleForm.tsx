@@ -45,6 +45,8 @@ export function ContributionBundleForm({
   const confirm = useConfirm();
   const { user } = useAppSelector((state) => state.user);
 
+  const adminActions = action === "update" && user?.isAdmin;
+
   // Validation schema
   const schema = z.object({
     note: z.string(),
@@ -165,7 +167,9 @@ export function ContributionBundleForm({
 
   const triggerSubmission = (data: FieldValues) => {
     const newBundle: Partial<ContributionBundle> = {
+      id: bundle?.id,
       contributions: contributions,
+      status: bundle?.status,
       note: data?.note,
       submitter: user!,
     };
@@ -240,6 +244,7 @@ export function ContributionBundleForm({
             onAdd={createDependantContribution}
             onEdit={editContribution}
             onRemove={removeContribution}
+            adminActions={adminActions}
             className="border border-white/10 rounded-md bg-white/5 min-h-[80px]"
           />
         </div>

@@ -11,6 +11,7 @@ import type { Link } from "~/components/lists/LinkButtonList";
 import { BookListBySerieId } from "~/components/lists/booklists/BookListBySerieId";
 import { IssueListByBookId } from "~/components/lists/issuelists/IssueListByBookId";
 import { useTranslation } from "~/i18n/i18n";
+import { insertLinebreaks } from "~/utils/strings";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -46,7 +47,9 @@ export default function BookPage({ params }: { params: { id: number } }) {
       {/* Description */}
       {book?.desc && (
         <InfoPageSection label={t("book.description")}>
-          <p className="text-sm text-white/60 leading-relaxed">{book.desc}</p>
+          <p className="text-sm text-white/60 leading-relaxed">
+            {insertLinebreaks(book.desc)}
+          </p>
         </InfoPageSection>
       )}
 
@@ -54,7 +57,7 @@ export default function BookPage({ params }: { params: { id: number } }) {
       {book?.voContent && (
         <InfoPageSection label={t("book.voContent")}>
           <p className="text-sm text-white/60 leading-relaxed">
-            {book.voContent}
+            {insertLinebreaks(book.voContent)   }
           </p>
         </InfoPageSection>
       )}

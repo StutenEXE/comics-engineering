@@ -35,9 +35,10 @@ function TableControls({
             selected={activeKeys.includes(key)}
             onClick={() => onToggleKey(key, !activeKeys.includes(key))}
             className={`px-3 h-7 text-xs rounded-md border transition-all
-              ${activeKeys.includes(key)
-                ? "bg-indigo-500/20 border-indigo-500/30 text-indigo-300"
-                : "bg-white/5 border-white/10 text-white/40 hover:text-white/60 hover:border-white/20"
+              ${
+                activeKeys.includes(key)
+                  ? "bg-indigo-500/20 border-indigo-500/30 text-indigo-300"
+                  : "bg-white/5 border-white/10 text-white/40 hover:text-white/60 hover:border-white/20"
               }`}
           >
             {searchableKeysDisplay[index] ?? capitalize(key)}
@@ -77,6 +78,7 @@ interface GenericTableProps<T> {
   columns: ColumnDef<T>[];
   addActions?: boolean;
   actionGenerator?: (arg: T) => ReactNode;
+  onPageChange?: (page: number) => void;
   isLoading?: boolean;
   emptyMessage?: string;
   error?: Error;
@@ -93,13 +95,20 @@ export function GenericTable<T extends Record<string, any>>(
     columns,
     addActions,
     actionGenerator,
+    onPageChange,
     isLoading,
     itemsPerPage = 10,
   } = props;
 
   const [currentPage, setCurrentPage] = useState(0);
-  const handleNextPage = () => setCurrentPage((p) => p + 1);
-  const handlePreviousPage = () => setCurrentPage((p) => Math.max(0, p - 1));
+  const handleNextPage = () => {
+    setCurrentPage((p) => p + 1);
+    onPageChange?.(currentPage);
+  };
+  const handlePreviousPage = () => {
+    setCurrentPage((p) => Math.max(0, p - 1));
+    onPageChange?.(currentPage);
+  };
 
   const tableCols = useMemo(() => {
     const cols = [...columns];
@@ -113,11 +122,15 @@ export function GenericTable<T extends Record<string, any>>(
   }, [columns, addActions, actionGenerator]);
 
   const searchableKeys = useMemo(
-    () => columns.filter((col) => col.searchable && col.key).map((col) => col.key as string),
+    () =>
+      columns
+        .filter((col) => col.searchable && col.key)
+        .map((col) => col.key as string),
     [columns],
   );
 
-  const [activeSearchKeys, setActiveSearchKeys] = useState<string[]>(searchableKeys);
+  const [activeSearchKeys, setActiveSearchKeys] =
+    useState<string[]>(searchableKeys);
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleToggleKey = (key: string, isSelected: boolean) => {
@@ -153,11 +166,16 @@ export function GenericTable<T extends Record<string, any>>(
 
   if (isLoading) {
     return (
-      <div className={`border border-white/8 rounded-lg overflow-hidden ${props.className}`}>
+      <div
+        className={`border border-white/8 rounded-lg overflow-hidden ${props.className}`}
+      >
         {/* Skeleton header */}
         <div className="px-4 py-3 border-b border-white/8 flex gap-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-7 w-20 rounded-md bg-white/5 animate-pulse" />
+            <div
+              key={i}
+              className="h-7 w-20 rounded-md bg-white/5 animate-pulse"
+            />
           ))}
         </div>
         {/* Skeleton rows */}
@@ -177,8 +195,9 @@ export function GenericTable<T extends Record<string, any>>(
   }
 
   return (
-    <div className={`border border-white/8 rounded-lg overflow-hidden ${props.className}`}>
-
+    <div
+      className={`border border-white/8 rounded-lg overflow-hidden ${props.className}`}
+    >
       {/* Controls */}
       {searchableKeys.length > 0 && (
         <TableControls
@@ -231,7 +250,10 @@ export function GenericTable<T extends Record<string, any>>(
               ))
             ) : (
               <tr>
-                <td colSpan={tableCols.length} className="px-4 py-12 text-center">
+                <td
+                  colSpan={tableCols.length}
+                  className="px-4 py-12 text-center"
+                >
                   <p className="text-sm text-white/25 italic">
                     {props.emptyMessage ?? t("loader.nodata")}
                   </p>
@@ -252,7 +274,10 @@ export function GenericTable<T extends Record<string, any>>(
                 current: currentPage + 1,
                 total: totalPages,
                 from: currentPage * itemsPerPage + 1,
-                to: Math.min((currentPage + 1) * itemsPerPage, filteredList.length),
+                to: Math.min(
+                  (currentPage + 1) * itemsPerPage,
+                  filteredList.length,
+                ),
                 count: filteredList.length,
               },
             })}
@@ -275,7 +300,6 @@ export function GenericTable<T extends Record<string, any>>(
           </div>
         </div>
       )}
-
     </div>
   );
 }

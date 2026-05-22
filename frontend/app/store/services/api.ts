@@ -1,5 +1,7 @@
-import { createApi, fetchBaseQuery, type FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { parseToBook, parseToSimpleBook, type Book, type SimpleBook } from "~/models/book";
+import { ContributionStatusEnum, parseToContribution, type Contribution } from "~/models/contribution";
+import { ContributionBundleStatusEnum, parseToBundle, type ContributionBundle } from "~/models/contributionBundle";
 import { parseToEdition, type Edition } from "~/models/edition";
 import { parseToIssue, type Issue } from "~/models/issue";
 import { parseToIssueSerie, type IssueSerie } from "~/models/issue-serie";
@@ -7,8 +9,6 @@ import { parseToOwnedEdition, type OwnedEdition } from "~/models/ownedEdition";
 import { parseToPublisher, type Publisher } from "~/models/publisher";
 import { parseToSerie, type Serie } from "~/models/serie";
 import { parseToUser, type SignupData, type User, type UserCredentials } from "~/models/user";
-import { parseToContribution, type Contribution, type ContributionActionEnum, type ContributionTypeEnum } from "~/models/contribution";
-import { parseToBundle, type ContributionBundle } from "~/models/contributionBundle";
 
 ////////////////////////////////////
 //////////// PUBLIC API ////////////
@@ -225,10 +225,13 @@ export const privateApi = createApi({
     submitContributionBundle: build.mutation<{ bundleId: number }, Partial<ContributionBundle>>({
       query: (data) => ({ url: "/contribute", method: 'POST', body: data }),
     }),
+    updateContributionBundle: build.mutation<{bundle: ContributionBundle}, Partial<ContributionBundle>>({
+      query: (data) => ({ url: "/bundles/update", method: 'POST', body: data }),
+    }),
   }),
 });
 
-export const { useCollectionQuery, useSubmitContributionBundleMutation } = privateApi;
+export const { useCollectionQuery, useSubmitContributionBundleMutation, useUpdateContributionBundleMutation } = privateApi;
 
 
 ////////////////////////////////////
@@ -259,10 +262,20 @@ export const adminApi = createApi({
         bundles: resp.bundles.map((b) => parseToBundle(b)),
       }),
     }),
+    // Update the status of a contribution
+    updateContributionStatus: build.mutation<{}, { contributionId: number, newStatus: ContributionStatusEnum }>({
+      query: ({ contributionId, newStatus }) => ({ url: "/contributions/update-status", method: 'POST', body: { contributionId, newStatus } }),
+    }),
+    // Update the status of a contribution bundle
+    updateBundleStatus: build.mutation<{}, { bundleId: number, newStatus: ContributionBundleStatusEnum }>({
+      query: ({ bundleId, newStatus }) => ({ url: "/bundles/update-status", method: 'POST', body: { bundleId, newStatus } }),
+    }),
   }),
 });
 
 export const {
   useUserListQuery,
-  useLazyBundleListQuery
+  useLazyBundleListQuery,
+  useUpdateContributionStatusMutation,
+  useUpdateBundleStatusMutation
 } = adminApi;

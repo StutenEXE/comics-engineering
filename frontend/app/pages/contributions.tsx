@@ -1,14 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ContributionBundleModal } from "~/components/modals/contribution/ContributionBundleModal";
 import { AdminProtectedRoute } from "~/components/security/AdminProtectedRoute";
 import { ContributionBundleTable } from "~/components/tables/ContributionBundleTable";
-import { useToast } from "~/components/toast/Toast";
 import { useTranslation } from "~/i18n/i18n";
 import { type ContributionBundle } from "~/models/contributionBundle";
-import { useLazyBundleListQuery } from "~/store/services/api";
+import {
+  useLazyBundleListQuery,
+  useUpdateContributionBundleMutation,
+} from "~/store/services/api";
 import type { Route } from "../+types/root";
+import { useToast } from "~/components/toast/Toast";
 
-export function meta({ }: Route.MetaArgs) {
+export function meta({}: Route.MetaArgs) {
   return [
     { title: `Contributions` },
     { name: "description", content: `Contributions to the library` },
@@ -17,6 +20,8 @@ export function meta({ }: Route.MetaArgs) {
 
 export default function ContributePage() {
   const { t } = useTranslation();
+  const toast = useToast();
+  const itemsPerPage = 10;
 
   // If a bundle is to be edited
   const [bundleToEdit, setBundleToEdit] = useState<ContributionBundle>();
@@ -25,8 +30,7 @@ export default function ContributePage() {
   const [isContributionModalOpen, setisContributionModalOpen] = useState(false);
 
   const openContributionModal = (bundle: ContributionBundle) => {
-    console.log(bundle)
-    setBundleToEdit(bundle)
+    setBundleToEdit(bundle);
     setisContributionModalOpen(true);
   };
 
@@ -36,19 +40,35 @@ export default function ContributePage() {
 
   // List bundles
   const [getBundles, { data }] = useLazyBundleListQuery();
-  const handleSearch = (from: number, limit: number) => {
+  const handleSearch = (page: number) => {
+    const from = page * itemsPerPage;
+    const limit = itemsPerPage;
     getBundles({ from, limit });
   };
+  // On load, fetch first page of bundles
+  useEffect(() => {
+    handleSearch(0);
+  }, []);
 
+  const [updateBundle] = useUpdateContributionBundleMutation();
 
   const updateContributionBundle = async (
     bundle: Partial<ContributionBundle>,
   ) => {
-    console.log(bundle)
-    // updateBundle(bundle);
+    console.log(bundle);
+    updateBundle(bundle)
+      .then((res) => {
+        if ("error" in res) {
+          toast.error(t("cbundle.updateError"));
+        }
+        toast.success(t("cbundle.updateSuccess"));
+        setBundleToEdit(undefined);
+        closeContributionModal();
+      })
+      .catch(() => {
+        toast.error(t("cbundle.updateError"));
+      });
   };
-
-
 
   return (
     <AdminProtectedRoute>
@@ -62,8 +82,8 @@ export default function ContributePage() {
           bundleList={data?.bundles || []}
           addActions
           onContributionClick={openContributionModal}
+          onPageChange={handleSearch}
         />
-        <button onClick={() => handleSearch(0, 10)}>Fetch</button>
       </main>
       <ContributionBundleModal
         bundle={bundleToEdit}

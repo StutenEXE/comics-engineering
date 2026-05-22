@@ -23,7 +23,6 @@ import org.jooq.SelectJoinStep;
 import dev.stuten.vps.models.dtos.full.EditionDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
 import dev.stuten.vps.models.dtos.simple.SimplePublisherDTO;
-import dev.stuten.vps.models.dtos.simple.SimpleSerieDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 import dev.stuten.vps.models.mappers.EditionMapper;
 
@@ -87,9 +86,6 @@ public class EditionDAO extends ContributableDAO<EditionDTO> {
         // Book id
         SimpleBookDTO book = proposal.getBook();
         super.replaceLocalRef(book, localRefs);
-        // Serie id
-        SimpleSerieDTO serie = proposal.getSerie();
-        super.replaceLocalRef(serie, localRefs);
     }
 
     @Override
@@ -102,9 +98,11 @@ public class EditionDAO extends ContributableDAO<EditionDTO> {
         return DSL().insertInto(EDITIONS)
                 .set(EDITIONS.ISBN, dto.getIsbn())
                 .set(EDITIONS.EAN, dto.getEan())
+                .set(EDITIONS.NPAGES, dto.getNpages())
                 .set(EDITIONS.PRICE, dto.getPrice())
                 .set(EDITIONS.URL, dto.getUrl())
                 .set(EDITIONS.IMG_URL, dto.getImgUrl())
+                .set(EDITIONS.COVER_TYPE, dto.getCoverType())
                 .set(EDITIONS.PARUTION_DATE, dto.getParutionDate())
                 .set(EDITIONS.PUBLISHER_ID, dto.getPublisher().getId())
                 .set(EDITIONS.BOOK_ID, dto.getBook().getId())
@@ -119,9 +117,11 @@ public class EditionDAO extends ContributableDAO<EditionDTO> {
         return DSL().update(EDITIONS)
                 .set(EDITIONS.ISBN, dto.getIsbn())
                 .set(EDITIONS.EAN, dto.getEan())
+                .set(EDITIONS.NPAGES, dto.getNpages())
                 .set(EDITIONS.PRICE, dto.getPrice())
                 .set(EDITIONS.URL, dto.getUrl())
                 .set(EDITIONS.IMG_URL, dto.getImgUrl())
+                .set(EDITIONS.COVER_TYPE, dto.getCoverType())
                 .set(EDITIONS.PARUTION_DATE, dto.getParutionDate())
                 .set(EDITIONS.PUBLISHER_ID, dto.getPublisher().getId())
                 .set(EDITIONS.BOOK_ID, dto.getBook().getId())

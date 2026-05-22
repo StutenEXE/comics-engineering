@@ -4,7 +4,7 @@ import type { ContributionBundle } from "~/models/contributionBundle";
 
 interface ContributionBundleModalProps {
   bundle?: ContributionBundle;
-  action: "create" | "update"
+  action: "create" | "update";
   isOpen: boolean;
   onSubmit?: (bundle: Partial<ContributionBundle>) => void;
   onClose: () => void;
@@ -26,7 +26,7 @@ export function ContributionBundleModal({
           action={action}
           onSubmit={onSubmit}
           onCancel={onClose}
-        ></ContributionBundleForm>
+        />
       </div>
     </GenericModal>
   );

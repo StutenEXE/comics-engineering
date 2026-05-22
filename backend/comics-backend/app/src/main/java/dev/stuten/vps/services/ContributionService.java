@@ -116,14 +116,19 @@ public class ContributionService {
 
         Optional<ContributionDTO<? extends IdDTO>> contribution = contributionDAO.findById(updateDTO.contributionId());
         if (contribution.isEmpty()) {
-            String message = String.format("Contributino of id %s not found", updateDTO.contributionId());
+            String message = String.format("Contribution of id %s not found", updateDTO.contributionId());
             ErrorResponse.send(HttpStatus.NOT_FOUND, "Contribution not found", message);
         }
         // If the new status changes nothing
         ContributionStatusEnum previousStatus = contribution.get().getStatus();
         if (previousStatus == updateDTO.newStatus()) {
-            String message = "Contribution already has this status %s".formatted(previousStatus);
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Contribution already has status", message);
+            String message = "Contribution already has this status : %s".formatted(previousStatus);
+            ErrorResponse.send(HttpStatus.METHOD_NOT_ALLOWED, "Contribution already has this status", message);
+        }
+        // If the contribution bundle is already accepted or rejected, we don't allow status change of individual contributions
+        if (previousStatus == ContributionStatusEnum.approved || previousStatus == ContributionStatusEnum.rejected) {
+            String message = "Cannot change status of contribution with already accepted or rejected status";
+            ErrorResponse.send(HttpStatus.METHOD_NOT_ALLOWED, "Invalid contribution status change", message);
         }
         // Update status
         Boolean updated = contributionDAO.updateStatus(updateDTO.contributionId(), updateDTO.newStatus());

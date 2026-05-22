@@ -81,6 +81,22 @@ public class ContributionBundleDAO extends DAO {
                                 .map(record -> record.get(CONTRIBUTION_BUNDLES.ID));
         }
 
+        public Boolean update(ContributionBundleDTO dto) {
+                return DSL().update(CONTRIBUTION_BUNDLES)
+                                .set(CONTRIBUTION_BUNDLES.STATUS, dto.getStatus())
+                                .set(CONTRIBUTION_BUNDLES.NOTE, dto.getNote())
+                                .set(CONTRIBUTION_BUNDLES.SUBMITTER_ID, dto.getSubmitter().getId())
+                                .where(CONTRIBUTION_BUNDLES.ID.eq(dto.getId()))
+                                .execute() > 0;
+        }
+
+        public Boolean updateStatus(Integer contributionId, ContributionBundleStatusEnum newStatus) {
+            return DSL().update(CONTRIBUTION_BUNDLES)
+                    .set(CONTRIBUTION_BUNDLES.STATUS, newStatus)
+                    .where(CONTRIBUTION_BUNDLES.ID.eq(contributionId))
+                    .execute() > 0;
+    }
+
         public Boolean delete(Integer id) {
                 return DSL().deleteFrom(CONTRIBUTION_BUNDLES)
                                 .where(CONTRIBUTION_BUNDLES.ID.eq(id))

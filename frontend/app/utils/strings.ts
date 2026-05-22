@@ -1,3 +1,8 @@
+import React from "react";
+
+export function insertLinebreaks(str: string) {
+    return str.split("\n").map((line, i) => React.createElement("span", { key: i }, line, React.createElement("br")));
+}
 
 export function capitalize(str: string) {
     if (str.length === 0) return str;
