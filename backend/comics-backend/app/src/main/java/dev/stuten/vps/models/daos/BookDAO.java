@@ -17,13 +17,16 @@ import java.util.Optional;
 import javax.naming.OperationNotSupportedException;
 
 import org.jooq.DSLContext;
+import org.jooq.InsertSetMoreStep;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
 
+import dev.stuten.vps.jooq.tables.records.BooksIssuesRecord;
 import dev.stuten.vps.models.dtos.full.BookDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleIssueDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleSerieDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 import dev.stuten.vps.models.mappers.BookMapper;
@@ -84,10 +87,15 @@ public class BookDAO extends ContributableDAO<BookDTO> {
         }
 
         @Override
-        protected void replaceLocalRefs(BookDTO proposal, Map<Integer, Integer> localRefs) throws OperationNotSupportedException {
+        protected void replaceLocalRefs(BookDTO proposal, Map<Integer, Integer> localRefs)
+                        throws OperationNotSupportedException {
                 // Serie id
                 SimpleSerieDTO serie = proposal.getSerie();
                 super.replaceLocalRef(serie, localRefs);
+                // Issues ids
+                for (SimpleIssueDTO issue : proposal.getIssues()) {
+                        super.replaceLocalRef(issue, localRefs);
+                }
         }
 
         @Override
@@ -97,7 +105,7 @@ public class BookDAO extends ContributableDAO<BookDTO> {
 
         @Override
         public Optional<Integer> create(BookDTO dto) {
-                return DSL().insertInto(BOOKS)
+                Optional<Integer> result = DSL().insertInto(BOOKS)
                                 .set(BOOKS.NAME, dto.getName())
                                 .set(BOOKS.DESC, dto.getDesc())
                                 .set(BOOKS.NUMBER, dto.getNumber())
@@ -108,6 +116,21 @@ public class BookDAO extends ContributableDAO<BookDTO> {
                                 .returning(BOOKS.ID)
                                 .fetchOptional()
                                 .map(record -> record.get(BOOKS.ID));
+                if (result.isEmpty()) {
+                        return result;
+                }
+                // Special handling for many-to-many relation with issues
+                Integer bookId = result.get();
+                List<SimpleIssueDTO> issues = dto.getIssues();
+                if (issues != null && !issues.isEmpty()) {
+                        List<InsertSetMoreStep<BooksIssuesRecord>> issueLinks = issues.stream()
+                                        .map(issue -> DSL().insertInto(BOOKS_ISSUES)
+                                                        .set(BOOKS_ISSUES.BOOK_ID, bookId)
+                                                        .set(BOOKS_ISSUES.ISSUE_ID, issue.getId()))
+                                        .toList();
+                        DSL().batch(issueLinks).execute();
+                }
+                return result;
         }
 
         @Override

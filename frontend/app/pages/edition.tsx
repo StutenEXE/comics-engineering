@@ -66,7 +66,7 @@ export default function EditionPage({ params }: { params: { id: number } }) {
           // Covertype
           {
             label: t("edition.coverType"),
-            value: edition?.coverType ? t(`edition.enum.${edition?.coverType}`) : undefined,
+            value: edition?.coverType ? t(`edition.coverType.${edition?.coverType}`) : undefined,
           },
           // Parutiondate
           {

@@ -11,11 +11,12 @@ import {
 } from "~/models/contribution";
 import { type ContributionBundle } from "~/models/contributionBundle";
 import { parseToEdition } from "~/models/edition";
-import { parseToIssue } from "~/models/issue";
-import { parseToIssueSerie } from "~/models/issue-serie";
+import { buildIssueShortName, issueToSimpleIssue, parseToIssue, type Issue, type SimpleIssue } from "~/models/issue";
+import { parseToIssueSerie, type SimpleIssueSerie } from "~/models/issue-serie";
 import { parseToSerie } from "~/models/serie";
 import { useAppSelector } from "~/store/hooks";
 import { noPropagationEvt } from "~/utils/events";
+import { deepCopy } from "~/utils/object";
 import { GenericButton } from "../../buttons/GenericButton";
 import { IndentedContributionList } from "../../lists/contributionlists/IndentedContributionList";
 import { useConfirm } from "../../modals/ConfirmModalProvider";
@@ -26,7 +27,6 @@ import { IssueSerieContributionModal } from "../../modals/contribution/IssueSeri
 import { SerieContributionModal } from "../../modals/contribution/SerieContributionModal";
 import { TextAreaRhfInput } from "../fields/TextAreaRhfInput";
 import { GenericForm } from "../GenericForm";
-import { deepCopy } from "~/utils/object";
 
 interface ContributionBundleFormProps {
   bundle?: ContributionBundle;
@@ -126,7 +126,6 @@ export function ContributionBundleForm({
       case ContributionTypeEnum.ISSUE_SERIE:
         return setIsIssueOpen(true);
     }
-    setLocalRef(undefined);
   };
 
   const editContribution = (c: SimpleContribution) => {
@@ -175,6 +174,25 @@ export function ContributionBundleForm({
     };
     onSubmit?.(newBundle);
   };
+
+  // Local issue candidates: unsaved issue contributions in this bundle
+  const localIssueCandidates: SimpleIssue[] = contributions
+    .filter((c) => c.entityType === ContributionTypeEnum.ISSUE)
+    .map((c) => {
+      const issue = c.proposedData as Issue;
+      issue.id = c.localRef!;
+      return issueToSimpleIssue(issue);
+    });
+
+  const localIssueSeries: SimpleIssueSerie[] = contributions
+    .filter((c) => c.entityType === ContributionTypeEnum.ISSUE_SERIE)
+    .map((c) => ({
+      id: c.localRef!,
+      name: c.proposedData.name,
+      desc: "",
+      startDate: new Date(),
+      endDate: null,
+    }));
 
   const handleCancel = () => {
     onCancel?.();
@@ -281,6 +299,8 @@ export function ContributionBundleForm({
         isOpen={isBookOpen}
         onSubmit={handleContributionSubmission}
         onClose={() => setIsBookOpen(false)}
+        localIssues={localIssueCandidates}
+        localIssueSeries={localIssueSeries}
       />
       <SerieContributionModal
         serie={

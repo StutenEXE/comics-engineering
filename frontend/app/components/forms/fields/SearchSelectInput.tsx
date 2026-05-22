@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { FieldError } from "react-hook-form";
 import { MdDelete } from "react-icons/md";
+import { useTranslation } from "~/i18n/i18n";
 
 export interface SearchSelectItem {
   id: number;
@@ -30,6 +31,9 @@ export interface SearchSelectInputProps<T extends SearchSelectItem> {
 
   /** Text shown inside the badge when `localRef` is set */
   localRefLabel?: string;
+
+  /** Can remove local reference */
+  isLocalRefRemovable?: boolean;
 
   /** Live search results fed from outside (e.g. from an API query) */
   results?: T[];
@@ -64,7 +68,8 @@ export function SearchSelectInput<T extends SearchSelectItem>({
   selectedItem,
   onClear,
   localRef,
-  localRefLabel = "Local reference present",
+  localRefLabel,
+  isLocalRefRemovable,
   results = [],
   onSearch,
   onSelect,
@@ -72,6 +77,8 @@ export function SearchSelectInput<T extends SearchSelectItem>({
   renderSelected,
   error,
 }: SearchSelectInputProps<T>) {
+  const { t } = useTranslation();
+
   const [inputValue, setInputValue] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,7 +134,7 @@ export function SearchSelectInput<T extends SearchSelectItem>({
             {/* Local-ref or negative-id variant */}
             {isLocalRef || isNegativeId ? (
               <span className="text-xs text-indigo-300/60 flex items-center gap-1">
-                {localRefLabel}
+                {localRefLabel ?? t("generic.localRefPresent")}
               </span>
             ) : selectedItem ? (
               /* Normal selected-item display */
@@ -147,7 +154,7 @@ export function SearchSelectInput<T extends SearchSelectItem>({
           </div>
 
           {/* Clear button — hidden for local refs and negative ids */}
-          {!isLocalRef && selectedItem && selectedItem.id >= 0 && (
+          {(isLocalRef && isLocalRefRemovable) || (selectedItem) && (
             <button
               type="button"
               onClick={handleClear}
