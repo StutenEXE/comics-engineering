@@ -102,7 +102,7 @@ public class ContributionBundleService {
         // Validate bundle
         if (bundle.getSubmitter().getId() != Integer.parseInt(auth.userId())
                 && !AuthMiddleware.hasRole(ctx, Role.ADMIN)) {
-            ErrorResponse.send(HttpStatus.FORBIDDEN, "Forbidden", "You can only submit contributions for yourself");
+            ErrorResponse.send(HttpStatus.FORBIDDEN, "Forbidden", "You can only update contributions for yourself");
             return;
         }
 

@@ -179,9 +179,9 @@ export function BookContributionForm({
 
   return (
     <GenericForm
-      title={book ? t("book.form.title.modify") : t("book.form.title.create")}
+      title={action === "update" ? t("book.form.title.modify") : t("book.form.title.create")}
       onCancel={noPropagationEvt(onCancel)}
-      submitLabel={book ? t("book.form.modify") : t("book.form.create")}
+      submitLabel={action === "update" ? t("book.form.modify") : t("book.form.create")}
       onSubmit={handleSubmit(triggerSubmission)}
     >
       {/* Name field */}

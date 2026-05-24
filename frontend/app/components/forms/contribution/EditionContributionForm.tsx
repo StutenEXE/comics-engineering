@@ -150,13 +150,13 @@ export function EditionContributionForm({
   return (
     <GenericForm
       title={
-        edition
+        action === "update"
           ? t("edition.form.title.modify")
           : t("edition.form.title.create")
       }
       onCancel={noPropagationEvt(onCancel)}
       submitLabel={
-        edition ? t("edition.form.modify") : t("edition.form.create")
+        action === "update" ? t("edition.form.modify") : t("edition.form.create")
       }
       onSubmit={handleSubmit(triggerSubmission)}
     >

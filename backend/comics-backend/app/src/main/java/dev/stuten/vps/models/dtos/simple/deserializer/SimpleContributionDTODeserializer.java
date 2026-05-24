@@ -47,6 +47,7 @@ public class SimpleContributionDTODeserializer extends JsonDeserializer<SimpleCo
 
         // Build the DTO manually
         return SimpleContributionDTO.builder()
+                .id(nullableInt(node, "id"))
                 .bundleId(nullableInt(node, "bundleId"))
                 .localRef(nullableInt(node, "localRef"))
                 .entityType(entityType)

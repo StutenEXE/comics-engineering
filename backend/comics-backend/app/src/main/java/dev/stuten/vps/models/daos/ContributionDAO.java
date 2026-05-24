@@ -63,26 +63,46 @@ public class ContributionDAO extends DAO {
     }
 
     public Optional<Integer> create(SimpleContributionDTO<? extends IdDTO> dto) {
-            return DSL().insertInto(CONTRIBUTIONS)
-                    .set(CONTRIBUTIONS.BUNDLE_ID, dto.getBundleId())
-                    .set(CONTRIBUTIONS.LOCAL_REF, dto.getLocalRef())
-                    .set(CONTRIBUTIONS.ENTITY_TYPE, dto.getEntityType())
-                    .set(CONTRIBUTIONS.ACTION, dto.getAction())
-                    .set(CONTRIBUTIONS.ENTITY_ID, dto.getEntityId())
-                    .set(CONTRIBUTIONS.PROPOSED_DATA, MappingUtils.mapToJsonb(dto.getProposedData()))
-                    .set(CONTRIBUTIONS.ENTITY_SNAPSHOT, MappingUtils.mapToJsonb(dto.getEntitySnapshot()))
-                    .set(CONTRIBUTIONS.STATUS, ContributionStatusEnum.pending)
-                    .set(CONTRIBUTIONS.RESOLVED_ENTITY_ID, dto.getResolvedEntityId())
-                    .returning(CONTRIBUTIONS.ID)
-                    .fetchOptional()
-                    .map(record -> record.get(CONTRIBUTIONS.ID));
-            }
+        return DSL().insertInto(CONTRIBUTIONS)
+                .set(CONTRIBUTIONS.BUNDLE_ID, dto.getBundleId())
+                .set(CONTRIBUTIONS.LOCAL_REF, dto.getLocalRef())
+                .set(CONTRIBUTIONS.ENTITY_TYPE, dto.getEntityType())
+                .set(CONTRIBUTIONS.ACTION, dto.getAction())
+                .set(CONTRIBUTIONS.ENTITY_ID, dto.getEntityId())
+                .set(CONTRIBUTIONS.PROPOSED_DATA, MappingUtils.mapToJsonb(dto.getProposedData()))
+                .set(CONTRIBUTIONS.ENTITY_SNAPSHOT, MappingUtils.mapToJsonb(dto.getEntitySnapshot()))
+                .set(CONTRIBUTIONS.STATUS, ContributionStatusEnum.pending)
+                .set(CONTRIBUTIONS.RESOLVED_ENTITY_ID, dto.getResolvedEntityId())
+                .returning(CONTRIBUTIONS.ID)
+                .fetchOptional()
+                .map(record -> record.get(CONTRIBUTIONS.ID));
+    }
+
+    /**
+     * Only updateable data :
+     * - entityId
+     * - proposedData
+     * - resolvedEntityId
+     * 
+     * To modify status, use updateStatus
+     * 
+     * @param dto The contribution data to update. Must contain the ID of the contribution to update.
+     * @return True if the contribution was updated, false otherwise (not found or no change)
+     */
+    public Boolean update(SimpleContributionDTO<? extends IdDTO> dto) {
+        return DSL().update(CONTRIBUTIONS)
+                .set(CONTRIBUTIONS.ENTITY_ID, dto.getEntityId())
+                .set(CONTRIBUTIONS.PROPOSED_DATA, MappingUtils.mapToJsonb(dto.getProposedData()))
+                .set(CONTRIBUTIONS.RESOLVED_ENTITY_ID, dto.getResolvedEntityId())
+                .where(CONTRIBUTIONS.ID.eq(dto.getId()))
+                .execute() > 0;
+    }
 
     public Boolean updateStatus(Integer contributionId, ContributionStatusEnum newStatus) {
-            return DSL().update(CONTRIBUTIONS)
-                    .set(CONTRIBUTIONS.STATUS, newStatus)
-                    .where(CONTRIBUTIONS.ID.eq(contributionId))
-                    .execute() > 0;
+        return DSL().update(CONTRIBUTIONS)
+                .set(CONTRIBUTIONS.STATUS, newStatus)
+                .where(CONTRIBUTIONS.ID.eq(contributionId))
+                .execute() > 0;
     }
 
     public Boolean updateResolvedEntityId(Integer contributionId, Integer resolvedEntityId) {

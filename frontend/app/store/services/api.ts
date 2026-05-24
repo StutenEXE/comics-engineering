@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { parseToBook, parseToSimpleBook, type Book, type SimpleBook } from "~/models/book";
-import { ContributionStatusEnum, parseToContribution, type Contribution } from "~/models/contribution";
+import { ContributionStatusEnum, parseToContribution, parseToSimpleContribution, type Contribution, type SimpleContribution } from "~/models/contribution";
 import { ContributionBundleStatusEnum, parseToBundle, type ContributionBundle } from "~/models/contributionBundle";
 import { parseToEdition, type Edition } from "~/models/edition";
 import { parseToIssue, type Issue } from "~/models/issue";
@@ -245,9 +245,6 @@ export const adminApi = createApi({
   reducerPath: 'adminApi',
   baseQuery: fetchBaseQuery({ baseUrl: API_ADM_BASE_URL, credentials: 'include' }),
   endpoints: (build) => ({
-    /****************
-     * SERIES
-     ****************/
     // Get list of users
     userList: build.query<{ users: User[] }, { from: number, limit: number }>({
       query: (params) => ({ url: "/users/list", method: 'GET', params: params }),
@@ -260,6 +257,20 @@ export const adminApi = createApi({
       query: (params) => ({ url: "/contributions/all", method: 'GET', params: params }),
       transformResponse: (resp: { bundles: ContributionBundle[] }) => ({
         bundles: resp.bundles.map((b) => parseToBundle(b)),
+      }),
+    }),
+    // Create a contribution
+    createContribution: build.mutation<{ contribution: Contribution }, Partial<SimpleContribution>>({
+      query: (data) => ({ url: "/contributions/create", method: 'POST', body: data }),
+      transformResponse: (resp: { contribution: Contribution }) => ({
+        contribution: parseToContribution(resp.contribution),
+      }),
+    }),
+    // Update a contribution
+    updateContribution: build.mutation<{ contribution: SimpleContribution }, Partial<SimpleContribution>>({
+      query: (data) => ({ url: "/contributions/update", method: 'POST', body: data }),
+      transformResponse: (resp: { contribution: SimpleContribution }) => ({
+        contribution: parseToSimpleContribution(resp.contribution),
       }),
     }),
     // Update the status of a contribution
@@ -276,6 +287,8 @@ export const adminApi = createApi({
 export const {
   useUserListQuery,
   useLazyBundleListQuery,
+  useCreateContributionMutation,
+  useUpdateContributionMutation,
   useUpdateContributionStatusMutation,
   useUpdateBundleStatusMutation
 } = adminApi;

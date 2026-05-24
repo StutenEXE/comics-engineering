@@ -49,8 +49,6 @@ export function IndentedContributionList({
   onEdit,
   onRemove,
   adminActions,
-  isLoading,
-  error,
   className,
 }: ContributionTreeListProps) {
   const { t, locale } = useTranslation();
@@ -70,10 +68,10 @@ export function IndentedContributionList({
         updateStatus({ contributionId: c.id, newStatus: newStatus }).then(
           (res) => {
             if ("error" in res) {
-              toast.error(t("contribution.statusupdaterror"));
+              toast.error(t("contribution.status.updateerror"));
               return;
             }
-            toast.success(t("contribution.statusupdated"));
+            toast.success(t("contribution.status.updated"));
             c.status = newStatus;
           },
         );
@@ -96,6 +94,24 @@ export function IndentedContributionList({
       case ContributionTypeEnum.ISSUE_SERIE:
         return "issueSerie";
     }
+    return undefined;
+  };
+
+  const getParentReference = (c: SimpleContribution) => {
+    const proposedData = c.proposedData ?? {};
+
+    if (proposedData.book?.id != null) {
+      return { key: "book", id: proposedData.book.id };
+    }
+
+    if (proposedData.serie?.id != null) {
+      return { key: "serie", id: proposedData.serie.id };
+    }
+
+    if (proposedData.issueSerie?.id != null) {
+      return { key: "issueSerie", id: proposedData.issueSerie.id };
+    }
+
     return undefined;
   };
 
@@ -296,34 +312,54 @@ export function IndentedContributionList({
     !contributionList || contributionList.length === 0
       ? []
       : isSimpleContribution(contributionList[0])
-        ? (contributionList as ContributionTree[])
-        : ((contributionList as Contribution[]).map(
-            contributionToSimpleContribution,
-          ) as ContributionTree[]);
 
-  const childrenIds = new Set<number>();
+        ? (contributionList as SimpleContribution[]).map((c) => ({
+            ...c, // Deepcopy
+          }))
+        : (contributionList as Contribution[]).map((c) => ({
+            ...contributionToSimpleContribution(c), // Deepcopy
+          }));
+
+  const buildTree = (node: SimpleContribution): ContributionTree => {
+    const key = findKeyForEntityType(node.entityType);
+    const children = key
+      ? list
+          .filter((candidate) => {
+            const localItem = candidate.proposedData[key];
+            return localItem && localItem.id === node.localRef;
+          })
+          .map((candidate) => buildTree(candidate))
+          .sort((a, b) => b.id - a.id)
+      : [];
+
+    return {
+      ...node,
+      children,
+    };
+  };
+
+  const childIds = new Set<number>();
+  list.forEach((candidate) => {
+    const parentReference = getParentReference(candidate);
+    if (!parentReference) {
+      return;
+    }
+
+    const isChild = list.some((potentialParent) => {
+      return (
+        potentialParent.localRef != null &&
+        potentialParent.localRef === parentReference.id
+      );
+    });
+
+    if (isChild) {
+      childIds.add(candidate.id);
+    }
+  });
+
   const parentList = list
-    // Assign children
-    .map((c) => {
-      const { localRef, entityType } = c;
-      const key = findKeyForEntityType(entityType);
-      const children: ContributionTree[] = [];
-      if (key) {
-        // For each contribution, we find if it's dependent
-        list.forEach((c2) => {
-          const localItem = c2.proposedData[key];
-          if (localItem && localItem.id === localRef) {
-            childrenIds.add(c2.id);
-            children.push(c2);
-          }
-        });
-      }
-
-      c.children = children;
-      return c;
-    })
-    // Filter out element that are children
-    .filter((c) => !childrenIds.has(c.id))
+    .map((c) => buildTree(c))
+    .filter((c) => !childIds.has(c.id))
     .sort((c1, c2) => c2.id - c1.id);
 
   return (

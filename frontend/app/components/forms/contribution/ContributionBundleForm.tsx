@@ -1,22 +1,27 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { useForm, type FieldValues } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import z from "zod";
 import { useTranslation } from "~/i18n/i18n";
 import { parseToBook } from "~/models/book";
 import {
+  ContributionActionEnum,
   ContributionTypeEnum,
   type ContributionTree,
   type SimpleContribution,
 } from "~/models/contribution";
 import { type ContributionBundle } from "~/models/contributionBundle";
 import { parseToEdition } from "~/models/edition";
-import { buildIssueShortName, issueToSimpleIssue, parseToIssue, type Issue, type SimpleIssue } from "~/models/issue";
+import {
+  issueToSimpleIssue,
+  parseToIssue,
+  type Issue,
+  type SimpleIssue,
+} from "~/models/issue";
 import { parseToIssueSerie, type SimpleIssueSerie } from "~/models/issue-serie";
 import { parseToSerie } from "~/models/serie";
 import { useAppSelector } from "~/store/hooks";
 import { noPropagationEvt } from "~/utils/events";
-import { deepCopy } from "~/utils/object";
 import { GenericButton } from "../../buttons/GenericButton";
 import { IndentedContributionList } from "../../lists/contributionlists/IndentedContributionList";
 import { useConfirm } from "../../modals/ConfirmModalProvider";
@@ -33,6 +38,11 @@ interface ContributionBundleFormProps {
   action: "create" | "update";
   onSubmit?: (bundle: Partial<ContributionBundle>) => void;
   onCancel?: () => void;
+  // Returing boolean : didn't create a new contribution in DB
+  onContributionAdd?: (
+    contribution: SimpleContribution,
+  ) => Promise<SimpleContribution | boolean>;
+  onContributionEdit?: (contribution: SimpleContribution) => Promise<boolean>;
 }
 
 export function ContributionBundleForm({
@@ -40,20 +50,19 @@ export function ContributionBundleForm({
   action,
   onSubmit,
   onCancel,
+  onContributionAdd = async () => true,
+  onContributionEdit = async () => true,
 }: ContributionBundleFormProps) {
   const { t } = useTranslation();
   const confirm = useConfirm();
   const { user } = useAppSelector((state) => state.user);
 
-  const adminActions = action === "update" && user?.isAdmin;
-
-  // Validation schema
   const schema = z.object({
-    note: z.string(),
+    note: z.string().default(""),
   });
 
   type FormData = z.infer<typeof schema>;
-  // Form operations
+
   const {
     register,
     handleSubmit,
@@ -61,29 +70,24 @@ export function ContributionBundleForm({
   } = useForm<FormData>({
     resolver: zodResolver(schema) as any,
     defaultValues: {
-      note: bundle?.note,
+      note: bundle?.note || "",
     },
   });
 
-  // Modal states
   const [isEditionOpen, setIsEditionOpen] = useState(false);
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [isSerieOpen, setIsSerieOpen] = useState(false);
   const [isIssueOpen, setIsIssueOpen] = useState(false);
   const [isIssueSerieOpen, setIsIssueSerieOpen] = useState(false);
-
-  // Bundle data
-  const [contributions, setContributions] = useState<SimpleContribution[]>(
-    bundle ? deepCopy(bundle?.contributions) : []
-  );
-
-  // Contribution data
   const [contribToModify, setContribToModify] = useState<
     SimpleContribution | undefined
   >(undefined);
   const [localRef, setLocalRef] = useState<
     { id: number; name: string } | undefined
   >(undefined);
+  const [contributions, setContributions] = useState<SimpleContribution[]>(
+    bundle?.contributions || [],
+  );
 
   const openModal = (type: ContributionTypeEnum) => {
     setIsEditionOpen(false);
@@ -91,25 +95,24 @@ export function ContributionBundleForm({
     setIsSerieOpen(false);
     setIsIssueOpen(false);
     setIsIssueSerieOpen(false);
+
     switch (type) {
       case ContributionTypeEnum.EDITION:
-        return setIsEditionOpen(true);
+        setIsEditionOpen(true);
+        break;
       case ContributionTypeEnum.BOOK:
-        return setIsBookOpen(true);
+        setIsBookOpen(true);
+        break;
       case ContributionTypeEnum.SERIE:
-        return setIsSerieOpen(true);
+        setIsSerieOpen(true);
+        break;
       case ContributionTypeEnum.ISSUE:
-        return setIsIssueOpen(true);
+        setIsIssueOpen(true);
+        break;
       case ContributionTypeEnum.ISSUE_SERIE:
-        return setIsIssueSerieOpen(true);
+        setIsIssueSerieOpen(true);
+        break;
     }
-  };
-
-  const addContribution = (c: Partial<SimpleContribution>) => {
-    const localRef = -(contributions.length + 1);
-    c.id = -localRef; // Used to identify locally
-    c.localRef = localRef;
-    contributions.push(c as SimpleContribution);
   };
 
   const createDependantContribution = (c: SimpleContribution) => {
@@ -118,13 +121,17 @@ export function ContributionBundleForm({
       id: c.localRef!,
       name: c.proposedData.name,
     });
+
     switch (c.entityType) {
       case ContributionTypeEnum.BOOK:
-        return setIsEditionOpen(true);
+        setIsEditionOpen(true);
+        break;
       case ContributionTypeEnum.SERIE:
-        return setIsBookOpen(true);
+        setIsBookOpen(true);
+        break;
       case ContributionTypeEnum.ISSUE_SERIE:
-        return setIsIssueOpen(true);
+        setIsIssueOpen(true);
+        break;
     }
   };
 
@@ -135,53 +142,75 @@ export function ContributionBundleForm({
   };
 
   const removeContribution = (c: ContributionTree) => {
+    const removableIds = new Set<number>([
+      c.id,
+      ...c.children.map((child) => child.id),
+    ]);
+
     confirm({
       title: t("cbundle.form.remove.title"),
       message: t("cbundle.form.remove.message"),
       onConfirm: () => {
-        // Remove all dependencies
-        c.children.forEach((c2) => {
-          const idx = contributions.findIndex((nc) => nc.id === c2.id);
-          if (idx < 0) return;
-          contributions.splice(idx, 1);
-        });
-        // Remove contribution
-        const idx = contributions.findIndex((nc) => nc.id === c.id);
-        if (idx < 0) return;
-        contributions.splice(idx, 1);
+        setContributions((current) =>
+          current.filter((contribution) => !removableIds.has(contribution.id)),
+        );
       },
     });
   };
 
   const handleContributionSubmission = (c: Partial<SimpleContribution>) => {
+    const submittedContribution = c as SimpleContribution;
+
+    // Not found means the user is adding
     if (!contribToModify) {
-      addContribution(c);
+      const nextLocalRef = -(contributions.length + 1);
+      submittedContribution.id = -nextLocalRef;
+      submittedContribution.localRef = nextLocalRef;
+      submittedContribution.bundleId = bundle?.id;
+
+      onContributionAdd?.(submittedContribution).then((newContribution) => {
+        if (!newContribution) return;
+        // If ok, add new contribution to the list
+        setContributions((current) => [
+          ...current,
+          typeof newContribution === "boolean" 
+            ? submittedContribution
+            : (newContribution as SimpleContribution), // if not boolean, means API returned the new contribution
+        ]);
+      });
       return;
     }
-    c.id = contribToModify.id;
-    c.localRef = contribToModify.localRef;
-    const idx = contributions.findIndex((c2) => contribToModify.id === c2.id);
-    contributions[idx] = c as SimpleContribution;
+    // Found means the user is editing
+    submittedContribution.id = contribToModify.id;
+    submittedContribution.localRef = contribToModify.localRef;
+
+    onContributionEdit?.(submittedContribution).then((success) => {
+      if (!success) return;
+      // if ok, update contribution in the list
+      setContributions((current) =>
+        current.map((entry) =>
+          entry.id === contribToModify.id ? submittedContribution : entry,
+        ),
+      );
+    });
   };
 
-  const triggerSubmission = (data: FieldValues) => {
-    const newBundle: Partial<ContributionBundle> = {
-      id: bundle?.id,
-      contributions: contributions,
-      status: bundle?.status,
-      note: data?.note,
+  const triggerSubmission = (data: FormData) => {
+    onSubmit?.({
+      contributions,
+      note: data.note,
       submitter: user!,
-    };
-    onSubmit?.(newBundle);
+    });
   };
 
-  // Local issue candidates: unsaved issue contributions in this bundle
   const localIssueCandidates: SimpleIssue[] = contributions
     .filter((c) => c.entityType === ContributionTypeEnum.ISSUE)
     .map((c) => {
       const issue = c.proposedData as Issue;
-      issue.id = c.localRef!;
-      return issueToSimpleIssue(issue);
+      return issueToSimpleIssue({
+        ...issue,
+        id: c.localRef!,
+      });
     });
 
   const localIssueSeries: SimpleIssueSerie[] = contributions
@@ -194,20 +223,28 @@ export function ContributionBundleForm({
       endDate: null,
     }));
 
-  const handleCancel = () => {
-    onCancel?.();
-  };
+  const modalAction =
+    contribToModify?.action === ContributionActionEnum.UPDATE
+      ? "update"
+      : "create";
 
   return (
     <>
       <GenericForm
-        title={bundle ? t("cbundle.form.title.modify") : t("cbundle.form.title.create")}
-        onCancel={noPropagationEvt(handleCancel)}
-        submitLabel={bundle ? t("cbundle.form.modify") : t("cbundle.form.create")}
+        title={
+          action === "update"
+            ? t("cbundle.form.title.update")
+            : t("cbundle.form.title.create")
+        }
+        onCancel={noPropagationEvt(onCancel)}
+        submitLabel={
+          action === "update"
+            ? t("cbundle.form.update")
+            : t("cbundle.form.create")
+        }
         onSubmit={handleSubmit(triggerSubmission)}
         disabled={contributions.length <= 0}
       >
-        {/* Add contribution buttons */}
         <div className="flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-widest text-white/40">
             {t("cbundle.form.add")}
@@ -251,51 +288,48 @@ export function ContributionBundleForm({
           </div>
         </div>
 
-        {/* Contributions list */}
         <div className="flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-widest text-white/40">
             {t("cbundle.form.newContributions")}
           </span>
           <IndentedContributionList
             contributionList={contributions}
-            buttons={{ add: true, edit: true, delete: true }}
+            buttons={{ add: true, edit: true, delete: action === "create" }}
+            adminActions={user?.isAdmin}
             onAdd={createDependantContribution}
             onEdit={editContribution}
             onRemove={removeContribution}
-            adminActions={adminActions}
             className="border border-white/10 rounded-md bg-white/5 min-h-[80px]"
           />
         </div>
 
-        {/* Note */}
         <TextAreaRhfInput
           label={t("cbundle.note")}
           registration={register("note")}
           error={errors.note}
         />
       </GenericForm>
+
       <EditionContributionModal
         edition={
-          contribToModify &&
-            contribToModify.entityType === ContributionTypeEnum.EDITION
+          contribToModify?.entityType === ContributionTypeEnum.EDITION
             ? parseToEdition(contribToModify.proposedData)
             : undefined
         }
         bookLocalRef={localRef}
-        action="create"
+        action={modalAction}
         isOpen={isEditionOpen}
         onSubmit={handleContributionSubmission}
         onClose={() => setIsEditionOpen(false)}
       />
       <BookContributionModal
         book={
-          contribToModify &&
-            contribToModify.entityType === ContributionTypeEnum.BOOK
+          contribToModify?.entityType === ContributionTypeEnum.BOOK
             ? parseToBook(contribToModify.proposedData)
             : undefined
         }
         serieLocalRef={localRef}
-        action="create"
+        action={modalAction}
         isOpen={isBookOpen}
         onSubmit={handleContributionSubmission}
         onClose={() => setIsBookOpen(false)}
@@ -304,37 +338,34 @@ export function ContributionBundleForm({
       />
       <SerieContributionModal
         serie={
-          contribToModify &&
-            contribToModify.entityType === ContributionTypeEnum.SERIE
+          contribToModify?.entityType === ContributionTypeEnum.SERIE
             ? parseToSerie(contribToModify.proposedData)
             : undefined
         }
-        action="create"
+        action={modalAction}
         isOpen={isSerieOpen}
         onSubmit={handleContributionSubmission}
         onClose={() => setIsSerieOpen(false)}
       />
       <IssueContributionModal
         issue={
-          contribToModify &&
-            contribToModify.entityType === ContributionTypeEnum.ISSUE
+          contribToModify?.entityType === ContributionTypeEnum.ISSUE
             ? parseToIssue(contribToModify.proposedData)
             : undefined
         }
         issueSerieLocalRef={localRef}
-        action="create"
+        action={modalAction}
         isOpen={isIssueOpen}
         onSubmit={handleContributionSubmission}
         onClose={() => setIsIssueOpen(false)}
       />
       <IssueSerieContributionModal
         issueSerie={
-          contribToModify &&
-            contribToModify.entityType === ContributionTypeEnum.ISSUE_SERIE
+          contribToModify?.entityType === ContributionTypeEnum.ISSUE_SERIE
             ? parseToIssueSerie(contribToModify.proposedData)
             : undefined
         }
-        action="create"
+        action={modalAction}
         isOpen={isIssueSerieOpen}
         onSubmit={handleContributionSubmission}
         onClose={() => setIsIssueSerieOpen(false)}

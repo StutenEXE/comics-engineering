@@ -114,10 +114,12 @@ export function SerieContributionForm({
   return (
     <GenericForm
       title={
-        serie ? t("serie.form.title.modify") : t("serie.form.title.create")
+        action === "update" ? t("serie.form.title.modify") : t("serie.form.title.create")
       }
       onCancel={noPropagationEvt(onCancel)}
-      submitLabel={serie ? t("serie.form.modify") : t("serie.form.create")}
+      submitLabel={
+        action === "update" ? t("serie.form.modify") : t("serie.form.create")
+      }
       onSubmit={handleSubmit(triggerSubmission)}
     >
       {/* Name field */}

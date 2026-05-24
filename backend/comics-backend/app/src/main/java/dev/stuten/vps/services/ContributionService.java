@@ -46,7 +46,8 @@ public class ContributionService {
         };
     }
 
-    protected static <T extends IdDTO> void createContribution(SimpleContributionDTO<T> contrib) {
+    protected static <T extends IdDTO> Optional<Integer> createContribution(SimpleContributionDTO<T> contrib) {
+        contrib.setStatus(ContributionStatusEnum.pending);
         // If we are updating or deleting save previous entity state
         if (contrib.getAction() != ContributionActionEnum.create) {
             ContributableDAO<? extends IdDTO> targetDAO = getDAOFromEntityType(contrib.getEntityType());
@@ -58,7 +59,8 @@ public class ContributionService {
             contrib.setEntitySnapshot(entity.get());
         }
         // Create
-        contributionDAO.create(contrib);
+        Optional<Integer> result = contributionDAO.create(contrib);
+        return result;
     }
 
     private static void approveContribution(ContributionDTO<? extends IdDTO> contribution)
@@ -94,6 +96,57 @@ public class ContributionService {
         if (contribution.getAction() == ContributionActionEnum.create) {
             contributionDAO.updateResolvedEntityId(contribution.getId(), result.get());
         }
+    }
+
+    public static void create(Context ctx) {
+        if (!AuthMiddleware.isAuthenticated(ctx)) {
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Unauthorized", "User must be logged in");
+            return;
+        }
+
+        SimpleContributionDTO<? extends IdDTO> contribution;
+        try {
+            contribution = ctx.bodyAsClass(SimpleContributionDTO.class);
+        } catch (Exception e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Invalid JSON body");
+            return;
+        }
+        Optional<Integer> contributionId = createContribution(contribution);
+        
+        ContributionDTO<? extends IdDTO> createdContribution = contributionDAO.findById(contributionId.get()).get();
+
+        ctx.status(HttpStatus.CREATED).json(Map.of("contribution", createdContribution));
+    }
+
+    public static void update(Context ctx) {
+        if (!AuthMiddleware.isAuthenticated(ctx)) {
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Unauthorized", "User must be logged in");
+            return;
+        }
+
+        SimpleContributionDTO<? extends IdDTO> contribution;
+        try {
+            contribution = ctx.bodyAsClass(SimpleContributionDTO.class);
+        } catch (Exception e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Invalid JSON body");
+            return;
+        }
+
+        if (contribution.getStatus() == ContributionStatusEnum.approved || contribution.getStatus() == ContributionStatusEnum.rejected) {
+            String message = "Cannot update contribution with already accepted or rejected status";
+            ErrorResponse.send(HttpStatus.METHOD_NOT_ALLOWED, "Invalid contribution update", message);
+            return;
+        }
+
+        System.out.println(contribution);
+        
+        boolean updated = contributionDAO.update(contribution);
+        if (!updated) {
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", "Failed to update contribution");
+            return;
+        }
+
+        ctx.status(HttpStatus.CREATED).json(Map.of("contribution", contribution));
     }
 
     public static void updateStatus(Context ctx) {

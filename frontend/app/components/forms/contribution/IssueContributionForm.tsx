@@ -99,10 +99,10 @@ export function IssueContributionForm({
   return (
     <GenericForm
       title={
-        issue ? t("issue.form.title.modify") : t("issue.form.title.create")
+        action === "update" ? t("issue.form.title.modify") : t("issue.form.title.create")
       }
       onCancel={noPropagationEvt(onCancel)}
-      submitLabel={issue ? t("issue.form.modify") : t("issue.form.create")}
+      submitLabel={action === "update"  ? t("issue.form.modify") : t("issue.form.create")}
       onSubmit={handleSubmit(triggerSubmission)}
     >
       {/* Name field */}

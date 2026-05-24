@@ -25,6 +25,7 @@ import lombok.experimental.SuperBuilder;
 @JsonDeserialize(using = SimpleContributionDTODeserializer.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SimpleContributionDTO<T extends IdDTO> extends IdDTO {
+    
     @JsonProperty("bundleId")
     private Integer bundleId;
 

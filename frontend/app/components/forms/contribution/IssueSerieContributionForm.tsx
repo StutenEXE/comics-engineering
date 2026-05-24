@@ -107,13 +107,13 @@ export function IssueSerieContributionForm({
   return (
     <GenericForm
       title={
-        issueSerie
+        action === "update"
           ? t("issueserie.form.title.modify")
           : t("issueserie.form.title.create")
       }
       onCancel={noPropagationEvt(onCancel)}
       submitLabel={
-        issueSerie ? t("issueserie.form.modify") : t("issueserie.form.create")
+        action === "update" ? t("issueserie.form.modify") : t("issueserie.form.create")
       }
       onSubmit={handleSubmit(triggerSubmission)}
     >

@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS books_issues (
 -- Contribution Bundle Status
 CREATE TYPE contribution_bundle_status_enum AS ENUM ('pending', 'approved', 'rejected', 'needs_revision');
 -- Contribution Types
-CREATE TYPE contribution_type_enum AS ENUM ('book', 'serie', 'edition', 'issue', 'issueserie', 'publisher', 'link_book_issue');
+CREATE TYPE contribution_type_enum AS ENUM ('book', 'serie', 'edition', 'issue', 'issueserie', 'publisher');
 -- Contribution Action
 CREATE TYPE contribution_action_enum AS ENUM ('create', 'update', 'delete');
 
