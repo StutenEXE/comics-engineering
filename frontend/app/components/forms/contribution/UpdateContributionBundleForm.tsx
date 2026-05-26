@@ -1,19 +1,18 @@
+import { useToast } from "~/components/toast/Toast";
 import { useTranslation } from "~/i18n/i18n";
+import {
+  contributionToSimpleContribution,
+  type SimpleContribution
+} from "~/models/contribution";
 import {
   ContributionBundleStatusEnum,
   type ContributionBundle,
 } from "~/models/contributionBundle";
-import { ContributionBundleForm } from "./ContributionBundleForm";
 import {
   useCreateContributionMutation,
   useUpdateContributionMutation,
 } from "~/store/services/api";
-import {
-  contributionToSimpleContribution,
-  type Contribution,
-  type SimpleContribution,
-} from "~/models/contribution";
-import { useToast } from "~/components/toast/Toast";
+import { ContributionBundleForm } from "./ContributionBundleForm";
 
 interface UpdateContributionBundleFormProps {
   bundle: ContributionBundle;
@@ -50,7 +49,7 @@ export function UpdateContributionBundleForm({
         return false;
       }
       toast.success(t("contribution.update.success"));
-      return true;
+      return result.data.contribution; // Return the created contribution
     });
   };
 

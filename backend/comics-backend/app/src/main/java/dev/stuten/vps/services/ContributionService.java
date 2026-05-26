@@ -1,6 +1,5 @@
 package dev.stuten.vps.services;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -128,6 +127,7 @@ public class ContributionService {
         try {
             contribution = ctx.bodyAsClass(SimpleContributionDTO.class);
         } catch (Exception e) {
+            e.printStackTrace();
             ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Invalid JSON body");
             return;
         }
@@ -137,8 +137,6 @@ public class ContributionService {
             ErrorResponse.send(HttpStatus.METHOD_NOT_ALLOWED, "Invalid contribution update", message);
             return;
         }
-
-        System.out.println(contribution);
         
         boolean updated = contributionDAO.update(contribution);
         if (!updated) {
@@ -198,7 +196,6 @@ public class ContributionService {
                 approveContribution(updatedContrib);
             } catch (Exception e) {
                 contributionDAO.updateStatus(updateDTO.contributionId(), previousStatus);
-                System.out.print(Arrays.asList(e.getStackTrace()));
                 ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", e.getMessage());
             }
         }

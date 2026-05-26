@@ -20,10 +20,14 @@ import {
   type ContributionTree,
   type SimpleContribution,
 } from "~/models/contribution";
-import type { ContributionIssue } from "~/models/issue";
 import { useUpdateContributionStatusMutation } from "~/store/services/api";
 import { type Error } from "~/utils/error";
 import { GenericList } from "../GenericList";
+import {
+  isSimpleIssue,
+  type ContributionIssue,
+  type SimpleIssue,
+} from "~/models/issue";
 
 interface LinkedIssue {
   id?: number;
@@ -32,6 +36,30 @@ interface LinkedIssue {
   issueSerieId?: number;
   issueSerieName?: string;
   issueSerieLocalRef?: string;
+}
+
+function simpleIssueToLinkedIssue(i: SimpleIssue): LinkedIssue {
+  return {
+    id: i.id >= 0 ? i.id : undefined,
+    name: i.name,
+    localRef: i.id < 0 ? String(i.id) : undefined,
+    issueSerieId: i.issueSerieId! >= 0 ? i.issueSerieId : undefined,
+    issueSerieName: i.issueSerieName,
+    issueSerieLocalRef:
+      i.issueSerieId! < 0 ? String(i.issueSerieId) : undefined,
+  };
+}
+
+function contributionIssueToLinkedIssue(i: ContributionIssue): LinkedIssue {
+  return {
+    id: i.id! >= 0 ? i.id : undefined,
+    name: i.name,
+    localRef: i.id! < 0 ? String(i.id) : undefined,
+    issueSerieId: i.issueSerie.id! >= 0 ? i.issueSerie.id : undefined,
+    issueSerieName: i.issueSerie.name,
+    issueSerieLocalRef:
+      i.issueSerie.id! < 0 ? String(i.issueSerie.id) : undefined,
+  };
 }
 
 interface ContributionTreeListProps {
@@ -87,6 +115,7 @@ export function IndentedContributionList({
     });
   };
 
+  // Default no-op functions for buttons if not provided
   onAdd ||= (c: ContributionTree) => {};
   onEdit ||= (c: ContributionTree) => {};
   onRemove ||= (c: ContributionTree) => {};
@@ -124,21 +153,19 @@ export function IndentedContributionList({
   };
 
   const getLinkedIssues = (c: SimpleContribution) => {
-    return (
+    const linkedIssues = (
       c.proposedData?.issues
-        ? c.proposedData.issues.map((i: ContributionIssue) => {
-            return {
-              id: i.id! >= 0 ? i.id : undefined,
-              name: i.name,
-              localRef: i.id! < 0 ? i.id : undefined,
-              issueSerieId: i.issueSerie!.id >= 0 ? i.issueSerie.id : undefined,
-              issueSerieName: i.issueSerie?.name,
-              issueSerieLocalRef:
-                i.issueSerie!.id < 0 ? i.issueSerie.id : undefined,
-            };
+        ? c.proposedData.issues.map((i: SimpleIssue | ContributionIssue) => {
+            if (isSimpleIssue(i)) {
+              return simpleIssueToLinkedIssue(i);
+            } else {
+              return contributionIssueToLinkedIssue(i);
+            }
           })
         : []
     ) as LinkedIssue[];
+    console.log("Linked issues for contribution", c.id, linkedIssues);
+    return linkedIssues;
   };
 
   const getCriticalLinkedIssues = (c: SimpleContribution) => {

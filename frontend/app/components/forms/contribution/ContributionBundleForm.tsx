@@ -32,6 +32,7 @@ import { IssueSerieContributionModal } from "../../modals/contribution/IssueSeri
 import { SerieContributionModal } from "../../modals/contribution/SerieContributionModal";
 import { TextAreaRhfInput } from "../fields/TextAreaRhfInput";
 import { GenericForm } from "../GenericForm";
+import { current } from "@reduxjs/toolkit";
 
 interface ContributionBundleFormProps {
   bundle?: ContributionBundle;
@@ -43,7 +44,9 @@ interface ContributionBundleFormProps {
   onContributionAdd?: (
     contribution: SimpleContribution,
   ) => Promise<SimpleContribution | boolean>;
-  onContributionEdit?: (contribution: SimpleContribution) => Promise<boolean>;
+  onContributionEdit?: (
+    contribution: SimpleContribution,
+  ) => Promise<SimpleContribution | boolean>;
 }
 
 export function ContributionBundleForm({
@@ -175,7 +178,7 @@ export function ContributionBundleForm({
         // If ok, add new contribution to the list
         setContributions((current) => [
           ...current,
-          typeof newContribution === "boolean" 
+          typeof newContribution === "boolean"
             ? submittedContribution
             : (newContribution as SimpleContribution), // if not boolean, means API returned the new contribution
         ]);
@@ -186,14 +189,20 @@ export function ContributionBundleForm({
     submittedContribution.id = contribToModify.id;
     submittedContribution.localRef = contribToModify.localRef;
 
-    onContributionEdit?.(submittedContribution).then((success) => {
-      if (!success) return;
-      // if ok, update contribution in the list
-      setContributions((current) =>
-        current.map((entry) =>
-          entry.id === contribToModify.id ? submittedContribution : entry,
-        ),
-      );
+    onContributionEdit?.(submittedContribution).then((newContribution) => {
+      if (!newContribution) return;
+      // If ok, replace the new contribution in the list
+      setContributions((current) => {
+        return current.map((contribution) =>
+          // If contribution.id is the same as submittedContribution.id, replace it with newContribution 
+          // (if boolean, means no change in DB so keep submittedContribution), else keep the same contribution
+          contribution.id === submittedContribution.id
+            ? typeof newContribution === "boolean"
+              ? submittedContribution
+              : (newContribution as SimpleContribution) // if not boolean, means API returned the new contribution
+            : contribution,
+        );
+      });
     });
   };
 

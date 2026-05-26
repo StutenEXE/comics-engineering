@@ -60,6 +60,11 @@ export function parseToSimpleBook(data: Record<string, any>): SimpleBook {
 	}
 }
 
+export type SimpleIssueStringDates = SimpleIssue | {
+	parutionDate: string,
+	coverDate: string
+}
+
 export interface ContributionBook {
 	id?: number,
 	name: string,
@@ -68,7 +73,7 @@ export interface ContributionBook {
 	voContent?: string,
 	imgUrl: string,
 	serie: { id: number, name: string },
-	issues: ContributionIssue[]
+	issues: SimpleIssueStringDates[]
 }
 
 export function isSimpleBook(book: Book | SimpleBook): book is SimpleBook {

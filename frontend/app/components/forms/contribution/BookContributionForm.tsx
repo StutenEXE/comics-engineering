@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useForm, type FieldValues } from "react-hook-form";
 import z from "zod";
 import { useTranslation } from "~/i18n/i18n";
-import type { Book, ContributionBook } from "~/models/book";
+import type { Book, ContributionBook, SimpleIssueStringDates } from "~/models/book";
 import {
   ContributionActionEnum,
   ContributionTypeEnum,
@@ -46,6 +46,8 @@ export function BookContributionForm({
   onCancel,
 }: BookFormProps) {
   const { t } = useTranslation();
+
+  console.log(book)
 
   // Validation schema
   const schema = z
@@ -90,13 +92,14 @@ export function BookContributionForm({
         name: selectedSerie?.name!,
       },
       issues: selectedLinkedIssues.map((issue) => {
-        const issueCopy: ContributionIssue = {
+        const issueCopy: SimpleIssueStringDates = {
           id: issue.id,
           name: issue.name,
           number: issue.number,
           coverDate: toYYYYmmDD(issue.coverDate),
           parutionDate: toYYYYmmDD(issue.parutionDate),
-          issueSerie: { id: issue.issueSerieId!, name: issue.issueSerieName! },
+          issueSerieId: issue.issueSerieId, 
+          issueSerieName: issue.issueSerieName,
         };
         return issueCopy;
       }),

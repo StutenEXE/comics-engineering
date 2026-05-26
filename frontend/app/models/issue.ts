@@ -37,8 +37,8 @@ export interface SimpleIssue {
     number: number,
     coverDate: Date,
     parutionDate: Date,
-    issueSerieId: number | null,
-    issueSerieName: string | null
+    issueSerieId?: number,
+    issueSerieName?: string
 }
 
 export function parseToSimpleIssue(data: Record<string, any>): SimpleIssue {
@@ -62,7 +62,7 @@ export interface ContributionIssue {
     issueSerie: { id: number, name: string }
 }
 
-export function isSimpleIssue(issue: Issue | SimpleIssue): issue is SimpleIssue {
+export function isSimpleIssue(issue: Issue | SimpleIssue | ContributionIssue): issue is SimpleIssue {
     return (issue as SimpleIssue).issueSerieId !== undefined;
 }
 
@@ -73,8 +73,8 @@ export function issueToSimpleIssue(issue: Issue): SimpleIssue {
         number: issue.number,
         coverDate: issue.coverDate,
         parutionDate: issue.parutionDate,
-        issueSerieId: issue.issueSerie ? issue.issueSerie.id : null,
-        issueSerieName: issue.issueSerie ? issue.issueSerie.name : null
+        issueSerieId: issue.issueSerie ? issue.issueSerie.id : undefined,
+        issueSerieName: issue.issueSerie ? issue.issueSerie.name : undefined
     }
 }
 

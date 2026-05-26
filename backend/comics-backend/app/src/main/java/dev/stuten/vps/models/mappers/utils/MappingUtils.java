@@ -89,7 +89,6 @@ public final class MappingUtils {
             mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
             return JSONB.valueOf(mapper.writeValueAsString(map));
         } catch (Exception e) {
-            System.out.println(e);
             return null;
         }
     }
