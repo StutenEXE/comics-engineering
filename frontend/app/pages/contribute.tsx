@@ -86,11 +86,13 @@ export default function ContributePage() {
     totalContributions: contributions?.length,
     approved: 0,
     pending: 0,
+    needsRevision: 0,
     rejected: 0,
   };
   contributions?.forEach((contrib) => {
     if (contrib.status === ContributionStatusEnum.APPROVED) stats.approved++;
     else if (contrib.status === ContributionStatusEnum.PENDING) stats.pending++;
+    else if (contrib.status === ContributionStatusEnum.NEEDS_REVISION) stats.needsRevision++;
     else if (contrib.status === ContributionStatusEnum.REJECTED)
       stats.rejected++;
   });
@@ -133,7 +135,7 @@ export default function ContributePage() {
             <h2 className="text-2xl font-semibold text-gray-200">
               {t("contribute.stats")}
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
               <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
                 <p className="text-3xl font-bold text-blue-400">
                   {stats.totalContributions}
@@ -153,6 +155,14 @@ export default function ContributePage() {
                   {stats.pending}
                 </p>
                 <p className="text-gray-400">{t("contribute.stats.pending")}</p>
+              </div>
+              <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
+                <p className="text-3xl font-bold text-purple-400">
+                  {stats.needsRevision}
+                </p>
+                <p className="text-gray-400">
+                  {t("contribute.stats.needsRevision")}
+                </p>
               </div>
               <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
                 <p className="text-3xl font-bold text-red-400">

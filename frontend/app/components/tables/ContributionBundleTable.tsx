@@ -106,7 +106,7 @@ export function ContributionBundleTable({
         return;
       }
       toast.success(t("cbundle.toast.statusupdated"));
-      // b.status = newStatus;
+      b.status = newStatus;
     });
   };
 

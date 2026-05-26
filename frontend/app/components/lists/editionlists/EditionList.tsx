@@ -50,7 +50,7 @@ export function EditionList({
   return (
     <GenericList
       list={list}
-      emptyMsg={t("loader.edition.nodata")}
+      emptyMsg={t("edition.nonefound")}
       elemGenerator={mapper}
       className={className}
     />

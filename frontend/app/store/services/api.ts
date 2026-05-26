@@ -254,7 +254,7 @@ export const adminApi = createApi({
     }),
     // Get list of contribution bundles
     bundleList: build.query<{ bundles: ContributionBundle[] }, { from: number, limit: number }>({
-      query: (params) => ({ url: "/contributions/all", method: 'GET', params: params }),
+      query: (params) => ({ url: "/bundles/all", method: 'GET', params: params }),
       transformResponse: (resp: { bundles: ContributionBundle[] }) => ({
         bundles: resp.bundles.map((b) => parseToBundle(b)),
       }),

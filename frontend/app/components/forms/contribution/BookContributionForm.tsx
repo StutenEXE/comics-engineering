@@ -47,8 +47,6 @@ export function BookContributionForm({
 }: BookFormProps) {
   const { t } = useTranslation();
 
-  console.log(book)
-
   // Validation schema
   const schema = z
     .object({
@@ -312,7 +310,7 @@ export function BookContributionForm({
         </div>
 
         {/* Linked Issues */}
-        <div className="grid gap-3 lg:grid-cols-[1fr_280px] mt-2">
+        <div className="grid gap-3 grid-cols-[1fr_280px] mt-2">
           <div className="space-y-3">
             <SearchSelectInput
               label={t("book.form.issueSerie")}
@@ -341,7 +339,7 @@ export function BookContributionForm({
             />
 
             {selectedIssueSerie && (
-              <div className="rounded-md border border-white/10 bg-white/5 p-3">
+              <div className="w-full rounded-md border border-white/10 bg-white/5 p-3">
                 <div className="space-y-3">
                   <input
                     type="number"
@@ -352,7 +350,7 @@ export function BookContributionForm({
                   />
 
                   {filteredAvailableIssues.length > 0 ? (
-                    <div className="grid grid-cols-10 gap-2">
+                    <div className="w-full grid grid-cols-8 gap-2">
                       {filteredAvailableIssues
                         .sort((a, b) => (a.number ?? 0) - (b.number ?? 0))
                         .map((issue) => {

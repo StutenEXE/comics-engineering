@@ -72,7 +72,6 @@ export function Header() {
                 {/* User links */}
                 {[
                   { to: "/collection", label: t("header.collection") },
-                  { to: "/profile", label: t("header.profile") },
                 ].map(({ to, label }) => (
                   <Link
                     key={to}
@@ -115,9 +114,9 @@ export function Header() {
               <>
                 <span className="text-xs text-white/30">
                   {t("header.welcome")},{" "}
-                  <span className="text-white/60 font-medium">
+                  <a className="text-white/60 font-medium cursor-pointer hover:underline" href={`/profile`}>
                     {user?.username}
-                  </span>
+                  </a>
                 </span>
                 <span className="w-px h-4 bg-white/10" />
                 <button

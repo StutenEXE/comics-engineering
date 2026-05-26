@@ -1,8 +1,7 @@
 import { InfoPageHeaderComponent } from "~/components/headers/InfoPageHeader";
 import { BookList } from "~/components/lists/booklists/BookList";
 import {
-  InfoPageFields,
-  InfoPageTemplate,
+  InfoPageTemplate
 } from "~/components/templates/InfoPageTemplate";
 import { useTranslation } from "~/i18n/i18n";
 import { useSerieByIdQuery } from "~/store/services/api";
@@ -47,7 +46,7 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
       <div className="flex gap-2 flex-col">
         <h3 className="text-xl text-gray-200 font-semibold">
           {t("serie.books")} ({serie?.books.length}/
-          {serie?.ongoing ? "?" : serie?.nvolumes}) :
+          {serie?.nvolumes}) :
         </h3>
 
         <BookList
