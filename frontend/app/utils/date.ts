@@ -54,5 +54,8 @@ export function toYYYYmmDD(d: Date | undefined | null): string {
     if (!d) {
         return ""
     }
+    if (typeof d === "string") {
+        return d
+    }
     return d.toISOString().split('T')[0];
 }

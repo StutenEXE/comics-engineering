@@ -39,6 +39,7 @@ function getBundleColumns(
     {
       key: "note",
       header: t("cbundle.note"),
+      searchable: true,
       cellRenderer: (b) => b.note,
       getValue: (b) => b.note,
     },

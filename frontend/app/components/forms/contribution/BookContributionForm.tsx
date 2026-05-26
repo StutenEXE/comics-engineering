@@ -9,7 +9,7 @@ import {
   ContributionTypeEnum,
   type SimpleContribution,
 } from "~/models/contribution";
-import { buildIssueShortName, type SimpleIssue } from "~/models/issue";
+import { type ContributionIssue, type SimpleIssue } from "~/models/issue";
 import type { SimpleIssueSerie } from "~/models/issue-serie";
 import type { SimpleSerie } from "~/models/serie";
 import {
@@ -17,8 +17,8 @@ import {
   useLazySearchIssueSeriesByNameQuery,
   useLazySearchSeriesByNameQuery,
 } from "~/store/services/api";
+import { toYYYYmmDD } from "~/utils/date";
 import { noPropagationEvt } from "~/utils/events";
-import { GenericButton } from "../../buttons/GenericButton";
 import { SearchSelectInput } from "../fields/SearchSelectInput";
 import { TextAreaRhfInput } from "../fields/TextAreaRhfInput";
 import { TextRhfInput } from "../fields/TextRhfInput";
@@ -89,7 +89,17 @@ export function BookContributionForm({
         id: selectedSerie?.id!,
         name: selectedSerie?.name!,
       },
-      issues: selectedLinkedIssues,
+      issues: selectedLinkedIssues.map((issue) => {
+        const issueCopy: ContributionIssue = {
+          id: issue.id,
+          name: issue.name,
+          number: issue.number,
+          coverDate: toYYYYmmDD(issue.coverDate),
+          parutionDate: toYYYYmmDD(issue.parutionDate),
+          issueSerie: { id: issue.issueSerieId!, name: issue.issueSerieName! },
+        };
+        return issueCopy;
+      }),
     };
     const contrib: Partial<SimpleContribution> = {
       action:
@@ -177,11 +187,45 @@ export function BookContributionForm({
       return false;
     }) ?? [];
 
+  const [issueNumberQuery, setIssueNumberQuery] = useState("");
+
+  const availableIssuesForSelectedSerie = [
+    ...issueSerieIssues,
+    ...localIssuesForSelectedSerie,
+  ].reduce<SimpleIssue[]>((acc, issue) => {
+    if (!acc.some((item) => item.id === issue.id)) {
+      acc.push(issue);
+    }
+    return acc;
+  }, []);
+
+  const filteredAvailableIssues = issueNumberQuery
+    ? availableIssuesForSelectedSerie.filter((issue) =>
+        issue.number?.toString().includes(issueNumberQuery),
+      )
+    : availableIssuesForSelectedSerie;
+
+  const selectedIssuesBySerie = selectedLinkedIssues.reduce<
+    Record<string, SimpleIssue[]>
+  >((acc, issue) => {
+    const serieLabel =
+      issue.issueSerieName ?? `${issue.issueSerieId ?? "unknown"}`;
+    if (!acc[serieLabel]) acc[serieLabel] = [];
+    acc[serieLabel].push(issue);
+    return acc;
+  }, {});
+
   return (
     <GenericForm
-      title={action === "update" ? t("book.form.title.modify") : t("book.form.title.create")}
+      title={
+        action === "update"
+          ? t("book.form.title.modify")
+          : t("book.form.title.create")
+      }
       onCancel={noPropagationEvt(onCancel)}
-      submitLabel={action === "update" ? t("book.form.modify") : t("book.form.create")}
+      submitLabel={
+        action === "update" ? t("book.form.modify") : t("book.form.create")
+      }
       onSubmit={handleSubmit(triggerSubmission)}
     >
       {/* Name field */}
@@ -264,6 +308,7 @@ export function BookContributionForm({
           </span>
         </div>
 
+        {/* Linked Issues */}
         <div className="grid gap-3 lg:grid-cols-[1fr_280px] mt-2">
           <div className="space-y-3">
             <SearchSelectInput
@@ -294,106 +339,43 @@ export function BookContributionForm({
 
             {selectedIssueSerie && (
               <div className="rounded-md border border-white/10 bg-white/5 p-3">
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <div>
-                    <div className="text-sm font-medium text-white">
-                      {selectedIssueSerie.name}
-                    </div>
-                    <div className="text-xs text-white/40">
-                      {t("book.form.issueSerieIssues")}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedIssueSerie(undefined)}
-                    className="text-xs text-white/40 hover:text-white"
-                  >
-                    {t("common.clear")}
-                  </button>
-                </div>
+                <div className="space-y-3">
+                  <input
+                    type="number"
+                    placeholder={t("book.form.issueNumberSearch")}
+                    value={issueNumberQuery}
+                    onChange={(e) => setIssueNumberQuery(e.target.value)}
+                    className="w-full rounded border border-white/10 bg-black/10 px-3 py-2 text-sm text-white outline-none focus:border-white"
+                  />
 
-                <div className="space-y-2">
-                  {issueSerieIssues.length > 0 ? (
-                    <div className="space-y-1">
-                      <div className="text-xs uppercase tracking-widest text-white/40">
-                        {t("book.form.existingIssues")}
-                      </div>
-                      <div className="grid gap-2">
-                        {issueSerieIssues.map((issue) => {
+                  {filteredAvailableIssues.length > 0 ? (
+                    <div className="grid grid-cols-10 gap-2">
+                      {filteredAvailableIssues
+                        .sort((a, b) => (a.number ?? 0) - (b.number ?? 0))
+                        .map((issue) => {
                           const linked = selectedLinkedIssues.some(
                             (li) => li.id === issue.id,
                           );
                           return (
-                            <div
+                            <button
+                              type="button"
                               key={issue.id}
-                              className="flex items-center justify-between gap-3 rounded-md border border-white/10 bg-black/10 px-3 py-2"
+                              onClick={() => addLinkedIssue(issue)}
+                              disabled={linked}
+                              className={`rounded-md border px-2 py-2 text-sm ${
+                                linked
+                                  ? "border-white/10 bg-white/10 text-white/50 cursor-not-allowed"
+                                  : "border-white/10 bg-black/10 text-white hover:border-white/30"
+                              }`}
                             >
-                              <div className="text-sm text-white/80">
-                                {buildIssueShortName(issue)}
-                              </div>
-                              <GenericButton
-                                type="button"
-                                onClick={() =>
-                                  addLinkedIssue({
-                                    id: issue.id,
-                                    name: buildIssueShortName(issue),
-                                    number: issue.number,
-                                    issueSerieId: selectedIssueSerie.id,
-                                    issueSerieName: selectedIssueSerie.name,
-                                    coverDate: issue.coverDate,
-                                    parutionDate: issue.parutionDate,
-                                  })
-                                }
-                                className="text-xs px-2 py-1"
-                                disabled={linked}
-                              >
-                                {linked
-                                  ? t("book.form.added")
-                                  : t("book.form.add")}
-                              </GenericButton>
-                            </div>
+                              #{issue.number ?? issue.name}
+                            </button>
                           );
                         })}
-                      </div>
                     </div>
                   ) : (
                     <div className="text-xs text-white/40">
                       {t("book.form.noIssuesInSerie")}
-                    </div>
-                  )}
-
-                  {localIssuesForSelectedSerie.length > 0 && (
-                    <div className="space-y-1">
-                      <div className="text-xs uppercase tracking-widest text-white/40">
-                        {t("book.form.localIssues")}
-                      </div>
-                      <div className="grid gap-2">
-                        {localIssuesForSelectedSerie.map((issue) => {
-                          const linked = selectedLinkedIssues.some(
-                            (li) => li.id === issue.id,
-                          );
-                          return (
-                            <div
-                              key={issue.id}
-                              className="flex items-center justify-between gap-3 rounded-md border border-white/10 bg-black/10 px-3 py-2"
-                            >
-                              <div className="text-sm text-white/80">
-                                {issue.name}
-                              </div>
-                              <GenericButton
-                                type="button"
-                                onClick={() => addLinkedIssue(issue)}
-                                className="text-xs px-2 py-1"
-                                disabled={linked}
-                              >
-                                {linked
-                                  ? t("book.form.added")
-                                  : t("book.form.add")}
-                              </GenericButton>
-                            </div>
-                          );
-                        })}
-                      </div>
                     </div>
                   )}
                 </div>
@@ -411,26 +393,36 @@ export function BookContributionForm({
                   {t("book.form.noLinkedIssues")}
                 </div>
               ) : (
-                selectedLinkedIssues.map((li, idx) => (
-                  <div
-                    key={`${li.id ?? li.id}-${idx}`}
-                    className="flex items-center justify-between gap-2 rounded-md border border-white/10 bg-black/10 px-3 py-2 text-sm"
-                  >
-                    <div>
-                      <div className="font-medium text-white">{li.name}</div>
-                      <div className="text-xs text-white/50">
-                        {li.issueSerieName ?? t("book.form.issueSerieUnknown")}
+                Object.entries(selectedIssuesBySerie).map(
+                  ([serieLabel, issues]) => (
+                    <div key={serieLabel} className="space-y-2">
+                      <div className="text-xs text-white/50">{serieLabel}</div>
+                      <div className="flex flex-wrap gap-2">
+                        {issues.map((issue) => (
+                          <div
+                            key={issue.id}
+                            className="flex items-center gap-2 rounded-full border border-white/10 bg-black/10 px-3 py-1 text-sm"
+                          >
+                            <span>{issue.number ?? issue.name}</span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                removeLinked(
+                                  selectedLinkedIssues.findIndex(
+                                    (li) => li.id === issue.id,
+                                  ),
+                                )
+                              }
+                              className="text-rose-400 text-xs"
+                            >
+                              x
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => removeLinked(idx)}
-                      className="text-rose-400 text-xs"
-                    >
-                      {t("common.remove")}
-                    </button>
-                  </div>
-                ))
+                  ),
+                )
               )}
             </div>
           </div>

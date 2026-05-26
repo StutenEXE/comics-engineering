@@ -36,6 +36,7 @@ import { GenericForm } from "../GenericForm";
 interface ContributionBundleFormProps {
   bundle?: ContributionBundle;
   action: "create" | "update";
+  disableNewContributions?: boolean;
   onSubmit?: (bundle: Partial<ContributionBundle>) => void;
   onCancel?: () => void;
   // Returing boolean : didn't create a new contribution in DB
@@ -48,6 +49,7 @@ interface ContributionBundleFormProps {
 export function ContributionBundleForm({
   bundle,
   action,
+  disableNewContributions = false,
   onSubmit,
   onCancel,
   onContributionAdd = async () => true,
@@ -279,6 +281,7 @@ export function ContributionBundleForm({
                   setLocalRef(undefined);
                   openModal(key);
                 })}
+                disabled={disableNewContributions}
                 className="bg-white/5 border border-white/10 text-white/60 text-xs font-medium px-3 py-1.5 rounded-md hover:bg-indigo-500/20 hover:border-indigo-500/40 hover:text-indigo-300 transition-all"
               >
                 <span className="mr-1 opacity-50">+</span>
@@ -295,7 +298,7 @@ export function ContributionBundleForm({
           <IndentedContributionList
             contributionList={contributions}
             buttons={{ add: true, edit: true, delete: action === "create" }}
-            adminActions={user?.isAdmin}
+            adminActions={action === "update" && user?.isAdmin}
             onAdd={createDependantContribution}
             onEdit={editContribution}
             onRemove={removeContribution}

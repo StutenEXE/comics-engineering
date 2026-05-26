@@ -1,11 +1,18 @@
 import { useTranslation } from "~/i18n/i18n";
-import { type ContributionBundle } from "~/models/contributionBundle";
+import {
+  ContributionBundleStatusEnum,
+  type ContributionBundle,
+} from "~/models/contributionBundle";
 import { ContributionBundleForm } from "./ContributionBundleForm";
 import {
   useCreateContributionMutation,
   useUpdateContributionMutation,
 } from "~/store/services/api";
-import { contributionToSimpleContribution, type Contribution, type SimpleContribution } from "~/models/contribution";
+import {
+  contributionToSimpleContribution,
+  type Contribution,
+  type SimpleContribution,
+} from "~/models/contribution";
 import { useToast } from "~/components/toast/Toast";
 
 interface UpdateContributionBundleFormProps {
@@ -51,6 +58,10 @@ export function UpdateContributionBundleForm({
     <ContributionBundleForm
       action="update"
       bundle={bundle}
+      disableNewContributions={
+        bundle.status === ContributionBundleStatusEnum.APPROVED ||
+        bundle.status === ContributionBundleStatusEnum.REJECTED
+      }
       onSubmit={onSubmit}
       onCancel={onCancel}
       onContributionAdd={(c) => triggerCreation(c)}

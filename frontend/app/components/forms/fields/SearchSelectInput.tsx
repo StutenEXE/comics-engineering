@@ -103,7 +103,7 @@ export function SearchSelectInput<T extends SearchSelectItem>({
   const isNegativeId = selectedItem && selectedItem.id < 0;
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="w-120 flex flex-col gap-1.5">
       {/* Label */}
       <label
         htmlFor="search-select-input"
@@ -114,7 +114,7 @@ export function SearchSelectInput<T extends SearchSelectItem>({
 
       {isSelected ? (
         /* ── Selected / local-ref badge ─────────────────────────────────── */
-        <div className="flex items-center justify-between gap-2 bg-indigo-500/10 border border-indigo-500/30 rounded-md px-3 py-2">
+        <div className="w-full flex items-center justify-between gap-2 bg-indigo-500/10 border border-indigo-500/30 rounded-md px-3 py-2">
           <div className="flex items-center gap-2 text-sm">
             {/* Checkmark icon */}
             <svg

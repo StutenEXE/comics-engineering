@@ -20,11 +20,19 @@ import {
   type ContributionTree,
   type SimpleContribution,
 } from "~/models/contribution";
+import type { ContributionIssue } from "~/models/issue";
 import { useUpdateContributionStatusMutation } from "~/store/services/api";
 import { type Error } from "~/utils/error";
 import { GenericList } from "../GenericList";
-import type { AnyARecord } from "dns";
-import type { SimpleIssue } from "~/models/issue";
+
+interface LinkedIssue {
+  id?: number;
+  name?: string;
+  localRef?: string;
+  issueSerieId?: number;
+  issueSerieName?: string;
+  issueSerieLocalRef?: string;
+}
 
 interface ContributionTreeListProps {
   contributionList: Contribution[] | SimpleContribution[] | null | undefined;
@@ -116,20 +124,38 @@ export function IndentedContributionList({
   };
 
   const getLinkedIssues = (c: SimpleContribution) => {
-    return (c.proposedData?.issues ?? []) as SimpleIssue[];
+    return (
+      c.proposedData?.issues
+        ? c.proposedData.issues.map((i: ContributionIssue) => {
+            return {
+              id: i.id! >= 0 ? i.id : undefined,
+              name: i.name,
+              localRef: i.id! < 0 ? i.id : undefined,
+              issueSerieId: i.issueSerie!.id >= 0 ? i.issueSerie.id : undefined,
+              issueSerieName: i.issueSerie?.name,
+              issueSerieLocalRef:
+                i.issueSerie!.id < 0 ? i.issueSerie.id : undefined,
+            };
+          })
+        : []
+    ) as LinkedIssue[];
   };
 
   const getCriticalLinkedIssues = (c: SimpleContribution) => {
-    return c.proposedData?.issues?.filter((li: SimpleIssue) => li.id < 0) ?? [];
+    return (
+      c.proposedData?.issues?.filter(
+        (li: LinkedIssue) => li.localRef !== undefined,
+      ) ?? []
+    );
   };
 
-  const formatIssueRef = (li: any) =>
+  const formatIssueRef = (li: LinkedIssue) =>
     li.localRef
       ? `${t("generic.local")}: ${li.name ?? li.localRef}`
       : `#${li.id} ${li.name ?? ""}`;
 
-  const groupLinkedIssuesBySerie = (issues: any[]) => {
-    const groups = new Map<string, { title: string; items: any[] }>();
+  const groupLinkedIssuesBySerie = (issues: LinkedIssue[]) => {
+    const groups = new Map<string, { title: string; items: LinkedIssue[] }>();
     issues.forEach((li) => {
       const key =
         li.issueSerieId != null
@@ -196,35 +222,38 @@ export function IndentedContributionList({
                 (adminActions && getCriticalLinkedIssues(c).length > 0)) && (
                 <span className="flex flex-col gap-2 px-2 py-2 bg-amber-500/10 text-amber-100">
                   <span className="text-[10px] uppercase tracking-widest text-amber-200">
-                    {adminActions ? t("contribution.book.criticalIssues") : t("contribution.book.linkedIssues")}
+                    {adminActions
+                      ? t("contribution.book.criticalIssues")
+                      : t("contribution.book.linkedIssues")}
                   </span>
-                  {groupLinkedIssuesBySerie(adminActions ? getCriticalLinkedIssues(c) : getLinkedIssues(c)).map(
-                    (group, idx) => (
-                      <span
-                        key={idx}
-                        className="flex flex-wrap items-center gap-2 text-[10px] rounded-full bg-amber-500/10 px-2 py-0.5 text-amber-100"
-                      >
-                        <span className="font-semibold text-amber-200">
-                          {group.title}:
-                        </span>
-                        {group.items.slice(0, 2).map((li, liIdx) => (
-                          <span key={liIdx}>
-                            {li.name ?? formatIssueRef(li)}
-                          </span>
-                        ))}
-                        {group.items.length > 2 && (
-                          <span>+{group.items.length - 2} more</span>
-                        )}
+                  {groupLinkedIssuesBySerie(
+                    adminActions
+                      ? getCriticalLinkedIssues(c)
+                      : getLinkedIssues(c),
+                  ).map((group, idx) => (
+                    <span
+                      key={idx}
+                      className="flex flex-wrap items-center gap-2 text-[10px] rounded-full bg-amber-500/10 px-2 py-0.5 text-amber-100"
+                    >
+                      <span className="font-semibold text-amber-200">
+                        {group.title}:
                       </span>
-                    ),
-                  )}
+                      {group.items.slice(0, 2).map((li, liIdx) => (
+                        <span key={liIdx}>{li.name ?? formatIssueRef(li)}</span>
+                      ))}
+                      {group.items.length > 2 && (
+                        <span>+{group.items.length - 2} more</span>
+                      )}
+                    </span>
+                  ))}
                 </span>
               )}
             {c.status && (
               <>
-                <ContributionStatusBadge status={c.status} />
+                <ContributionStatusBadge className="ml-2" status={c.status} />
               </>
             )}
+            {/* Show action buttons if admin actions are enabled and if the contribution is not approved or rejected */}
             {adminActions &&
               c.status !== ContributionStatusEnum.APPROVED &&
               c.status !== ContributionStatusEnum.REJECTED && (
@@ -312,7 +341,6 @@ export function IndentedContributionList({
     !contributionList || contributionList.length === 0
       ? []
       : isSimpleContribution(contributionList[0])
-
         ? (contributionList as SimpleContribution[]).map((c) => ({
             ...c, // Deepcopy
           }))

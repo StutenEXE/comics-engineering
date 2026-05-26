@@ -1,10 +1,10 @@
 import { parseToSimpleEdition, type SimpleEdition } from "./edition";
-import { parseToSimpleIssue, type SimpleIssue } from "./issue";
+import { parseToSimpleIssue, type ContributionIssue, type SimpleIssue } from "./issue";
 import { parseToSimpleSerie, type SimpleSerie } from "./serie";
 import { parseToSimpleUser, type SimpleUser } from "./user";
 
 export interface Book {
- 	id: number,
+	id: number,
 	name: string,
 	desc: string,
 	number: number,
@@ -37,7 +37,7 @@ export function parseToBook(data: Record<string, any>): Book {
 }
 
 export interface SimpleBook {
- 	id: number,
+	id: number,
 	name: string,
 	desc: string,
 	number: number,
@@ -68,7 +68,7 @@ export interface ContributionBook {
 	voContent?: string,
 	imgUrl: string,
 	serie: { id: number, name: string },
-	issues: SimpleIssue[]
+	issues: ContributionIssue[]
 }
 
 export function isSimpleBook(book: Book | SimpleBook): book is SimpleBook {
