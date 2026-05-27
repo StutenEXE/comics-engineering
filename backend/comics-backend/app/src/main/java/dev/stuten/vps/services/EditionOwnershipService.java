@@ -49,24 +49,32 @@ public class EditionOwnershipService {
         ctx.json(Map.of("ownedEdition", newOwnedEdition));
     }
 
-    public static void getByID(Context ctx) {
-        // Retreive ID from request
-        Integer id;
-        try {
-            id = Integer.parseInt(ctx.queryParam("id"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+    public static void update(Context ctx) {
+        OwnedEditionDTO dto = ctx.bodyAsClass(OwnedEditionDTO.class);
+
+        // Validate that the person creating the owned edition is the owner or an admin
+        AuthContext auth = AuthMiddleware.getCurrentSession(ctx);
+        if (auth == null) {
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid session", "No valid session found");
+            return;
+        }
+        if (!auth.userId().equals(dto.getUser().getId().toString()) && !auth.role().equals(Role.ADMIN)) {
+            ErrorResponse.send(HttpStatus.FORBIDDEN, "Forbidden", "You can only create owned editions for yourself");
             return;
         }
 
-        // Get owned edition by id
-        Optional<OwnedEditionDTO> edition = dao.findOwnedById(id);
-        if (edition.isEmpty()) {
-            String message = String.format("OwnedEdition of id %s not found", id);
-            ErrorResponse.send(HttpStatus.NOT_FOUND, "OwnedEdition not found", message);
+        // Update owned edition
+        Boolean updated = dao.update(dto);
+
+        if (!updated) {
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", "Failed to update owned edition");
+            return;
         }
 
-        ctx.json(Map.of("ownedEdition", edition.get()));
+        // Retreive new ownership in db
+        Optional<OwnedEditionDTO> newOe = dao.findOwnedById(dto.getId());
+
+        ctx.status(HttpStatus.CREATED).json(Map.of("ownedEdition", newOe.get()));
     }
 
     public static void getByUserID(Context ctx) {

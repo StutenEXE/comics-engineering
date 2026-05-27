@@ -76,6 +76,21 @@ public class OwnedEditionDAO extends EditionDAO {
                 .fetchOptional()
                 .map(record -> record.get(EDITION_OWNERSHIP.ID));
     }
+    
+    public Boolean update(OwnedEditionDTO dto) {
+        return DSL().update(EDITION_OWNERSHIP)
+                .set(EDITION_OWNERSHIP.DATE, dto.getDate() == null ? null : dto.getDate().toLocalDateTime())
+                .set(EDITION_OWNERSHIP.READ, dto.getRead())
+                .set(EDITION_OWNERSHIP.DATE_READ, dto.getDateRead())
+                .set(EDITION_OWNERSHIP.GIFT, dto.getGift())
+                .set(EDITION_OWNERSHIP.SIGNED, dto.getSigned())
+                .set(EDITION_OWNERSHIP.PURCHASE_PRICE, dto.getPurchasePrice())
+                .set(EDITION_OWNERSHIP.FEES, dto.getFees())
+                .set(EDITION_OWNERSHIP.RETAIL_PRICE, dto.getRetailPrice())
+                .set(EDITION_OWNERSHIP.NOTE, dto.getNote())
+                .where(EDITION_OWNERSHIP.ID.eq(dto.getId()))
+                .execute() > 0;
+    }
 
     public Optional<OwnedEditionDTO> findOwnedById(Integer id) {
         return super.selectOne(EDITION_OWNERSHIP.ID.eq(id));

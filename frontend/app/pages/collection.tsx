@@ -47,9 +47,7 @@ export default function CollectionPage() {
     {
       id: "editions",
       label: t("editions", { capitalize: true }),
-      content: (
-        <OwnedEditionTab ownedEditions={ownedEd || []}></OwnedEditionTab>
-      ),
+      content: <OwnedEditionTab />,
     },
     {
       id: "series",

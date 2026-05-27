@@ -129,7 +129,7 @@ export function OwnedEditionForm({
         <div className="flex flex-col gap-6">
           {/* Add Date */}
           <DateRhfInput
-            label={t("oedition.date")}
+            label={t("oedition.addDate")}
             registration={register("date", {
               valueAsDate: true,
             })}

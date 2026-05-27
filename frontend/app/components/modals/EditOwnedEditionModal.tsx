@@ -1,57 +1,42 @@
-import type { SimpleEdition } from "~/models/edition";
-import type { OwnedEdition, OwnedEditionDTO } from "~/models/ownedEdition";
-import { GenericModal } from "./GenericModal";
-import {
-  useAddToCollectionMutation,
-  useEditionByIdQuery,
-} from "~/store/services/api";
-import { useToast } from "../toast/Toast";
 import { useTranslation } from "~/i18n/i18n";
+import type { OwnedEdition, OwnedEditionDTO } from "~/models/ownedEdition";
+import {
+  useUpdateOwnedEditionMutation
+} from "~/store/services/api";
 import { OwnedEditionForm } from "../forms/OwnedEditionForm";
+import { useToast } from "../toast/Toast";
+import { GenericModal } from "./GenericModal";
 
-interface AddToCollectionModalProps {
-  editionId: number;
+interface EditOwnedEditionModalProps {
+  ownedEdition: OwnedEdition;
   isOpen: boolean;
   onSubmit: (oe: OwnedEdition) => void;
   onClose: () => void;
 }
 
-export function AddToCollectionModal({
-  editionId,
+export function EditOwnedEditionModal({
+  ownedEdition,
   isOpen,
   onSubmit,
   onClose,
-}: AddToCollectionModalProps) {
+}: EditOwnedEditionModalProps) {
   const { t } = useTranslation();
   const toast = useToast();
 
-  const [addToCollection] = useAddToCollectionMutation();
+  const [updateOwnedEdition] = useUpdateOwnedEditionMutation();
 
   const handleSubmit = async (oe: Partial<OwnedEditionDTO>) => {
-    await addToCollection(oe).then((res) => {
+    await updateOwnedEdition(oe).then((res) => {
       if ("error" in res) {
         toast.error(t("addToCollection.error"));
         return false;
       }
-
       toast.success(t("addToCollection.success"));
+      console.log(res)
       onSubmit(res.data.ownedEdition);
       onClose();
-      return res.data.ownedEdition;
+      return ;
     });
-  };
-
-  const { data, isError } = useEditionByIdQuery({ id: editionId });
-
-  if (isError) {
-    toast.error(t("addToCollection.error"));
-    onClose();
-  }
-
-  const edition = data?.edition;
-
-  const ownedEdition: Partial<OwnedEdition> = {
-    edition: edition,
   };
 
   return (
@@ -59,7 +44,7 @@ export function AddToCollectionModal({
       <div className="border border-gray-300 rounded-lg shadow-md bg-black">
         <OwnedEditionForm
           ownedEdition={ownedEdition}
-          action="create"
+          action="update"
           onCancel={onClose}
           onSubmit={handleSubmit}
         />

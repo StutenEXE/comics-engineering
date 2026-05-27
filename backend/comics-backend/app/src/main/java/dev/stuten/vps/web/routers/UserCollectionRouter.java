@@ -9,8 +9,8 @@ public class UserCollectionRouter implements Router {
     @Override
     public void register(Javalin app) {
         // Private
-        app.get(APIPathBuilder.buildPrivatePath("/collection/get"), EditionOwnershipService::getByID);
         app.post(APIPathBuilder.buildPrivatePath("/collection/add"), EditionOwnershipService::create);
+        app.post(APIPathBuilder.buildPrivatePath("/collection/update"), EditionOwnershipService::update);
         app.get(APIPathBuilder.buildPrivatePath("/collection"), EditionOwnershipService::getByUserID);
     }
     

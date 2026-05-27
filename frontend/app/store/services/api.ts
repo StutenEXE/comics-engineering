@@ -238,6 +238,12 @@ export const privateApi = createApi({
         ownedEdition: parseToOwnedEdition(resp.ownedEdition)
       })
     }),
+    updateOwnedEdition: build.mutation<{ ownedEdition: OwnedEdition }, Partial<OwnedEditionDTO>>({
+      query: (data) => ({ url: "/collection/update", method: 'POST', body: data }),
+      transformResponse: (resp: { ownedEdition: OwnedEdition }) => ({
+        ownedEdition: parseToOwnedEdition(resp.ownedEdition)
+      })
+    }),
 
     /****************
      * CONTRIBUTIONS
@@ -255,6 +261,7 @@ export const {
   useCollectionQuery,
   useOwnedEditionByIdQuery,
   useAddToCollectionMutation,
+  useUpdateOwnedEditionMutation,
   useSubmitContributionBundleMutation,
   useUpdateContributionBundleMutation
 } = privateApi;

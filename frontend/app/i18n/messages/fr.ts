@@ -3,6 +3,7 @@ export default {
     // ============================
     // == Generics
     // ============================
+    "generic.n/a": "N/A",
     "generic.yes": "oui",
     "generic.no": "non",
     "generic.cancel": "annuler",
@@ -189,8 +190,9 @@ export default {
     "oedition.serie.name": "Nom de la série",
     "oedition.cover": "Couverture",
     "oedition.book.volume": "Tome",
-    "oedition.addDate": "Date d'ajout à la collection",
+    "oedition.addDate": "Date d'ajout",
     "oedition.read": "Lu",
+    "oedition.book.publisher": "Nom de l'éditeur",
     // Serie
     "serie.nonefound": "Aucune série trouvée",
     "serie.header": "Série",

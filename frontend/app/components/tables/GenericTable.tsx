@@ -220,6 +220,7 @@ export function GenericTable<T extends Record<string, any>>(
               {tableCols.map((col, idx) => (
                 <th
                   key={col.header ?? idx}
+                  align="center"
                   className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-widest text-white/30"
                 >
                   {col.header}
@@ -239,11 +240,13 @@ export function GenericTable<T extends Record<string, any>>(
                       key={`${rowIdx}-${colIdx}`}
                       className="px-4 py-3 text-sm text-white/60 group-hover:text-white/80 transition-colors"
                     >
-                      {col.cellRenderer
-                        ? col.cellRenderer(row)
-                        : col.key
-                          ? row[col.key]
-                          : null}
+                      <div className="flex items-center">
+                        {col.cellRenderer
+                          ? col.cellRenderer(row)
+                          : col.key
+                            ? row[col.key]
+                            : null}
+                      </div>
                     </td>
                   ))}
                 </tr>
