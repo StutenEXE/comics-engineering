@@ -15,7 +15,7 @@ public class App {
     public static void main(String[] args) {
 
         int port = Integer.parseInt(
-                System.getProperty("server.port", "8080"));
+                System.getProperty("APP_PORT", "8080"));
 
         Javalin app = Javalin.create(config -> {
             config.http.defaultContentType = "application/json";

@@ -9,6 +9,7 @@ public class EditionRouter implements Router {
     @Override
     public void register(Javalin app) {
         app.get(APIPathBuilder.buildPublicPath("/editions"), EditionService::getByID);
+        app.get(APIPathBuilder.buildPublicPath("/editions/relation/toUser"), EditionService::getRelationToUser);
     }
     
 }

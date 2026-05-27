@@ -141,5 +141,4 @@ public class EditionDAO extends ContributableDAO<EditionDTO> {
     public Optional<EditionDTO> findById(Integer id) {
         return super.selectOne(EDITIONS.ID.eq(id));
     }
-
 }

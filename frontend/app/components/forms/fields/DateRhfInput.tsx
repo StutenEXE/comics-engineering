@@ -1,9 +1,11 @@
 import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
+import { twMerge } from "tailwind-merge";
 
 export interface DateRhfInputProps {
   label: string;
   registration?: UseFormRegisterReturn;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
+  invisible?: boolean;
   error?: FieldError;
 }
 
@@ -11,10 +13,11 @@ export function DateRhfInput({
   label,
   registration,
   inputProps,
+  invisible,
   error,
 }: DateRhfInputProps) {
   return (
-    <div className="flex flex-col gap-1.5 flex-1">
+    <div className={twMerge("max-w-35 flex flex-col gap-1.5 flex-1", invisible ? "invisible" : "")}>
       <label className="text-xs font-medium uppercase tracking-widest text-white/40">
         {label}
       </label>

@@ -5,7 +5,7 @@ import { ContributionBundleStatusEnum, parseToBundle, type ContributionBundle } 
 import { parseToEdition, type Edition } from "~/models/edition";
 import { parseToIssue, type Issue } from "~/models/issue";
 import { parseToIssueSerie, type IssueSerie } from "~/models/issue-serie";
-import { parseToOwnedEdition, type OwnedEdition } from "~/models/ownedEdition";
+import { parseToOwnedEdition, type OwnedEdition, type OwnedEditionDTO } from "~/models/ownedEdition";
 import { parseToPublisher, type Publisher } from "~/models/publisher";
 import { parseToSerie, type Serie } from "~/models/serie";
 import { parseToUser, type SignupData, type User, type UserCredentials } from "~/models/user";
@@ -69,9 +69,17 @@ export const publicApi = createApi({
     editionById: build.query<{ edition: Edition }, { id: number }>({
       query: (params) => ({ url: "/editions", method: 'GET', params: params }),
       transformResponse: (resp: { edition: Edition }) => {
-        console.log("Raw edition response:", resp);
         return ({
           edition: parseToEdition(resp.edition),
+        })
+      },
+    }),
+    // Get edition by id
+    editionRelationToUser: build.query<{ relation: { userId: number, editionId: number, inCollection: boolean } }, { userId: number, editionId: number }>({
+      query: (params) => ({ url: "/editions/relation/toUser", method: 'GET', params: params }),
+      transformResponse: (resp: { relation: { userId: number, editionId: number, inCollection: boolean } }) => {
+        return ({
+          relation: resp.relation,
         })
       },
     }),
@@ -183,7 +191,7 @@ export const publicApi = createApi({
 export const {
   useLoginMutation, useSignupMutation, useLazyDisconnectQuery, useRefreshQuery,
   useBookByIdQuery, useBookBySerieIdQuery, useLatestBooksQuery,
-  useEditionByIdQuery,
+  useEditionByIdQuery, useEditionRelationToUserQuery,
   useIssueSerieByIdQuery,
   useIssueByIdQuery, useIssueByBookIdQuery,
   usePublisherByIdQuery,
@@ -218,6 +226,18 @@ export const privateApi = createApi({
         ownedEditions: resp.ownedEditions.map(parseToOwnedEdition),
       }),
     }),
+    ownedEditionById: build.query<{ ownedEdition: OwnedEdition }, { id: number }>({
+      query: (params) => ({ url: "/collection/get", method: 'GET', params: params }),
+      transformResponse: (resp: { ownedEdition: OwnedEdition }) => ({
+        ownedEdition: parseToOwnedEdition(resp.ownedEdition),
+      }),
+    }),
+    addToCollection: build.mutation<{ ownedEdition: OwnedEdition }, Partial<OwnedEditionDTO>>({
+      query: (data) => ({ url: "/collection/add", method: 'POST', body: data }),
+      transformResponse: (resp: { ownedEdition: OwnedEdition }) => ({
+        ownedEdition: parseToOwnedEdition(resp.ownedEdition)
+      })
+    }),
 
     /****************
      * CONTRIBUTIONS
@@ -225,13 +245,19 @@ export const privateApi = createApi({
     submitContributionBundle: build.mutation<{ bundleId: number }, Partial<ContributionBundle>>({
       query: (data) => ({ url: "/contribute", method: 'POST', body: data }),
     }),
-    updateContributionBundle: build.mutation<{bundle: ContributionBundle}, Partial<ContributionBundle>>({
+    updateContributionBundle: build.mutation<{ bundle: ContributionBundle }, Partial<ContributionBundle>>({
       query: (data) => ({ url: "/bundles/update", method: 'POST', body: data }),
     }),
   }),
 });
 
-export const { useCollectionQuery, useSubmitContributionBundleMutation, useUpdateContributionBundleMutation } = privateApi;
+export const {
+  useCollectionQuery,
+  useOwnedEditionByIdQuery,
+  useAddToCollectionMutation,
+  useSubmitContributionBundleMutation,
+  useUpdateContributionBundleMutation
+} = privateApi;
 
 
 ////////////////////////////////////

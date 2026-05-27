@@ -7,6 +7,8 @@ import static dev.stuten.vps.jooq.tables.Users.USERS;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Map;
 
 import org.jooq.Record;
@@ -44,19 +46,23 @@ public class OwnedEditionMapper {
         // Map user
         SimpleUserDTO user = MappingUtils.getSingleDTOFromRecord(r, USERS, UserMapper::mapToSimpleDTO);
         // Map edition
+        LocalDateTime ldt = r.get(getFieldName(EDITION_OWNERSHIP.DATE), LocalDateTime.class);
+        OffsetDateTime odt = ldt == null ? null : ldt.atOffset(ZoneOffset.UTC);
+
         OwnedEditionDTO dto = OwnedEditionDTO.builder()
-                .id(r.get(getFieldName(EDITION_OWNERSHIP.ID), Integer.class))
-                .date(r.get(getFieldName(EDITION_OWNERSHIP.DATE), LocalDateTime.class))
-                .read(r.get(getFieldName(EDITION_OWNERSHIP.READ), Boolean.class))
-                .dateRead(r.get(getFieldName(EDITION_OWNERSHIP.DATE_READ), LocalDate.class))
-                .gift(r.get(getFieldName(EDITION_OWNERSHIP.GIFT), Boolean.class))
-                .purchasePrice(r.get(getFieldName(EDITION_OWNERSHIP.PURCHASE_PRICE), BigDecimal.class))
-                .fees(r.get(getFieldName(EDITION_OWNERSHIP.FEES), BigDecimal.class))
-                .retailPrice(r.get(getFieldName(EDITION_OWNERSHIP.RETAIL_PRICE), BigDecimal.class))
-                .note(r.get(getFieldName(EDITION_OWNERSHIP.NOTE), String.class))
-                .edition(edition)
-                .user(user)
-                .build();
+            .id(r.get(getFieldName(EDITION_OWNERSHIP.ID), Integer.class))
+            .date(odt)
+            .read(r.get(getFieldName(EDITION_OWNERSHIP.READ), Boolean.class))
+            .dateRead(r.get(getFieldName(EDITION_OWNERSHIP.DATE_READ), LocalDate.class))
+            .gift(r.get(getFieldName(EDITION_OWNERSHIP.GIFT), Boolean.class))
+            .signed(r.get(getFieldName(EDITION_OWNERSHIP.SIGNED), Boolean.class))
+            .purchasePrice(r.get(getFieldName(EDITION_OWNERSHIP.PURCHASE_PRICE), BigDecimal.class))
+            .fees(r.get(getFieldName(EDITION_OWNERSHIP.FEES), BigDecimal.class))
+            .retailPrice(r.get(getFieldName(EDITION_OWNERSHIP.RETAIL_PRICE), BigDecimal.class))
+            .note(r.get(getFieldName(EDITION_OWNERSHIP.NOTE), String.class))
+            .edition(edition)
+            .user(user)
+            .build();
         return dto;
     }
 }

@@ -15,8 +15,9 @@ import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 
 public class EditionOwnershipService {
-    
-    private EditionOwnershipService() {}
+
+    private EditionOwnershipService() {
+    }
 
     private static OwnedEditionDAO dao = new OwnedEditionDAO(
             JooqProvider.get());
@@ -47,7 +48,6 @@ public class EditionOwnershipService {
         // Send back account info to the client
         ctx.json(Map.of("ownedEdition", newOwnedEdition));
     }
-
 
     public static void getByID(Context ctx) {
         // Retreive ID from request

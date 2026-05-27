@@ -81,9 +81,9 @@ interface ContributionTreeListProps {
 export function IndentedContributionList({
   contributionList,
   buttons,
-  onAdd,
-  onEdit,
-  onRemove,
+  onAdd = () => {},
+  onEdit = () => {},
+  onRemove = () => {},
   adminActions,
   className,
 }: ContributionTreeListProps) {
@@ -114,11 +114,6 @@ export function IndentedContributionList({
       },
     });
   };
-
-  // Default no-op functions for buttons if not provided
-  onAdd ||= (c: ContributionTree) => {};
-  onEdit ||= (c: ContributionTree) => {};
-  onRemove ||= (c: ContributionTree) => {};
 
   const findKeyForEntityType = (
     t: ContributionTypeEnum,

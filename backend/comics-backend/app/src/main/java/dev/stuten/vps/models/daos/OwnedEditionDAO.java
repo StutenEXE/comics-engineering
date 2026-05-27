@@ -63,7 +63,7 @@ public class OwnedEditionDAO extends EditionDAO {
         return DSL().insertInto(EDITION_OWNERSHIP)
                 .set(EDITION_OWNERSHIP.EDITION_ID, dto.getEdition().getId())
                 .set(EDITION_OWNERSHIP.USER_ID, dto.getUser().getId())
-                .set(EDITION_OWNERSHIP.DATE, dto.getDate())
+                .set(EDITION_OWNERSHIP.DATE, dto.getDate() == null ? null : dto.getDate().toLocalDateTime())
                 .set(EDITION_OWNERSHIP.READ, dto.getRead())
                 .set(EDITION_OWNERSHIP.DATE_READ, dto.getDateRead())
                 .set(EDITION_OWNERSHIP.GIFT, dto.getGift())
@@ -83,5 +83,9 @@ public class OwnedEditionDAO extends EditionDAO {
 
     public List<OwnedEditionDTO> findOwnedByUserId(Integer userId) {
         return super.selectMany(EDITION_OWNERSHIP.USER_ID.eq(userId));
+    }
+
+    public Boolean doesUserOwnEdition(Integer userId, Integer editionId) {
+        return super.selectOne(EDITION_OWNERSHIP.USER_ID.eq(userId).and(EDITION_OWNERSHIP.EDITION_ID.eq(editionId))).isPresent();
     }
 }
