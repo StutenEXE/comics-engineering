@@ -1,9 +1,15 @@
 # Ignore Gradle project-specific cache directory
 .gradle
 
-# Ignore Gradle build output directory
+# Ignore build output directory (except Jooq)
 build
+app/build/classes
+app/build/resources
+app/build/tmp
 
 # Ignore Java binaries
 app/bin
 
+# Ignore env file
+.env.dev
+.env.prod

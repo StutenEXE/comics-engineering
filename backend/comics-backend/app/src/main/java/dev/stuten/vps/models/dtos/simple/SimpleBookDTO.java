@@ -1,0 +1,43 @@
+package dev.stuten.vps.models.dtos.simple;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import dev.stuten.vps.models.dtos.template.IdDTO;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
+
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
+@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class SimpleBookDTO extends IdDTO {
+
+        @JsonProperty("name")
+        private String name;
+
+        @JsonProperty("desc")
+        private String desc;
+
+        @JsonProperty("number")
+        private Integer number;
+
+        @JsonProperty("voContent")
+        private String voContent;
+
+        @JsonProperty("imgUrl")
+        private String imgUrl;
+
+        @JsonProperty("serieId")
+        private Integer serieId;
+
+        @JsonProperty("serieName")
+        private String serieName;
+}

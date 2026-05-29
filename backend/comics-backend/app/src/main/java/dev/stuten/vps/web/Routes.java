@@ -7,6 +7,7 @@ import dev.stuten.vps.web.middleware.AuthMiddleware;
 import dev.stuten.vps.web.middleware.Role;
 import dev.stuten.vps.web.middleware.RoleMiddleware;
 import dev.stuten.vps.web.routers.BookRouter;
+import dev.stuten.vps.web.routers.ContributionRouter;
 import dev.stuten.vps.web.routers.EditionRouter;
 import dev.stuten.vps.web.routers.IssueRouter;
 import dev.stuten.vps.web.routers.IssueSerieRouter;
@@ -14,6 +15,7 @@ import dev.stuten.vps.web.routers.PublisherRouter;
 import dev.stuten.vps.web.routers.Router;
 import dev.stuten.vps.web.routers.SearchRouter;
 import dev.stuten.vps.web.routers.SerieRouter;
+import dev.stuten.vps.web.routers.UserCollectionRouter;
 import dev.stuten.vps.web.routers.UserRouter;
 import dev.stuten.vps.web.routers.utils.APIPathBuilder;
 import io.javalin.Javalin;
@@ -23,12 +25,15 @@ public class Routes {
     @SuppressWarnings("null")
     private static List<Router> routers = Arrays.asList(
         new BookRouter(),
+        new ContributionRouter(),
         new EditionRouter(),
         new IssueRouter(),
         new IssueSerieRouter(),
         new PublisherRouter(),
         new SerieRouter(),
         new UserRouter(),
+
+        new UserCollectionRouter(),
 
         new SearchRouter()
     );

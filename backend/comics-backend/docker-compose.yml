@@ -1,0 +1,95 @@
+services:
+  # ─────────────────────────────────────────
+  # PostgreSQL 18
+  # ─────────────────────────────────────────
+  postgres:
+    image: postgres:18
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
+    container_name: kys_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_SUPERUSER}
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERPASSWORD}
+      POSTGRES_DB: ${KYS_POSTGRES_DB}
+      PG_APP_USER: ${KYS_POSTGRES_USER}
+      PG_APP_PASSWORD: ${KYS_POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    networks:
+      - kys-backend
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${KYS_POSTGRES_USER} -d ${KYS_POSTGRES_DB}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────
+  # Redis
+  # ─────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: kys_redis
+    restart: unless-stopped
+    build:
+      context: ./redis
+      dockerfile: Dockerfile
+    environment:
+      REDIS_USER: ${KYS_REDIS_USER}
+      REDIS_PASSWORD: ${KYS_REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    networks:
+      - kys-backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${KYS_REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────
+  # Java REST API  (Javalin + jOOQ)
+  # ─────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kys_main_api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # Postgres
+      PG_HOST: postgres
+      PG_PORT: 5432
+      PG_NAME: ${KYS_POSTGRES_DB}
+      PG_USER: ${KYS_POSTGRES_USER}
+      PG_PASSWORD: ${KYS_POSTGRES_PASSWORD}
+      PG_URL: ${KYS_POSTGRES_URL}
+      # Redis
+      REDIS_HOST: ${KYS_REDIS_HOST}
+      REDIS_PORT: 6379
+      REDIS_USER: ${KYS_REDIS_USER}
+      REDIS_PASSWORD: ${KYS_REDIS_PASSWORD}
+      # App
+      APP_PORT: 8080
+    ports:
+      - "8080:8080"
+    networks:
+      - kys-backend
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  kys-backend:
+    driver: bridge

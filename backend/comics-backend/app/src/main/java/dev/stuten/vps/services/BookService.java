@@ -6,7 +6,8 @@ import java.util.Optional;
 
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.BookDAO;
-import dev.stuten.vps.models.dtos.BookDTO;
+import dev.stuten.vps.models.dtos.full.BookDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
 import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -17,6 +18,10 @@ public class BookService {
 
     private static BookDAO dao = new BookDAO(
             JooqProvider.get());
+
+    protected static BookDAO getDAO() {
+        return dao;
+    }
 
     public static void getByID(Context ctx) {
         // Retreive ID from request
@@ -69,7 +74,7 @@ public class BookService {
         }
 
         // Retreive books
-        List<BookDTO> books = dao.findLatest(from, limit);
+        List<SimpleBookDTO> books = dao.findLatest(from, limit);
 
         ctx.json(Map.of("books", books));
     }

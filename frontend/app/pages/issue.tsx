@@ -1,12 +1,29 @@
-import { useIssueByIdQuery } from "~/store/services/api";
+import {
+  useIssueByIdQuery,
+  useSubmitContributionBundleMutation,
+} from "~/store/services/api";
 import type { Route } from "../+types/root";
 import { createError } from "~/utils/error";
 import { dateToMonthYearString, dateToVerboseDateString } from "~/utils/date";
-import { PageHeaderComponent } from "~/components/headers/PageHeader";
-import { PageTemplate } from "~/components/templates/PageTemplate";
+import { InfoPageHeaderComponent } from "~/components/headers/InfoPageHeader";
+import {
+  InfoPageField,
+  InfoPageFields,
+  InfoPageSection,
+  InfoPageTemplate,
+} from "~/components/templates/InfoPageTemplate";
 import { buildIssueShortName } from "~/models/issue";
 import { BookList } from "~/components/lists/booklists/BookList";
 import type { Link } from "~/components/lists/LinkButtonList";
+import { useTranslation } from "~/i18n/i18n";
+import { IssueContributionModal } from "~/components/modals/contribution/IssueContributionModal";
+import { useEffect, useState } from "react";
+import {
+  type SimpleContribution,
+  wrapInNewBundle,
+} from "~/models/contribution";
+import { useToast } from "~/components/toast/Toast";
+import { useAppSelector } from "~/store/hooks";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -15,61 +32,85 @@ export function meta({ params }: Route.MetaArgs) {
   ];
 }
 
-export default function IssuePage({ params }: { params : { id: number}}) {
-  
-  const { data, isLoading, error } = useIssueByIdQuery({ id: params.id });
-  const issue = data?.issue ?? null;
-  const err = createError(error)
+export default function IssuePage({ params }: { params: { id: number } }) {
+  const { t, locale } = useTranslation();
+  const toast = useToast();
+  const { user, isAuthenticated } = useAppSelector((state) => state.user);
 
-  const links: Link[] = [
-    { name: "Go to issue serie", path: `/issue_serie/${issue?.issueSerie?.id}`, disabled: isLoading },
-  ]
+  const { data, isLoading, error } = useIssueByIdQuery({ id: params.id });
+  const issue = data?.issue;
+  const err = createError(error);
+
+  // Submit a contribution bundle
+  const [submitBundle, { isError, isSuccess }] =
+    useSubmitContributionBundleMutation();
+
+  // If error or success occurs during contribution submission
+  useEffect(() => {
+    if (isError) toast.error(t("contribute.fail"));
+  }, [isError]);
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success(t("contribute.success"));
+      closeModal();
+    }
+  }, [isSuccess]);
+
+  const handleEditSubmit = (c: Partial<SimpleContribution>) => {
+    // Cannot access function if not connected
+    const b = wrapInNewBundle(c, user!);
+    submitBundle(b);
+  };
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const openModal = () => setIsEditModalOpen(true);
+  const closeModal = () => setIsEditModalOpen(false);
 
   return (
-    <PageTemplate links={links}>
-      { isLoading && (
-        <div className="flex items-center justify-center">
-            <h1 className="text-3xl text-gray-500">Loading issue...</h1>
-        </div>
-      )}
-      { err && (
-        <div className="flex flex-col items-center justify-center">
-            <h1 className="text-3xl text-gray-500">Error while fetching issue</h1>
-            <h3 className="text-xl text-red-400">
-              [Code: {err.status}] { err.details.message }
-            </h3> 
-        </div>
-      )}
-      { (!isLoading && !error) && (
-        <>
-          <PageHeaderComponent headerTitle="Issue" title={buildIssueShortName(issue)} subtitle={issue?.name} 
-            createdAt={issue?.createdAt} modifiedAt={issue?.modifiedAt} addedBy={issue?.addedBy?.username} 
-            links={links}
+    <>
+      <InfoPageTemplate isLoading={isLoading} error={err}>
+        <InfoPageHeaderComponent
+          headerTitle={t("page.issue.header")}
+          title={issue?.name || ""}
+          subtitle={buildIssueShortName(issue)}
+          subtitleTo={`/issue_serie/${issue?.issueSerie?.id}`}
+          createdAt={issue?.createdAt}
+          modifiedAt={issue?.modifiedAt}
+          addedBy={issue?.addedBy?.username}
+        />
+
+        <InfoPageFields
+          fieldProps={[
+            // Story
+            { label: t("issue.name"), value: issue?.name },
+            // Parutiondate
+            {
+              label: t("issue.parutionDate"),
+              value: dateToVerboseDateString(locale, issue?.parutionDate),
+            },
+            // Coverdate
+            {
+              label: t("issue.coverDate"),
+              value: dateToVerboseDateString(locale, issue?.coverDate),
+            },
+          ]}
+        />
+
+        <InfoPageSection label={t("page.issue.books")}>
+          <BookList
+            bookList={issue?.books}
+            className="border border-white/8 rounded-lg"
           />
-          <div className="flex gap-2 items-center">
-            <h3 className="text-xl text-gray-200 font-semibold">Parution date :</h3>
-            <p className="text-xl text-gray-200">
-              {dateToVerboseDateString("en-EN", issue?.parutionDate)}
-            </p>
-          </div>
-          <div className="flex gap-2 items-center">
-            <h3 className="text-xl text-gray-200 font-semibold">Cover date :</h3>
-            <p className="text-xl text-gray-200">
-              {dateToMonthYearString("en-EN", issue?.coverDate)}
-            </p>
-          </div>
-          <div className="flex gap-2 items-center">
-            <h3 className="text-xl text-gray-200 font-semibold">Story&nbsp;:</h3>
-            <p className="text-xl text-gray-200">
-              {issue?.name}
-            </p>
-          </div>
-          <div className="flex gap-2 flex-col">
-            <h3 className="text-xl text-gray-200 font-semibold">Books :</h3>
-            <BookList bookList={issue?.books} className="border border-gray-500 rounded-lg"/>
-          </div>
-        </>
-      )}
-    </PageTemplate>
+        </InfoPageSection>
+      </InfoPageTemplate>
+      <IssueContributionModal
+        issue={issue}
+        action="update"
+        isOpen={isEditModalOpen}
+        onSubmit={handleEditSubmit}
+        onClose={closeModal}
+      />
+    </>
   );
 }

@@ -1,5 +1,6 @@
 import type { MRT_ColumnDef } from "material-react-table";
 import type { ColumnDef } from "~/components/tables/GenericTable";
+import { useTranslation } from "~/i18n/i18n";
 
 export interface User {
     id: number;
@@ -11,7 +12,7 @@ export interface User {
 }
 
 // Utility function to transform the api data to an instance of User
-export function parseDataToUser(data: Record<string, any>): User {
+export function parseToUser(data: Record<string, any>): User {
     return {
         id: data.id,
         username: data.username,
@@ -19,6 +20,18 @@ export function parseDataToUser(data: Record<string, any>): User {
         isAdmin: data.isAdmin,
         createdAt: new Date(data.createdAt),
         updatedAt: new Date(data.updatedAt)
+    }
+}
+
+export interface SimpleUser {
+    id: number;
+    username: string;
+}
+
+export function parseToSimpleUser(data: Record<string, any>): SimpleUser {
+    return {
+        id: data.id,
+        username: data.username
     }
 }
 
@@ -34,34 +47,39 @@ export interface SignupData {
 }
 
 export function getUserColumns(): ColumnDef<User>[] {
+  const { t, locale } = useTranslation()
+
   return [
     {
       key: 'id',
-      header: 'ID',
+      header: t('user.id'),
       searchable: true,
+      getValue: (usr) => String(usr.id)
     },
     {
       key: 'email',
-      header: 'Email',
-      searchable: true
+      header: t('user.email'),
+      searchable: true,
+      getValue: (usr) => usr.email
     },
     {
       key: 'username',
-      header: 'Username',
-      searchable: true
+      header: t('user.username'),
+      searchable: true,
+      getValue: (usr) => usr.username
     },
     {
       key: 'createdAt',
-      header: 'Created at',
+      header: t('user.createdAt'),
       cellRenderer: (usr) => {
-        return usr?.createdAt.toLocaleDateString()
+        return usr?.createdAt.toLocaleDateString(locale)
       },
     },
     {
       key: 'isAdmin',
-      header: 'Admin',
+      header: t('user.isAdmin'),
       cellRenderer: (usr) => {
-        return usr.isAdmin ? "Yes" : "No"
+        return t(usr.isAdmin ? 'generic.yes' : 'generic.no', { capitalize: true })
       },
     }
   ]

@@ -5,16 +5,25 @@ import java.util.Optional;
 
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.EditionDAO;
-import dev.stuten.vps.models.dtos.EditionDTO;
+import dev.stuten.vps.models.daos.OwnedEditionDAO;
+import dev.stuten.vps.models.dtos.full.EditionDTO;
+import dev.stuten.vps.models.dtos.response.EditionRelationToUserDTO;
 import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 
 public class EditionService {
-    private EditionService() {}
+    private EditionService() {
+    }
 
     private static EditionDAO dao = new EditionDAO(
             JooqProvider.get());
+
+    private static OwnedEditionDAO oeDao = new OwnedEditionDAO(JooqProvider.get());
+
+    protected static EditionDAO getDAO() {
+        return dao;
+    }
 
     public static void getByID(Context ctx) {
         // Retreive ID from request
@@ -34,5 +43,22 @@ public class EditionService {
         }
 
         ctx.json(Map.of("edition", edition));
+    }
+
+    public static void getRelationToUser(Context ctx) {
+        // Retreive ID from request
+        Integer userId, editionId;
+        try {
+            userId = Integer.parseInt(ctx.queryParam("userId"));
+            editionId = Integer.parseInt(ctx.queryParam("editionId"));
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            return; // For compiler
+        }
+
+        Boolean isOwned = oeDao.doesUserOwnEdition(userId, editionId);
+
+        EditionRelationToUserDTO relation = new EditionRelationToUserDTO(editionId, userId, isOwned);
+        ctx.json(Map.of("relation", relation));
     }
 }

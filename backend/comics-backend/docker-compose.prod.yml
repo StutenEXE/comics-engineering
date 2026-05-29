@@ -1,0 +1,11 @@
+services:
+  postgres:
+    ports: [] # not exposed externally
+
+  redis:
+    ports: [] # not exposed externally
+
+  api:
+    restart: always
+    environment:
+      APP_ENV: production

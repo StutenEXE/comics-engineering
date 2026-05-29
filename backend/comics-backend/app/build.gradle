@@ -11,6 +11,8 @@ plugins {
     id 'application'
 
     id 'nu.studer.jooq' version '8.2'
+
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 repositories {
@@ -33,19 +35,20 @@ dependencies {
     // JSON
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.15.2' // Optional<T> handling
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2' // java.time.OffsetDateTime handling
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.0' // java.time.LocalDateTime handling
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
     // BCrypt
     implementation 'org.mindrot:jbcrypt:0.4'
 
     // QueryDSL
-    implementation 'com.querydsl:querydsl-jpa:5.0.0'
-    annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jpa'
+    // implementation 'com.querydsl:querydsl-jpa:5.0.0'
+    // annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jpa'
 
     // JDBC pool
     implementation 'com.zaxxer:HikariCP:5.1.0'
 
-    // PostgreSQL (or swap for MySQL)
+    // PostgreSQL
     implementation 'org.postgresql:postgresql:42.7.3'
 
     // Redis synchronous connection
@@ -58,8 +61,8 @@ dependencies {
 
     // jOOQ
     implementation 'org.jooq:jooq:3.20.11'
-    implementation 'org.jooq:jooq-meta:3.20.11'
-    implementation 'org.jooq:jooq-codegen:3.20.11'
+    // implementation 'org.jooq:jooq-meta:3.20.11'
+    // implementation 'org.jooq:jooq-codegen:3.20.11'
     jooqGenerator 'org.postgresql:postgresql:42.7.3'
 }
 
@@ -81,7 +84,7 @@ java {
 }
 
 application {
-    // Define the main class for the application.
+    // Defines the main class for the application
     mainClass = 'dev.stuten.vps.App'
 }
 
@@ -91,9 +94,9 @@ jooq {
             generationTool {
                 jdbc {
                     driver = 'org.postgresql.Driver'  // Change based on DB
-                    url = System.getenv('COMICS_DB_URL') 
-                    user = System.getenv('COMICS_DB_USER') 
-                    password = System.getenv('COMICS_DB_PASSWORD')
+                    url = System.getenv('KYS_POSTGRES_URL') 
+                    user = System.getenv('KYS_POSTGRES_USER') 
+                    password = System.getenv('KYS_POSTGRES_PASSWORD')
                 }
                 generator {
                     name = 'org.jooq.codegen.DefaultGenerator'

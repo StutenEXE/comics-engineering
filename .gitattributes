@@ -1,0 +1,3 @@
+# Guarantee LF for EOL on shell and sql scripts
+*.sh text eol=lf
+*.sql text eol=lf

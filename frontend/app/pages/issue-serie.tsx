@@ -1,14 +1,27 @@
-import { useIssueSerieByIdQuery } from "~/store/services/api";
-import type { Route } from "../+types/root";
-import { createError } from "~/utils/error";
-import { BookCard } from "~/components/cards/BookCard";
-import { compareDates, dateToMonthYearString, dateToVerboseDateString } from "~/utils/date";
-import { IssueCard } from "~/components/cards/IssueCard";
-import type { Book } from "~/models/book";
-import { PageHeaderComponent } from "~/components/headers/PageHeader";
-import { PageTemplate } from "~/components/templates/PageTemplate";
-import { IssueList } from "~/components/lists/issuelists/IssueList";
+import { InfoPageHeaderComponent } from "~/components/headers/InfoPageHeader";
 import { BookList } from "~/components/lists/booklists/BookList";
+import { IssueList } from "~/components/lists/issuelists/IssueList";
+import {
+  InfoPageSection,
+  InfoPageTemplate,
+} from "~/components/templates/InfoPageTemplate";
+import { useTranslation } from "~/i18n/i18n";
+import type { SimpleBook } from "~/models/book";
+import {
+  useIssueSerieByIdQuery,
+  useSubmitContributionBundleMutation,
+} from "~/store/services/api";
+import { dateToMonthYearString } from "~/utils/date";
+import { createError } from "~/utils/error";
+import type { Route } from "../+types/root";
+import { useEffect, useState } from "react";
+import { useToast } from "~/components/toast/Toast";
+import {
+  type SimpleContribution,
+  wrapInNewBundle,
+} from "~/models/contribution";
+import { useAppSelector } from "~/store/hooks";
+import { IssueSerieContributionModal } from "~/components/modals/contribution/IssueSerieContributionModal";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -17,69 +30,105 @@ export function meta({ params }: Route.MetaArgs) {
   ];
 }
 
-export default function IssueSeriePage({ params }: { params : { id: number}}) {
-  
+export default function IssueSeriePage({ params }: { params: { id: number } }) {
+  const { t, locale } = useTranslation();
+  const toast = useToast();
+  const { user, isAuthenticated } = useAppSelector((state) => state.user);
+
   const { data, isLoading, error } = useIssueSerieByIdQuery({ id: params.id });
-  const issueSerie = data?.issueSerie ?? null;
-  const err = createError(error)
+  const issueSerie = data?.issueSerie;
+  const err = createError(error);
 
-  // Remove duplicate books by id
-  const ids = new Set();
-  const books: Book[] | undefined = issueSerie?.issues.flatMap(is => is.books)
-    .filter(({ id }) => !ids.has(id) && ids.add(id))
+  // Submit a contribution bundle
+  const [submitBundle, { isError, isSuccess }] =
+    useSubmitContributionBundleMutation();
 
-  let subtitle = dateToMonthYearString("en-EN", issueSerie?.startDate)
-  if (!issueSerie?.endDate) { subtitle += " - Present" }
-  else if (issueSerie?.startDate.getTime() === issueSerie?.endDate.getTime()) {
-    subtitle += " (Oneshot)"
-  }
-  else {
-    subtitle += ` - ${dateToMonthYearString("en-EN", issueSerie?.endDate)}`
+  // If error or success occurs during contribution submission
+  useEffect(() => {
+    if (isError) toast.error(t("contribute.fail"));
+  }, [isError]);
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success(t("contribute.success"));
+      closeModal();
+    }
+  }, [isSuccess]);
+
+  const handleEditSubmit = (c: Partial<SimpleContribution>) => {
+    // Cannot access function if not connected
+    const b = wrapInNewBundle(c, user!);
+    submitBundle(b);
+  };
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const openModal = () => setIsEditModalOpen(true);
+  const closeModal = () => setIsEditModalOpen(false);
+
+  const books: SimpleBook[] | undefined = issueSerie?.books;
+
+  let subtitle = dateToMonthYearString(locale, issueSerie?.startDate);
+  if (!issueSerie?.endDate) {
+    subtitle += ` - ${t("generic.present", { capitalize: true })}`;
+  } else if (
+    issueSerie?.startDate.getTime() === issueSerie?.endDate.getTime()
+  ) {
+    subtitle += ` - ${t("generic.oneshot", { capitalize: true })}`;
+  } else {
+    subtitle += ` - ${dateToMonthYearString(locale, issueSerie?.endDate)}`;
   }
 
   return (
-    <PageTemplate hasImg={false}>
-      { isLoading && (
-        <div className="flex items-center justify-center">
-            <h1 className="text-3xl text-gray-500">Loading issue...</h1>
-        </div>
-      )}
-      { err && (
-        <div className="flex flex-col items-center justify-center">
-            <h1 className="text-3xl text-gray-500">Error while fetching issue</h1>
-            <h3 className="text-xl text-red-400">
-              [Code: {err.status}] { err.details.message }
-            </h3> 
-        </div>
-      )}
-      { (!isLoading && !error) && (
-        <>
-          <PageHeaderComponent headerTitle="Issue Serie" title={issueSerie?.name} subtitle={subtitle} 
-            createdAt={issueSerie?.createdAt} modifiedAt={issueSerie?.modifiedAt} addedBy={issueSerie?.addedBy?.username} />
-          <div className="flex flex-col gap-2">
-            <h3 className="text-xl text-gray-200 font-semibold">Description :</h3>
-            <p>
-              {issueSerie?.desc}
+    <>
+      <InfoPageTemplate hasImg={false} isLoading={isLoading} error={err}>
+        <InfoPageHeaderComponent
+          headerTitle={t("page.issueserie.header")}
+          title={issueSerie?.name || ""}
+          subtitle={subtitle}
+          createdAt={issueSerie?.createdAt}
+          modifiedAt={issueSerie?.modifiedAt}
+          addedBy={issueSerie?.addedBy?.username}
+          onEditClick={() => {
+            if (!isAuthenticated) {
+              toast.info("toast.notconnected");
+              return;
+            }
+            openModal();
+          }}
+        />
+
+        {issueSerie?.desc && (
+          <InfoPageSection label={t("issueserie.description")}>
+            <p className="text-sm text-white/60 leading-relaxed">
+              {issueSerie.desc}
             </p>
-          </div>
-          <div className="flex gap-2 flex-col">
-            <h3 className="text-xl text-gray-200 font-semibold">Issues :</h3>
-              <IssueList issueList={
-                issueSerie?.issues.map((is) => {
-                  // Since issueSerie is read-only, it's children are too,  nd we need to have a defined issueSerie here
-                  // it is not sent back by the API (infinite loops in this case)
-                  return {
-                    ...is,
-                    issueSerie: {...issueSerie}
-                  }
-              })} className="border border-gray-500 rounded-lg"/>
-          </div>
-          <div className="flex gap-2 flex-col">
-            <h3 className="text-xl text-gray-200 font-semibold">Books :</h3>
-            <BookList bookList={books} className="border border-gray-500 rounded-lg"/>
-          </div>
-        </>
-      )}
-    </PageTemplate>
+          </InfoPageSection>
+        )}
+
+        <InfoPageSection label={t("issueserie.issues")}>
+          <IssueList
+            issueList={issueSerie?.issues.map((is) => ({
+              ...is,
+              issueSerie: { ...issueSerie },
+            }))}
+            className="border border-white/8 rounded-lg"
+          />
+        </InfoPageSection>
+
+        <InfoPageSection label={t("page.issueserie.books")}>
+          <BookList
+            bookList={books}
+            className="border border-white/8 rounded-lg"
+          />
+        </InfoPageSection>
+      </InfoPageTemplate>
+      <IssueSerieContributionModal
+        issueSerie={issueSerie}
+        action="update"
+        isOpen={isEditModalOpen}
+        onSubmit={handleEditSubmit}
+        onClose={closeModal}
+      />
+    </>
   );
 }

@@ -1,11 +1,13 @@
 import { useState } from "react";
-import type { Route } from "../+types/root";
+import { CollapsableSerieList } from "~/components/lists/serielists/CollapsableSerieList";
+import { useTranslation } from "~/i18n/i18n";
+import type { Book } from "~/models/book";
+import { simpleSerieToSerie, type Serie } from "~/models/serie";
 import { useSearchBooksAndSeriesByNameQuery } from "~/store/services/api";
 import { createError } from "~/utils/error";
-import type { Serie } from "~/models/serie";
-import type { Book } from "~/models/book";
 import { deepCopy } from "~/utils/object";
-import { CollapsableSerieList } from "~/components/lists/serielists/CollapsableSerieList";
+import type { Route } from "../+types/root";
+import { MdSearch } from "react-icons/md";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -14,84 +16,116 @@ export function meta({ params }: Route.MetaArgs) {
   ];
 }
 
-
 export default function SearchPage() {
-    const [query, setQuery] = useState("");
+  const { t } = useTranslation();
 
-    // Fetch data from query 
-    const { data, error, isLoading } = useSearchBooksAndSeriesByNameQuery({ query });
-    const books = data?.books ?? [];
-    const series = data?.series ?? [];
-    const err = createError(error)
+  const [query, setQuery] = useState("");
+  const { data, error, isLoading } = useSearchBooksAndSeriesByNameQuery({
+    query,
+  });
+  const books = data?.books ?? [];
+  const series = data?.series ?? [];
+  const err = createError(error);
 
-    const serieIds = new Set();
-    // Not const because it will be modified
-    let allSeries: Serie[] = [...deepCopy(series), ...deepCopy(books)]
-    // Get all series contained in books
-    .flatMap((el: Serie | Book) => {
-        if ((el as Book).serie) {
-            return (el as Book).serie
-        }
-        return el as Serie
-    })
-    // Filter out possibly null series (shouldn't exist but checking doesn't hurt)
-    .filter(ser => ser !== null)
-    // Remove duplicates
-    .filter(({ id }) => !serieIds.has(id) && serieIds.add(id))
-
-    // For each book returned by the search, we want to add it to it's serie
-    books.forEach((bk) => {
-        if (!bk?.serie?.id) {
-            return
-        }
-        // Find the book's serie only
-        let ser = allSeries.find((ser) => ser.id === bk?.serie?.id)
-        // We do not want to add the book to the serie if the serie already knows it
-        if(ser?.books.find(bk2 => bk.id === bk2.id)) {
-            return
-        }
-        // Deep copy for later modification
-        ser?.books.push(deepCopy(bk))
-    })
-
-    // For each serie now complete, we need to ensure that all books have a reference towards it's serie
-    allSeries.forEach(ser => {
-        ser?.books.forEach(bk => {
-            bk.serie = ser
-        })
-    })
-
-    const handleQueryChange = (event: any) => {
-        const value = event.target.value;
-        setQuery(value);
-    };
-
-    return (
-        <main className="flex flex-col items-center pt-8">
-            <div className="max-w-500 w-1/2 mb-4">
-                <div className="w-full flex flex-col items-center">
-                    <div className="w-1/2 mb-4 ">
-                        <label htmlFor="text" className="block font-semibold mb-2">Search</label>
-                        <input
-                            type="text"
-                            id="search"
-                            name="search"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Search books and series"
-                            onChange={handleQueryChange}
-                        />
-                    </div>
-                    <div className="w-full flex flex-col items-center">
-                        { query.trim().length < 3 && <p>Type at least 3 characters to search</p> }
-                        { query.trim().length >= 3 && <CollapsableSerieList serieList={allSeries} isLoading={isLoading} error={err} />}
-                    </div>
-                </div>
-            </div>
-
-            <div>
-
-            </div>
-
-        </main>
+  const serieIds = new Set();
+  let allSeries: Serie[] = [...deepCopy(series), ...deepCopy(books)]
+    .flatMap((el: Serie | Book) =>
+      (el as Book).serie ? (el as Book).serie : (el as Serie),
     )
+    .filter((ser) => ser !== null)
+    .filter(({ id }) => !serieIds.has(id) && serieIds.add(id))
+    .map((ser) => simpleSerieToSerie(ser));
+
+  books.forEach((bk) => {
+    if (!bk?.serie?.id) return;
+    let ser = allSeries.find((ser) => ser.id === bk?.serie?.id);
+    if (ser?.books.find((bk2) => bk.id === bk2.id)) return;
+    ser?.books.push(deepCopy(bk));
+  });
+
+  allSeries.forEach((ser) => {
+    ser?.books.forEach((bk) => {
+      bk.serieId = ser.id;
+    });
+  });
+
+  const trimmed = query.trim();
+  const isShort = trimmed.length < 3;
+  const hasResults = allSeries.length > 0;
+
+  return (
+    <main className="flex flex-col items-center px-4 py-12 gap-8">
+      {/* Search bar */}
+      <div className="w-full max-w-xl flex flex-col gap-2">
+        <label
+          htmlFor="search"
+          className="text-xs font-medium uppercase tracking-widest text-white/40"
+        >
+          {t("search.header")}
+        </label>
+        <div className="relative">
+          <input
+            type="text"
+            id="search"
+            name="search"
+            autoComplete="off"
+            placeholder={t("search.placeholder")}
+            onChange={(e) => setQuery(e.target.value)}
+            className="bg-white/5 border border-white/10 rounded-md px-4 py-2.5 pr-10 text-sm text-white/80 placeholder-white/20 outline-none focus:border-indigo-500/70 focus:ring-1 focus:ring-indigo-500/30 transition-all w-full"
+          />
+          {/* Search icon */}
+          <MdSearch
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none"
+            size={18}
+          />
+        </div>
+
+        {/* Hint */}
+        {isShort && trimmed.length > 0 && (
+          <p className="text-xs text-white/25 italic">
+            {t("search.gte3chars")}
+          </p>
+        )}
+      </div>
+
+      {/* Valid query */}
+      {!isShort && (
+        <div className="w-full max-w-xl flex flex-col gap-3">
+          {/* Results header */}
+          {!isLoading && !err && (
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium uppercase tracking-widest text-white/40">
+                {t("search.results")}
+              </span>
+              {hasResults && (
+                <span className="text-xs text-white/25">
+                  {allSeries.length} {t("search.series")}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Results */}
+          {!isLoading && !err && hasResults && (
+            <CollapsableSerieList
+              serieList={allSeries}
+              isLoading={isLoading}
+              error={err}
+            />
+          )}
+
+          {/* No results */}
+          {!isLoading && !err && !hasResults && (
+            <div className="flex flex-col items-center gap-2 py-12 border border-white/8 rounded-lg">
+              <MdSearch size={32} className="text-white/10" />
+              <p className="text-sm text-white/25 italic">
+                {t("search.noresults")} "
+                <span className="text-white/40">{trimmed}</span>"
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </main>
+  );
 }

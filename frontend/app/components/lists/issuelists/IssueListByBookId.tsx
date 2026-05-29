@@ -2,6 +2,7 @@ import { useIssueByBookIdQuery } from "~/store/services/api";
 import { createError } from "~/utils/error";
 import type { Book } from "~/models/book";
 import { IssueList } from "./IssueList";
+import { useTranslation } from "~/i18n/i18n";
 
 interface IssueListByBooksIdProps {
     bookId: number | null | undefined
@@ -11,11 +12,13 @@ interface IssueListByBooksIdProps {
 }
 
 export function IssueListByBookId({ bookId, toIgnore, descOrder, className }: IssueListByBooksIdProps) {
+    const { t } = useTranslation()
+
     if (!bookId) {
         return(<IssueList issueList={[]} error={{
             status: 0,
             details: {
-                error: "No book found"
+                error: t("book.nonefound")
             }
         }} className={className}/>)
     }

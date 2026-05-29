@@ -1,0 +1,15 @@
+services:
+  postgres:
+    ports:
+      - "127.0.0.1:5432:5432" # exposed locally
+
+  redis:
+    ports:
+      - "127.0.0.1:6379:6379" # exposed locally
+  api:
+    build:
+      target: builder # stop at build stage, don't run
+    volumes:
+      - .:/app # mount source code live
+    environment:
+      APP_ENV: development

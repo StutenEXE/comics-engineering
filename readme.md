@@ -1,26 +1,58 @@
-# Comics engineering
+# Know Your Stash
 
-> Licensed under the PolyForm Noncommercial License 1.0.0
+- REST API built with **Javalin** + **jOOQ**
+- Databases : **PostgreSQL 18** and **Redis**.
 
-## Technology stack
+---
 
-### Databases
+## Prerequisites
 
-* Main : PostgreSQL
-* Secondary (unplugable features) : MongoDB
+- Docker & Docker Compose
+- JDK 21
+- Gradle 8
 
-### Backend
+---
 
-* Technology : Java
-* Framework : Javalin & jOOQ
+## Setup
 
-Before compiling, generate the jOOQ files:
+Create two `.env` files : `.env.dev` & `.env.prod`.
 
-> Set environement variables for the Postgres DataBase
-> Go to `backend/comics-backend`
-> Run `./gradlew clean :app:generateJooq --no-build-cache --rerun-tasks`
-> After that, you can start to run the Java code
+---
 
-### Frontend
+## Development
 
-* Framework : React
+Postgres and Redis run in Docker. The API runs locally for hot reload.
+
+**1. Start the databases**
+
+```bash
+make dev-up
+```
+
+**2. Run the API**
+
+Run it using an IDE.
+
+API available at `http://localhost:8080`.  
+Postgres exposed at `127.0.0.1:5432`, Redis at `127.0.0.1:6379`.
+
+---
+
+## Production
+
+All three services run in Docker.
+
+```bash
+make prod-up
+```
+
+---
+
+## Schema changes
+
+Whenever `postgres/init/` is changes, regenerate jOOQ classes against a local throwaway DB then commit the changes.
+
+```bash
+git add app/build/generated-src/jooq/
+git commit -m "[chore: regenerate jOOQ classes"
+```
