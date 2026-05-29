@@ -41,7 +41,7 @@ export function EditionCard({
 
   const onSubmit = () => {
     relation?.inCollection && (relation.inCollection = true);
-  }
+  };
 
   // Handles modal open/close state
   const [isModalOpen, setisModalOpen] = useState(false);
@@ -65,7 +65,12 @@ export function EditionCard({
       >
         {!disableInteractions && user && (
           <AddToCollectionIconButton
-            onClick={preventDefaultEvt(noPropagationEvt(openModal))}
+            // TODO : fix when already added not open modal
+            onClick={preventDefaultEvt(
+              noPropagationEvt(() => {
+                relation?.inCollection && openModal();
+              }),
+            )}
             alreadyAdded={relation ? relation.inCollection : false}
             className="absolute z-2 top-1 right-1"
           />

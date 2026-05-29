@@ -1,14 +1,12 @@
-import { useTranslation } from "~/i18n/i18n";
-import { parseToSimpleBundle, type SimpleContributionBundle } from "./contributionBundle";
-import type { ColumnDef } from "~/components/tables/GenericTable";
+import type { Locale } from "~/store/slices/localeSlice";
 import type { Book } from "./book";
+import { newBundle, parseToSimpleBundle, type ContributionBundle, type SimpleContributionBundle } from "./contributionBundle";
 import type { Edition } from "./edition";
-import type { Serie } from "./serie";
 import { buildIssueShortName, type Issue } from "./issue";
 import type { IssueSerie } from "./issue-serie";
 import type { Publisher } from "./publisher";
-import type { Locale } from "~/store/slices/localeSlice";
-import React from "react";
+import type { Serie } from "./serie";
+import type { SimpleUser } from "./user";
 
 export enum ContributionTypeEnum {
     BOOK = "book",
@@ -75,10 +73,8 @@ export interface SimpleContribution {
 }
 
 export interface ContributionTree extends SimpleContribution {
-  children: ContributionTree[];
+    children: ContributionTree[];
 }
-
-
 
 export function parseToSimpleContribution(data: Record<string, any>): SimpleContribution {
     return {
@@ -119,10 +115,17 @@ export function getContributionName(c: SimpleContribution | Contribution, locale
         case ContributionTypeEnum.BOOK: return (c.proposedData as Book).name
         case ContributionTypeEnum.EDITION:
             const ed = (c.proposedData as Edition)
-            return `${ `${ed.book?.name} - ` || ""}${ed.publisher?.name} (${new Date(ed.parutionDate).toLocaleDateString(locale)})`
+            return `${`${ed.book?.name} - ` || ""}${ed.publisher?.name} (${new Date(ed.parutionDate).toLocaleDateString(locale)})`
         case ContributionTypeEnum.SERIE: return (c.proposedData as Serie)?.name
         case ContributionTypeEnum.ISSUE: return buildIssueShortName(c.proposedData as Issue)
         case ContributionTypeEnum.ISSUE_SERIE: return (c.proposedData as IssueSerie).name
         case ContributionTypeEnum.PUBLISHER: return (c.proposedData as Publisher).name
     }
+}
+
+export function wrapInNewBundle(c: Partial<SimpleContribution>, submitter: SimpleUser): Partial<ContributionBundle> {
+    const b = newBundle(submitter)
+    b.note = `${c.action} - ${c.entityType} - ${c.entityId}`
+    b.contributions?.push(c as SimpleContribution)
+    return b;
 }

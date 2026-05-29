@@ -78,7 +78,7 @@ export function issueToSimpleIssue(issue: Issue): SimpleIssue {
     }
 }
 
-export function buildIssueShortName(is: Issue | SimpleIssue | null): string {
+export function buildIssueShortName(is: Issue | SimpleIssue | undefined): string {
     if (!is) {
         return "";
     }

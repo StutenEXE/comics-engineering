@@ -11,6 +11,7 @@ import { deepCopy } from "~/utils/object";
 import { BundleStatusBadge } from "../badges/BundleStatusBadge";
 import { useToast } from "../toast/Toast";
 import { GenericTable, type ColumnDef } from "./GenericTable";
+import type { SimpleContribution } from "~/models/contribution";
 
 function getBundleColumns(
   onContibutionClick?: (b: ContributionBundle) => void,
@@ -78,6 +79,10 @@ interface ContributionBundleTableProps {
   addActions: boolean;
   onContributionClick?: (b: ContributionBundle) => void;
   onPageChange?: (page: number) => void;
+  onSuccesfulStatusUpdate?: (
+    b: ContributionBundle,
+    newStatus: ContributionBundleStatusEnum,
+  ) => void;
   isLoading?: boolean;
   error?: Error;
   className?: string;
@@ -87,6 +92,7 @@ export function ContributionBundleTable({
   bundleList,
   onContributionClick,
   onPageChange,
+  onSuccesfulStatusUpdate,
   isLoading,
   error,
 }: ContributionBundleTableProps) {
@@ -106,7 +112,7 @@ export function ContributionBundleTable({
         return;
       }
       toast.success(t("cbundle.toast.statusupdated"));
-      b.status = newStatus;
+      onSuccesfulStatusUpdate?.(b, newStatus);
     });
   };
 

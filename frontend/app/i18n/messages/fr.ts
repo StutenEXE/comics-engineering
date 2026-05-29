@@ -6,6 +6,7 @@ export default {
     "generic.n/a": "N/A",
     "generic.yes": "oui",
     "generic.no": "non",
+    "generic.edit": "Modifier",
     "generic.cancel": "annuler",
     "generic.submit": "soumettre",
     "generic.confirm": "confirmer",
@@ -27,6 +28,7 @@ export default {
     // ============================
     // == Toasts
     // ============================
+    "toast.notconnected": "Vous n'êtes pas connecté",
     "toast.adminroute.access_denied": "Accès refusé. Réservé aux admins.",
     "toast.loggedroute.access_denied": "Accès refusé. Veuillez vous connecter.",
     // ============================
@@ -68,9 +70,9 @@ export default {
     "contribution.enum.status.pending": "En attente",
     "contribution.enum.status.rejected": "Rejetée",
     "contribution.enum.status.needs_revision": "Besoin de révision",
-    "contribution.enum.status.ignored": "Ignorée",
+    "contribution.enum.status.skipped": "Ignorée",
     "contribution.enum.action.create": "Création",
-    "contribution.enum.action.modify": "Modification",
+    "contribution.enum.action.update": "Modification",
     "contribution.enum.action.delete": "Suppression",
     "contribution.enum.type.book": "Livre",
     "contribution.enum.type.serie": "Série",
@@ -98,7 +100,7 @@ export default {
     "contribution.confirmstatuschangemessage.approved": "Êtes-vous sûr de vouloir approuver cette contribution ?\nCette action va créer ou modifier un item dans la base de données.",
     "contribution.confirmstatuschangemessage.rejected": "Êtes-vous sûr de vouloir rejeter cette contribution ?",
     "contribution.confirmstatuschangemessage.needs_revision": "Êtes-vous sûr de vouloir demander une révision pour cette contribution ?",
-    "contribution.confirmstatuschangemessage.ignored": "Êtes-vous sûr de vouloir ignorer cette contribution ?",
+    "contribution.confirmstatuschangemessage.skipped": "Êtes-vous sûr de vouloir ignorer cette contribution ?",
     "contribution.create.success": "Contribution créée avec succès",
     "contribution.create.error": "Erreur lors de la création de la contribution",
     "contribution.update.success": "Contribution mise à jour avec succès",

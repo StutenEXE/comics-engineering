@@ -4,6 +4,7 @@ import {
   BiSolidDislike,
   BiSolidLike,
 } from "react-icons/bi";
+import { useState, useEffect } from "react";
 import { MdAdd, MdDelete, MdModeEdit } from "react-icons/md";
 import { PiArrowElbowDownRightBold } from "react-icons/pi";
 import { ContributionStatusBadge } from "~/components/badges/ContributionStatusBadge";
@@ -29,6 +30,11 @@ import {
   type SimpleIssue,
 } from "~/models/issue";
 
+/**
+ * A simplified representation of an issue as referenced from a contribution's
+ * proposed data. Fields are optional because some issues may only be local
+ * references (negative ids) or may come from a ContributionIssue wrapper.
+ */
 interface LinkedIssue {
   id?: number;
   name?: string;
@@ -38,6 +44,11 @@ interface LinkedIssue {
   issueSerieLocalRef?: string;
 }
 
+/**
+ * Convert a `SimpleIssue` to a `LinkedIssue` shape used by the list UI. Handles
+ * mapping negative ids to `localRef` so the UI can indicate unresolved
+ * local references.
+ */
 function simpleIssueToLinkedIssue(i: SimpleIssue): LinkedIssue {
   return {
     id: i.id >= 0 ? i.id : undefined,
@@ -50,6 +61,11 @@ function simpleIssueToLinkedIssue(i: SimpleIssue): LinkedIssue {
   };
 }
 
+/**
+ * Convert a `ContributionIssue` into a `LinkedIssue`. Contribution-wrapped
+ * issues include an `issueSerie` object rather than top-level fields, so the
+ * mapping extracts those values.
+ */
 function contributionIssueToLinkedIssue(i: ContributionIssue): LinkedIssue {
   return {
     id: i.id! >= 0 ? i.id : undefined,
@@ -62,6 +78,15 @@ function contributionIssueToLinkedIssue(i: ContributionIssue): LinkedIssue {
   };
 }
 
+/**
+ * Props for `IndentedContributionList`.
+ * - `contributionList`: incoming data (either full `Contribution` or already-
+ *   simplified `SimpleContribution`).
+ * - `buttons`: which action buttons (add/edit/delete) should be shown.
+ * - `onAdd/onEdit/onRemove`: callbacks invoked when the corresponding action
+ *   buttons are clicked (they receive the `ContributionTree` node).
+ * - `adminActions`: when true, shows admin status controls (approve/reject).
+ */
 interface ContributionTreeListProps {
   contributionList: Contribution[] | SimpleContribution[] | null | undefined;
   buttons?: {
@@ -78,6 +103,12 @@ interface ContributionTreeListProps {
   className?: string;
 }
 
+/**
+ * Render an indented, hierarchical list of contributions. The component keeps
+ * an internal `list` state derived from the `contributionList` prop so that
+ * updates (for example status changes) can be applied locally and trigger a
+ * re-render immediately after the backend acknowledges the change.
+ */
 export function IndentedContributionList({
   contributionList,
   buttons,
@@ -108,7 +139,11 @@ export function IndentedContributionList({
               return;
             }
             toast.success(t("contribution.status.updated"));
-            c.status = newStatus;
+            setList((prev) =>
+              prev.map((item) =>
+                item.id === c.id ? { ...item, status: newStatus } : item,
+              ),
+            );
           },
         );
       },
@@ -200,6 +235,11 @@ export function IndentedContributionList({
     return Array.from(groups.values());
   };
 
+  /**
+   * Generate the element for a single contribution node. The `indent`
+   * parameter controls how far the node is shifted to the right to indicate
+   * hierarchy.
+   */
   const mapper = (c: ContributionTree, indent: number) => (
     <div key={c.id} className="pb-1">
       <div className="flex items-center gap-1 group">
@@ -359,17 +399,32 @@ export function IndentedContributionList({
     </div>
   );
 
-  const list =
+  const [list, setList] = useState<SimpleContribution[]>(() =>
     !contributionList || contributionList.length === 0
       ? []
       : isSimpleContribution(contributionList[0])
-        ? (contributionList as SimpleContribution[]).map((c) => ({
-            ...c, // Deepcopy
-          }))
+        ? (contributionList as SimpleContribution[]).map((c) => ({ ...c }))
         : (contributionList as Contribution[]).map((c) => ({
-            ...contributionToSimpleContribution(c), // Deepcopy
-          }));
+            ...contributionToSimpleContribution(c),
+          })),
+  );
 
+  useEffect(() => {
+    const initial =
+      !contributionList || contributionList.length === 0
+        ? []
+        : isSimpleContribution(contributionList[0])
+          ? (contributionList as SimpleContribution[]).map((c) => ({ ...c }))
+          : (contributionList as Contribution[]).map((c) => ({
+              ...contributionToSimpleContribution(c),
+            }));
+    setList(initial);
+  }, [contributionList]);
+
+  /**
+   * Recursively builds a `ContributionTree` by finding children whose
+   * `proposedData` references this node via `localRef`.
+   */
   const buildTree = (node: SimpleContribution): ContributionTree => {
     const key = findKeyForEntityType(node.entityType);
     const children = key

@@ -1,3 +1,4 @@
+import { MdModeEdit } from "react-icons/md";
 import { Link } from "react-router";
 import { useTranslation } from "~/i18n/i18n";
 
@@ -10,6 +11,7 @@ interface PageHeaderComponentProps {
   createdAt?: Date;
   modifiedAt?: Date;
   addedBy?: string;
+  onEditClick?: () => void;
 }
 
 export function InfoPageHeaderComponent({
@@ -21,6 +23,7 @@ export function InfoPageHeaderComponent({
   createdAt,
   modifiedAt,
   addedBy,
+  onEditClick,
 }: PageHeaderComponentProps) {
   const { t, locale } = useTranslation();
 
@@ -75,6 +78,16 @@ export function InfoPageHeaderComponent({
           </span>
         </p>
       </div>
+
+      {/* If there is an expected behavior for edition, show edition button */}
+      {onEditClick && (
+        <div className="group flex gap-1 text-xs text-white/25 cursor-pointer hover:underline hover:text-white/75">
+          <p className="" onClick={onEditClick}>
+            {t("generic.edit")}
+          </p>
+          <MdModeEdit size={16} />
+        </div>
+      )}
     </div>
   );
 }

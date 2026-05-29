@@ -15,7 +15,7 @@ import { useToast } from "~/components/toast/Toast";
 import type { ContributionBundle } from "~/models/contributionBundle";
 import { LoggedProtectedRoute } from "~/components/security/LoggedProtectedRoute";
 
-export function meta({ }: Route.MetaArgs) {
+export function meta({}: Route.MetaArgs) {
   return [
     { title: `Contribute` },
     { name: "description", content: `Contribute to the library` },
@@ -37,9 +37,6 @@ export default function ContributePage() {
   const [submitBundle, { isError, isSuccess }] =
     useSubmitContributionBundleMutation();
 
-  // Handles contribution modal state
-  const [isContributionModalOpen, setisContributionModalOpen] = useState(false);
-
   // If error or success occurs during contribution submission
   useEffect(() => {
     if (isError) toast.error(t("contribute.fail"));
@@ -51,6 +48,9 @@ export default function ContributePage() {
       refetch();
     }
   }, [isSuccess]);
+
+  // Handles contribution modal state
+  const [isContributionModalOpen, setisContributionModalOpen] = useState(false);
 
   // If not auth
   if (!isAuthenticated) {
@@ -92,7 +92,8 @@ export default function ContributePage() {
   contributions?.forEach((contrib) => {
     if (contrib.status === ContributionStatusEnum.APPROVED) stats.approved++;
     else if (contrib.status === ContributionStatusEnum.PENDING) stats.pending++;
-    else if (contrib.status === ContributionStatusEnum.NEEDS_REVISION) stats.needsRevision++;
+    else if (contrib.status === ContributionStatusEnum.NEEDS_REVISION)
+      stats.needsRevision++;
     else if (contrib.status === ContributionStatusEnum.REJECTED)
       stats.rejected++;
   });

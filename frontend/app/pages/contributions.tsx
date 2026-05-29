@@ -23,6 +23,8 @@ export default function ContributePage() {
   const toast = useToast();
   const itemsPerPage = 10;
 
+  const [currPage, setCurrPage] = useState(0);
+
   // If a bundle is to be edited
   const [bundleToEdit, setBundleToEdit] = useState<ContributionBundle>();
 
@@ -40,14 +42,20 @@ export default function ContributePage() {
 
   // List bundles
   const [getBundles, { data }] = useLazyBundleListQuery();
-  const handleSearch = (page: number) => {
-    const from = page * itemsPerPage;
+  const bundles = data?.bundles;
+
+  const triggerGetBundles = () => {
+    const from = currPage * itemsPerPage;
     const limit = itemsPerPage;
     getBundles({ from, limit });
   };
+
+  // On page change, refetch data
+  useEffect(() => triggerGetBundles(), [currPage]);
+
   // On load, fetch first page of bundles
   useEffect(() => {
-    handleSearch(0);
+    if (!bundles) triggerGetBundles();
   }, []);
 
   const [updateBundle] = useUpdateContributionBundleMutation();
@@ -55,7 +63,6 @@ export default function ContributePage() {
   const updateContributionBundle = async (
     bundle: Partial<ContributionBundle>,
   ) => {
-    console.log(bundle);
     updateBundle(bundle)
       .then((res) => {
         if ("error" in res) {
@@ -79,10 +86,11 @@ export default function ContributePage() {
           </h1>
         </div>
         <ContributionBundleTable
-          bundleList={data?.bundles || []}
+          bundleList={bundles || []}
           addActions
           onContributionClick={openContributionModal}
-          onPageChange={handleSearch}
+          onPageChange={setCurrPage}
+          onSuccesfulStatusUpdate={triggerGetBundles}
         />
       </main>
       <ContributionBundleModal

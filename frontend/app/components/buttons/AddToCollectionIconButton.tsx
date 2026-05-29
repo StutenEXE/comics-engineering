@@ -40,7 +40,6 @@ export function AddToCollectionIconButton({
             "text-green-600",
             className,
           )}
-          onClick={onClick}
           role={onClick ? "button" : undefined}
         />
       )}

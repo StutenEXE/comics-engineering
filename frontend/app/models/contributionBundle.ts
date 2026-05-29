@@ -1,9 +1,6 @@
-import { SelectRhfInput } from "~/components/forms/fields/SelectRhfInput";
-import type { ColumnDef } from "~/components/tables/GenericTable";
-import { useTranslation } from "~/i18n/i18n";
+import { resolveTimeViewsResponse } from "@mui/x-date-pickers/internals";
 import { parseToSimpleContribution, type SimpleContribution } from "./contribution";
 import { parseToSimpleUser, type SimpleUser } from "./user";
-import React from "react";
 
 export enum ContributionBundleStatusEnum {
     PENDING = "pending",
@@ -22,6 +19,17 @@ export interface ContributionBundle {
     modifiedAt: Date,
 }
 
+export interface SimpleContributionBundle {
+    id: number,
+    submitterId: number,
+    submitterUsername: string,
+    status: ContributionBundleStatusEnum,
+    note: string,
+    createdAt: Date,
+    modifiedAt: Date,
+}
+
+
 export function parseToBundle(data: Record<string, any>): ContributionBundle {
     return {
         id: data.id,
@@ -34,16 +42,6 @@ export function parseToBundle(data: Record<string, any>): ContributionBundle {
     }
 }
 
-export interface SimpleContributionBundle {
-    id: number,
-    submitterId: number,
-    submitterUsername: string,
-    status: ContributionBundleStatusEnum,
-    note: string,
-    createdAt: Date,
-    modifiedAt: Date,
-}
-
 export function parseToSimpleBundle(data: Record<string, any>): SimpleContributionBundle {
     return {
         id: data.id,
@@ -54,4 +52,13 @@ export function parseToSimpleBundle(data: Record<string, any>): SimpleContributi
         createdAt: new Date(data.createdAt),
         modifiedAt: new Date(data.modifiedAt),
     }
+}
+
+export function newBundle(submitter: SimpleUser): Partial<ContributionBundle> {
+    const b: Partial<ContributionBundle> = {
+        submitter: submitter,
+        status: ContributionBundleStatusEnum.PENDING,
+        contributions: []
+    }
+    return b;
 }
