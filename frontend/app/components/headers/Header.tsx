@@ -8,6 +8,7 @@ import { SignupModal } from "../modals/SignupModal";
 import { MdLogout } from "react-icons/md";
 import { clearUser } from "~/store/slices/userSlice";
 import { useLazyDisconnectQuery } from "~/store/services/api";
+import { AppVersionBadge } from "../badges/AppVersionBadge";
 
 export function Header() {
   const { t } = useTranslation();
@@ -40,11 +41,16 @@ export function Header() {
               alt="logo"
               className="w-16 h-16 object-contain"
             />
-            <span className="text-xl font-semibold tracking-wide text-white/80">
-              <span className="text-yellow-400">K</span>now{" "}
-              <span className="text-yellow-400">Y</span>our{" "}
-              <span className="text-yellow-400">S</span>tash
-            </span>
+            <div className="flex flex-col items-center">
+              <span className="text-xl font-semibold tracking-wide text-white/80">
+                <span className="text-yellow-400">K</span>now{" "}
+                <span className="text-yellow-400">Y</span>our{" "}
+                <span className="text-yellow-400">S</span>tash
+              </span>
+              <div>
+              <AppVersionBadge version="Version 0.0" />
+            </div>
+            </div>
           </div>
 
           {/* Nav */}
@@ -70,17 +76,17 @@ export function Header() {
                 <span className="w-px h-4 bg-white/10 mx-1" />
 
                 {/* User links */}
-                {[
-                  { to: "/collection", label: t("header.collection") },
-                ].map(({ to, label }) => (
-                  <Link
-                    key={to}
-                    to={to}
-                    className="px-3 py-1.5 text-md text-cyan-400/70 rounded-md hover:bg-cyan-400/10 hover:text-cyan-400 transition-all"
-                  >
-                    {label}
-                  </Link>
-                ))}
+                {[{ to: "/collection", label: t("header.collection") }].map(
+                  ({ to, label }) => (
+                    <Link
+                      key={to}
+                      to={to}
+                      className="px-3 py-1.5 text-md text-cyan-400/70 rounded-md hover:bg-cyan-400/10 hover:text-cyan-400 transition-all"
+                    >
+                      {label}
+                    </Link>
+                  ),
+                )}
 
                 {/* Admin links */}
                 {user?.isAdmin && (
@@ -114,7 +120,10 @@ export function Header() {
               <>
                 <span className="text-xs text-white/30">
                   {t("header.welcome")},{" "}
-                  <a className="text-white/60 font-medium cursor-pointer hover:underline" href={`/profile`}>
+                  <a
+                    className="text-white/60 font-medium cursor-pointer hover:underline"
+                    href={`/profile`}
+                  >
                     {user?.username}
                   </a>
                 </span>
