@@ -40,7 +40,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           source: "frontend/build/client/*"
-          target: "/home/debian/kys/frontend/build/client/"
+          target: "/home/debian/comics-engineering/frontend/build/client/"
           strip_components: 2   # removes "frontend/dist" prefix
 
       - name: SSH Deploy - pull, write secrets, restart backend
@@ -52,7 +52,7 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           script: |
             set -e
-            cd /home/debian/kys
+            cd /home/debian/comics-engineering
 
             # Pull latest code
             git pull origin main
