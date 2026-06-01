@@ -29,6 +29,7 @@ public class App {
                 cors.addRule(it -> {
                     // Dev rule
                     it.allowHost("http://localhost:5173");
+                    it.allowHost("https://vps.stuten.dev");
                     it.allowCredentials = true;
                     it.exposeHeader("Authorization");
                 });

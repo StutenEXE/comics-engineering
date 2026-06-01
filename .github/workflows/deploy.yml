@@ -1,0 +1,65 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: debian-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Frontend: Build with Vite
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Build frontend
+        run: npm run build
+        working-directory: frontend
+
+      # Deploy to VPS
+      - name: Copy built frontend to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          source: "frontend/dist/*"
+          target: "/var/www/kys/frontend/dist"
+          strip_components: 2   # removes "frontend/dist" prefix
+
+      - name: SSH Deploy - pull, write secrets, restart backend
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -e
+            cd /var/www/kys
+
+            # Pull latest code
+            git pull origin main
+
+            # Write secrets from GitHub to .env file
+            cd backend/comics-backend
+            cat > .env.prod << 'ENDSECRETS'
+            ${{ secrets.ENV_FILE }}
+            ENDSECRETS
+
+            # Rebuild and restart the Java backend container
+            make prod-up

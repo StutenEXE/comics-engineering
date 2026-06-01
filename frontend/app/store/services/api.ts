@@ -10,10 +10,12 @@ import { parseToPublisher, type Publisher } from "~/models/publisher";
 import { parseToSerie, type Serie } from "~/models/serie";
 import { parseToUser, type SignupData, type User, type UserCredentials } from "~/models/user";
 
+const API_HOST = (import.meta.env.API_HOST as string | undefined) ?? "http://localhost:8080";
+
 ////////////////////////////////////
 //////////// PUBLIC API ////////////
 ////////////////////////////////////
-export const API_PUB_BASE_URL = "http://localhost:8080/api/comics/pub";
+export const API_PUB_BASE_URL = `${API_HOST}/api/comics/pub`;
 
 // RTK Query service for public API endpoints
 export const publicApi = createApi({
@@ -210,7 +212,7 @@ export const {
 //////////// PRIVATE API ///////////
 ////////////////////////////////////
 
-export const API_PVT_BASE_URL = "http://localhost:8080/api/comics/prv";
+export const API_PVT_BASE_URL = `${API_HOST}/api/comics/prv`;
 
 // RTK Query service for private API endpoints
 export const privateApi = createApi({
@@ -271,7 +273,7 @@ export const {
 ///////////// ADMIN API ////////////
 ////////////////////////////////////
 
-export const API_ADM_BASE_URL = "http://localhost:8080/api/comics/adm";
+export const API_ADM_BASE_URL = `${API_HOST}/api/comics/adm`;
 
 // RTK Query service for private API endpoints
 export const adminApi = createApi({
