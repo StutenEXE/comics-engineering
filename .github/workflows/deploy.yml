@@ -29,7 +29,7 @@ jobs:
         run: npm run build
         working-directory: frontend
         env:
-          VITE_API_HOST: ${{ secrets.VPS_HOST }}
+          VITE_API_HOST: ${{ secrets.API_HOST }}
 
       # Deploy to VPS
       - name: Copy built frontend to VPS
