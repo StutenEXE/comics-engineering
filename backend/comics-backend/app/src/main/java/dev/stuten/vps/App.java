@@ -28,8 +28,7 @@ public class App {
             config.bundledPlugins.enableCors(cors -> {
                 cors.addRule(it -> {
                     // Dev rule
-                    it.allowHost("http://localhost:5173");
-                    it.allowHost("https://vps.stuten.dev");
+                    it.allowHost(System.getProperty("CORS_ALLOWED_ORIGIN"));
                     it.allowCredentials = true;
                     it.exposeHeader("Authorization");
                 });
@@ -37,16 +36,7 @@ public class App {
             config.router.ignoreTrailingSlashes = true;
         });
 
-        app.before(ctx -> {
-            if (ctx.method().toString().equals("OPTIONS")) {
-                ctx.header("Access-Control-Allow-Origin", "http://localhost:5173");
-                ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-                ctx.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-                ctx.header("Access-Control-Allow-Credentials", "true");
-                ctx.status(200);
-                ctx.skipRemainingHandlers();
-            }
-        });
+
 
         // Authorize POST
         app.options("/*", ctx -> ctx.status(204));
