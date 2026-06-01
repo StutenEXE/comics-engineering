@@ -41,7 +41,7 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           source: "frontend/build/client/*"
           target: "/home/debian/comics-engineering/frontend/build/client/"
-          strip_components: 2   # removes "frontend/dist" prefix
+          strip_components: 3   # removes "frontend/build/client" prefix
 
       - name: SSH Deploy - pull, write secrets, restart backend
         uses: appleboy/ssh-action@v1.0.3
