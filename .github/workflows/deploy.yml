@@ -40,7 +40,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           source: "frontend/build/client/*"
-          target: "/var/www/kys/frontend/build/client/"
+          target: "/home/debian/kys/frontend/build/client/"
           strip_components: 2   # removes "frontend/dist" prefix
 
       - name: SSH Deploy - pull, write secrets, restart backend
@@ -52,7 +52,7 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           script: |
             set -e
-            cd /var/www/kys
+            cd /home/debian/kys
 
             # Pull latest code
             git pull origin main
