@@ -10,7 +10,7 @@ import { parseToPublisher, type Publisher } from "~/models/publisher";
 import { parseToSerie, type Serie } from "~/models/serie";
 import { parseToUser, type SignupData, type User, type UserCredentials } from "~/models/user";
 
-const API_HOST = (import.meta.env.API_HOST as string | undefined) ?? "http://localhost:8080";
+const API_HOST = (import.meta.env.VITE_API_HOST as string | undefined) ?? "http://localhost:8080";
 
 ////////////////////////////////////
 //////////// PUBLIC API ////////////

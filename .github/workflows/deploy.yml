@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: debian-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -28,6 +28,8 @@ jobs:
       - name: Build frontend
         run: npm run build
         working-directory: frontend
+        env:
+          VITE_API_HOST: ${{ secrets.VPS_HOST }}
 
       # Deploy to VPS
       - name: Copy built frontend to VPS
