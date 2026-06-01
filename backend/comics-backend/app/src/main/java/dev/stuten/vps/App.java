@@ -14,8 +14,7 @@ public class App {
 
     public static void main(String[] args) {
 
-        int port = Integer.parseInt(
-                System.getProperty("APP_PORT", "8080"));
+        int port = Integer.parseInt(System.getenv("APP_PORT"));
 
         Javalin app = Javalin.create(config -> {
             config.http.defaultContentType = "application/json";
@@ -28,15 +27,13 @@ public class App {
             config.bundledPlugins.enableCors(cors -> {
                 cors.addRule(it -> {
                     // Dev rule
-                    it.allowHost(System.getProperty("CORS_ALLOWED_ORIGIN"));
+                    it.allowHost(System.getenv("CORS_ALLOWED_ORIGIN"));
                     it.allowCredentials = true;
                     it.exposeHeader("Authorization");
                 });
             });
             config.router.ignoreTrailingSlashes = true;
         });
-
-
 
         // Authorize POST
         app.options("/*", ctx -> ctx.status(204));
