@@ -7,6 +7,7 @@ import {
 import { useTranslation } from "~/i18n/i18n";
 import {
   useEditionByIdQuery,
+  useEditionRelationToUserQuery,
   useSubmitContributionBundleMutation,
 } from "~/store/services/api";
 import { createError } from "~/utils/error";
@@ -20,6 +21,8 @@ import {
 import { useToast } from "~/components/toast/Toast";
 import { useAppSelector } from "~/store/hooks";
 import { EditionContributionModal } from "~/components/modals/contribution/EditionContributionModal";
+import { GenericButton } from "~/components/buttons/GenericButton";
+import { AddToCollectionModal } from "~/components/modals/AddToCollectionModal";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -33,9 +36,22 @@ export default function EditionPage({ params }: { params: { id: number } }) {
   const toast = useToast();
   const { user, isAuthenticated } = useAppSelector((state) => state.user);
 
+  // Main edition data
   const { data, isLoading, error } = useEditionByIdQuery({ id: params.id });
   const edition = data?.edition;
   const err = createError(error);
+
+  // Relation to user check (for collection status)
+  const { data: relationData } = useEditionRelationToUserQuery(
+    {
+      userId: user ? user.id : 0,
+      editionId: edition ? edition.id : 0,
+    },
+    {
+      skip: !isAuthenticated || !edition, // Skip if any of these values aren't defined
+    },
+  );
+  const relation = relationData?.relation || undefined;
 
   // Submit a contribution bundle
   const [submitBundle, { isError, isSuccess }] =
@@ -47,19 +63,32 @@ export default function EditionPage({ params }: { params: { id: number } }) {
   useEffect(() => {
     if (isSuccess) {
       toast.success(t("contribute.success"));
-      closeModal();
+      closeEditModal();
     }
   }, [isSuccess]);
 
   // Edit modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const openModal = () => setIsEditModalOpen(true);
-  const closeModal = () => setIsEditModalOpen(false);
+  const openEditModal = () => setIsEditModalOpen(true);
+  const closeEditModal = () => setIsEditModalOpen(false);
 
   const handleEditSubmit = (c: Partial<SimpleContribution>) => {
     // Cannot access function if not connected
     const b = wrapInNewBundle(c, user!);
     submitBundle(b);
+  };
+
+  // Handles modal open/close state
+  const [isAddToCollectionModalOpen, setisAddToCollectionModalOpen] =
+    useState(false);
+  const openAddToCollectionModal = () => {
+    setisAddToCollectionModalOpen(true);
+  };
+  const closeAddToCollectionModal = () => {
+    setisAddToCollectionModalOpen(false);
+  };
+  const onAddToCollectionSubmit = () => {
+    relation?.inCollection && (relation.inCollection = true);
   };
 
   return (
@@ -85,7 +114,7 @@ export default function EditionPage({ params }: { params: { id: number } }) {
               toast.info("toast.notconnected");
               return;
             }
-            openModal();
+            openEditModal();
           }}
         />
 
@@ -102,7 +131,7 @@ export default function EditionPage({ params }: { params: { id: number } }) {
             {
               label: t("edition.publisher"),
               value: edition?.publisher?.name,
-              to: `/publisher/${edition?.publisher?.id}`,
+              // to: `/publisher/${edition?.publisher?.id}`,
             },
             // Link
             {
@@ -134,27 +163,31 @@ export default function EditionPage({ params }: { params: { id: number } }) {
             },
           ]}
         />
+        <GenericButton
+          onClick={openAddToCollectionModal}
+          disabled={!isAuthenticated || relation?.inCollection}
+        >
+          {relation?.inCollection
+            ? t("edition.inCollection")
+            : t("edition.addToCollection")}
+        </GenericButton>
       </InfoPageTemplate>
+
       <EditionContributionModal
         edition={edition}
         action="update"
         isOpen={isEditModalOpen}
         onSubmit={handleEditSubmit}
-        onClose={closeModal}
+        onClose={closeEditModal}
       />
+      {edition && (
+        <AddToCollectionModal
+          editionId={edition.id}
+          isOpen={isAddToCollectionModalOpen}
+          onSubmit={onAddToCollectionSubmit}
+          onClose={closeAddToCollectionModal}
+        />
+      )}
     </>
   );
-}
-
-// ── Local helpers ──────────────────────────────────────────────────────────────
-function FieldLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="text-xs font-medium uppercase tracking-widest text-white/30 whitespace-nowrap">
-      {children}
-    </span>
-  );
-}
-
-function FieldValue({ children }: { children: React.ReactNode }) {
-  return <span className="text-sm text-white/70">{children}</span>;
 }

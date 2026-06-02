@@ -26,7 +26,7 @@ export function DateRhfInput({
         invisible ? "invisible" : "",
       )}
     >
-      <label className="flex items-center justify-between text-xs font-medium uppercase tracking-widest text-white/40">
+      <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-white/40">
         {label} {tooltip && <HelpBadgeTooltip tooltipContent={tooltip} />}
       </label>
       <input
