@@ -362,9 +362,17 @@ function ContributionTreeRow({
       <div className="flex items-center gap-1 group">
         {contribution.children && contribution.children.length > 0 ? (
           collapsed ? (
-            <BsArrowsExpand onClick={() => setCollapsed(false)} size={12} className="text-white/20 flex-shrink-0 cursor-pointer hover:text-white/50" />
+            <BsArrowsExpand
+              onClick={() => setCollapsed(false)}
+              size={12}
+              className="text-white/20 flex-shrink-0 cursor-pointer hover:text-white/50"
+            />
           ) : (
-            <BsArrowsCollapse onClick={() => setCollapsed(true)} size={12} className="text-white/20 flex-shrink-0 cursor-pointer hover:text-white/50" />
+            <BsArrowsCollapse
+              onClick={() => setCollapsed(true)}
+              size={12}
+              className="text-white/20 flex-shrink-0 cursor-pointer hover:text-white/50"
+            />
           )
         ) : null}
         <div
@@ -412,29 +420,33 @@ function ContributionTreeRow({
         {renderActionButtons()}
       </div>
 
-      {!collapsed && contribution.children && contribution.children.length > 0 && (
-        <div className="ml-1 mt-1 border-l border-white/8 pl-1">
-          <GenericList
-            list={contribution.children}
-            emptyMsg=""
-            elemGenerator={(child: ContributionTree) => (
-              <ContributionTreeRow
-                contribution={child}
-                indent={indent + 1}
-                buttons={buttons}
-                adminActions={adminActions}
-                onAdd={onAdd}
-                onEdit={onEdit}
-                onRemove={onRemove}
-                triggerUpdateStatus={triggerUpdateStatus}
-                t={t}
-                locale={locale}
-              />
-            )}
-            vertical
-          />
-        </div>
-      )}
+      {!collapsed &&
+        contribution.children &&
+        contribution.children.length > 0 && (
+          <div className="ml-1 mt-1 border-l border-white/8 pl-1">
+            <GenericList
+              list={contribution.children.sort(
+                (a, b) => (b.localRef || b.id) - (a.localRef || a.id),
+              )}
+              emptyMsg=""
+              elemGenerator={(child: ContributionTree) => (
+                <ContributionTreeRow
+                  contribution={child}
+                  indent={indent + 1}
+                  buttons={buttons}
+                  adminActions={adminActions}
+                  onAdd={onAdd}
+                  onEdit={onEdit}
+                  onRemove={onRemove}
+                  triggerUpdateStatus={triggerUpdateStatus}
+                  t={t}
+                  locale={locale}
+                />
+              )}
+              vertical
+            />
+          </div>
+        )}
     </div>
   );
 }
@@ -537,7 +549,9 @@ export function IndentedContributionList({
 
   return (
     <GenericList
-      list={parentList}
+      list={parentList.sort(
+        (a, b) => (b.localRef || b.id) - (a.localRef || a.id),
+      )}
       emptyMsg={t("contribution.nonefound")}
       elemGenerator={(c: ContributionTree) => (
         <ContributionTreeRow

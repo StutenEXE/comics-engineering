@@ -239,16 +239,6 @@ export function ContributionBundleForm({
       ? "update"
       : "create";
 
-  const handleCancel = () => {
-    confirm({
-      title: t("cbundle.form.cancel.title"),
-      message: t("cbundle.form.cancel.message"),
-      onConfirm: () => {
-        onCancel?.();
-      },
-    });
-  };
-
   return (
     <>
       <GenericForm
@@ -257,7 +247,7 @@ export function ContributionBundleForm({
             ? t("cbundle.form.title.update")
             : t("cbundle.form.title.create")
         }
-        onCancel={noPropagationEvt(handleCancel)}
+        onCancel={noPropagationEvt(onCancel)}
         submitLabel={
           action === "update"
             ? t("cbundle.form.update")
@@ -321,7 +311,7 @@ export function ContributionBundleForm({
             onAdd={createDependantContribution}
             onEdit={editContribution}
             onRemove={removeContribution}
-            className="border border-white/10 rounded-md bg-white/5 min-h-[80px]"
+            className="border border-white/10 rounded-md bg-white/5 min-h-[80px] min-w-[300px] p-3"
           />
         </div>
 
