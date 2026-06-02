@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { useTranslation } from "~/i18n/i18n";
 import type { Error } from "~/utils/error";
 import { HelpBadgeTooltip } from "../badges/HelpBadge";
+import { GenericPageTemplate } from "./GenericPageTemplate";
 
 interface PageTemplateProps {
   hasImg?: boolean;
@@ -24,44 +25,42 @@ export function InfoPageTemplate({
   const { t } = useTranslation();
 
   return (
-    <main className="flex flex-col items-center px-4 py-10">
-      <div className="w-full max-w-4xl">
-        <div className="flex gap-8 items-start">
-          {hasImg && (
-            <div className="w-48 shrink-0 sticky top-24">
-              <img
-                src={imgUrl ?? "/placeholder.jpg"}
-                alt={imgAlt ?? "placeholder"}
-                className="w-full rounded-lg border border-white/8 shadow-xl shadow-black/40 object-cover"
-              />
+    <GenericPageTemplate>
+      <div className="flex gap-8 items-start">
+        {hasImg && (
+          <div className="w-48 shrink-0 sticky top-24">
+            <img
+              src={imgUrl ?? "/placeholder.jpg"}
+              alt={imgAlt ?? "placeholder"}
+              className="w-full rounded-lg border border-white/8 shadow-xl shadow-black/40 object-cover"
+            />
+          </div>
+        )}
+        <div className="flex-1 flex flex-col gap-6 min-w-0">
+          {/* Loading */}
+          {isLoading && (
+            <div className="flex items-center justify-center py-12">
+              <p className="text-sm text-white/30 animate-pulse">
+                {t("loader.loading")}
+              </p>
             </div>
           )}
-          <div className="flex-1 flex flex-col gap-6 min-w-0">
-            {/* Loading */}
-            {isLoading && (
-              <div className="flex items-center justify-center py-12">
-                <p className="text-sm text-white/30 animate-pulse">
-                  {t("loader.loading")}
-                </p>
-              </div>
-            )}
 
-            {/* Error */}
-            {error && (
-              <div className="flex flex-col gap-1 py-12">
-                <p className="text-sm text-white/40">{t("loader.error")}</p>
-                <p className="text-xs text-rose-400/70 font-mono">
-                  [{error.status}] {error.details.message}
-                </p>
-              </div>
-            )}
+          {/* Error */}
+          {error && (
+            <div className="flex flex-col gap-1 py-12">
+              <p className="text-sm text-white/40">{t("loader.error")}</p>
+              <p className="text-xs text-rose-400/70 font-mono">
+                [{error.status}] {error.details.message}
+              </p>
+            </div>
+          )}
 
-            {/* Content */}
-            {!isLoading && !error && children}
-          </div>
+          {/* Content */}
+          {!isLoading && !error && children}
         </div>
       </div>
-    </main>
+    </GenericPageTemplate>
   );
 }
 

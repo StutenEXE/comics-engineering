@@ -10,6 +10,7 @@ import {
 } from "~/store/services/api";
 import type { Route } from "../+types/root";
 import { useToast } from "~/components/toast/Toast";
+import { GenericPageTemplate } from "~/components/templates/GenericPageTemplate";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -90,12 +91,10 @@ export default function ContributePage() {
 
   return (
     <AdminProtectedRoute>
-      <main className="flex flex-col items-center pt-8 px-4 lg:px-8 xl:px-12">
-        <div className="w-full max-w-6xl space-y-8">
-          <h1 className="text-3xl font-bold text-gray-200 mb-6">
-            {t("contributions.title")}
-          </h1>
-        </div>
+      <GenericPageTemplate>
+        <h1 className="text-3xl font-bold text-gray-200 mb-6">
+          {t("contributions.title")}
+        </h1>
         <ContributionBundleTable
           bundleList={bundles || []}
           addActions
@@ -103,14 +102,14 @@ export default function ContributePage() {
           onPageChange={setCurrPage}
           onSuccesfulStatusUpdate={triggerGetBundles}
         />
-      </main>
-      <ContributionBundleModal
-        bundle={bundleToEdit}
-        action="update"
-        isOpen={isContributionModalOpen}
-        onSubmit={updateContributionBundle}
-        onClose={closeContributionModal}
-      />
+        <ContributionBundleModal
+          bundle={bundleToEdit}
+          action="update"
+          isOpen={isContributionModalOpen}
+          onSubmit={updateContributionBundle}
+          onClose={closeContributionModal}
+        />
+      </GenericPageTemplate>
     </AdminProtectedRoute>
   );
 }

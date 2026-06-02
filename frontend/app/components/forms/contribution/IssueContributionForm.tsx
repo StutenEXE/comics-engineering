@@ -155,6 +155,7 @@ export function IssueContributionForm({
           }}
           error={errors.parutionDate}
           tooltip={t("issue.parutionDateExplanation")}
+          className="max-w-50"
         />
         <DateRhfInput
           label={t("issue.coverDate")}
@@ -166,6 +167,7 @@ export function IssueContributionForm({
           }}
           error={errors.coverDate}
           tooltip={t("issue.coverDateExplanation")}
+          className="max-w-50"
         />
       </div>
     </GenericForm>

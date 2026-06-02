@@ -44,14 +44,14 @@ export function zDateOptional() {
 }
 
 export function toHtmlInputString(d: Date | undefined | null): string {
-    if (!d) {
+    if (!d || isNaN(d.getTime())) {
         return ""
     }
     return d.toISOString().substring(0, 10);
 }
 
 export function toYYYYmmDD(d: Date | undefined | null): string {
-    if (!d) {
+    if (!d || isNaN(d.getTime())) {
         return ""
     }
     if (typeof d === "string") {

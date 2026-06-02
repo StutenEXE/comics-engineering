@@ -22,6 +22,7 @@ import { parseToIssueSerie, type SimpleIssueSerie } from "~/models/issue-serie";
 import { parseToSerie } from "~/models/serie";
 import { useAppSelector } from "~/store/hooks";
 import { noPropagationEvt } from "~/utils/events";
+import { deepCopy } from "~/utils/object";
 import { GenericButton } from "../../buttons/GenericButton";
 import { IndentedContributionList } from "../../lists/contributionlists/IndentedContributionList";
 import { useConfirm } from "../../modals/ConfirmModalProvider";
@@ -70,7 +71,7 @@ export function ContributionBundleForm({
   const {
     register,
     handleSubmit,
-    formState: { errors, isDirty},
+    formState: { errors, isDirty },
   } = useForm<FormData>({
     resolver: zodResolver(schema) as any,
     defaultValues: {
@@ -115,6 +116,36 @@ export function ContributionBundleForm({
         break;
       case ContributionTypeEnum.ISSUE_SERIE:
         setIsIssueSerieOpen(true);
+        break;
+    }
+  };
+
+  // When the + icon is clicked on a contribution
+  const addContributionFrom = (c: SimpleContribution) => {
+    if (c.entityType === ContributionTypeEnum.ISSUE) {
+      createNextLogicalContribution(c);
+    } else if (
+      c.entityType === ContributionTypeEnum.BOOK ||
+      c.entityType === ContributionTypeEnum.SERIE ||
+      c.entityType === ContributionTypeEnum.ISSUE_SERIE
+    ) {
+      createDependantContribution(c);
+    }
+  };
+
+  const createNextLogicalContribution = (c: SimpleContribution) => {
+    const newContribution = deepCopy(c);
+    newContribution.id = undefined;
+    newContribution.localRef = undefined;
+
+    switch (c.entityType) {
+      case ContributionTypeEnum.ISSUE:
+        newContribution.proposedData = {
+          number: newContribution.proposedData.number + 1,
+          issueSerie: newContribution.proposedData.issueSerie,
+        } as Partial<Issue>;
+        setContribToModify(newContribution);
+        setIsIssueOpen(true);
         break;
     }
   };
@@ -164,9 +195,8 @@ export function ContributionBundleForm({
 
   const handleContributionSubmission = (c: Partial<SimpleContribution>) => {
     const submittedContribution = c as SimpleContribution;
-
-    // Not found means the user is adding
-    if (!contribToModify) {
+    // Not found or no id means the user is adding
+    if (!contribToModify || !contribToModify.id) {
       const nextLocalRef = -(contributions.length + 1);
       submittedContribution.id = -nextLocalRef;
       submittedContribution.localRef = nextLocalRef;
@@ -206,12 +236,15 @@ export function ContributionBundleForm({
   };
 
   const triggerSubmission = (data: FormData) => {
-    onSubmit?.({
-      id: bundle?.id,
-      contributions: contributions,
-      note: data.note,
-      submitter: user!,
-    }, isDirty);
+    onSubmit?.(
+      {
+        id: bundle?.id,
+        contributions: contributions,
+        note: data.note,
+        submitter: user!,
+      },
+      isDirty,
+    );
   };
 
   const localIssueCandidates: SimpleIssue[] = contributions
@@ -308,7 +341,7 @@ export function ContributionBundleForm({
             contributionList={contributions}
             buttons={{ add: true, edit: true, delete: action === "create" }}
             adminActions={action === "update" && user?.isAdmin}
-            onAdd={createDependantContribution}
+            onAdd={addContributionFrom}
             onEdit={editContribution}
             onRemove={removeContribution}
             className="border border-white/10 rounded-md bg-white/5 min-h-[80px] min-w-[300px] p-3"

@@ -14,6 +14,7 @@ import type { Route } from "../+types/root";
 import { useToast } from "~/components/toast/Toast";
 import type { ContributionBundle } from "~/models/contributionBundle";
 import { LoggedProtectedRoute } from "~/components/security/LoggedProtectedRoute";
+import { GenericPageTemplate } from "~/components/templates/GenericPageTemplate";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -106,96 +107,88 @@ export default function ContributePage() {
 
   return (
     <LoggedProtectedRoute>
-      <main className="flex flex-col items-center pt-8 px-4 lg:px-8 xl:px-12">
-        <div className="w-full max-w-6xl space-y-8">
-          <h1 className="text-3xl font-bold text-gray-200 mb-6">
-            {t("contribute.title")}
-          </h1>
+      <GenericPageTemplate>
+        <h1 className="text-3xl font-bold text-gray-200 mb-6">
+          {t("contribute.title")}
+        </h1>
 
-          {/* Welcome message */}
-          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-            <p className="text-gray-300 text-lg">
-              {t("contribute.welcome")}{" "}
-              <span className="font-semibold text-white">{user?.username}</span>
-              !
-            </p>
-          </div>
+        {/* Welcome message */}
+        <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+          <p className="text-gray-300 text-lg">
+            {t("contribute.welcome")}{" "}
+            <span className="font-semibold text-white">{user?.username}</span>!
+          </p>
+        </div>
 
-          {/* Contribution options */}
-          <div className="flex flex-col gap-5">
-            <GenericButton
-              onClick={openContributionModal}
-              className="w-50 px-6 py-3 bg-green-700 hover:bg-green-600"
-            >
-              {t("contribute.contribute")}
-            </GenericButton>
-          </div>
+        {/* Contribution options */}
+        <div className="flex flex-col gap-5">
+          <GenericButton
+            onClick={openContributionModal}
+            className="w-50 px-6 py-3 bg-green-700 hover:bg-green-600"
+          >
+            {t("contribute.contribute")}
+          </GenericButton>
+        </div>
 
-          {/* Statistics */}
-          <div className="flex flex-col gap-6">
-            <h2 className="text-2xl font-semibold text-gray-200">
-              {t("contribute.stats")}
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-              <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
-                <p className="text-3xl font-bold text-blue-400">
-                  {stats.totalContributions}
-                </p>
-                <p className="text-gray-400">{t("contribute.stats.total")}</p>
-              </div>
-              <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
-                <p className="text-3xl font-bold text-green-400">
-                  {stats.approved}
-                </p>
-                <p className="text-gray-400">
-                  {t("contribute.stats.approved")}
-                </p>
-              </div>
-              <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
-                <p className="text-3xl font-bold text-yellow-400">
-                  {stats.pending}
-                </p>
-                <p className="text-gray-400">{t("contribute.stats.pending")}</p>
-              </div>
-              <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
-                <p className="text-3xl font-bold text-purple-400">
-                  {stats.needsRevision}
-                </p>
-                <p className="text-gray-400">
-                  {t("contribute.stats.needsRevision")}
-                </p>
-              </div>
-              <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
-                <p className="text-3xl font-bold text-red-400">
-                  {stats.rejected}
-                </p>
-                <p className="text-gray-400">
-                  {t("contribute.stats.rejected")}
-                </p>
-              </div>
+        {/* Statistics */}
+        <div className="flex flex-col gap-6">
+          <h2 className="text-2xl font-semibold text-gray-200">
+            {t("contribute.stats")}
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
+              <p className="text-3xl font-bold text-blue-400">
+                {stats.totalContributions}
+              </p>
+              <p className="text-gray-400">{t("contribute.stats.total")}</p>
             </div>
-          </div>
-
-          {/* Previous contributions table */}
-          <div className="flex flex-col gap-6 pb-8">
-            <h2 className="text-2xl font-semibold text-gray-200">
-              {t("contribute.history")}
-            </h2>
-            <ContributionTable
-              contributionList={contributions}
-              isLoading={isLoading}
-              error={err}
-            />
+            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
+              <p className="text-3xl font-bold text-green-400">
+                {stats.approved}
+              </p>
+              <p className="text-gray-400">{t("contribute.stats.approved")}</p>
+            </div>
+            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
+              <p className="text-3xl font-bold text-yellow-400">
+                {stats.pending}
+              </p>
+              <p className="text-gray-400">{t("contribute.stats.pending")}</p>
+            </div>
+            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
+              <p className="text-3xl font-bold text-purple-400">
+                {stats.needsRevision}
+              </p>
+              <p className="text-gray-400">
+                {t("contribute.stats.needsRevision")}
+              </p>
+            </div>
+            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
+              <p className="text-3xl font-bold text-red-400">
+                {stats.rejected}
+              </p>
+              <p className="text-gray-400">{t("contribute.stats.rejected")}</p>
+            </div>
           </div>
         </div>
 
+        {/* Previous contributions table */}
+        <div className="flex flex-col gap-6 pb-8">
+          <h2 className="text-2xl font-semibold text-gray-200">
+            {t("contribute.history")}
+          </h2>
+          <ContributionTable
+            contributionList={contributions}
+            isLoading={isLoading}
+            error={err}
+          />
+        </div>
         <ContributionBundleModal
           action="create"
           isOpen={isContributionModalOpen}
           onSubmit={submitContributionBundle}
           onClose={closeContributionModal}
         />
-      </main>
+      </GenericPageTemplate>
     </LoggedProtectedRoute>
   );
 }

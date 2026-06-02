@@ -39,9 +39,7 @@ export function IssueList({ issueList, descOrder, isLoading, error, className }:
         <>
             <GenericList 
                 list={list} 
-                emptyMsg={isLoading ? t("loader.issue.loading") : 
-                    error ? error.details.error :  
-                    t("loader.issue.nodata")}
+                emptyMsg={t("issue.nonefound")}
                 elemGenerator={mapper}
                 vertical
                 className={className}

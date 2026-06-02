@@ -11,6 +11,7 @@ import {
   BsArrowRightCircle,
 } from "react-icons/bs";
 import { useTranslation } from "~/i18n/i18n";
+import { GenericPageTemplate } from "~/components/templates/GenericPageTemplate";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -40,7 +41,7 @@ export default function LandingPage() {
   }, [error]);
 
   return (
-    <main className="flex flex-col items-center px-4 py-6 gap-10">
+    <GenericPageTemplate>
       {/* Hero */}
       <div className="flex flex-col items-center gap-3 text-center max-w-lg">
         <h1 className="text-3xl font-semibold text-white/90">
@@ -113,6 +114,6 @@ export default function LandingPage() {
           </GenericButton>
         </div>
       </div>
-    </main>
+    </GenericPageTemplate>
   );
 }
