@@ -78,6 +78,13 @@ export default function IssuePage({ params }: { params: { id: number } }) {
           createdAt={issue?.createdAt}
           modifiedAt={issue?.modifiedAt}
           addedBy={issue?.addedBy?.username}
+          onEditClick={() => {
+            if (!isAuthenticated) {
+              toast.info("toast.notconnected");
+              return;
+            }
+            openModal();
+          }}
         />
 
         <InfoPageFields

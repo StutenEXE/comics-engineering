@@ -2,7 +2,6 @@ import { Outlet } from "react-router";
 import { Header } from "./components/headers/Header";
 import { useRefreshQuery } from "./store/services/api";
 import { clearUser, setUser } from "./store/slices/userSlice";
-import { useToast } from "./components/toast/Toast";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { useAppSelector } from "./store/hooks";
@@ -15,7 +14,7 @@ export default function App() {
     {
       skip: !isAuthenticated, // Skip the refresh query if the user is not authenticated
       refetchOnReconnect: true, // Refetch when the browser regains network connections
-      pollingInterval: 15 * 60 * 1000, // Poll every 15 minutes
+      pollingInterval: 15 * 60 * 1000, // Poll every 15 minutes (automatic token refresh)
     }, 
   );
   const dispatch = useDispatch();
