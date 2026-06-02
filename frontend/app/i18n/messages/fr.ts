@@ -181,6 +181,7 @@ export default {
     "issueserie.form.modify": "Modifier la série d'issues",
     "issueserie.form.endDate.afterStart": "La date de fin ne peut pas être antérieur à la date de début",
     // Issue
+    "issue.nonefound": "Aucune issue trouvée",
     "issue.name": "Nom (histoire)",
     "issue.serie": "Série d'issues",
     "issue.story": "Histoire",

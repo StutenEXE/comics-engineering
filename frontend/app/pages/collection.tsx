@@ -8,6 +8,7 @@ import { useCollectionQuery } from "~/store/services/api";
 import { createError } from "~/utils/error";
 import type { Route } from "../+types/root";
 import { OwnedSeriesTab } from "~/components/tabs/collection/OwnedSeriesTab";
+import { GenericPageTemplate } from "~/components/templates/GenericPageTemplate";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -35,16 +36,14 @@ export default function CollectionPage() {
 
   return (
     <LoggedProtectedRoute>
-      <main className="flex flex-col items-center pt-8 px-4 lg:px-8 xl:px-12">
-        <div className="w-full max-w-6xl space-y-8">
-          <h1 className="text-3xl font-bold text-gray-200 mb-6">
-            {t("collection.title")}
-          </h1>
-          <div className="w-full max-w-6xl">
-            <Tabs tabs={tabs} defaultTabId="editions" />
-          </div>
+      <GenericPageTemplate>
+        <h1 className="text-3xl font-bold text-gray-200 mb-6">
+          {t("collection.title")}
+        </h1>
+        <div className="w-full max-w-6xl">
+          <Tabs tabs={tabs} defaultTabId="editions" />
         </div>
-      </main>
+      </GenericPageTemplate>
     </LoggedProtectedRoute>
   );
 }
