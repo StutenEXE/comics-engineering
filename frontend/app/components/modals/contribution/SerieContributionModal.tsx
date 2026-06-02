@@ -26,14 +26,12 @@ export function SerieContributionModal({
 
   return (
     <GenericModal isOpen={isOpen} onClose={onClose}>
-      <div className="border border-gray-300 rounded-lg shadow-md bg-black">
-        <SerieContributionForm
-          serie={serie}
-          action={action}
-          onSubmit={handleSubmit}
-          onCancel={onClose}
-        />
-      </div>
+      <SerieContributionForm
+        serie={serie}
+        action={action}
+        onSubmit={handleSubmit}
+        onCancel={onClose}
+      />
     </GenericModal>
   );
 }

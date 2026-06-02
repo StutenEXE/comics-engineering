@@ -35,17 +35,15 @@ export function BookContributionModal({
 
   return (
     <GenericModal isOpen={isOpen} onClose={onClose}>
-      <div className="border border-gray-300 rounded-lg shadow-md bg-black">
-        <BookContributionForm
-          book={book}
-          serieLocalRef={serieLocalRef}
-          localIssues={localIssues}
-          localIssueSeries={localIssueSeries}
-          action={action}
-          onSubmit={handleSubmit}
-          onCancel={onClose}
-        />
-      </div>
+      <BookContributionForm
+        book={book}
+        serieLocalRef={serieLocalRef}
+        localIssues={localIssues}
+        localIssueSeries={localIssueSeries}
+        action={action}
+        onSubmit={handleSubmit}
+        onCancel={onClose}
+      />
     </GenericModal>
   );
 }

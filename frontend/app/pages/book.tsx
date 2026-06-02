@@ -23,6 +23,7 @@ import {
   wrapInNewBundle,
   type SimpleContribution,
 } from "~/models/contribution";
+import { EditionModal } from "~/components/modals/EditionModal";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -50,15 +51,14 @@ export default function BookPage({ params }: { params: { id: number } }) {
   useEffect(() => {
     if (isSuccess) {
       toast.success(t("contribute.success"));
-      closeModal();
+      closeEditModal();
     }
   }, [isSuccess]);
 
   // Edit modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const openModal = () => setIsEditModalOpen(true);
-  const closeModal = () => setIsEditModalOpen(false);
-
+  const openEditModal = () => setIsEditModalOpen(true);
+  const closeEditModal = () => setIsEditModalOpen(false);
   const handleEditSubmit = (c: Partial<SimpleContribution>) => {
     // Cannot access function if not connected
     const b = wrapInNewBundle(c, user!);
@@ -87,7 +87,7 @@ export default function BookPage({ params }: { params: { id: number } }) {
               toast.info("toast.notconnected");
               return;
             }
-            openModal();
+            openEditModal();
           }}
         />
 
@@ -140,7 +140,7 @@ export default function BookPage({ params }: { params: { id: number } }) {
         isOpen={isEditModalOpen}
         action="update"
         onSubmit={handleEditSubmit}
-        onClose={closeModal}
+        onClose={closeEditModal}
       />
     </>
   );
