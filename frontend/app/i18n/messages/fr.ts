@@ -210,7 +210,7 @@ export default {
     "oedition.feesExplanation": "Exemple : frais de port, taxes, etc... Mettez ce que vous considérez comme des frais additionnels au prix d'achat.",
     "oedition.retailPrice": "Prix de vente",
     "oedition.retailPriceExplanation": "Le prix auquel vous valuez l'édition. Par défaut, le prix de vente est le prix de l'édition.",
-    "oedition.note": "Note",
+    "oedition.note": "Note personnelle",
     "oedition.book.publisher": "Nom de l'éditeur",
     "oedition.form.title.create": "Ajouter une édition à ma collection",
     "oedition.form.title.modify": "Modifier une édition de ma collection",

@@ -4,7 +4,7 @@ import { type OwnedEdition } from "~/models/ownedEdition";
 import type { Error } from "~/utils/error";
 import { GenericTable, type ColumnDef } from "./GenericTable";
 import { EditOwnedEditionModal } from "../modals/EditOwnedEditionModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { compareDates } from "~/utils/date";
 
 function getOwnedEditionColumns(): ColumnDef<OwnedEdition>[] {
@@ -93,6 +93,11 @@ export function OwnedEditionTable({
 }: OwnedEditionTableProps) {
   // State to have a better control on render lifecycle
   const [localEditionList, setLocalEditionList] = useState([...editionList]);
+
+  // Keep local state in sync when the prop changes
+  useEffect(() => {
+    setLocalEditionList([...editionList]);
+  }, [editionList]);
 
   // Handles modal open/close state
   const [isModalOpen, setisModalOpen] = useState(false);
