@@ -1,5 +1,6 @@
 import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
+import { HelpBadgeTooltip } from "~/components/badges/HelpBadge";
 
 export interface DateRhfInputProps {
   label: string;
@@ -7,6 +8,7 @@ export interface DateRhfInputProps {
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   invisible?: boolean;
   error?: FieldError;
+  tooltip?: string;
 }
 
 export function DateRhfInput({
@@ -15,11 +17,17 @@ export function DateRhfInput({
   inputProps,
   invisible,
   error,
+  tooltip,
 }: DateRhfInputProps) {
   return (
-    <div className={twMerge("max-w-35 flex flex-col gap-1.5 flex-1", invisible ? "invisible" : "")}>
-      <label className="text-xs font-medium uppercase tracking-widest text-white/40">
-        {label}
+    <div
+      className={twMerge(
+        "max-w-45 flex flex-col gap-1.5 flex-1",
+        invisible ? "invisible" : "",
+      )}
+    >
+      <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-white/40">
+        {label} {tooltip && <HelpBadgeTooltip tooltipContent={tooltip} />}
       </label>
       <input
         type="date"

@@ -26,7 +26,6 @@ public class App {
             // CORS policy
             config.bundledPlugins.enableCors(cors -> {
                 cors.addRule(it -> {
-                    // Dev rule
                     it.allowHost(System.getenv("CORS_ALLOWED_ORIGIN"));
                     it.allowCredentials = true;
                     it.exposeHeader("Authorization");

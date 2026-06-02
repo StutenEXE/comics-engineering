@@ -1,11 +1,13 @@
 import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
+import { HelpBadgeTooltip } from "~/components/badges/HelpBadge";
 
 interface TextRhfInputProps {
   label: string;
   registration?: UseFormRegisterReturn;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   error?: FieldError;
+  tooltip?: string;
   className?: string;
 }
 
@@ -14,12 +16,13 @@ export function TextRhfInput({
   registration,
   inputProps,
   error,
+  tooltip,
   className,
 }: TextRhfInputProps) {
   return (
     <div className={twMerge("flex flex-col gap-1.5", className)}>
-      <label className="text-xs font-medium uppercase tracking-widest text-white/40">
-        {label}
+      <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-white/40">
+        {label} {tooltip && <HelpBadgeTooltip tooltipContent={tooltip} />}
       </label>
       <input
         autoComplete="off"

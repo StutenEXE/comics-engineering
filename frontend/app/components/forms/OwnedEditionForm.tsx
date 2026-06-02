@@ -179,7 +179,8 @@ export function OwnedEditionForm({
           </div>
 
           <div>
-            <div className="flex gap-6">
+            <span className="text-white/40 text-xs">{t("generic.currencyDisclaimer")}</span>
+            <div className="flex gap-6 mt-2">
               {/* Purchase Price */}
               <TextRhfInput
                 className="w-30"
@@ -205,10 +206,11 @@ export function OwnedEditionForm({
                   min: 0,
                 }}
                 error={errors.fees}
+                tooltip={t("oedition.feesExplanation")}
               />
               {/* Retail Price */}
               <TextRhfInput
-                className="w-30"
+                className="w-35"
                 label={t("oedition.retailPrice")}
                 registration={register("retailPrice")}
                 inputProps={{
@@ -218,6 +220,7 @@ export function OwnedEditionForm({
                   min: 0,
                 }}
                 error={errors.retailPrice}
+                tooltip={t("oedition.retailPriceExplanation")}
               />
             </div>
 

@@ -15,7 +15,24 @@
 
 ## Setup
 
-Create two `.env` files : `.env.dev` & `.env.prod`.
+Create two `.env` files : `.env.dev` & `.env.prod` with the following template :
+
+```txt
+POSTGRES_SUPERUSER=<text>
+POSTGRES_SUPERPASSWORD=<text>
+
+KYS_POSTGRES_DB=<text>
+KYS_POSTGRES_USER=<text>
+KYS_POSTGRES_PASSWORD=<text>
+KYS_POSTGRES_URL=jdbc:postgresql://<host>:<port>/$KYS_POSTGRES_DB
+
+KYS_REDIS_HOST=<text>
+KYS_REDIS_USER=<text>
+KYS_REDIS_PASSWORD=<text>
+
+APP_PORT=<number>
+CORS_ALLOWED_ORIGIN=https://<dns / ip>
+```
 
 ---
 
@@ -46,6 +63,8 @@ All three services run in Docker.
 make prod-up
 ```
 
+A github action automatically deploys when code is pushed on main.
+
 ---
 
 ## Schema changes
@@ -54,5 +73,7 @@ Whenever `postgres/init/` is changes, regenerate jOOQ classes against a local th
 
 ```bash
 git add app/build/generated-src/jooq/
-git commit -m "[chore: regenerate jOOQ classes"
+git commit -m "chore: regenerate jOOQ classes"
 ```
+
+In production, the jOOQ classes are regenerated automatically. So if you are pushing changes to the DB, you have to report them on the actual DB before pushing to main.

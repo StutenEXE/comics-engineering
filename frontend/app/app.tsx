@@ -2,22 +2,31 @@ import { Outlet } from "react-router";
 import { Header } from "./components/headers/Header";
 import { useRefreshQuery } from "./store/services/api";
 import { clearUser, setUser } from "./store/slices/userSlice";
-import { useToast } from "./components/toast/Toast";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
+import { useAppSelector } from "./store/hooks";
 
 export default function App() {
-  const { data, isLoading, isSuccess, isError } = useRefreshQuery({});
-  const dispatch = useDispatch();
-  const toast = useToast();
+  let firstLoad = true;
+  const { isAuthenticated } = useAppSelector((state) => state.user);
 
-  // run once when refresh gives result
+  const { data, isLoading, isSuccess, isError } = useRefreshQuery(
+    {},
+    {
+      skip: !isAuthenticated && !firstLoad, // Skip the refresh query if the user is not authenticated and it's not the first load
+      refetchOnReconnect: true, // Refetch when the browser regains network connections
+      pollingInterval: 15 * 60 * 1000, // Poll every 15 minutes (automatic token refresh)
+    }, 
+  );
+  const dispatch = useDispatch();
+
+  // Run once when refresh gives result
   useEffect(() => {
+    firstLoad = false;
     if (isSuccess && data?.user) {
       dispatch(setUser(data.user));
-      // toast.success("Login successful"); // Is too much on the screen
     }
-    // Optionally: clear user state if refresh fails (not authenticated)
+    // Clear user state if refresh fails (not authenticated)
     if (isError) {
       dispatch(clearUser());
     }

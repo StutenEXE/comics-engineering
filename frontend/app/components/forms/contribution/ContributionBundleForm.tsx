@@ -194,7 +194,7 @@ export function ContributionBundleForm({
       // If ok, replace the new contribution in the list
       setContributions((current) => {
         return current.map((contribution) =>
-          // If contribution.id is the same as submittedContribution.id, replace it with newContribution 
+          // If contribution.id is the same as submittedContribution.id, replace it with newContribution
           // (if boolean, means no change in DB so keep submittedContribution), else keep the same contribution
           contribution.id === submittedContribution.id
             ? typeof newContribution === "boolean"
@@ -311,7 +311,7 @@ export function ContributionBundleForm({
             onAdd={createDependantContribution}
             onEdit={editContribution}
             onRemove={removeContribution}
-            className="border border-white/10 rounded-md bg-white/5 min-h-[80px]"
+            className="border border-white/10 rounded-md bg-white/5 min-h-[80px] min-w-[300px] p-3"
           />
         </div>
 
