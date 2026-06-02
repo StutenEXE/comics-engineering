@@ -113,7 +113,7 @@ export function SearchSelectInput<T extends SearchSelectItem>({
       </label>
 
       {isSelected ? (
-        /* ── Selected / local-ref badge ─────────────────────────────────── */
+        /* Selected / local-ref badge */
         <div className="w-full flex items-center justify-between gap-2 bg-indigo-500/10 border border-indigo-500/30 rounded-md px-3 py-2">
           <div className="flex items-center gap-2 text-sm">
             {/* Checkmark icon */}
@@ -154,19 +154,20 @@ export function SearchSelectInput<T extends SearchSelectItem>({
           </div>
 
           {/* Clear button — hidden for local refs and negative ids */}
-          {(isLocalRef && isLocalRefRemovable) || (selectedItem) && (
-            <button
-              type="button"
-              onClick={handleClear}
-              className="text-white/20 hover:text-rose-400 transition-colors cursor-pointer"
-              aria-label="Clear selection"
-            >
-              <MdDelete size={15} />
-            </button>
-          )}
+          {(isLocalRef && isLocalRefRemovable) ||
+            (selectedItem && (
+              <button
+                type="button"
+                onClick={handleClear}
+                className="text-white/20 hover:text-rose-400 transition-colors cursor-pointer"
+                aria-label="Clear selection"
+              >
+                <MdDelete size={15} />
+              </button>
+            ))}
         </div>
       ) : (
-        /* ── Search input + results ──────────────────────────────────────── */
+        /* Search input + results */
         <>
           <input
             type="text"
@@ -179,20 +180,21 @@ export function SearchSelectInput<T extends SearchSelectItem>({
             onChange={handleChange}
             className="bg-white/5 border border-white/10 rounded-md px-3 py-2 text-sm text-white/80 placeholder-white/20 outline-none focus:border-indigo-500/70 focus:ring-1 focus:ring-indigo-500/30 transition-all w-full disabled:opacity-30 disabled:cursor-not-allowed"
           />
-
-          {results.length > 0 && (
-            <ol className="border border-white/10 rounded-md overflow-hidden">
-              {results.map((item) => (
-                <li
-                  key={item.id}
-                  onClick={() => handleSelect(item)}
-                  className="px-3 py-2 text-sm text-white/70 border-b border-white/5 last:border-none hover:bg-white/5 transition-colors cursor-pointer"
-                >
-                  {renderResult ? renderResult(item) : item.name}
-                </li>
-              ))}
-            </ol>
-          )}
+          <div className="relative">
+            {results.length > 0 && (
+              <ol className="absolute top-full left-0 right-0 border bg-black border-white/25 rounded-md overflow-hidden">
+                {results.map((item) => (
+                  <li
+                    key={item.id}
+                    onClick={() => handleSelect(item)}
+                    className="px-3 py-2 text-sm text-white/70 border-b border-white/5 last:border-none hover:bg-white/5 transition-colors cursor-pointer"
+                  >
+                    {renderResult ? renderResult(item) : item.name}
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
         </>
       )}
       {error && <p className="text-xs text-rose-400/80">{error}</p>}

@@ -99,10 +99,14 @@ export function IssueContributionForm({
   return (
     <GenericForm
       title={
-        action === "update" ? t("issue.form.title.modify") : t("issue.form.title.create")
+        action === "update"
+          ? t("issue.form.title.modify")
+          : t("issue.form.title.create")
       }
       onCancel={noPropagationEvt(onCancel)}
-      submitLabel={action === "update"  ? t("issue.form.modify") : t("issue.form.create")}
+      submitLabel={
+        action === "update" ? t("issue.form.modify") : t("issue.form.create")
+      }
       onSubmit={handleSubmit(triggerSubmission)}
     >
       {/* Name field */}
@@ -116,7 +120,7 @@ export function IssueContributionForm({
         {/* IssueSerie selection */}
         <SearchSelectInput
           label={t("issue.serie")}
-          placeholder={t("issue.form.issueserieSearchPlaceholder")}
+          placeholder={t("generic.search.placeholder")}
           localRefLabel={t("issue.form.localRefPresent")}
           selectedItem={selectedIssueSerie}
           localRef={issueSerieLocalRef}
@@ -150,6 +154,7 @@ export function IssueContributionForm({
             defaultValue: toHtmlInputString(issue?.parutionDate),
           }}
           error={errors.parutionDate}
+          tooltip={t("issue.parutionDateExplanation")}
         />
         <DateRhfInput
           label={t("issue.coverDate")}
@@ -160,6 +165,7 @@ export function IssueContributionForm({
             defaultValue: toHtmlInputString(issue?.coverDate),
           }}
           error={errors.coverDate}
+          tooltip={t("issue.coverDateExplanation")}
         />
       </div>
     </GenericForm>

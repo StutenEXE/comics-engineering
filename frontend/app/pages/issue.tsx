@@ -94,12 +94,14 @@ export default function IssuePage({ params }: { params: { id: number } }) {
             // Parutiondate
             {
               label: t("issue.parutionDate"),
+              labelTooltip: t("issue.parutionDateExplanation"),
               value: dateToVerboseDateString(locale, issue?.parutionDate),
             },
             // Coverdate
             {
               label: t("issue.coverDate"),
-              value: dateToVerboseDateString(locale, issue?.coverDate),
+              labelTooltip: t("issue.coverDateExplanation"),
+              value: dateToMonthYearString(locale, issue?.coverDate),
             },
           ]}
         />

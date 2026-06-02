@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "~/i18n/i18n";
 import type { Error } from "~/utils/error";
+import { HelpBadgeTooltip } from "../badges/HelpBadge";
 
 interface PageTemplateProps {
   hasImg?: boolean;
@@ -83,6 +84,7 @@ export function InfoPageSection({
 
 interface InfoPageFieldProps {
   label: string;
+  labelTooltip?: string;
   value?: ReactNode;
   to?: string; // internal link
   href?: string; // external link
@@ -91,6 +93,7 @@ interface InfoPageFieldProps {
 
 export function InfoPageField({
   label,
+  labelTooltip,
   value,
   to,
   href,
@@ -104,8 +107,9 @@ export function InfoPageField({
 
   return (
     <>
-      <span className="text-xs font-medium uppercase tracking-widest text-white/30 whitespace-nowrap">
+      <span className="flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-white/30 whitespace-nowrap">
         {label}
+        {labelTooltip && <HelpBadgeTooltip tooltipContent={labelTooltip} />}
       </span>
       {to ? (
         <Link
