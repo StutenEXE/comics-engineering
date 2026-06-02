@@ -152,9 +152,9 @@ export function OwnedEditionForm({
                 valueAsDate: true,
               })}
               inputProps={{
-                defaultValue: toHtmlInputString(
-                  ownedEdition.date || new Date(),
-                ),
+                defaultValue: ownedEdition.dateRead ? toHtmlInputString(
+                  ownedEdition.dateRead,
+                ) : undefined,
               }}
               invisible={!watchedRead}
               error={errors.dateRead}

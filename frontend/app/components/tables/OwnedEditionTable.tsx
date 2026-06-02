@@ -30,7 +30,7 @@ function getOwnedEditionColumns(): ColumnDef<OwnedEdition>[] {
       searchable: true,
       cellRenderer: (oe) => (
         <a className="hover:underline" href={`/book/${oe.edition.book?.id}`}>
-          {oe.edition.book?.name} <span className="font-normal">↗</span>
+          {oe.edition.book?.name}&nbsp;<span className="font-normal">↗</span>
         </a>
       ),
       getValue: (oe) => oe.edition.book?.name || "",
@@ -44,7 +44,7 @@ function getOwnedEditionColumns(): ColumnDef<OwnedEdition>[] {
           className="hover:underline"
           href={`/serie/${oe.edition.book?.serieId}`}
         >
-          {oe.edition.serie?.name} <span className="font-normal">↗</span>
+          {oe.edition.serie?.name}&nbsp;<span className="font-normal">↗</span>
         </a>
       ),
       getValue: (oe) => oe.edition.serie?.name || "",

@@ -200,7 +200,7 @@ export default {
     "oedition.serie.name": "Nom de la série",
     "oedition.cover": "Couverture",
     "oedition.book.volume": "Tome",
-    "oedition.addDate": "Date d'ajout",
+    "oedition.addDate": "Date d'ajout à ma collection",
     "oedition.read": "Lu",
     "oedition.dateRead": "Date de lecture",
     "oedition.gift": "Cadeau",
