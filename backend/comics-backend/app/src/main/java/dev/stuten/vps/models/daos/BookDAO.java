@@ -103,6 +103,30 @@ public class BookDAO extends ContributableDAO<BookDTO> {
                 proposal.setAddedBy(user);
         }
 
+        private void linkToIssues(Integer bookId, List<SimpleIssueDTO> issues) {
+                if (issues == null || issues.isEmpty()) {
+                        return;
+                }
+                Optional<BookDTO> currBook = findById(bookId);
+                List<InsertSetMoreStep<BooksIssuesRecord>> issueLinks = issues.stream()
+                                .filter(issue -> {
+                                        // If the book is not found, then all issues can be created
+                                        if (currBook.isEmpty()) {
+                                                return true;
+                                        }
+                                        // If issue and book are already linked, filter it out
+                                        return !currBook.get().getIssues()
+                                                        .stream()
+                                                        .anyMatch(issue2 -> issue.getId().equals(issue2.getId()));
+                                })
+                                // Create the batch of insertions in the linking table
+                                .map(issue -> DSL().insertInto(BOOKS_ISSUES)
+                                                .set(BOOKS_ISSUES.BOOK_ID, bookId)
+                                                .set(BOOKS_ISSUES.ISSUE_ID, issue.getId()))
+                                .toList();
+                DSL().batch(issueLinks).execute();
+        }
+
         @Override
         public Optional<Integer> create(BookDTO dto) {
                 Optional<Integer> result = DSL().insertInto(BOOKS)
@@ -122,19 +146,13 @@ public class BookDAO extends ContributableDAO<BookDTO> {
                 // Special handling for many-to-many relation with issues
                 Integer bookId = result.get();
                 List<SimpleIssueDTO> issues = dto.getIssues();
-                if (issues != null && !issues.isEmpty()) {
-                        List<InsertSetMoreStep<BooksIssuesRecord>> issueLinks = issues.stream()
-                                        .map(issue -> DSL().insertInto(BOOKS_ISSUES)
-                                                        .set(BOOKS_ISSUES.BOOK_ID, bookId)
-                                                        .set(BOOKS_ISSUES.ISSUE_ID, issue.getId()))
-                                        .toList();
-                        DSL().batch(issueLinks).execute();
-                }
+                linkToIssues(bookId, issues);
                 return result;
         }
 
         @Override
         public boolean update(BookDTO dto) {
+                linkToIssues(dto.getId(), dto.getIssues());
                 return DSL().update(BOOKS)
                                 .set(BOOKS.NAME, dto.getName())
                                 .set(BOOKS.DESC, dto.getDesc())
