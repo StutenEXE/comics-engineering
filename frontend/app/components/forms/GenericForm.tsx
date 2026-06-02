@@ -8,7 +8,7 @@ interface GenericFormProps {
   onCancel?: (e: React.BaseSyntheticEvent) => void;
   submitLabel?: string;
   onSubmit?: (event: React.SubmitEvent<HTMLFormElement>) => void;
-  disabled?: boolean,
+  disabled?: boolean;
   children?: React.ReactNode;
 }
 
@@ -22,6 +22,7 @@ export function GenericForm({
   children,
 }: GenericFormProps) {
   const { t } = useTranslation();
+
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-6 p-6">
       {/* Title */}

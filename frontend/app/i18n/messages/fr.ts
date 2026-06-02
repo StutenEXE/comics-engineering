@@ -134,6 +134,8 @@ export default {
     "cbundle.action.seeContributions": "Voir les contributions",
     "cbundle.toast.statusupdated": "Statut du lot mis à jour",
     "cbundle.toast.statusupdateerror": "Statut du lot n'a pas pu être mis à jour",
+    "cbundle.form.cancel.title": "Annuler la soumission",
+    "cbundle.form.cancel.message": "Êtes-vous sûr de vouloir annuler cette soumission ?\nToutes les données seront perdues.",
     // Edition
     "edition.nonefound": "Aucune édition trouvée",
     "edition.book": "Livre",

@@ -194,7 +194,7 @@ export function ContributionBundleForm({
       // If ok, replace the new contribution in the list
       setContributions((current) => {
         return current.map((contribution) =>
-          // If contribution.id is the same as submittedContribution.id, replace it with newContribution 
+          // If contribution.id is the same as submittedContribution.id, replace it with newContribution
           // (if boolean, means no change in DB so keep submittedContribution), else keep the same contribution
           contribution.id === submittedContribution.id
             ? typeof newContribution === "boolean"
@@ -239,6 +239,16 @@ export function ContributionBundleForm({
       ? "update"
       : "create";
 
+  const handleCancel = () => {
+    confirm({
+      title: t("cbundle.form.cancel.title"),
+      message: t("cbundle.form.cancel.message"),
+      onConfirm: () => {
+        onCancel?.();
+      },
+    });
+  };
+
   return (
     <>
       <GenericForm
@@ -247,7 +257,7 @@ export function ContributionBundleForm({
             ? t("cbundle.form.title.update")
             : t("cbundle.form.title.create")
         }
-        onCancel={noPropagationEvt(onCancel)}
+        onCancel={noPropagationEvt(handleCancel)}
         submitLabel={
           action === "update"
             ? t("cbundle.form.update")

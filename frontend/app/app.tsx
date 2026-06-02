@@ -7,12 +7,13 @@ import { useEffect } from "react";
 import { useAppSelector } from "./store/hooks";
 
 export default function App() {
+  let firstLoad = true;
   const { isAuthenticated } = useAppSelector((state) => state.user);
 
   const { data, isLoading, isSuccess, isError } = useRefreshQuery(
     {},
     {
-      skip: !isAuthenticated, // Skip the refresh query if the user is not authenticated
+      skip: !isAuthenticated && !firstLoad, // Skip the refresh query if the user is not authenticated and it's not the first load
       refetchOnReconnect: true, // Refetch when the browser regains network connections
       pollingInterval: 15 * 60 * 1000, // Poll every 15 minutes (automatic token refresh)
     }, 
@@ -21,6 +22,7 @@ export default function App() {
 
   // Run once when refresh gives result
   useEffect(() => {
+    firstLoad = false;
     if (isSuccess && data?.user) {
       dispatch(setUser(data.user));
     }
