@@ -68,7 +68,7 @@ export function EditionCard({
             // TODO : fix when already added not open modal
             onClick={preventDefaultEvt(
               noPropagationEvt(() => {
-                relation?.inCollection && openModal();
+                !relation?.inCollection && openModal();
               }),
             )}
             alreadyAdded={relation ? relation.inCollection : false}
