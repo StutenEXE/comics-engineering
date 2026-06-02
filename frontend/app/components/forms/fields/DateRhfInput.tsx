@@ -9,6 +9,7 @@ export interface DateRhfInputProps {
   invisible?: boolean;
   error?: FieldError;
   tooltip?: string;
+  className?: string;
 }
 
 export function DateRhfInput({
@@ -18,12 +19,14 @@ export function DateRhfInput({
   invisible,
   error,
   tooltip,
+  className,
 }: DateRhfInputProps) {
   return (
     <div
       className={twMerge(
         "max-w-45 flex flex-col gap-1.5 flex-1",
         invisible ? "invisible" : "",
+        className,
       )}
     >
       <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-white/40">
