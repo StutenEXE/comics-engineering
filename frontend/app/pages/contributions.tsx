@@ -22,9 +22,9 @@ export function meta({}: Route.MetaArgs) {
 export default function ContributePage() {
   const { t } = useTranslation();
   const toast = useToast();
-  const itemsPerPage = 10;
+  const itemsPerPage = 500; // TODO, setup pagination on backend and update this accordingly
 
-  const [currPage, setCurrPage] = useState(0);
+  // const [currPage, setCurrPage] = useState(0);
 
   // If a bundle is to be edited
   const [bundleToEdit, setBundleToEdit] = useState<ContributionBundle>();
@@ -46,13 +46,13 @@ export default function ContributePage() {
   const bundles = data?.bundles;
 
   const triggerGetBundles = () => {
-    const from = currPage * itemsPerPage;
+    const from = 0;// currPage * itemsPerPage; 
     const limit = itemsPerPage;
     getBundles({ from, limit });
   };
 
   // On page change, refetch data
-  useEffect(() => triggerGetBundles(), [currPage]);
+  // useEffect(() => triggerGetBundles(), [currPage]);
 
   // On load, fetch first page of bundles
   useEffect(() => {
@@ -99,7 +99,7 @@ export default function ContributePage() {
           bundleList={bundles || []}
           addActions
           onContributionClick={openContributionModal}
-          onPageChange={setCurrPage}
+          // onPageChange={setCurrPage}
           onSuccesfulStatusUpdate={triggerGetBundles}
         />
         <ContributionBundleModal

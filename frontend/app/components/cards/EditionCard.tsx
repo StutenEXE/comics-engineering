@@ -110,7 +110,7 @@ export function EditionCard({
   return (
     <>
       <div
-        className={twMerge("group block", className)}
+        className={twMerge("group block cursor-pointer", className, disableInteractions && "cursor-default")}
         onClick={() => !disableInteractions && openEditionModal()}
       >
         {generateCard()}
