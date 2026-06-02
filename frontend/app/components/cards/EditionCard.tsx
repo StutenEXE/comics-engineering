@@ -12,6 +12,7 @@ import { noPropagationEvt, preventDefaultEvt } from "~/utils/events";
 import { AddToCollectionIconButton } from "../buttons/AddToCollectionIconButton";
 import { AddToCollectionModal } from "../modals/AddToCollectionModal";
 import type { OwnedEdition } from "~/models/ownedEdition";
+import { EditionModal } from "../modals/EditionModal";
 
 type EditionCardProps = {
   edition?: SimpleEdition;
@@ -43,16 +44,22 @@ export function EditionCard({
     relation?.inCollection && (relation.inCollection = true);
   };
 
-  // Handles modal open/close state
-  const [isModalOpen, setisModalOpen] = useState(false);
-  const openModal = () => {
-    setisModalOpen(true);
+  // Handles add to collection modal open/close state
+  const [isAddToCollectionModalOpen, setIsAddToCollectionModalOpen] =
+    useState(false);
+  const openAddToCollectionModal = () => {
+    setIsAddToCollectionModalOpen(true);
+  };
+  const closeAddToCollectionModal = () => {
+    setIsAddToCollectionModalOpen(false);
   };
 
-  const closeModal = () => {
-    setisModalOpen(false);
-  };
+  // Edition modal
+  const [isEditionModalOpen, setIsEditionModalOpen] = useState(false);
+  const openEditionModal = () => setIsEditionModalOpen(true);
+  const closeEditionModal = () => setIsEditionModalOpen(false);
 
+  // If no edition provided, return null (can happen when edition is deleted but still in cache somewhere)
   if (!edition) return null;
 
   const generateCard = () => {
@@ -67,7 +74,7 @@ export function EditionCard({
           <AddToCollectionIconButton
             onClick={preventDefaultEvt(
               noPropagationEvt(() => {
-                !relation?.inCollection && openModal();
+                !relation?.inCollection && openAddToCollectionModal();
               }),
             )}
             alreadyAdded={relation ? relation.inCollection : false}
@@ -102,23 +109,24 @@ export function EditionCard({
 
   return (
     <>
-      {!disableInteractions && (
-        <Link
-          to={`/edition/${edition.id}`}
-          className={`group block ${className}`}
-        >
-          {generateCard()}
-        </Link>
-      )}
-      {disableInteractions && (
-        <div className={`group block ${className}`}>{generateCard()}</div>
-      )}
+      <div
+        className={twMerge("group block", className)}
+        onClick={() => !disableInteractions && openEditionModal()}
+      >
+        {generateCard()}
+      </div>
 
       <AddToCollectionModal
         editionId={edition.id}
-        isOpen={isModalOpen}
+        isOpen={isAddToCollectionModalOpen}
         onSubmit={onSubmit}
-        onClose={closeModal}
+        onClose={closeAddToCollectionModal}
+      />
+
+      <EditionModal
+        editionId={edition.id}
+        isOpen={isEditionModalOpen}
+        onClose={closeEditionModal}
       />
     </>
   );

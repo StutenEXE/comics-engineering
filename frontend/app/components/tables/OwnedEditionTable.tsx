@@ -6,8 +6,11 @@ import { GenericTable, type ColumnDef } from "./GenericTable";
 import { EditOwnedEditionModal } from "../modals/EditOwnedEditionModal";
 import { useState, useEffect } from "react";
 import { compareDates } from "~/utils/date";
+import { EditionModal } from "../modals/EditionModal";
 
-function getOwnedEditionColumns(): ColumnDef<OwnedEdition>[] {
+function getOwnedEditionColumns(
+  onCoverClick: (oe: OwnedEdition) => void,
+): ColumnDef<OwnedEdition>[] {
   const { t, locale } = useTranslation();
   return [
     {
@@ -15,13 +18,13 @@ function getOwnedEditionColumns(): ColumnDef<OwnedEdition>[] {
       header: t("oedition.cover"),
       searchable: false,
       cellRenderer: (oe) => (
-        <a className="hover:underline" href={`/edition/${oe.edition.id}`}>
+        <div className="cursor-pointer" onClick={() => onCoverClick(oe)}>
           <img
             src={oe.edition.imgUrl}
             alt={oe.edition.book?.name}
             className="max-h-[75px]"
           />
-        </a>
+        </div>
       ),
     },
     {
@@ -53,7 +56,9 @@ function getOwnedEditionColumns(): ColumnDef<OwnedEdition>[] {
       key: "volume",
       header: t("oedition.book.volume"),
       cellRenderer: (oe) =>
-        oe.edition?.book ? `${t("generic.volume", { capitalize: true })} ${oe.edition.book?.number}` : "generic.n/a",
+        oe.edition?.book
+          ? `${t("generic.volume", { capitalize: true })} ${oe.edition.book?.number}`
+          : "generic.n/a",
     },
     {
       key: "publisher",
@@ -100,14 +105,23 @@ export function OwnedEditionTable({
   }, [editionList]);
 
   // Handles modal open/close state
-  const [isModalOpen, setisModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const openModal = () => {
-    setisModalOpen(true);
+    setIsEditModalOpen(true);
+  };
+  const closeModal = () => {
+    setIsEditModalOpen(false);
   };
 
-  const closeModal = () => {
-    setisModalOpen(false);
+  // Handles edition details modal
+  const [isEditionModalOpen, setIsEditionModalOpen] = useState(false);
+  const openEditionModal = () => {
+    setIsEditionModalOpen(true);
   };
+  const closeEditionModal = () => {
+    setIsEditionModalOpen(false);
+  };
+  const [editionToShowId, setEditionToShowId] = useState<number>();
 
   const [editedOwnedEdition, setEditedOwnedEdition] = useState<OwnedEdition>();
   const actionGenerator = (oe: OwnedEdition) => {
@@ -138,7 +152,10 @@ export function OwnedEditionTable({
         list={[...localEditionList].sort(
           (a, b) => -compareDates(a.date, b.date),
         )}
-        columns={getOwnedEditionColumns()}
+        columns={getOwnedEditionColumns((oe) => {
+          setEditionToShowId(oe.edition.id);
+          openEditionModal();
+        })}
         addActions={true}
         actionGenerator={actionGenerator}
         isLoading={isLoading}
@@ -146,10 +163,17 @@ export function OwnedEditionTable({
       />
       <EditOwnedEditionModal
         ownedEdition={editedOwnedEdition!}
-        isOpen={isModalOpen}
+        isOpen={isEditModalOpen}
         onSubmit={handleSubmit}
         onClose={closeModal}
       />
+      {editionToShowId && (
+        <EditionModal
+          editionId={editionToShowId}
+          isOpen={isEditionModalOpen}
+          onClose={closeEditionModal}
+        />
+      )}
     </>
   );
 }

@@ -83,7 +83,7 @@ export function OwnedEditionForm({
       retailPrice: data.retailPrice,
       note: data.note,
       edition: editionToDTO(ownedEdition.edition!),
-      user: ownedEdition.user || user!
+      user: ownedEdition.user || user!,
     };
     onSubmit?.(newOwnedEdition);
   };
@@ -108,7 +108,7 @@ export function OwnedEditionForm({
           ? t("oedition.form.title.modify")
           : t("oedition.form.title.create")
       }
-      onCancel={noPropagationEvt(onCancel)}
+      onCancel={noPropagationEvt(handleCancel)}
       submitLabel={
         action === "update"
           ? t("oedition.form.modify")
@@ -126,7 +126,7 @@ export function OwnedEditionForm({
           }
           className="w-35 h-min"
         />
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-2">
           {/* Add Date */}
           <DateRhfInput
             label={t("oedition.addDate")}
@@ -137,6 +137,7 @@ export function OwnedEditionForm({
               defaultValue: toHtmlInputString(ownedEdition.date || new Date()),
             }}
             error={errors.date}
+            className="max-w-60"
           />
           <div className="flex gap-3">
             {/* Read */}
@@ -152,9 +153,9 @@ export function OwnedEditionForm({
                 valueAsDate: true,
               })}
               inputProps={{
-                defaultValue: ownedEdition.dateRead ? toHtmlInputString(
-                  ownedEdition.dateRead,
-                ) : undefined,
+                defaultValue: ownedEdition.dateRead
+                  ? toHtmlInputString(ownedEdition.dateRead)
+                  : undefined,
               }}
               invisible={!watchedRead}
               error={errors.dateRead}
@@ -179,7 +180,6 @@ export function OwnedEditionForm({
           </div>
 
           <div>
-            <span className="text-white/40 text-xs">{t("generic.currencyDisclaimer")}</span>
             <div className="flex gap-6 mt-2">
               {/* Purchase Price */}
               <TextRhfInput
@@ -225,6 +225,10 @@ export function OwnedEditionForm({
             </div>
 
             <div className="mt-2 text-white/40 text-xs">
+              <span className="text-white/40 text-xs">
+                {t("generic.currencyDisclaimer")}
+              </span>
+              <br />
               <span>
                 {t("oedition.form.totalCost")} : {totalCost.toFixed(2)} €{" "}
                 {savings > 0 &&
@@ -234,6 +238,7 @@ export function OwnedEditionForm({
           </div>
         </div>
       </div>
+
       <TextAreaRhfInput
         label={t("oedition.note")}
         registration={register("note")}

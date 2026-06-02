@@ -28,15 +28,13 @@ export function EditionContributionModal({
 
   return (
     <GenericModal isOpen={isOpen} onClose={onClose}>
-      <div className="border border-gray-300 rounded-lg shadow-md bg-black">
-        <EditionContributionForm
-          edition={edition}
-          bookLocalRef={bookLocalRef}
-          action={action}
-          onSubmit={handleSubmit}
-          onCancel={onClose}
-        />
-      </div>
+      <EditionContributionForm
+        edition={edition}
+        bookLocalRef={bookLocalRef}
+        action={action}
+        onSubmit={handleSubmit}
+        onCancel={onClose}
+      />
     </GenericModal>
   );
 }

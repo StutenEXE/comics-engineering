@@ -28,15 +28,13 @@ export function IssueContributionModal({
 
   return (
     <GenericModal isOpen={isOpen} onClose={onClose}>
-      <div className="border border-gray-300 rounded-lg shadow-md bg-black">
-        <IssueContributionForm
-          issue={issue}
-          issueSerieLocalRef={issueSerieLocalRef}
-          action={action}
-          onSubmit={handleSubmit}
-          onCancel={onClose}
-        />
-      </div>
+      <IssueContributionForm
+        issue={issue}
+        issueSerieLocalRef={issueSerieLocalRef}
+        action={action}
+        onSubmit={handleSubmit}
+        onCancel={onClose}
+      />
     </GenericModal>
   );
 }

@@ -56,14 +56,12 @@ export function AddToCollectionModal({
 
   return (
     <GenericModal isOpen={isOpen} onClose={onClose}>
-      <div className="border border-gray-300 rounded-lg shadow-md bg-black">
-        <OwnedEditionForm
-          ownedEdition={ownedEdition}
-          action="create"
-          onCancel={onClose}
-          onSubmit={handleSubmit}
-        />
-      </div>
+      <OwnedEditionForm
+        ownedEdition={ownedEdition}
+        action="create"
+        onCancel={onClose}
+        onSubmit={handleSubmit}
+      />
     </GenericModal>
   );
 }
