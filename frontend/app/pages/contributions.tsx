@@ -62,18 +62,29 @@ export default function ContributePage() {
 
   const updateContributionBundle = async (
     bundle: Partial<ContributionBundle>,
+    hasChanges: boolean,
   ) => {
+    const resetFormAndClose = () => {
+      setBundleToEdit(undefined);
+      closeContributionModal();
+    };
+    if (!hasChanges) {
+      resetFormAndClose();
+      return;
+    }
     updateBundle(bundle)
       .then((res) => {
         if ("error" in res) {
-          toast.error(t("cbundle.updateError"));
+          toast.error(t("cbundle.toast.updateError"));
+          resetFormAndClose();
+          return;
         }
-        toast.success(t("cbundle.updateSuccess"));
-        setBundleToEdit(undefined);
-        closeContributionModal();
+        console.log("Update bundle response", res);
+        toast.success(t("cbundle.toast.updateSuccess"));
+        resetFormAndClose();
       })
       .catch(() => {
-        toast.error(t("cbundle.updateError"));
+        toast.error(t("cbundle.toast.updateError"));
       });
   };
 

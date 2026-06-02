@@ -16,7 +16,7 @@ import { ContributionBundleForm } from "./ContributionBundleForm";
 
 interface UpdateContributionBundleFormProps {
   bundle: ContributionBundle;
-  onSubmit?: (bundle: Partial<ContributionBundle>) => void;
+  onSubmit?: (bundle: Partial<ContributionBundle>, hasChanges: boolean) => void;
   onCancel?: () => void;
 }
 

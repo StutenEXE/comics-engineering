@@ -107,7 +107,7 @@ public class ContributionBundleService {
         }
 
         // Update contribution bundle
-        boolean updated = dao.update(bundle);
+        Boolean updated = dao.update(bundle);
         if (!updated) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Contribution bundle not updated", "");
             return;

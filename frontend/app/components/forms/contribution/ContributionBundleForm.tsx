@@ -32,13 +32,12 @@ import { IssueSerieContributionModal } from "../../modals/contribution/IssueSeri
 import { SerieContributionModal } from "../../modals/contribution/SerieContributionModal";
 import { TextAreaRhfInput } from "../fields/TextAreaRhfInput";
 import { GenericForm } from "../GenericForm";
-import { current } from "@reduxjs/toolkit";
 
 interface ContributionBundleFormProps {
   bundle?: ContributionBundle;
   action: "create" | "update";
   disableNewContributions?: boolean;
-  onSubmit?: (bundle: Partial<ContributionBundle>) => void;
+  onSubmit?: (bundle: Partial<ContributionBundle>, hasChanges: boolean) => void;
   onCancel?: () => void;
   // Returing boolean : didn't create a new contribution in DB
   onContributionAdd?: (
@@ -71,7 +70,7 @@ export function ContributionBundleForm({
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty},
   } = useForm<FormData>({
     resolver: zodResolver(schema) as any,
     defaultValues: {
@@ -208,10 +207,11 @@ export function ContributionBundleForm({
 
   const triggerSubmission = (data: FormData) => {
     onSubmit?.({
-      contributions,
+      id: bundle?.id,
+      contributions: contributions,
       note: data.note,
       submitter: user!,
-    });
+    }, isDirty);
   };
 
   const localIssueCandidates: SimpleIssue[] = contributions
