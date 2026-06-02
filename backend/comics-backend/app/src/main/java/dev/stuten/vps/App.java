@@ -15,6 +15,7 @@ public class App {
     public static void main(String[] args) {
 
         int port = Integer.parseInt(System.getenv("APP_PORT"));
+        String allowedOrigin = System.getenv("CORS_ALLOWED_ORIGIN");
 
         Javalin app = Javalin.create(config -> {
             config.http.defaultContentType = "application/json";
@@ -26,7 +27,7 @@ public class App {
             // CORS policy
             config.bundledPlugins.enableCors(cors -> {
                 cors.addRule(it -> {
-                    it.allowHost(System.getenv("CORS_ALLOWED_ORIGIN"));
+                    it.allowHost(allowedOrigin);
                     it.allowCredentials = true;
                     it.exposeHeader("Authorization");
                 });
@@ -34,10 +35,21 @@ public class App {
             config.router.ignoreTrailingSlashes = true;
         });
 
-        // Authorize POST
-        app.options("/*", ctx -> ctx.status(204));
+        app.before(ctx -> {
+            if (ctx.method().toString().equals("OPTIONS")) {
+                ctx.header("Access-Control-Allow-Origin", allowedOrigin);
+                ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+                ctx.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+                ctx.header("Access-Control-Allow-Credentials", "true");
+                ctx.status(200);
+                ctx.skipRemainingHandlers();
+            }
+        });
 
         Routes.register(app);
+
+        // Handle OPTIONS preflight requests
+        app.options("/*", ctx -> ctx.status(204));
 
         app.start(port);
     }

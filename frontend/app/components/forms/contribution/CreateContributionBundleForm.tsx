@@ -4,7 +4,7 @@ import { useConfirm } from "~/components/modals/ConfirmModalProvider";
 import { useTranslation } from "~/i18n/i18n";
 
 interface CreateContributionBundleFormProps {
-  onSubmit?: (bundle: Partial<ContributionBundle>) => void;
+  onSubmit?: (bundle: Partial<ContributionBundle>, hasChanges: boolean) => void;
   onCancel?: () => void;
 }
 

@@ -81,9 +81,20 @@ public class ContributionBundleDAO extends DAO {
                                 .map(record -> record.get(CONTRIBUTION_BUNDLES.ID));
         }
 
+        /**
+         * Only updateable data :
+         * - note
+         * - submitterId
+         * 
+         * To modify status, use updateStatus
+         * 
+         * @param dto The contribution bundle data to update. Must contain the ID of the
+         *            bundle to update.
+         * @return True if the contribution was updated, false otherwise (not found or
+         *         no change)
+         */
         public Boolean update(ContributionBundleDTO dto) {
                 return DSL().update(CONTRIBUTION_BUNDLES)
-                                .set(CONTRIBUTION_BUNDLES.STATUS, dto.getStatus())
                                 .set(CONTRIBUTION_BUNDLES.NOTE, dto.getNote())
                                 .set(CONTRIBUTION_BUNDLES.SUBMITTER_ID, dto.getSubmitter().getId())
                                 .where(CONTRIBUTION_BUNDLES.ID.eq(dto.getId()))
@@ -91,11 +102,11 @@ public class ContributionBundleDAO extends DAO {
         }
 
         public Boolean updateStatus(Integer contributionId, ContributionBundleStatusEnum newStatus) {
-            return DSL().update(CONTRIBUTION_BUNDLES)
-                    .set(CONTRIBUTION_BUNDLES.STATUS, newStatus)
-                    .where(CONTRIBUTION_BUNDLES.ID.eq(contributionId))
-                    .execute() > 0;
-    }
+                return DSL().update(CONTRIBUTION_BUNDLES)
+                                .set(CONTRIBUTION_BUNDLES.STATUS, newStatus)
+                                .where(CONTRIBUTION_BUNDLES.ID.eq(contributionId))
+                                .execute() > 0;
+        }
 
         public Boolean delete(Integer id) {
                 return DSL().deleteFrom(CONTRIBUTION_BUNDLES)
