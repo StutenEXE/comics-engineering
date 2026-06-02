@@ -12,9 +12,11 @@ export function OwnedEditionTab({}: OwnedEditionTabProps) {
     user ? { id: user.id } : { id: 0 },
     { skip: !user },
   );
-
   const ownedEds = data?.ownedEditions ?? [];
   const err = createError(error);
+
+  console.log("OwnedEditionTab data:", ownedEds);
+
   return (
     <div className="space-y-2">
       <OwnedEditionTable

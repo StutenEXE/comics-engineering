@@ -4,7 +4,7 @@ import { type OwnedEdition } from "~/models/ownedEdition";
 import type { Error } from "~/utils/error";
 import { GenericTable, type ColumnDef } from "./GenericTable";
 import { EditOwnedEditionModal } from "../modals/EditOwnedEditionModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { compareDates } from "~/utils/date";
 
 function getOwnedEditionColumns(): ColumnDef<OwnedEdition>[] {
@@ -30,7 +30,7 @@ function getOwnedEditionColumns(): ColumnDef<OwnedEdition>[] {
       searchable: true,
       cellRenderer: (oe) => (
         <a className="hover:underline" href={`/book/${oe.edition.book?.id}`}>
-          {oe.edition.book?.name} <span className="font-normal">↗</span>
+          {oe.edition.book?.name}&nbsp;<span className="font-normal">↗</span>
         </a>
       ),
       getValue: (oe) => oe.edition.book?.name || "",
@@ -44,7 +44,7 @@ function getOwnedEditionColumns(): ColumnDef<OwnedEdition>[] {
           className="hover:underline"
           href={`/serie/${oe.edition.book?.serieId}`}
         >
-          {oe.edition.serie?.name} <span className="font-normal">↗</span>
+          {oe.edition.serie?.name}&nbsp;<span className="font-normal">↗</span>
         </a>
       ),
       getValue: (oe) => oe.edition.serie?.name || "",
@@ -93,6 +93,11 @@ export function OwnedEditionTable({
 }: OwnedEditionTableProps) {
   // State to have a better control on render lifecycle
   const [localEditionList, setLocalEditionList] = useState([...editionList]);
+
+  // Keep local state in sync when the prop changes
+  useEffect(() => {
+    setLocalEditionList([...editionList]);
+  }, [editionList]);
 
   // Handles modal open/close state
   const [isModalOpen, setisModalOpen] = useState(false);
