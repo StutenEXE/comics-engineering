@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
+import { Input } from "~/components/ui/input";
 
 interface PasswordRhfInputProps {
   label: string;
@@ -26,7 +27,7 @@ export function PasswordRhfInput({
         {label}
       </label>
       <div className="relative">
-        <input
+        <Input
           type={visible ? "text" : "password"}
           autoComplete="off"
           {...registration}

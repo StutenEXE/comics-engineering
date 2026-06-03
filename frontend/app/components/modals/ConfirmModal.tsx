@@ -21,7 +21,7 @@ export function ConfirmModal({
 
   return (
     <GenericModal isOpen={isOpen} onClose={onClose}>
-      <div className="rounded-lg p-6 z-10 w-full max-w-md border border-red-700 rounded-lg shadow-md bg-black">
+      <div className="rounded-lg text-white p-6 z-10 w-full max-w-md border border-red-700 rounded-lg shadow-md bg-black">
         <h2 className="text-xl font-bold mb-4">{title}</h2>
         <p className="mb-6">{insertLinebreaks(message)}</p>
         <div className="flex justify-end gap-4">

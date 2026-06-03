@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { FieldError } from "react-hook-form";
 import { MdDelete } from "react-icons/md";
+import { Input } from "~/components/ui/input";
 import { useTranslation } from "~/i18n/i18n";
 
 export interface SearchSelectItem {
@@ -169,7 +170,7 @@ export function SearchSelectInput<T extends SearchSelectItem>({
       ) : (
         /* Search input + results */
         <>
-          <input
+          <Input
             type="text"
             autoComplete="off"
             id="search-select-input"

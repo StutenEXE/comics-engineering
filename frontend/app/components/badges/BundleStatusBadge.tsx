@@ -1,5 +1,6 @@
 import { useTranslation } from "~/i18n/i18n";
 import { ContributionBundleStatusEnum } from "~/models/contributionBundle";
+import { Badge } from "~/components/ui/badge";
 
 export function BundleStatusBadge({ status }: { status: ContributionBundleStatusEnum }) {
   const { t } = useTranslation();
@@ -16,8 +17,8 @@ export function BundleStatusBadge({ status }: { status: ContributionBundleStatus
   };
 
   return (
-    <span className={`text-xs px-1.5 py-0.5 rounded border ${styles[status]}`}>
+    <Badge className={`text-xs px-1.5 py-0.5 rounded border ${styles[status]}`}>
       {t(`cbundle.enum.status.${status}`)}
-    </span>
+    </Badge>
   );
 }
