@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import { Link } from "react-router";
 import { twMerge } from "tailwind-merge";
-import { OwnedEditionTable } from "~/components/tables/OwnedEditionTable";
 import { useTranslation } from "~/i18n/i18n";
 import { useAppSelector } from "~/store/hooks";
 import { useCollectionQuery } from "~/store/services/api";

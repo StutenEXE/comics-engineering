@@ -11,6 +11,7 @@ public class UserCollectionRouter implements Router {
         // Private
         app.post(APIPathBuilder.buildPrivatePath("/collection/add"), EditionOwnershipService::create);
         app.post(APIPathBuilder.buildPrivatePath("/collection/update"), EditionOwnershipService::update);
+        app.delete(APIPathBuilder.buildPrivatePath("/collection/remove"), EditionOwnershipService::remove);
         app.get(APIPathBuilder.buildPrivatePath("/collection"), EditionOwnershipService::getByUserID);
     }
     

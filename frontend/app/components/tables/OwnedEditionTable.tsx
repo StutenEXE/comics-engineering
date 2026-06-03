@@ -1,12 +1,16 @@
+import { useEffect, useState } from "react";
 import { MdDelete, MdModeEdit } from "react-icons/md";
 import { useTranslation } from "~/i18n/i18n";
 import { type OwnedEdition } from "~/models/ownedEdition";
-import type { Error } from "~/utils/error";
-import { GenericTable, type ColumnDef } from "./GenericTable";
-import { EditOwnedEditionModal } from "../modals/EditOwnedEditionModal";
-import { useState, useEffect } from "react";
+import { useCollectionQuery, useRemoveFromCollectionMutation } from "~/store/services/api";
 import { compareDates } from "~/utils/date";
+import { createError, type Error } from "~/utils/error";
 import { EditionModal } from "../modals/EditionModal";
+import { EditOwnedEditionModal } from "../modals/EditOwnedEditionModal";
+import { GenericTable, type ColumnDef } from "./GenericTable";
+import { useConfirm } from "../modals/ConfirmModalProvider";
+import { useToast } from "../toast/Toast";
+import { useAppSelector } from "~/store/hooks";
 
 function getOwnedEditionColumns(
   onCoverClick: (oe: OwnedEdition) => void,
@@ -85,24 +89,29 @@ function getOwnedEditionColumns(
 }
 
 interface OwnedEditionTableProps {
-  editionList: OwnedEdition[];
-  isLoading?: boolean;
-  error?: Error;
   className?: string;
 }
 
-export function OwnedEditionTable({
-  editionList,
-  isLoading,
-  error,
-}: OwnedEditionTableProps) {
+export function OwnedEditionTable({}: OwnedEditionTableProps) {
+  const confirm = useConfirm();
+  const { t } = useTranslation();
+  const toast = useToast();
+  const { user } = useAppSelector((state) => state.user);
+
+  const { data, isLoading, error, refetch } = useCollectionQuery(
+    user ? { id: user.id } : { id: 0 },
+    { skip: !user },
+  );
+  const editionList = data?.ownedEditions ?? [];
+  const err = createError(error);
+
   // State to have a better control on render lifecycle
-  const [localEditionList, setLocalEditionList] = useState([...editionList]);
+  // const [localEditionList, setLocalEditionList] = useState([...editionList]);
 
   // Keep local state in sync when the prop changes
-  useEffect(() => {
-    setLocalEditionList([...editionList]);
-  }, [editionList]);
+  // useEffect(() => {
+  //   setLocalEditionList([...editionList]);
+  // }, [editionList]);
 
   // Handles modal open/close state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -121,9 +130,22 @@ export function OwnedEditionTable({
   const closeEditionModal = () => {
     setIsEditionModalOpen(false);
   };
-  const [editionToShowId, setEditionToShowId] = useState<number>();
 
+  // Query to remove from a lib
+  const [removeFromCollection, { isSuccess, isError }] =
+    useRemoveFromCollectionMutation();
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("collection.toast.remove.success");
+      refetch();
+    } else if (isError) {
+      toast.success("collection.toast.remove.error");
+    }
+  }, [isSuccess, isError]);
+
+  const [editionToShowId, setEditionToShowId] = useState<number>();
   const [editedOwnedEdition, setEditedOwnedEdition] = useState<OwnedEdition>();
+
   const actionGenerator = (oe: OwnedEdition) => {
     return (
       <div className="w-min flex gap-2 justify-center items-center">
@@ -135,21 +157,31 @@ export function OwnedEditionTable({
           }}
           className="cursor-pointer hover:text-blue-500"
         />
-        <MdDelete size={20} className="cursor-pointer hover:text-red-500" />
+        <MdDelete
+          size={20}
+          onClick={() => {
+            confirm({
+              title: t("collection.remove.title"),
+              message: t("collection.remove.message"),
+              onConfirm: () => {
+                removeFromCollection({ id: oe.id });
+              },
+            });
+          }}
+          className="cursor-pointer hover:text-red-500"
+        />
       </div>
     );
   };
 
   const handleSubmit = (oe: OwnedEdition) => {
-    setLocalEditionList(
-      localEditionList?.map((ed) => (ed.id === oe.id ? oe : ed)),
-    );
+    refetch();
   };
 
   return (
     <>
       <GenericTable
-        list={[...localEditionList].sort(
+        list={[...editionList].sort(
           (a, b) => -compareDates(a.date, b.date),
         )}
         columns={getOwnedEditionColumns((oe) => {
@@ -159,7 +191,7 @@ export function OwnedEditionTable({
         addActions={true}
         actionGenerator={actionGenerator}
         isLoading={isLoading}
-        error={error}
+        error={err}
       />
       <EditOwnedEditionModal
         ownedEdition={editedOwnedEdition!}

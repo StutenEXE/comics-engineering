@@ -52,14 +52,14 @@ public class EditionOwnershipService {
     public static void update(Context ctx) {
         OwnedEditionDTO dto = ctx.bodyAsClass(OwnedEditionDTO.class);
 
-        // Validate that the person creating the owned edition is the owner or an admin
+        // Validate that the person updating the owned edition is the owner or an admin
         AuthContext auth = AuthMiddleware.getCurrentSession(ctx);
         if (auth == null) {
             ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid session", "No valid session found");
             return;
         }
         if (!auth.userId().equals(dto.getUser().getId().toString()) && !auth.role().equals(Role.ADMIN)) {
-            ErrorResponse.send(HttpStatus.FORBIDDEN, "Forbidden", "You can only create owned editions for yourself");
+            ErrorResponse.send(HttpStatus.FORBIDDEN, "Forbidden", "You can only update owned editions for yourself");
             return;
         }
 
@@ -75,6 +75,45 @@ public class EditionOwnershipService {
         Optional<OwnedEditionDTO> newOe = dao.findOwnedById(dto.getId());
 
         ctx.status(HttpStatus.CREATED).json(Map.of("ownedEdition", newOe.get()));
+    }
+
+    public static void remove(Context ctx) {
+        // Retreive ownership ID from request
+        Integer ownershipID;
+        try {
+            ownershipID = Integer.parseInt(ctx.queryParam("id"));
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            return; // For compiler
+        }
+
+        Optional<OwnedEditionDTO> optOe = dao.findOwnedById(ownershipID);
+        if (optOe.isEmpty()) {
+            ErrorResponse.send(HttpStatus.NOT_FOUND, "Ownership not found", "This ownerhip relation has not been found");
+            return;
+        }
+        OwnedEditionDTO oe = optOe.get();
+
+        // Validate that the person deleting the owned edition is the owner or an admin
+        AuthContext auth = AuthMiddleware.getCurrentSession(ctx);
+        if (auth == null) {
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid session", "No valid session found");
+            return;
+        }
+        if (!auth.userId().equals(oe.getUser().getId().toString()) && !auth.role().equals(Role.ADMIN)) {
+            ErrorResponse.send(HttpStatus.FORBIDDEN, "Forbidden", "You can only remove owned editions for yourself");
+            return;
+        }
+
+        // Delete owned edition (remove from collection)
+        Boolean removed = dao.delete(oe);
+
+        if (!removed) {
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", "Failed to remove owned edition");
+            return;
+        }
+
+        ctx.status(HttpStatus.OK);
     }
 
     public static void getByUserID(Context ctx) {
