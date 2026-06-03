@@ -1,4 +1,5 @@
 import type { UseFormRegisterReturn, FieldError } from "react-hook-form";
+import { Input } from "~/components/ui/input";
 
 interface CheckboxRhfInputProps {
   label: string;
@@ -16,7 +17,7 @@ export function CheckboxRhfInput({
   return (
     <label className="flex items-center gap-2.5 cursor-pointer group">
       <div className="relative">
-        <input
+        <Input
           type="checkbox"
             autoComplete="off"
           {...registration}

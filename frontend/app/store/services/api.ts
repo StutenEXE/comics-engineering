@@ -246,6 +246,9 @@ export const privateApi = createApi({
         ownedEdition: parseToOwnedEdition(resp.ownedEdition)
       })
     }),
+    removeFromCollection: build.mutation<{ id: number }, {}>({
+      query: (params) => ({ url: "/collection/remove", method: 'DELETE', params: params }),
+    }),
 
     /****************
      * CONTRIBUTIONS
@@ -264,6 +267,7 @@ export const {
   useOwnedEditionByIdQuery,
   useAddToCollectionMutation,
   useUpdateOwnedEditionMutation,
+  useRemoveFromCollectionMutation,
   useSubmitContributionBundleMutation,
   useUpdateContributionBundleMutation
 } = privateApi;

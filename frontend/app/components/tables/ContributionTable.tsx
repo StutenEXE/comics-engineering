@@ -3,70 +3,7 @@ import { getContributionName, type Contribution } from "~/models/contribution";
 import type { Error } from "~/utils/error";
 import { GenericTable, type ColumnDef } from "./GenericTable";
 import { ContributionStatusBadge } from "../badges/ContributionStatusBadge";
-
-function getContributionColumns(): ColumnDef<Contribution>[] {
-  const { t, locale } = useTranslation();
-  return [
-    {
-      key: "id",
-      header: t("contribution.id"),
-      searchable: true,
-      cellRenderer: (c) => c.id,
-      getValue: (c) => String(c.id),
-    },
-    {
-      key: "action",
-      header: t("contribution.action"),
-      searchable: true,
-      cellRenderer: (c) => t(`contribution.enum.action.${c.action}`),
-      getValue: (c) => c.action,
-    },
-    {
-      key: "type",
-      header: t("contribution.type"),
-      searchable: true,
-      cellRenderer: (c) => t(`contribution.enum.type.${c.entityType}`, { capitalize: true }),
-      getValue: (c) => c.entityType,
-    },
-    {
-      key: "item",
-      header: t("contribution.item"),
-      searchable: true,
-      cellRenderer: (c) => {
-        const name = getContributionName(c, locale);
-        // If the action has a link to something
-        if (c.resolvedEntityId || c.entityId) {
-          return (
-            <a
-              href={`${c.entityType}/${c.resolvedEntityId || c.entityId}`}
-              className="hover:underline"
-            >
-              {name} 
-              <span className="font-normal"> ↗</span>
-            </a>
-          );
-        }
-        return name;
-      },
-      getValue: (c) => getContributionName(c, locale),
-    },
-    {
-      key: "date",
-      header: t("contribution.date"),
-      cellRenderer: (c) =>
-        c.bundle.createdAt
-          ? c.bundle.createdAt.toLocaleDateString(locale)
-          : t("generic.uknown"),
-    },
-    {
-      key: "status",
-      header: t("contribution.status"),
-      searchable: true,
-      cellRenderer: (c) => <ContributionStatusBadge status={c.status} />,
-      getValue: (c) => c.status,
-    },
-  ];
-}
+import { createColumnHelper } from "@tanstack/react-table";
 
 interface ContributionTableProps {
   contributionList: Contribution[] | null | undefined;
@@ -80,7 +17,52 @@ export function ContributionTable({
   isLoading,
   error,
 }: ContributionTableProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+
+  // Define columns
+  const col = createColumnHelper<Contribution>();
+  const columns = [
+    col.accessor("id", {
+      header: t("contribution.id"),
+    }),
+    col.accessor("action", {
+      header: t("contribution.action"),
+      cell: (info) => t(`contribution.enum.action.${info.getValue()}`),
+    }),
+    col.accessor("entityType", {
+      header: t("contribution.type"),
+      cell: (info) =>
+        t(`contribution.enum.type.${info.getValue()}`, { capitalize: true }),
+    }),
+    col.accessor("proposedData", {
+      header: t("contribution.item"),
+      cell: (info) => {
+        const c = info.row.original;
+        const name = getContributionName(c, locale);
+        // If the action has a link to something, create a link towards it
+        if (c.resolvedEntityId || c.entityId) {
+          return (
+            <a
+              href={`${c.entityType}/${c.resolvedEntityId || c.entityId}`}
+              className="hover:underline"
+            >
+              {name}&nbsp;<span className="font-normal">↗</span>
+            </a>
+          );
+        }
+        return name;
+      },
+    }),
+    col.accessor("bundle.createdAt", {
+      header: t("contribution.date"),
+      cell: (info) => info.getValue().toLocaleDateString(locale),
+    }),
+    col.accessor("status", {
+      header: t("contribution.status"),
+      cell: (info) => <ContributionStatusBadge status={info.getValue()} />,
+    }),
+  ];
+
   return (
     <GenericTable
       list={
@@ -91,7 +73,7 @@ export function ContributionTable({
             )
           : []
       }
-      columns={getContributionColumns()}
+      columns={columns}
       isLoading={isLoading}
       emptyMessage={t("contribution.nonefound")}
       error={error}

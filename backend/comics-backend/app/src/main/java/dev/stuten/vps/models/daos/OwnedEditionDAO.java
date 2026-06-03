@@ -92,6 +92,12 @@ public class OwnedEditionDAO extends EditionDAO {
                 .execute() > 0;
     }
 
+    public Boolean delete(OwnedEditionDTO dto) {
+        return DSL().delete(EDITION_OWNERSHIP)
+                .where(EDITION_OWNERSHIP.ID.eq(dto.getId()))
+                .execute() > 0;
+    }
+
     public Optional<OwnedEditionDTO> findOwnedById(Integer id) {
         return super.selectOne(EDITION_OWNERSHIP.ID.eq(id));
     }

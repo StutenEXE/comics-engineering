@@ -1,7 +1,12 @@
+import { Tooltip } from "@mui/material";
 import { type MouseEventHandler } from "react";
-import { BsFillBookmarkCheckFill, BsFillBookmarkPlusFill } from "react-icons/bs";
+import {
+  BsFillBookmarkCheckFill,
+  BsFillBookmarkPlusFill,
+} from "react-icons/bs";
 
 import { twMerge } from "tailwind-merge";
+import { useTranslation } from "~/i18n/i18n";
 
 interface AddToCollectionIconButtonProps {
   onClick?: MouseEventHandler;
@@ -18,31 +23,42 @@ export function AddToCollectionIconButton({
   alreadyAdded,
   className,
 }: AddToCollectionIconButtonProps) {
-  if (hidden) return <></>;
+  const { t } = useTranslation();
+
+  if (hidden) return null;
+
+  if (alreadyAdded) {
+    return (
+      <Tooltip title={t("edition.inCollection")} placement="top" arrow>
+        <div
+          className={twMerge("p-1 bg-green-600 rounded text-white", className)}
+        >
+          <BsFillBookmarkCheckFill
+            size={size}
+            role={onClick ? "button" : undefined}
+          />
+        </div>
+      </Tooltip>
+    );
+  }
 
   return (
-    <>
-      {!alreadyAdded && (
+    <Tooltip title={t("edition.addToCollection")} placement="top" arrow>
+      <button
+        type="button"
+        onClick={onClick}
+        className={twMerge(
+          "p-1 bg-white/70 text-gray-600 shadow-md rounded transition duration-150 ease-in-out cursor-pointer",
+          "hover:scale-105 hover:bg-green-400 hover:text-white active:scale-95",
+          className,
+        )}
+      >
         <BsFillBookmarkPlusFill
           size={size}
-          className={twMerge(
-            "text-gray-400 cursor-pointer transition duration-150 ease-in-out hover:scale-110 hover:text-green-400",
-            className,
-          )}
-          onClick={onClick}
-          role={onClick ? "button" : undefined}
+          className="pointer-events-none"
+          aria-hidden="true"
         />
-      )}
-      {alreadyAdded && (
-        <BsFillBookmarkCheckFill
-          size={size}
-          className={twMerge(
-            "text-green-600",
-            className,
-          )}
-          role={onClick ? "button" : undefined}
-        />
-      )}
-    </>
+      </button>
+    </Tooltip>
   );
 }

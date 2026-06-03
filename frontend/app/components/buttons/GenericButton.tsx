@@ -1,5 +1,6 @@
 import type { MouseEventHandler, ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
+import { Button } from "~/components/ui/button";
 
 export interface ButtonProps {
   onClick?: MouseEventHandler;
@@ -17,7 +18,8 @@ export function GenericButton({
   type = "button",
 }: ButtonProps) {
   return (
-    <button
+    <Button
+      variant={"default"}
       type={type}
       onClick={onClick}
       disabled={disabled}
@@ -27,6 +29,6 @@ export function GenericButton({
       )}
     >
       {children}
-    </button>
+    </Button>
   );
 }

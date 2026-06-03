@@ -1,108 +1,37 @@
+import { useEffect, useState } from "react";
 import { MdDelete, MdModeEdit } from "react-icons/md";
 import { useTranslation } from "~/i18n/i18n";
 import { type OwnedEdition } from "~/models/ownedEdition";
-import type { Error } from "~/utils/error";
-import { GenericTable, type ColumnDef } from "./GenericTable";
-import { EditOwnedEditionModal } from "../modals/EditOwnedEditionModal";
-import { useState, useEffect } from "react";
+import { useAppSelector } from "~/store/hooks";
+import {
+  useCollectionQuery,
+  useRemoveFromCollectionMutation,
+} from "~/store/services/api";
 import { compareDates } from "~/utils/date";
+import { createError } from "~/utils/error";
+import { useConfirm } from "../modals/ConfirmModalProvider";
 import { EditionModal } from "../modals/EditionModal";
-
-function getOwnedEditionColumns(
-  onCoverClick: (oe: OwnedEdition) => void,
-): ColumnDef<OwnedEdition>[] {
-  const { t, locale } = useTranslation();
-  return [
-    {
-      key: "cover",
-      header: t("oedition.cover"),
-      searchable: false,
-      cellRenderer: (oe) => (
-        <div className="cursor-pointer" onClick={() => onCoverClick(oe)}>
-          <img
-            src={oe.edition.imgUrl}
-            alt={oe.edition.book?.name}
-            className="max-h-[75px]"
-          />
-        </div>
-      ),
-    },
-    {
-      key: "edition.book.name",
-      header: t("oedition.book.name"),
-      searchable: true,
-      cellRenderer: (oe) => (
-        <a className="hover:underline" href={`/book/${oe.edition.book?.id}`}>
-          {oe.edition.book?.name}&nbsp;<span className="font-normal">↗</span>
-        </a>
-      ),
-      getValue: (oe) => oe.edition.book?.name || "",
-    },
-    {
-      key: "serie",
-      header: t("oedition.serie.name"),
-      searchable: true,
-      cellRenderer: (oe) => (
-        <a
-          className="hover:underline"
-          href={`/serie/${oe.edition.book?.serieId}`}
-        >
-          {oe.edition.serie?.name}&nbsp;<span className="font-normal">↗</span>
-        </a>
-      ),
-      getValue: (oe) => oe.edition.serie?.name || "",
-    },
-    {
-      key: "volume",
-      header: t("oedition.book.volume"),
-      cellRenderer: (oe) =>
-        oe.edition?.book
-          ? `${t("generic.volume", { capitalize: true })} ${oe.edition.book?.number}`
-          : "generic.n/a",
-    },
-    {
-      key: "publisher",
-      header: t("oedition.book.publisher"),
-      searchable: true,
-      cellRenderer: (oe) => <span>{oe.edition.publisher?.name}</span>,
-      getValue: (oe) => oe.edition.publisher?.name || "",
-    },
-    {
-      key: "addDate",
-      header: t("oedition.addDate"),
-      cellRenderer: (oe) => {
-        return oe?.date.toLocaleDateString(locale);
-      },
-    },
-    {
-      key: "read",
-      header: t("oedition.read"),
-      cellRenderer: (oe) => {
-        return t(oe.read ? "generic.yes" : "generic.no", { capitalize: true });
-      },
-    },
-  ];
-}
+import { EditOwnedEditionModal } from "../modals/EditOwnedEditionModal";
+import { useToast } from "../toast/Toast";
+import { GenericTable } from "./GenericTable";
+import { createColumnHelper } from "@tanstack/react-table";
 
 interface OwnedEditionTableProps {
-  editionList: OwnedEdition[];
-  isLoading?: boolean;
-  error?: Error;
   className?: string;
 }
 
-export function OwnedEditionTable({
-  editionList,
-  isLoading,
-  error,
-}: OwnedEditionTableProps) {
-  // State to have a better control on render lifecycle
-  const [localEditionList, setLocalEditionList] = useState([...editionList]);
+export function OwnedEditionTable({}: OwnedEditionTableProps) {
+  const confirm = useConfirm();
+  const { t, locale } = useTranslation();
+  const toast = useToast();
+  const { user } = useAppSelector((state) => state.user);
 
-  // Keep local state in sync when the prop changes
-  useEffect(() => {
-    setLocalEditionList([...editionList]);
-  }, [editionList]);
+  const { data, isLoading, error, refetch } = useCollectionQuery(
+    user ? { id: user.id } : { id: 0 },
+    { skip: !user },
+  );
+  const editionList = data?.ownedEditions ?? [];
+  const err = createError(error);
 
   // Handles modal open/close state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -121,45 +50,144 @@ export function OwnedEditionTable({
   const closeEditionModal = () => {
     setIsEditionModalOpen(false);
   };
-  const [editionToShowId, setEditionToShowId] = useState<number>();
 
+  // Query to remove from a lib
+  const [removeFromCollection, { isSuccess, isError }] =
+    useRemoveFromCollectionMutation();
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("collection.toast.remove.success");
+      refetch();
+    } else if (isError) {
+      toast.success("collection.toast.remove.error");
+    }
+  }, [isSuccess, isError]);
+
+  const [editionToShowId, setEditionToShowId] = useState<number>();
   const [editedOwnedEdition, setEditedOwnedEdition] = useState<OwnedEdition>();
-  const actionGenerator = (oe: OwnedEdition) => {
-    return (
-      <div className="w-min flex gap-2 justify-center items-center">
-        <MdModeEdit
-          size={20}
-          onClick={() => {
-            setEditedOwnedEdition(oe);
-            openModal();
-          }}
-          className="cursor-pointer hover:text-blue-500"
-        />
-        <MdDelete size={20} className="cursor-pointer hover:text-red-500" />
-      </div>
-    );
-  };
 
   const handleSubmit = (oe: OwnedEdition) => {
-    setLocalEditionList(
-      localEditionList?.map((ed) => (ed.id === oe.id ? oe : ed)),
-    );
+    refetch();
   };
+
+  // Define columns
+
+  const col = createColumnHelper<OwnedEdition>();
+  const columns = [
+    // Cover
+    col.display({
+      id: "cover",
+      header: t("oedition.cover"),
+      cell: ({ row }) => (
+        <div
+          className="cursor-pointer"
+          onClick={() => {
+            setEditionToShowId(row.original.id);
+            openEditionModal();
+          }}
+        >
+          <img
+            src={row.original.edition.imgUrl}
+            alt={row.original.edition.book?.name}
+            className="max-h-[75px]"
+          />
+        </div>
+      ),
+    }),
+    // Book name
+    col.accessor("edition.book.name", {
+      header: t("oedition.book.name"),
+      cell: (info) => (
+        <a
+          className="hover:underline"
+          href={`/book/${info.row.original.edition.book?.id}`}
+        >
+          {info.getValue()}&nbsp;<span className="font-normal">↗</span>
+        </a>
+      ),
+    }),
+    // Serie name
+    col.accessor("edition.serie.name", {
+      header: t("oedition.serie.name"),
+      cell: (info) => (
+        <a
+          className="hover:underline"
+          href={`/serie/${info.row.original.edition.serie?.id}`}
+        >
+          {info.getValue()}&nbsp;<span className="font-normal">↗</span>
+        </a>
+      ),
+    }),
+    // Volume
+    col.accessor("edition.book.number", {
+      header: t("oedition.book.volume"),
+      cell: (info) => (
+        <span>
+          {info.row.original.edition?.book?.number ? (
+            // If number is present
+            <>
+              {t("generic.volume", { capitalize: true })}&nbsp;{info.getValue()}
+            </>
+          ) : (
+            // If no number
+            t("generic.n/a")
+          )}
+        </span>
+      ),
+    }),
+    // Publisher name
+    col.accessor("edition.publisher.name", {
+      header: t("oedition.book.publisher"),
+    }),
+    // Add Date
+    col.accessor("date", {
+      header: t("oedition.addDate"),
+      cell: (info) => info.getValue().toLocaleDateString(locale),
+    }),
+    // Read
+    col.accessor("read", {
+      header: t("oedition.read"),
+      cell: (info) =>
+        t(info.getValue() ? "generic.yes" : "generic.no", { capitalize: true }),
+    }),
+    // Actions
+    col.display({
+      id: "actions",
+      cell: ({ row }) => (
+        <div className="w-min flex gap-2 justify-center items-center">
+          <MdModeEdit
+            size={20}
+            onClick={() => {
+              setEditedOwnedEdition(row.original);
+              openModal();
+            }}
+            className="cursor-pointer hover:text-blue-500"
+          />
+          <MdDelete
+            size={20}
+            onClick={() => {
+              confirm({
+                title: t("collection.remove.title"),
+                message: t("collection.remove.message"),
+                onConfirm: () => {
+                  removeFromCollection({ id: row.original.id });
+                },
+              });
+            }}
+            className="cursor-pointer hover:text-red-500"
+          />
+        </div>
+      ),
+    }),
+  ];
 
   return (
     <>
       <GenericTable
-        list={[...localEditionList].sort(
-          (a, b) => -compareDates(a.date, b.date),
-        )}
-        columns={getOwnedEditionColumns((oe) => {
-          setEditionToShowId(oe.edition.id);
-          openEditionModal();
-        })}
-        addActions={true}
-        actionGenerator={actionGenerator}
+        list={[...editionList].sort((a, b) => -compareDates(a.date, b.date))}
+        columns={columns}
         isLoading={isLoading}
-        error={error}
+        error={err}
       />
       <EditOwnedEditionModal
         ownedEdition={editedOwnedEdition!}

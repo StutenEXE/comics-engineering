@@ -1,6 +1,7 @@
 import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
 import { HelpBadgeTooltip } from "~/components/badges/HelpBadge";
+import { Input } from "~/components/ui/input";
 
 export interface DateRhfInputProps {
   label: string;
@@ -32,7 +33,7 @@ export function DateRhfInput({
       <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-white/40">
         {label} {tooltip && <HelpBadgeTooltip tooltipContent={tooltip} />}
       </label>
-      <input
+      <Input
         type="date"
         autoComplete="off"
         {...registration}
