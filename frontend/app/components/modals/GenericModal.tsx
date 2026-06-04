@@ -22,11 +22,10 @@ export function GenericModal({ isOpen, onClose, children }: GenericModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose}></div>
       <div
-        className="absolute inset-0 bg-black opacity-50"
-        onClick={onClose}
-      ></div>
-      <div
+        role="dialog"
+        aria-modal="true"
         className="relative z-50 max-h-150 overflow-x-auto border border-gray-300 rounded-lg shadow-md bg-black"
         onClick={noPropagationEvt()}
       >

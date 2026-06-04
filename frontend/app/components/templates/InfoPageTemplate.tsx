@@ -4,6 +4,7 @@ import { useTranslation } from "~/i18n/i18n";
 import type { Error } from "~/utils/error";
 import { HelpBadgeTooltip } from "../badges/HelpBadge";
 import { GenericPageTemplate } from "./GenericPageTemplate";
+import { EnlargeableImage } from "../misc/EnlargeableImage";
 
 interface PageTemplateProps {
   hasImg?: boolean;
@@ -28,8 +29,8 @@ export function InfoPageTemplate({
     <GenericPageTemplate>
       <div className="flex gap-8 items-start">
         {hasImg && (
-          <div className="w-48 shrink-0 sticky top-24">
-            <img
+          <div className="w-50 shrink-0 sticky top-24">
+            <EnlargeableImage
               src={imgUrl ?? "/placeholder.jpg"}
               alt={imgAlt ?? "placeholder"}
               className="w-full rounded-lg border border-white/8 shadow-xl shadow-black/40 object-cover"
