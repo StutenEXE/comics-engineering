@@ -25,16 +25,17 @@ export function ContributionTable({
     col.accessor("id", {
       header: t("contribution.id"),
     }),
-    col.accessor("action", {
+    col.accessor((row) => t(`contribution.enum.action.${row.action}`), {
       header: t("contribution.action"),
-      cell: (info) => t(`contribution.enum.action.${info.getValue()}`),
     }),
-    col.accessor("entityType", {
-      header: t("contribution.type"),
-      cell: (info) =>
-        t(`contribution.enum.type.${info.getValue()}`, { capitalize: true }),
-    }),
-    col.accessor("proposedData", {
+    col.accessor(
+      (row) =>
+        t(`contribution.enum.type.${row.entityType}`, { capitalize: true }),
+      {
+        header: t("contribution.type"),
+      },
+    ),
+    col.accessor((row) => getContributionName(row, locale), {
       header: t("contribution.item"),
       cell: (info) => {
         const c = info.row.original;
@@ -53,13 +54,14 @@ export function ContributionTable({
         return name;
       },
     }),
-    col.accessor("bundle.createdAt", {
+    col.accessor((row) => row.bundle.createdAt.toLocaleDateString(locale), {
       header: t("contribution.date"),
-      cell: (info) => info.getValue().toLocaleDateString(locale),
     }),
-    col.accessor("status", {
+    col.accessor((row) => t(`contribution.enum.status.${row.status}`), {
       header: t("contribution.status"),
-      cell: (info) => <ContributionStatusBadge status={info.getValue()} />,
+      cell: ({ row }) => (
+        <ContributionStatusBadge status={row.original.status} />
+      ),
     }),
   ];
 

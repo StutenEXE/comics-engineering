@@ -1,8 +1,8 @@
+import { useTranslation } from "~/i18n/i18n";
+import type { Book } from "~/models/book";
 import { useIssueByBookIdQuery } from "~/store/services/api";
 import { createError } from "~/utils/error";
-import type { Book } from "~/models/book";
 import { IssueList } from "./IssueList";
-import { useTranslation } from "~/i18n/i18n";
 
 interface IssueListByBooksIdProps {
     bookId: number | null | undefined

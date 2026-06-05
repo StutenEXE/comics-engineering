@@ -1,3 +1,4 @@
+import { createColumnHelper } from "@tanstack/react-table";
 import { BiRevision, BiSolidDislike, BiSolidLike } from "react-icons/bi";
 import { useTranslation } from "~/i18n/i18n";
 import {
@@ -7,12 +8,9 @@ import {
 import { useAppSelector } from "~/store/hooks";
 import { useUpdateBundleStatusMutation } from "~/store/services/api";
 import { type Error } from "~/utils/error";
-import { deepCopy } from "~/utils/object";
 import { BundleStatusBadge } from "../badges/BundleStatusBadge";
 import { useToast } from "../toast/Toast";
-import { GenericTable, type ColumnDef } from "./GenericTable";
-import type { SimpleContribution } from "~/models/contribution";
-import { createColumnHelper } from "@tanstack/react-table";
+import { GenericTable } from "./GenericTable";
 
 interface ContributionBundleTableProps {
   bundleList: ContributionBundle[] | null | undefined;
@@ -72,24 +70,25 @@ export function ContributionBundleTable({
     col.accessor("note", {
       header: t("cbundle.note"),
     }),
-    col.accessor("createdAt", {
+    col.accessor((row) => row.createdAt.toLocaleDateString(locale), {
       header: t("cbundle.date"),
-      cell: (info) => info.getValue().toLocaleDateString(locale),
     }),
-    col.accessor("status", {
+    col.accessor(row => t(`cbundle.enum.status.${row.status}`), {
       header: t("cbundle.status"),
-      cell: (info) => <BundleStatusBadge status={info.getValue()} />,
+      cell: ({ row }) => <BundleStatusBadge status={row.original.status} />,
     }),
-    col.accessor("contributions", {
+    col.accessor(row => `${t("cbundle.action.seeContributions")} (${row.contributions.length})`, {
       header: t("cbundle.contributions"),
       cell: (info) => (
         <span
           className="hover:underline cursor-pointer"
           onClick={() => onContributionClick?.(info.row.original)}
         >
-          {t("cbundle.action.seeContributions")} ({info.getValue().length})
+          {info.getValue()}
         </span>
       ),
+      enableSorting: false,
+      enableGlobalFilter: false,
     }),
     col.display({
       id: "actions",

@@ -13,14 +13,17 @@ import {
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
   useReactTable,
-  type ColumnDef
+  type ColumnDef,
+  type SortingState,
 } from "@tanstack/react-table";
 import { useState } from "react";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { MdOutlineSearch } from "react-icons/md";
 import { useTranslation } from "~/i18n/i18n";
 import { type Error } from "~/utils/error";
+import { ArrowUpDown } from "lucide-react";
 
 // Re-export ColumnDef so callers import from one place
 export type { ColumnDef };
@@ -46,30 +49,41 @@ export function GenericTable<T extends Record<string, any>>({
 }: GenericTableProps<T>) {
   const { t } = useTranslation();
   const [globalFilter, setGlobalFilter] = useState("");
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
     data: list ?? [],
     columns,
-    state: { globalFilter },
+    state: { globalFilter, sorting },
     onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
     initialState: { pagination: { pageSize: itemsPerPage } },
   });
 
   if (isLoading) {
     return (
-      <div className={`border border-white/8 rounded-lg overflow-hidden ${className}`}>
+      <div
+        className={`border border-white/8 rounded-lg overflow-hidden ${className}`}
+      >
         <div className="px-4 py-3 border-b border-white/8 flex gap-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-7 w-20 rounded-md bg-white/5 animate-pulse" />
+            <div
+              key={i}
+              className="h-7 w-20 rounded-md bg-white/5 animate-pulse"
+            />
           ))}
         </div>
         {Array.from({ length: itemsPerPage }).map((_, i) => (
           <div key={i} className="flex gap-4 px-4 py-3 border-b border-white/5">
             {Array.from({ length: columns.length }).map((_, j) => (
-              <div key={j} className="h-4 rounded bg-white/5 animate-pulse flex-1" />
+              <div
+                key={j}
+                className="h-4 rounded bg-white/5 animate-pulse flex-1"
+              />
             ))}
           </div>
         ))}
@@ -78,8 +92,9 @@ export function GenericTable<T extends Record<string, any>>({
   }
 
   return (
-    <div className={`border border-white/8 rounded-lg overflow-hidden ${className}`}>
-
+    <div
+      className={`border border-white/8 rounded-lg overflow-hidden ${className}`}
+    >
       {/* Search bar */}
       <div className="px-4 py-3 border-b border-white/8 flex items-center gap-3">
         <div className="relative flex-1 max-w-sm">
@@ -104,13 +119,33 @@ export function GenericTable<T extends Record<string, any>>({
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="border-white/8 hover:bg-transparent">
+              <TableRow
+                key={headerGroup.id}
+                className="border-white/8 hover:bg-transparent"
+              >
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
                     className="text-xs font-medium uppercase tracking-widest text-white/30 h-10"
                   >
-                    {flexRender(header.column.columnDef.header, header.getContext())}
+                    <div className="flex gap-2">
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                      {/* Sorting arrows */}
+                      {header.column.getCanSort() && (
+                        <ArrowUpDown
+                          size={16}
+                          className="cursor-pointer rounded p-0.5 hover:bg-white/10 hover:scale-105 active:scale-95"
+                          onClick={() =>
+                            header.column.toggleSorting(
+                              header.column.getIsSorted() === "asc",
+                            )
+                          }
+                        />
+                      )}
+                    </div>
                   </TableHead>
                 ))}
               </TableRow>
@@ -128,7 +163,10 @@ export function GenericTable<T extends Record<string, any>>({
                       key={cell.id}
                       className="text-sm text-white/60 group-hover:text-white/80 transition-colors py-3"
                     >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -187,7 +225,6 @@ export function GenericTable<T extends Record<string, any>>({
           </div>
         </div>
       )}
-
     </div>
   );
 }

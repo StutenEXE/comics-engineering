@@ -30,11 +30,11 @@ export function AddToCollectionModal({
   const handleSubmit = async (oe: Partial<OwnedEditionDTO>) => {
     await addToCollection(oe).then((res) => {
       if ("error" in res) {
-        toast.error(t("addToCollection.error"));
+        toast.error(t("toast.addToCollection.error"));
         return false;
       }
 
-      toast.success(t("addToCollection.success"));
+      toast.success(t("toast.addToCollection.success"));
       onSubmit(res.data.ownedEdition);
       onClose();
       return res.data.ownedEdition;
@@ -44,7 +44,7 @@ export function AddToCollectionModal({
   const { data, isError } = useEditionByIdQuery({ id: editionId });
 
   if (isError) {
-    toast.error(t("addToCollection.error"));
+    toast.error(t("toast.addToCollection.error"));
     onClose();
   }
 
