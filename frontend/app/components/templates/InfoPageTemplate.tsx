@@ -106,7 +106,7 @@ export function InfoPageField({
 
   if (hide) return <></>;
 
-  const displayValue = value ?? t("generic.uknown");
+  const displayValue = value ?? t("generic.unknown");
 
   if (isLoading) {
     return <SkeletonField label={label} labelTooltip={labelTooltip} />;

@@ -10,7 +10,8 @@ export default {
     "generic.cancel": "annuler",
     "generic.submit": "soumettre",
     "generic.confirm": "confirmer",
-    "generic.uknown": "inconnu",
+    "generic.unknown": "inconnu",
+    "generic.all": "tous",
     "generic.the": "le",
     "generic.present": "présent",
     "generic.oneshot": "oneshot",
@@ -227,6 +228,7 @@ export default {
     "oedition.form.modify": "Modifier",
     "oedition.form.totalCost": "Coût total",
     "oedition.form.saved": "Economies",
+    "oedition.publisher.select": "Choisir un éditeur",
     // Serie
     "series": "Séries",
     "serie.nonefound": "Aucune série trouvée",

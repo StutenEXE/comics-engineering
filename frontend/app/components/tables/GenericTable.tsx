@@ -1,13 +1,3 @@
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/shadcn/ui/table";
 import {
   flexRender,
   getCoreRowModel,
@@ -18,18 +8,38 @@ import {
   type ColumnDef,
   type SortingState,
 } from "@tanstack/react-table";
-import { useState } from "react";
+import { ArrowUpDown } from "lucide-react";
+import { Fragment, useState } from "react";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
-import { MdOutlineSearch } from "react-icons/md";
+import { Button } from "~/components/shadcn/ui/button";
+import { Input } from "~/components/shadcn/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/shadcn/ui/table";
 import { useTranslation } from "~/i18n/i18n";
 import { type Error } from "~/utils/error";
-import { ArrowUpDown } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "../shadcn/ui/select";
 
 // Re-export ColumnDef so callers import from one place
 export type { ColumnDef };
 
+export type FilterType = "none" | "text" | "boolean" | "multi";
+
 interface GenericTableProps<T> {
-  list: T[] | null | undefined;
+  list?: T[];
   columns: ColumnDef<T, any>[];
   isLoading?: boolean;
   emptyMessage?: string;
@@ -48,14 +58,31 @@ export function GenericTable<T extends Record<string, any>>({
   itemsPerPage = 10,
 }: GenericTableProps<T>) {
   const { t } = useTranslation();
-  const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
     data: list ?? [],
     columns,
-    state: { globalFilter, sorting },
-    onGlobalFilterChange: setGlobalFilter,
+    state: { sorting },
+    // Custom filter functions available to columns via `filterFn`
+    filterFns: {
+      arrIncludes: (row, columnId, filterValue: unknown) => {
+        if (!filterValue) return true;
+        const arr = Array.isArray(filterValue) ? filterValue : [filterValue];
+        const cell = row.getValue(columnId);
+        return arr.length === 0 ? true : arr.includes(cell as any);
+      },
+      equals: (row, columnId, filterValue: unknown) => {
+        if (
+          filterValue === undefined ||
+          filterValue === null ||
+          filterValue === ""
+        )
+          return true;
+        const cell = row.getValue(columnId);
+        return String(cell) === String(filterValue);
+      },
+    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -95,62 +122,186 @@ export function GenericTable<T extends Record<string, any>>({
     <div
       className={`border border-white/8 rounded-lg overflow-hidden ${className}`}
     >
-      {/* Search bar */}
-      <div className="px-4 py-3 border-b border-white/8 flex items-center gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <MdOutlineSearch
-            size={15}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none"
-          />
-          <Input
-            value={globalFilter}
-            onChange={(e) => {
-              table.setPageIndex(0);
-              setGlobalFilter(e.target.value);
-            }}
-            placeholder={t("generic.search.placeholder")}
-            className="pl-8 bg-white/5 border-white/10 text-white/70 placeholder:text-white/20 focus:border-indigo-500/70 focus:ring-indigo-500/30 h-8 text-sm"
-          />
-        </div>
-      </div>
-
       {/* Table */}
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow
-                key={headerGroup.id}
-                className="border-white/8 hover:bg-transparent"
-              >
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    className="text-xs font-medium uppercase tracking-widest text-white/30 h-10"
-                  >
-                    <div className="flex gap-2 items-center">
-                      <div className="max-w-40 text-wrap">
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
+              <Fragment key={headerGroup.id}>
+                {/* Filters row (inputs above headers) */}
+                <TableRow
+                  key={`${headerGroup.id}-filters`}
+                  className="border-white/8"
+                >
+                  {headerGroup.headers.map((header) => {
+                    const meta = header.column.columnDef.meta as
+                      | {
+                          filterType?: "text" | "boolean" | "single";
+                          options?: string[];
+                          placeholder?: string;
+                        }
+                      | undefined;
+
+                    const filterValue = header.column.getFilterValue();
+
+                    const renderFilter = () => {
+                      if (!meta?.filterType) {
+                        return (
+                          <Input
+                            value={(filterValue as string) ?? ""}
+                            onChange={(e) => {
+                              table.setPageIndex(0);
+                              header.column.setFilterValue(e.target.value);
+                            }}
+                            placeholder={t("generic.search.placeholder")}
+                            className="h-8 text-sm bg-white/5 border-white/10 text-white/70 placeholder:text-white/20"
+                          />
+                        );
+                      }
+
+                      switch (meta.filterType) {
+                        case "boolean":
+                          return (
+                            <Select
+                              value={(filterValue as string) ?? ""}
+                              onValueChange={(value) => {
+                                table.setPageIndex(0);
+                                header.column.setFilterValue(
+                                  value === "any" ? undefined : value,
+                                );
+                              }}
+                            >
+                              <SelectTrigger className="w-full max-w-48">
+                                <SelectValue
+                                  placeholder={
+                                    meta.placeholder ||
+                                    t("generic.search.placeholder")
+                                  }
+                                />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectGroup>
+                                  <SelectItem value="any">
+                                    {t("generic.all", {
+                                      capitalize: true,
+                                    })}
+                                  </SelectItem>
+                                  <SelectItem value="true">
+                                    {t("generic.yes", {
+                                      capitalize: true,
+                                    })}
+                                  </SelectItem>
+                                  <SelectItem value="false">
+                                    {t("generic.no", {
+                                      capitalize: true,
+                                    })}
+                                  </SelectItem>
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
+                          );
+
+                        case "single":
+                          return (
+                            <Select
+                              value={(filterValue as string) ?? ""}
+                              onValueChange={(value) => {
+                                table.setPageIndex(0);
+                                header.column.setFilterValue(
+                                  value === "any" ? undefined : value,
+                                );
+                              }}
+                            >
+                              <SelectTrigger className="w-full max-w-48">
+                                <SelectValue
+                                  placeholder={
+                                    meta.placeholder ||
+                                    t("generic.search.placeholder")
+                                  }
+                                />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectGroup>
+                                  <SelectLabel>
+                                    {meta.placeholder || t("generic.select")}
+                                  </SelectLabel>
+                                  <SelectItem value="any">
+                                    {t("generic.all", {
+                                      capitalize: true,
+                                    })}
+                                  </SelectItem>
+                                  {meta.options?.map((o) => (
+                                    <SelectItem key={o} value={o}>
+                                      {o}
+                                    </SelectItem>
+                                  ))}
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
+                          );
+
+                        default:
+                          return (
+                            <Input
+                              value={(filterValue as string) ?? ""}
+                              onChange={(e) => {
+                                table.setPageIndex(0);
+                                header.column.setFilterValue(e.target.value);
+                              }}
+                              placeholder={
+                                meta.placeholder ||
+                                t("generic.search.placeholder")
+                              }
+                              className="h-8 text-sm bg-white/5 border-white/10 text-white/70 placeholder:text-white/20"
+                            />
+                          );
+                      }
+                    };
+
+                    return (
+                      <TableHead
+                        key={`${header.id}-filter`}
+                        className="h-10 py-2"
+                      >
+                        {header.column.getCanFilter() ? renderFilter() : null}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+                {/* Header labels row */}
+                <TableRow
+                  key={headerGroup.id}
+                  className="border-white/8 hover:bg-transparent"
+                >
+                  {headerGroup.headers.map((header) => (
+                    <TableHead
+                      key={header.id}
+                      className="text-xs font-medium uppercase tracking-widest text-white/30 h-10"
+                    >
+                      <div className="flex gap-2 items-center">
+                        <div className="max-w-40 text-wrap">
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                        </div>
+                        {/* Sorting arrows */}
+                        {header.column.getCanSort() && (
+                          <ArrowUpDown
+                            size={16}
+                            className="cursor-pointer rounded p-0.5 hover:bg-white/10 hover:scale-105 active:scale-95 flex-shrink-0"
+                            onClick={() =>
+                              header.column.toggleSorting(
+                                header.column.getIsSorted() === "asc",
+                              )
+                            }
+                          />
                         )}
                       </div>
-                      {/* Sorting arrows */}
-                      {header.column.getCanSort() && (
-                        <ArrowUpDown
-                          size={16}
-                          className="cursor-pointer rounded p-0.5 hover:bg-white/10 hover:scale-105 active:scale-95 flex-shrink-0"
-                          onClick={() =>
-                            header.column.toggleSorting(
-                              header.column.getIsSorted() === "asc",
-                            )
-                          }
-                        />
-                      )}
-                    </div>
-                  </TableHead>
-                ))}
-              </TableRow>
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </Fragment>
             ))}
           </TableHeader>
           <TableBody>

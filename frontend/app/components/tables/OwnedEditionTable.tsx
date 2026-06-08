@@ -32,6 +32,9 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
   );
   const editionList = data?.ownedEditions ?? [];
   const err = createError(error);
+  const publishers = [
+    ...new Set(editionList.map((e) => e.edition.publisher?.name)),
+  ];
 
   // Handles modal open/close state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -96,6 +99,7 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
     // Book name
     col.accessor("edition.book.name", {
       header: t("oedition.book.name"),
+      meta: { filterType: "text" },
       cell: (info) => (
         <a
           className="hover:underline"
@@ -108,6 +112,7 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
     // Serie name
     col.accessor("edition.serie.name", {
       header: t("oedition.serie.name"),
+      meta: { filterType: "text" },
       cell: (info) => (
         <a
           className="hover:underline"
@@ -120,6 +125,7 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
     // Volume
     col.accessor("edition.book.number", {
       header: t("oedition.book.volume"),
+      meta: { filterType: "text" },
       cell: (info) => (
         <span>
           {info.row.original.edition?.book?.number ? (
@@ -133,23 +139,35 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
           )}
         </span>
       ),
-      enableGlobalFilter: false,
+      enableColumnFilter: false,
     }),
     // Publisher name
     col.accessor("edition.publisher.name", {
       header: t("oedition.book.publisher"),
+      meta: {
+        filterType: "single",
+        options: publishers,
+        placeholder: t("oedition.publisher.select"),
+      },
+      filterFn: "arrIncludes",
     }),
-    // Add Date
-    col.accessor((row) => row.date.toLocaleDateString(locale), {
+    // Add Date (use raw date accessor so range filtering works)
+    col.accessor("date", {
       header: t("oedition.addDate"),
+      meta: { filterType: "range" },
+      cell: (info) =>
+        info.getValue()
+          ? (info.getValue() as Date).toLocaleDateString(locale)
+          : "",
+      enableColumnFilter: false,
     }),
     // Read
-    col.accessor(
-      (row) => t(row.read ? "generic.yes" : "generic.no", { capitalize: true }),
-      {
-        header: t("oedition.read"),
-      },
-    ),
+    col.accessor("read", {
+      header: t("oedition.read"),
+      cell: (info) => t(info.getValue() ? "generic.yes" : "generic.no", { capitalize: true }),
+      meta: { filterType: "boolean" },
+      filterFn: "equals",
+    }),
     // Actions
     col.display({
       id: "actions",
