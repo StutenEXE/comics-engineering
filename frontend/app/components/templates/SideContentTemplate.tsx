@@ -12,7 +12,7 @@ export function SideContentTemplate({
   return (
     <div>
       <SideContentHeader title={title} />
-      <main className="w-full w-full py-8 px-4">{children}</main>
+      <main className="w-full w-full py-4 px-4">{children}</main>
     </div>
   );
 }

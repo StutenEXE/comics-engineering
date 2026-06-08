@@ -1,5 +1,5 @@
 import { type User } from "~/models/user";
-import { GenericTable } from "./GenericTable";
+import { BooleanCellRenderer, GenericTable } from "./GenericTable";
 import { createError, type Error } from "~/utils/error";
 import {
   MdDelete,
@@ -79,27 +79,20 @@ export function UserTable({ showActions, className }: UserTableProps) {
     col.accessor("createdAt", {
       header: t("user.createdAt"),
       cell: (info) => info.getValue().toLocaleDateString(locale),
+      enableColumnFilter: false,
     }),
-    col.accessor(
-      (row) =>
-        t(row.isAdmin ? "generic.yes" : "generic.no", {
-          capitalize: true,
-        }),
-      {
-        id: "isAdmin",
-        header: t("user.isAdmin"),
-      },
-    ),
-    col.accessor(
-      (row) =>
-        t(row.isDeleted ? "generic.yes" : "generic.no", {
-          capitalize: true,
-        }),
-      {
-        id: "isDeleted",
-        header: t("user.isDeleted"),
-      },
-    ),
+    col.accessor("isAdmin", {
+      id: "isAdmin",
+      header: t("user.isAdmin"),
+      cell: (info) => <BooleanCellRenderer val={info.getValue()} />,
+      meta: { filterType: "boolean" },
+    }),
+    col.accessor("isDeleted", {
+      id: "isDeleted",
+      header: t("user.isDeleted"),
+      cell: (info) => <BooleanCellRenderer val={info.getValue()} />,
+      meta: { filterType: "boolean" },
+    }),
     col.display({
       id: "actions",
       cell: ({ row }) => {

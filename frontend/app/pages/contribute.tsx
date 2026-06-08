@@ -46,14 +46,11 @@ export default function ContributePage() {
     }
   }, [isSuccess]);
 
-  const { data, isLoading, refetch } =
-    useContributionStatsBySubmitterIdQuery(
-      user ? { id: user.id } : { id: 0 },
-      { skip: !user }, // Doesn't execute if user is undefined
-    );
+  const { data, isLoading, refetch } = useContributionStatsBySubmitterIdQuery(
+    user ? { id: user.id } : { id: 0 },
+    { skip: !user }, // Doesn't execute if user is undefined
+  );
   const stats = data?.stats;
-
-  const contributionTableRef = useRef<ContributionTableHandle>(null);
 
   // Handles contribution modal state
   const [isContributionModalOpen, setisContributionModalOpen] = useState(false);
@@ -96,7 +93,6 @@ export default function ContributePage() {
       toast.success(t("contribute.success"));
       closeContributionModal();
       refetch();
-      contributionTableRef.current?.refetch();
     }
   }, [isSuccess]);
 
@@ -174,7 +170,6 @@ export default function ContributePage() {
           <h2 className="text-2xl font-semibold text-gray-200">
             {t("contribute.history")}
           </h2>
-          <ContributionTable ref={contributionTableRef} />
         </div>
         <ContributionBundleModal
           action="create"

@@ -72,24 +72,36 @@ export function ContributionBundleTable({
     }),
     col.accessor((row) => row.createdAt.toLocaleDateString(locale), {
       header: t("cbundle.date"),
+      enableColumnFilter: false,
     }),
-    col.accessor(row => t(`cbundle.enum.status.${row.status}`), {
+    col.accessor((row) => t(`cbundle.enum.status.${row.status}`), {
       header: t("cbundle.status"),
       cell: ({ row }) => <BundleStatusBadge status={row.original.status} />,
+      meta: {
+        filterType: "single",
+        options: Object.values(ContributionBundleStatusEnum).map((status) =>
+          t(`cbundle.enum.status.${status}`),
+        ),
+        placeholder: t("cbundle.status.select"),
+      },
     }),
-    col.accessor(row => `${t("cbundle.action.seeContributions")} (${row.contributions.length})`, {
-      header: t("cbundle.contributions"),
-      cell: (info) => (
-        <span
-          className="hover:underline cursor-pointer"
-          onClick={() => onContributionClick?.(info.row.original)}
-        >
-          {info.getValue()}
-        </span>
-      ),
-      enableSorting: false,
-      enableGlobalFilter: false,
-    }),
+    col.accessor(
+      (row) =>
+        `${t("cbundle.action.seeContributions")} (${row.contributions.length})`,
+      {
+        header: t("cbundle.contributions"),
+        cell: (info) => (
+          <span
+            className="hover:underline cursor-pointer"
+            onClick={() => onContributionClick?.(info.row.original)}
+          >
+            {info.getValue()}
+          </span>
+        ),
+        enableSorting: false,
+        enableColumnFilter: false,
+      },
+    ),
     col.display({
       id: "actions",
       cell: ({ row }) => {

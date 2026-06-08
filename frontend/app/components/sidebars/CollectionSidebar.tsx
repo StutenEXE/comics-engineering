@@ -1,4 +1,4 @@
-import { MdBook, MdLibraryBooks } from "react-icons/md";
+import { MdBook, MdEditDocument, MdLibraryBooks } from "react-icons/md";
 import { useTranslation } from "~/i18n/i18n";
 import {
   Sidebar,
@@ -38,6 +38,15 @@ export function CollectionSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+        <NavSection
+          items={[
+            {
+              title: t("contributions"),
+              url: "/collection/contributions",
+              icon: MdEditDocument,
+            },
+          ]}
+        />
         <NavSection
           label={t("collection.library")}
           items={[
