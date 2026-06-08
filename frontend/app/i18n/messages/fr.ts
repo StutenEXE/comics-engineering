@@ -82,6 +82,7 @@ export default {
   "book.form.added": "Ajouté",
   "book.form.noIssuesInSerie": "Aucune issue trouvée pour cette série",
   // Contribution
+  contributions: "Contributions",
   "contribution.nonefound": "Aucune contribution trouvée",
   "contribution.id": "ID",
   "contribution.action": "Action",
@@ -123,6 +124,9 @@ export default {
   "contribution.status.updated": "Statut de la contribution mis à jour",
   "contribution.status.updateerror":
     "Statut de la contribution n'a pas pu être mis à jour",
+  "contribution.action.select": "Choisir une action",
+  "contribution.type.select": "Choisir un type",
+  "contribution.status.select": "Choisir un statut",
   // Contribution Bundle
   "cbundle.nonefound": "Aucun lot de contribution trouvé",
   "cbundle.id": "ID",
@@ -156,6 +160,7 @@ export default {
   "cbundle.form.cancel.title": "Annuler la soumission",
   "cbundle.form.cancel.message":
     "Êtes-vous sûr de vouloir annuler cette soumission ?\nToutes les données seront perdues.",
+  "cbundle.status.select": "Choisir un statut",
   // Edition
   editions: "Editions",
   "edition.nonefound": "Aucune édition trouvée",

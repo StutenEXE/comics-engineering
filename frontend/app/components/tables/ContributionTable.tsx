@@ -1,6 +1,12 @@
 import { forwardRef, useEffect, useImperativeHandle } from "react";
 import { useTranslation } from "~/i18n/i18n";
-import { getContributionName, type Contribution } from "~/models/contribution";
+import {
+  ContributionActionEnum,
+  ContributionStatusEnum,
+  ContributionTypeEnum,
+  getContributionName,
+  type Contribution,
+} from "~/models/contribution";
 import { createError, type Error } from "~/utils/error";
 import { GenericTable, type ColumnDef } from "./GenericTable";
 import { ContributionStatusBadge } from "../badges/ContributionStatusBadge";
@@ -34,7 +40,9 @@ export const ContributionTable = forwardRef<
 
   const triggerRefetch = () => refetch?.();
 
-  useImperativeHandle(ref, () => ({ refetch: triggerRefetch }), [triggerRefetch]);
+  useImperativeHandle(ref, () => ({ refetch: triggerRefetch }), [
+    triggerRefetch,
+  ]);
 
   useEffect(() => {
     if (!onRefetch) {
@@ -51,12 +59,26 @@ export const ContributionTable = forwardRef<
     }),
     col.accessor((row) => t(`contribution.enum.action.${row.action}`), {
       header: t("contribution.action"),
+      meta: {
+        filterType: "single",
+        options: Object.values(ContributionActionEnum).map((action) =>
+          t(`contribution.enum.action.${action}`),
+        ),
+        placeholder: t("contribution.action.select"),
+      },
     }),
     col.accessor(
       (row) =>
         t(`contribution.enum.type.${row.entityType}`, { capitalize: true }),
       {
         header: t("contribution.type"),
+        meta: {
+          filterType: "single",
+          options: Object.values(ContributionTypeEnum).map((type) =>
+            t(`contribution.enum.type.${type}`),
+          ),
+          placeholder: t("contribution.type.select"),
+        },
       },
     ),
     col.accessor((row) => getContributionName(row, locale), {
@@ -80,12 +102,20 @@ export const ContributionTable = forwardRef<
     }),
     col.accessor((row) => row.bundle.createdAt.toLocaleDateString(locale), {
       header: t("contribution.date"),
+      enableColumnFilter: false,
     }),
     col.accessor((row) => t(`contribution.enum.status.${row.status}`), {
       header: t("contribution.status"),
       cell: ({ row }) => (
         <ContributionStatusBadge status={row.original.status} />
       ),
+      meta: {
+        filterType: "single",
+        options: Object.values(ContributionStatusEnum).map((action) =>
+          t(`contribution.enum.status.${action}`),
+        ),
+        placeholder: t("contribution.status.select"),
+      },
     }),
   ];
 

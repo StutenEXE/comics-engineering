@@ -18,7 +18,7 @@ import { useConfirm } from "../modals/ConfirmModalProvider";
 import { EditionModal } from "../modals/EditionModal";
 import { EditOwnedEditionModal } from "../modals/EditOwnedEditionModal";
 import { useToast } from "../toast/Toast";
-import { GenericTable } from "./GenericTable";
+import { BooleanCellRenderer, GenericTable } from "./GenericTable";
 import { createColumnHelper } from "@tanstack/react-table";
 
 interface OwnedEditionTableProps {
@@ -169,18 +169,8 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
     // Read
     col.accessor("read", {
       header: t("oedition.read"),
-      cell: (info) => (
-        <div className="flex gap-1 items-center">
-          {info.getValue() && (
-            <MdCheckBox size={20} className="text-green-500" />
-          )}
-          {!info.getValue() && (
-            <MdCheckBoxOutlineBlank size={20} className="text-grey-500" />
-          )}
-        </div>
-      ),
+      cell: (info) => <BooleanCellRenderer val={info.getValue()} />,
       meta: { filterType: "boolean" },
-      filterFn: "equals",
     }),
     // Actions
     col.display({

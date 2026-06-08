@@ -11,6 +11,7 @@ import {
 import { ArrowUpDown } from "lucide-react";
 import { Fragment, useState } from "react";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
+import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
 import { Button } from "~/components/shadcn/ui/button";
 import { Input } from "~/components/shadcn/ui/input";
 import {
@@ -32,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../shadcn/ui/select";
+import { Separator } from "../shadcn/ui/separator";
 
 // Re-export ColumnDef so callers import from one place
 export type { ColumnDef };
@@ -166,11 +168,11 @@ export function GenericTable<T extends Record<string, any>>({
                               options={[
                                 {
                                   label: t("generic.yes", { capitalize: true }),
-                                  value: "true",
+                                  value: true,
                                 },
                                 {
                                   label: t("generic.no", { capitalize: true }),
-                                  value: "false",
+                                  value: false,
                                 },
                               ]}
                               filterValue={(filterValue as string) ?? ""}
@@ -241,10 +243,10 @@ export function GenericTable<T extends Record<string, any>>({
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className="text-xs font-medium uppercase tracking-widest text-white/30 h-10"
+                      className="w-fit max-w-40 text-xs font-medium uppercase tracking-widest text-white/30 h-10 border-r"
                     >
-                      <div className="flex gap-2 items-center">
-                        <div className="max-w-40 text-wrap">
+                      <div className="flex gap-2 justify-center items-center">
+                        <div className="text-wrap text-center">
                           {flexRender(
                             header.column.columnDef.header,
                             header.getContext(),
@@ -279,12 +281,14 @@ export function GenericTable<T extends Record<string, any>>({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className="max-w-50 text-sm text-white/60 group-hover:text-white/80 transition-colors py-3 truncate"
+                      className="w-fit max-w-50 text-sm text-white/60 group-hover:text-white/80 transition-colors py-3 truncate"
                     >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
+                      <div className="w-full flex justify-center">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </div>
                     </TableCell>
                   ))}
                 </TableRow>
@@ -350,7 +354,7 @@ export function GenericTable<T extends Record<string, any>>({
 interface SelectInputProps {
   options: {
     label: string;
-    value: string;
+    value: any;
   }[];
   filterValue: string;
   placeholder?: string;
@@ -393,5 +397,14 @@ function SelectInput({
         </SelectGroup>
       </SelectContent>
     </Select>
+  );
+}
+
+export function BooleanCellRenderer({ val }: { val: boolean }) {
+  return (
+    <>
+      {val && <MdCheckBox size={20} className="text-green-500" />}
+      {!val && <MdCheckBoxOutlineBlank size={20} className="text-grey-500" />}
+    </>
   );
 }
