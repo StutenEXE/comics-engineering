@@ -3,7 +3,15 @@ import { twMerge } from "tailwind-merge";
 import { useTranslation } from "~/i18n/i18n";
 import { ContributionStatusEnum } from "~/models/contribution";
 
-export function ContributionStatusBadge({ status }: { status: ContributionStatusEnum }) {
+interface ContributionStatusBadgeProps {
+  status: ContributionStatusEnum;
+  className?: string;
+}
+
+export function ContributionStatusBadge({
+  status,
+  className,
+}: ContributionStatusBadgeProps) {
   const { t } = useTranslation();
 
   const styles: Record<ContributionStatusEnum, string> = {
@@ -20,7 +28,13 @@ export function ContributionStatusBadge({ status }: { status: ContributionStatus
   };
 
   return (
-    <Badge className={twMerge("text-xs px-1.5 py-0.5 rounded border", styles[status])}>
+    <Badge
+      className={twMerge(
+        "text-xs px-1.5 py-0.5 rounded border",
+        styles[status],
+        className
+      )}
+    >
       {t(`contribution.enum.status.${status}`)}
     </Badge>
   );

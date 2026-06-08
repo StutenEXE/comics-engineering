@@ -26,10 +26,10 @@ export function EditOwnedEditionModal({
   const handleSubmit = async (oe: Partial<OwnedEditionDTO>) => {
     await updateOwnedEdition(oe).then((res) => {
       if ("error" in res) {
-        toast.error(t("addToCollection.error"));
+        toast.error(t("toast.addToCollection.error"));
         return false;
       }
-      toast.success(t("addToCollection.success"));
+      toast.success(t("toast.addToCollection.success"));
       console.log(res);
       onSubmit(res.data.ownedEdition);
       onClose();

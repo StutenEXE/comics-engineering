@@ -32,6 +32,10 @@ export default {
     "toast.notconnected": "Vous n'êtes pas connecté",
     "toast.adminroute.access_denied": "Accès refusé. Réservé aux admins.",
     "toast.loggedroute.access_denied": "Accès refusé. Veuillez vous connecter.",
+    "toast.addToCollection.success": "Edition ajoutée à la collection",
+    "toast.addToCollection.error": "Une erreur est survenue lors de l'ajout",
+    "toast.removeFromCollection.success": "Edition retirée de la collection",
+    "toast.removeFromCollection.error": "Une erreur est survenue",
     // ============================
     // == Loading
     // ============================
@@ -303,6 +307,8 @@ export default {
     "search.noresults": "Aucun résultat",
     // Collection
     "collection.title": "Ma collection",
+    "collection.remove.title": "Retirer de la collection",
+    "collection.remove.message": "Voulez-vous vraiment retirer cette édition de votre collection ?\nLes informations associées seront perdues.",
     // Contribute
     "contribute.loginRequired": "Veuillez vous connecter",
     "contribute.loginRequiredDesc": "Vous devez être connecté pour contribuer",

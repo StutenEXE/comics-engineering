@@ -56,10 +56,10 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
     useRemoveFromCollectionMutation();
   useEffect(() => {
     if (isSuccess) {
-      toast.success("collection.toast.remove.success");
+      toast.success("toast.removeFromCollection.success");
       refetch();
     } else if (isError) {
-      toast.success("collection.toast.remove.error");
+      toast.success("toast.removeFromCollection.error");
     }
   }, [isSuccess, isError]);
 
@@ -71,7 +71,6 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
   };
 
   // Define columns
-
   const col = createColumnHelper<OwnedEdition>();
   const columns = [
     // Cover
@@ -134,22 +133,23 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
           )}
         </span>
       ),
+      enableGlobalFilter: false,
     }),
     // Publisher name
     col.accessor("edition.publisher.name", {
       header: t("oedition.book.publisher"),
     }),
     // Add Date
-    col.accessor("date", {
+    col.accessor((row) => row.date.toLocaleDateString(locale), {
       header: t("oedition.addDate"),
-      cell: (info) => info.getValue().toLocaleDateString(locale),
     }),
     // Read
-    col.accessor("read", {
-      header: t("oedition.read"),
-      cell: (info) =>
-        t(info.getValue() ? "generic.yes" : "generic.no", { capitalize: true }),
-    }),
+    col.accessor(
+      (row) => t(row.read ? "generic.yes" : "generic.no", { capitalize: true }),
+      {
+        header: t("oedition.read"),
+      },
+    ),
     // Actions
     col.display({
       id: "actions",

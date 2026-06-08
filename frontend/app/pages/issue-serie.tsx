@@ -95,17 +95,19 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
             }
             openModal();
           }}
+          isLoading={isLoading}
         />
 
-        {issueSerie?.desc && (
-          <InfoPageSection label={t("issueserie.description")}>
-            <p className="text-sm text-white/60 leading-relaxed">
-              {issueSerie.desc}
-            </p>
-          </InfoPageSection>
-        )}
+        <InfoPageSection
+          label={t("issueserie.description")}
+          isLoading={isLoading}
+        >
+          <p className="text-sm text-white/60 leading-relaxed">
+            {issueSerie?.desc}
+          </p>
+        </InfoPageSection>
 
-        <InfoPageSection label={t("issueserie.issues")}>
+        <InfoPageSection label={t("issueserie.issues")} isLoading={isLoading}>
           <IssueList
             issueList={issueSerie?.issues.map((is) => ({
               ...is,
@@ -115,7 +117,10 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
           />
         </InfoPageSection>
 
-        <InfoPageSection label={t("page.issueserie.books")}>
+        <InfoPageSection
+          label={t("page.issueserie.books")}
+          isLoading={isLoading}
+        >
           <BookList
             bookList={books}
             className="border border-white/8 rounded-lg"

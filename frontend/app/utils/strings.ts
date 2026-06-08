@@ -1,6 +1,7 @@
 import React from "react";
 
-export function insertLinebreaks(str: string) {
+export function insertLinebreaks(str: string | undefined) {
+    if (!str) return "";
     return str.split("\n").map((line, i) => React.createElement("span", { key: i }, line, React.createElement("br")));
 }
 

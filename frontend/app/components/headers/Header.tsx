@@ -35,7 +35,7 @@ export function Header() {
       <header className="w-full border-b border-white/10 bg-gray-950/80 backdrop-blur-md text-white sticky top-0 z-50">
         <div className="container mx-auto flex items-center justify-between gap-6 px-4 py-3">
           {/* Brand */}
-          <div className="flex items-center gap-3 shrink-0">
+          <Link className="flex items-center gap-3 shrink-0" to={"/"}>
             <img
               src="/kystash-logo.png"
               alt="logo"
@@ -51,7 +51,7 @@ export function Header() {
               <AppVersionBadge version="Version 0.0" />
             </div>
             </div>
-          </div>
+          </Link>
 
           {/* Nav */}
           <nav className="flex items-center gap-1">

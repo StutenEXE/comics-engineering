@@ -1,29 +1,27 @@
-import {
-  useBookByIdQuery,
-  useSubmitContributionBundleMutation,
-} from "~/store/services/api";
-import type { Route } from "../+types/root";
-import { createError } from "~/utils/error";
+import { useEffect, useState } from "react";
 import { InfoPageHeaderComponent } from "~/components/headers/InfoPageHeader";
+import { BookListBySerieId } from "~/components/lists/booklists/BookListBySerieId";
+import { EditionList } from "~/components/lists/editionlists/EditionList";
+import { IssueListByBookId } from "~/components/lists/issuelists/IssueListByBookId";
+import { BookContributionModal } from "~/components/modals/contribution/BookContributionModal";
 import {
   InfoPageSection,
   InfoPageTemplate,
 } from "~/components/templates/InfoPageTemplate";
-import { EditionList } from "~/components/lists/editionlists/EditionList";
-import type { Link } from "~/components/lists/LinkButtonList";
-import { BookListBySerieId } from "~/components/lists/booklists/BookListBySerieId";
-import { IssueListByBookId } from "~/components/lists/issuelists/IssueListByBookId";
-import { useTranslation } from "~/i18n/i18n";
-import { insertLinebreaks } from "~/utils/strings";
-import { BookContributionModal } from "~/components/modals/contribution/BookContributionModal";
 import { useToast } from "~/components/toast/Toast";
-import { useAppSelector } from "~/store/hooks";
-import { useEffect, useState } from "react";
+import { useTranslation } from "~/i18n/i18n";
 import {
   wrapInNewBundle,
   type SimpleContribution,
 } from "~/models/contribution";
-import { EditionModal } from "~/components/modals/EditionModal";
+import { useAppSelector } from "~/store/hooks";
+import {
+  useBookByIdQuery,
+  useSubmitContributionBundleMutation,
+} from "~/store/services/api";
+import { createError } from "~/utils/error";
+import { insertLinebreaks } from "~/utils/strings";
+import type { Route } from "../+types/root";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -89,28 +87,25 @@ export default function BookPage({ params }: { params: { id: number } }) {
             }
             openEditModal();
           }}
+          isLoading={isLoading}
         />
 
         {/* Description */}
-        {book?.desc && (
-          <InfoPageSection label={t("book.description")}>
-            <p className="text-sm text-white/60 leading-relaxed">
-              {insertLinebreaks(book.desc)}
-            </p>
-          </InfoPageSection>
-        )}
+        <InfoPageSection label={t("book.description")} isLoading={isLoading}>
+          <p className="text-sm text-white/60 leading-relaxed">
+            {insertLinebreaks(book?.desc)}
+          </p>
+        </InfoPageSection>
 
         {/* VO Content */}
-        {book?.voContent && (
-          <InfoPageSection label={t("book.voContent")}>
-            <p className="text-sm text-white/60 leading-relaxed">
-              {insertLinebreaks(book.voContent)}
-            </p>
-          </InfoPageSection>
-        )}
+        <InfoPageSection label={t("book.voContent")} isLoading={isLoading}>
+          <p className="text-sm text-white/60 leading-relaxed">
+            {insertLinebreaks(book?.voContent)}
+          </p>
+        </InfoPageSection>
 
         {/* Editions */}
-        <InfoPageSection label={t("book.editions")}>
+        <InfoPageSection label={t("book.editions")} isLoading={isLoading}>
           <EditionList
             editionList={book?.editions}
             className="border border-white/8 rounded-lg"
@@ -118,7 +113,10 @@ export default function BookPage({ params }: { params: { id: number } }) {
         </InfoPageSection>
 
         {/* Same series */}
-        <InfoPageSection label={t("page.book.sameseries")}>
+        <InfoPageSection
+          label={t("page.book.sameseries")}
+          isLoading={isLoading}
+        >
           <BookListBySerieId
             serieId={book?.serie?.id}
             toIgnore={book}
@@ -127,7 +125,7 @@ export default function BookPage({ params }: { params: { id: number } }) {
         </InfoPageSection>
 
         {/* Issues */}
-        <InfoPageSection label={t("book.issues")}>
+        <InfoPageSection label={t("book.issues")} isLoading={isLoading}>
           <IssueListByBookId
             bookId={book?.id}
             className="border border-white/8 rounded-lg"
