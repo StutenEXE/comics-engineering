@@ -5,6 +5,7 @@ import type { Error } from "~/utils/error";
 import { HelpBadgeTooltip } from "../badges/HelpBadge";
 import { GenericPageTemplate } from "./GenericPageTemplate";
 import { EnlargeableImage } from "../misc/EnlargeableImage";
+import { SkeletonImage, SkeletonText, SkeletonField } from "../misc/Skeleton";
 
 interface PageTemplateProps {
   hasImg?: boolean;
@@ -30,23 +31,18 @@ export function InfoPageTemplate({
       <div className="flex gap-8 items-start">
         {hasImg && (
           <div className="w-50 shrink-0 sticky top-24">
-            <EnlargeableImage
-              src={imgUrl ?? "/placeholder.jpg"}
-              alt={imgAlt ?? "placeholder"}
-              className="w-full rounded-lg border border-white/8 shadow-xl shadow-black/40 object-cover"
-            />
+            {isLoading ? (
+              <SkeletonImage className="w-full aspect-[2/3] rounded-lg shadow-xl shadow-black/40" />
+            ) : (
+              <EnlargeableImage
+                src={imgUrl ?? "/placeholder.jpg"}
+                alt={imgUrl ?? "/placeholder.jpg"}
+                className="w-full rounded-lg border border-white/8 shadow-xl shadow-black/40 object-cover"
+              />
+            )}
           </div>
         )}
         <div className="flex-1 flex flex-col gap-6 min-w-0">
-          {/* Loading */}
-          {isLoading && (
-            <div className="flex items-center justify-center py-12">
-              <p className="text-sm text-white/30 animate-pulse">
-                {t("loader.loading")}
-              </p>
-            </div>
-          )}
-
           {/* Error */}
           {error && (
             <div className="flex flex-col gap-1 py-12">
@@ -58,26 +54,31 @@ export function InfoPageTemplate({
           )}
 
           {/* Content */}
-          {!isLoading && !error && children}
+          {!error && children}
         </div>
       </div>
     </GenericPageTemplate>
   );
 }
 
+interface InfoPageSectionProps {
+  label: string;
+  isLoading?: boolean;
+  children: React.ReactNode;
+}
+
 export function InfoPageSection({
   label,
+  isLoading,
   children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+}: InfoPageSectionProps) {
   return (
     <div className="flex flex-col gap-2">
       <span className="text-xs font-medium uppercase tracking-widest text-white/40">
         {label}
       </span>
-      {children}
+      {isLoading && <SkeletonText lines={2} />}
+      {!isLoading && children}
     </div>
   );
 }
@@ -89,6 +90,7 @@ interface InfoPageFieldProps {
   to?: string; // internal link
   href?: string; // external link
   hide?: boolean; // skip if no value
+  isLoading?: boolean;
 }
 
 export function InfoPageField({
@@ -98,6 +100,7 @@ export function InfoPageField({
   to,
   href,
   hide,
+  isLoading,
 }: InfoPageFieldProps) {
   const { t } = useTranslation();
 
@@ -105,12 +108,17 @@ export function InfoPageField({
 
   const displayValue = value ?? t("generic.uknown");
 
+  if (isLoading) {
+    return <SkeletonField label={label} labelTooltip={labelTooltip} />;
+  }
+
   return (
     <>
       <span className="flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-white/30 whitespace-nowrap">
         {label}
         {labelTooltip && <HelpBadgeTooltip tooltipContent={labelTooltip} />}
       </span>
+      {/* Internal link found */}
       {to ? (
         <Link
           to={to}
@@ -118,6 +126,7 @@ export function InfoPageField({
         >
           {displayValue} ↗
         </Link>
+      // External link found
       ) : href ? (
         <a
           href={href}
@@ -127,6 +136,7 @@ export function InfoPageField({
         >
           {displayValue} ↗
         </a>
+      // No link
       ) : (
         <span className="text-sm text-white/70">{displayValue}</span>
       )}
@@ -136,13 +146,15 @@ export function InfoPageField({
 
 export function InfoPageFields({
   fieldProps,
+  isLoading,
 }: {
   fieldProps: InfoPageFieldProps[];
+  isLoading?: boolean;
 }) {
   return (
     <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2.5 items-baseline">
       {fieldProps.map((props) => (
-        <InfoPageField {...props} />
+        <InfoPageField {...props} isLoading={isLoading} />
       ))}
     </div>
   );

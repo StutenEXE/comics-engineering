@@ -1,29 +1,27 @@
-import {
-  useIssueByIdQuery,
-  useSubmitContributionBundleMutation,
-} from "~/store/services/api";
-import type { Route } from "../+types/root";
-import { createError } from "~/utils/error";
-import { dateToMonthYearString, dateToVerboseDateString } from "~/utils/date";
+import { useEffect, useState } from "react";
 import { InfoPageHeaderComponent } from "~/components/headers/InfoPageHeader";
+import { BookList } from "~/components/lists/booklists/BookList";
+import { IssueContributionModal } from "~/components/modals/contribution/IssueContributionModal";
 import {
-  InfoPageField,
   InfoPageFields,
   InfoPageSection,
   InfoPageTemplate,
 } from "~/components/templates/InfoPageTemplate";
-import { buildIssueShortName } from "~/models/issue";
-import { BookList } from "~/components/lists/booklists/BookList";
-import type { Link } from "~/components/lists/LinkButtonList";
+import { useToast } from "~/components/toast/Toast";
 import { useTranslation } from "~/i18n/i18n";
-import { IssueContributionModal } from "~/components/modals/contribution/IssueContributionModal";
-import { useEffect, useState } from "react";
 import {
   type SimpleContribution,
   wrapInNewBundle,
 } from "~/models/contribution";
-import { useToast } from "~/components/toast/Toast";
+import { buildIssueShortName } from "~/models/issue";
 import { useAppSelector } from "~/store/hooks";
+import {
+  useIssueByIdQuery,
+  useSubmitContributionBundleMutation,
+} from "~/store/services/api";
+import { dateToMonthYearString, dateToVerboseDateString } from "~/utils/date";
+import { createError } from "~/utils/error";
+import type { Route } from "../+types/root";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -85,9 +83,11 @@ export default function IssuePage({ params }: { params: { id: number } }) {
             }
             openModal();
           }}
+          isLoading={isLoading}
         />
 
         <InfoPageFields
+          isLoading={isLoading}
           fieldProps={[
             // Story
             { label: t("issue.name"), value: issue?.name },
@@ -106,7 +106,7 @@ export default function IssuePage({ params }: { params: { id: number } }) {
           ]}
         />
 
-        <InfoPageSection label={t("page.issue.books")}>
+        <InfoPageSection label={t("page.issue.books")} isLoading={isLoading}>
           <BookList
             bookList={issue?.books}
             className="border border-white/8 rounded-lg"

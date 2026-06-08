@@ -71,7 +71,6 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
   };
 
   // Define columns
-
   const col = createColumnHelper<OwnedEdition>();
   const columns = [
     // Cover

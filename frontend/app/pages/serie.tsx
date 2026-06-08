@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { InfoPageHeaderComponent } from "~/components/headers/InfoPageHeader";
 import { BookList } from "~/components/lists/booklists/BookList";
 import { SerieContributionModal } from "~/components/modals/contribution/SerieContributionModal";
-import { InfoPageTemplate } from "~/components/templates/InfoPageTemplate";
+import {
+  InfoPageSection,
+  InfoPageTemplate,
+} from "~/components/templates/InfoPageTemplate";
 import { useToast } from "~/components/toast/Toast";
 import { useTranslation } from "~/i18n/i18n";
 import {
@@ -53,7 +56,7 @@ export default function SeriePage({ params }: { params: { id: number } }) {
 
   const handleEditSubmit = (c: Partial<SimpleContribution>) => {
     // Cannot access function if not connected
-    const b = wrapInNewBundle(c, user!); 
+    const b = wrapInNewBundle(c, user!);
     submitBundle(b);
   };
 
@@ -88,25 +91,25 @@ export default function SeriePage({ params }: { params: { id: number } }) {
             }
             openModal();
           }}
+          isLoading={isLoading}
         />
 
-        <div className="flex gap-2 flex-col">
-          <h3 className="text-xl text-gray-200 font-semibold">
-            {t("serie.books")} ({serie?.books.length}/{serie?.nvolumes}) :
-          </h3>
-
+        <InfoPageSection
+          label={`${t("serie.books")} (${serie?.books.length}/${serie?.nvolumes})`}
+          isLoading={isLoading}
+        >
           <BookList
             bookList={serie?.books.map((bk) => {
-              // Since serie is read-only, it's children are too, and we need to have a defined serie here
+              // Since serie is read-only, its children are too, and we need to have a defined serie here
               // it is not sent back by the API (infinite loops in this case)
               return {
                 ...bk,
                 serie: { ...serie },
               };
             })}
-            className="border border-gray-500 rounded-lg"
+            className="border border-white/8 rounded-lg"
           />
-        </div>
+        </InfoPageSection>
       </InfoPageTemplate>
       <SerieContributionModal
         serie={serie}

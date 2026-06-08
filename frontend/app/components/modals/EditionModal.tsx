@@ -90,7 +90,7 @@ export function EditionModal({
     setisAddToCollectionModalOpen(false);
   };
   const onAddToCollectionSubmit = () => {
-    relation?.inCollection && (relation.inCollection = true);
+    relation && (relation.inCollection = true);
   };
   return (
     <>
@@ -118,9 +118,11 @@ export function EditionModal({
               }
               openEditModal();
             }}
+            isLoading={false}
           />
 
           <InfoPageFields
+            isLoading={isLoading}
             fieldProps={[
               // EAN
               { label: t("edition.ean"), value: edition?.ean },
@@ -165,14 +167,16 @@ export function EditionModal({
               },
             ]}
           />
-          <GenericButton
-            onClick={openAddToCollectionModal}
-            disabled={!isAuthenticated || relation?.inCollection}
-          >
-            {relation?.inCollection
-              ? t("edition.inCollection")
-              : t("edition.addToCollection")}
-          </GenericButton>
+          {isAuthenticated && (
+            <GenericButton
+              onClick={openAddToCollectionModal}
+              disabled={relation?.inCollection}
+            >
+              {relation?.inCollection
+                ? t("edition.inCollection")
+                : t("edition.addToCollection")}
+            </GenericButton>
+          )}
         </InfoPageTemplate>
 
         <EditionContributionModal
