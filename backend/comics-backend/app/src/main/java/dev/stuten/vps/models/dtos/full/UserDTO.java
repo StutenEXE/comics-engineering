@@ -25,4 +25,7 @@ public class UserDTO extends ModifiedAtDTO {
 
         @JsonProperty("isAdmin")
         private Boolean isAdmin;
+
+        @JsonProperty("isDeleted")
+        private Boolean isDeleted;
 }

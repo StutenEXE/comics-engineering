@@ -1,6 +1,6 @@
 import { useTranslation } from "~/i18n/i18n";
 import { ContributionBundleStatusEnum } from "~/models/contributionBundle";
-import { Badge } from "~/components/ui/badge";
+import { Badge } from "~/components/shadcn/ui/badge";
 
 export function BundleStatusBadge({ status }: { status: ContributionBundleStatusEnum }) {
   const { t } = useTranslation();

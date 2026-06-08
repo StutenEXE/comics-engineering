@@ -1,12 +1,10 @@
-import type { MRT_ColumnDef } from "material-react-table";
-import type { ColumnDef } from "~/components/tables/GenericTable";
-import { useTranslation } from "~/i18n/i18n";
 
 export interface User {
     id: number;
     username: string;
     email: string;
     isAdmin: boolean;
+    isDeleted: boolean;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -18,6 +16,7 @@ export function parseToUser(data: Record<string, any>): User {
         username: data.username,
         email: data.email,
         isAdmin: data.isAdmin,
+        isDeleted: data.isDeleted,
         createdAt: new Date(data.createdAt),
         updatedAt: new Date(data.updatedAt)
     }
@@ -26,12 +25,14 @@ export function parseToUser(data: Record<string, any>): User {
 export interface SimpleUser {
     id: number;
     username: string;
+    isDeleted: boolean;
 }
 
 export function parseToSimpleUser(data: Record<string, any>): SimpleUser {
     return {
         id: data.id,
-        username: data.username
+        username: data.username,
+        isDeleted: data.isDeleted
     }
 }
 

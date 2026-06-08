@@ -1,4 +1,4 @@
-import { Badge } from "~/components/ui/badge";
+import { Badge } from "~/components/shadcn/ui/badge";
 import { twMerge } from "tailwind-merge";
 import { useTranslation } from "~/i18n/i18n";
 import { ContributionStatusEnum } from "~/models/contribution";

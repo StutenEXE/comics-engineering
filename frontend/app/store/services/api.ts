@@ -187,6 +187,9 @@ export const publicApi = createApi({
         contributions: resp.contributions.map(parseToContribution),
       }),
     }),
+    contributionStatsBySubmitterId: build.query<{ stats: { total: number, approved: number, rejected: number, pending: number, needs_revision: number, skipped: number } }, { id: number }>({
+      query: (params) => ({ url: "/contributions/submitter/stats", method: 'GET', params: params }),
+    }),
   }),
 });
 
@@ -204,7 +207,8 @@ export const {
   useLazySearchIssueSeriesByNameQuery,
   // Lazyfy ?
   useSearchBooksAndSeriesByNameQuery,
-  useContributionBySubmitterIdQuery
+  useContributionBySubmitterIdQuery,
+  useContributionStatsBySubmitterIdQuery
 } = publicApi;
 
 
@@ -291,6 +295,12 @@ export const adminApi = createApi({
         users: resp.users.map((usr) => parseToUser(usr)),
       }),
     }),
+    deleteUser: build.mutation<{ id: number }, {}>({
+      query: (params) => ({ url: "/users/delete", method: 'DELETE', params: params }),
+    }),
+    recycleUser: build.mutation<{ id: number }, {}>({
+      query: (params) => ({ url: "/users/recycle", method: 'GET', params: params }),
+    }),
     // Get list of contribution bundles
     bundleList: build.query<{ bundles: ContributionBundle[] }, { from: number, limit: number }>({
       query: (params) => ({ url: "/bundles/all", method: 'GET', params: params }),
@@ -325,6 +335,8 @@ export const adminApi = createApi({
 
 export const {
   useUserListQuery,
+  useDeleteUserMutation,
+  useRecycleUserMutation,
   useLazyBundleListQuery,
   useCreateContributionMutation,
   useUpdateContributionMutation,

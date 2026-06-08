@@ -1,20 +1,23 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GenericButton } from "~/components/buttons/GenericButton";
 import { ContributionBundleModal } from "~/components/modals/contribution/ContributionBundleModal";
-import { ContributionTable } from "~/components/tables/ContributionTable";
+import { LoggedProtectedRoute } from "~/components/security/LoggedProtectedRoute";
+import {
+  ContributionTable,
+  type ContributionTableHandle,
+} from "~/components/tables/ContributionTable";
+import { GenericPageTemplate } from "~/components/templates/GenericPageTemplate";
+import { useToast } from "~/components/toast/Toast";
 import { useTranslation } from "~/i18n/i18n";
-import { ContributionStatusEnum } from "~/models/contribution";
+import type { ContributionBundle } from "~/models/contributionBundle";
 import { useAppSelector } from "~/store/hooks";
 import {
-  useContributionBySubmitterIdQuery,
+  useContributionStatsBySubmitterIdQuery,
   useSubmitContributionBundleMutation,
 } from "~/store/services/api";
-import { createError } from "~/utils/error";
 import type { Route } from "../+types/root";
-import { useToast } from "~/components/toast/Toast";
-import type { ContributionBundle } from "~/models/contributionBundle";
-import { LoggedProtectedRoute } from "~/components/security/LoggedProtectedRoute";
-import { GenericPageTemplate } from "~/components/templates/GenericPageTemplate";
+import { ContributionStatusEnum } from "~/models/contribution";
+import { createError } from "~/utils/error";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -28,12 +31,6 @@ export default function ContributePage() {
   const toast = useToast();
   const { isAuthenticated, user } = useAppSelector((state) => state.user);
 
-  // Fetch contributions
-  const { data, isLoading, error, refetch } = useContributionBySubmitterIdQuery(
-    user ? { id: user.id } : { id: 0 },
-    { skip: !user }, // Doesn't execute if user is undefined
-  );
-
   // Submit a contribution bundle
   const [submitBundle, { isError, isSuccess }] =
     useSubmitContributionBundleMutation();
@@ -46,9 +43,17 @@ export default function ContributePage() {
     if (isSuccess) {
       toast.success(t("contribute.success"));
       closeContributionModal();
-      refetch();
     }
   }, [isSuccess]);
+
+  const { data, isLoading, refetch } =
+    useContributionStatsBySubmitterIdQuery(
+      user ? { id: user.id } : { id: 0 },
+      { skip: !user }, // Doesn't execute if user is undefined
+    );
+  const stats = data?.stats;
+
+  const contributionTableRef = useRef<ContributionTableHandle>(null);
 
   // Handles contribution modal state
   const [isContributionModalOpen, setisContributionModalOpen] = useState(false);
@@ -80,30 +85,20 @@ export default function ContributePage() {
     setisContributionModalOpen(false);
   };
 
-  const err = createError(error);
-  const contributions = data?.contributions;
-  const stats = {
-    // Calculate stats
-    totalContributions: contributions?.length,
-    approved: 0,
-    pending: 0,
-    needsRevision: 0,
-    rejected: 0,
-  };
-  contributions?.forEach((contrib) => {
-    if (contrib.status === ContributionStatusEnum.APPROVED) stats.approved++;
-    else if (contrib.status === ContributionStatusEnum.PENDING) stats.pending++;
-    else if (contrib.status === ContributionStatusEnum.NEEDS_REVISION)
-      stats.needsRevision++;
-    else if (contrib.status === ContributionStatusEnum.REJECTED)
-      stats.rejected++;
-  });
-
   const submitContributionBundle = async (
     bundle: Partial<ContributionBundle>,
   ) => {
     submitBundle(bundle);
   };
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success(t("contribute.success"));
+      closeContributionModal();
+      refetch();
+      contributionTableRef.current?.refetch();
+    }
+  }, [isSuccess]);
 
   return (
     <LoggedProtectedRoute>
@@ -138,25 +133,28 @@ export default function ContributePage() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
             <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
               <p className="text-3xl font-bold text-blue-400">
-                {stats.totalContributions}
+                {stats?.total}
+                {/* X */}
               </p>
               <p className="text-gray-400">{t("contribute.stats.total")}</p>
             </div>
             <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
               <p className="text-3xl font-bold text-green-400">
-                {stats.approved}
+                {stats?.approved}
+                {/* Y */}
               </p>
               <p className="text-gray-400">{t("contribute.stats.approved")}</p>
             </div>
             <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
               <p className="text-3xl font-bold text-yellow-400">
-                {stats.pending}
+                {stats?.pending}
+                {/* Z */}
               </p>
               <p className="text-gray-400">{t("contribute.stats.pending")}</p>
             </div>
             <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
               <p className="text-3xl font-bold text-purple-400">
-                {stats.needsRevision}
+                {stats?.needs_revision}
               </p>
               <p className="text-gray-400">
                 {t("contribute.stats.needsRevision")}
@@ -164,7 +162,7 @@ export default function ContributePage() {
             </div>
             <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
               <p className="text-3xl font-bold text-red-400">
-                {stats.rejected}
+                {stats?.rejected}
               </p>
               <p className="text-gray-400">{t("contribute.stats.rejected")}</p>
             </div>
@@ -176,11 +174,7 @@ export default function ContributePage() {
           <h2 className="text-2xl font-semibold text-gray-200">
             {t("contribute.history")}
           </h2>
-          <ContributionTable
-            contributionList={contributions}
-            isLoading={isLoading}
-            error={err}
-          />
+          <ContributionTable ref={contributionTableRef} />
         </div>
         <ContributionBundleModal
           action="create"

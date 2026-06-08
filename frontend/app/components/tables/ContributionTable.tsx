@@ -1,23 +1,47 @@
+import { forwardRef, useEffect, useImperativeHandle } from "react";
 import { useTranslation } from "~/i18n/i18n";
 import { getContributionName, type Contribution } from "~/models/contribution";
-import type { Error } from "~/utils/error";
+import { createError, type Error } from "~/utils/error";
 import { GenericTable, type ColumnDef } from "./GenericTable";
 import { ContributionStatusBadge } from "../badges/ContributionStatusBadge";
 import { createColumnHelper } from "@tanstack/react-table";
+import { useContributionBySubmitterIdQuery } from "~/store/services/api";
+import { useAppSelector } from "~/store/hooks";
 
-interface ContributionTableProps {
-  contributionList: Contribution[] | null | undefined;
-  isLoading?: boolean;
-  error?: Error;
-  className?: string;
+export interface ContributionTableHandle {
+  refetch: () => void;
 }
 
-export function ContributionTable({
-  contributionList,
-  isLoading,
-  error,
-}: ContributionTableProps) {
+interface ContributionTableProps {
+  className?: string;
+  onRefetch?: (refetch: () => void) => void;
+}
+
+export const ContributionTable = forwardRef<
+  ContributionTableHandle,
+  ContributionTableProps
+>(function ContributionTable({ className, onRefetch }, ref) {
   const { t, locale } = useTranslation();
+  const { user } = useAppSelector((state) => state.user);
+
+  // Fetch contributions
+  const { data, isLoading, error, refetch } = useContributionBySubmitterIdQuery(
+    user ? { id: user.id } : { id: 0 },
+    { skip: !user }, // Doesn't execute if user is undefined
+  );
+  const err = createError(error);
+  const contributions = data?.contributions;
+
+  const triggerRefetch = () => refetch?.();
+
+  useImperativeHandle(ref, () => ({ refetch: triggerRefetch }), [triggerRefetch]);
+
+  useEffect(() => {
+    if (!onRefetch) {
+      return;
+    }
+    onRefetch(triggerRefetch);
+  }, [onRefetch, triggerRefetch]);
 
   // Define columns
   const col = createColumnHelper<Contribution>();
@@ -68,8 +92,8 @@ export function ContributionTable({
   return (
     <GenericTable
       list={
-        contributionList
-          ? [...contributionList]?.sort(
+        contributions
+          ? [...contributions]?.sort(
               (c1, c2) =>
                 c2.bundle.createdAt.getTime() - c1.bundle.createdAt.getTime(),
             )
@@ -78,7 +102,8 @@ export function ContributionTable({
       columns={columns}
       isLoading={isLoading}
       emptyMessage={t("contribution.nonefound")}
-      error={error}
+      error={err}
+      className={className}
     />
   );
-}
+});

@@ -10,8 +10,11 @@ export default [
     route("serie/:id", "pages/serie.tsx"),
 
     route("contribute", "pages/contribute.tsx"),
-    route("collection", "pages/collection.tsx"),
-    
+    route("collection", "pages/collection.tsx", [
+      index("pages/collection/editions.tsx"),
+      route("series", "pages/collection/series.tsx"),
+    ]),
+
     route("users", "pages/users.tsx"),
     route("contributions", "pages/contributions.tsx"),
 ] satisfies RouteConfig;

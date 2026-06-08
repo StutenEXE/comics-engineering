@@ -29,13 +29,14 @@ export default {
     // ============================
     // == Toasts
     // ============================
+    "toast.error": "Une erreur est survenue",
     "toast.notconnected": "Vous n'êtes pas connecté",
     "toast.adminroute.access_denied": "Accès refusé. Réservé aux admins.",
     "toast.loggedroute.access_denied": "Accès refusé. Veuillez vous connecter.",
     "toast.addToCollection.success": "Edition ajoutée à la collection",
-    "toast.addToCollection.error": "Une erreur est survenue lors de l'ajout",
     "toast.removeFromCollection.success": "Edition retirée de la collection",
-    "toast.removeFromCollection.error": "Une erreur est survenue",
+    "toast.delete.user.success": "Utilisateur supprimé",
+    "toast.recycle.user.success": "Utilisateur recyclé",
     // ============================
     // == Loading
     // ============================
@@ -144,6 +145,7 @@ export default {
     "cbundle.form.cancel.title": "Annuler la soumission",
     "cbundle.form.cancel.message": "Êtes-vous sûr de vouloir annuler cette soumission ?\nToutes les données seront perdues.",
     // Edition
+    "editions": "Editions",
     "edition.nonefound": "Aucune édition trouvée",
     "edition.book": "Livre",
     "edition.ean": "EAN",
@@ -226,6 +228,7 @@ export default {
     "oedition.form.totalCost": "Coût total",
     "oedition.form.saved": "Economies",
     // Serie
+    "series": "Séries",
     "serie.nonefound": "Aucune série trouvée",
     "serie.header": "Série",
     "serie.name": "Nom",
@@ -247,6 +250,11 @@ export default {
     "user.username": "Nom d'utilisateur",
     "user.createdAt": "Date de création",
     "user.isAdmin": "Administrateur",
+    "user.isDeleted": "Supprimé",
+    "user.action.delete": "Supprimer l'utilisateur",
+    "user.action.delete.message": "Vous allez supprimer l'utilisateur %username%.",
+    "user.action.recycle": "Recycler l'utilisateur",
+    "user.action.recycle.message": "Vous allez recycler (dé-supprimer) l'utilisateur %username%.",
     // ============================
     // == COMPONENTS 
     // ============================
@@ -307,6 +315,8 @@ export default {
     "search.noresults": "Aucun résultat",
     // Collection
     "collection.title": "Ma collection",
+    "collection.library": "Bibliothèque",
+    "collection.statistics": "Statistiques",
     "collection.remove.title": "Retirer de la collection",
     "collection.remove.message": "Voulez-vous vraiment retirer cette édition de votre collection ?\nLes informations associées seront perdues.",
     // Contribute

@@ -1,36 +1,71 @@
 import { type User } from "~/models/user";
 import { GenericTable } from "./GenericTable";
-import type { Error } from "~/utils/error";
-import { MdDelete, MdModeEdit, MdRemoveRedEye } from "react-icons/md";
+import { createError, type Error } from "~/utils/error";
+import {
+  MdDelete,
+  MdModeEdit,
+  MdRecycling,
+  MdRemoveRedEye,
+} from "react-icons/md";
 import { Link } from "react-router";
 import { useConfirm } from "../modals/ConfirmModalProvider";
 import { useTranslation } from "~/i18n/i18n";
 import { useToast } from "../toast/Toast";
 import { createColumnHelper } from "@tanstack/react-table";
+import {
+  useDeleteUserMutation,
+  useRecycleUserMutation,
+  useUserListQuery,
+} from "~/store/services/api";
 
 interface UserTableProps {
-  userList: User[] | null | undefined;
-  isLoading?: boolean;
-  error?: Error;
   showActions?: boolean;
   className?: string;
 }
 
-export function UserTable({
-  userList,
-  isLoading,
-  error,
-  showActions,
-}: UserTableProps) {
+export function UserTable({ showActions, className }: UserTableProps) {
   const { t, locale } = useTranslation();
   const confirm = useConfirm();
   const toast = useToast();
+
+  // Fetch users for current page
+  const { data, error, isLoading, refetch } = useUserListQuery(
+    { from: 0, limit: 10 },
+    { refetchOnMountOrArgChange: true },
+  );
+  const users = data?.users ?? [];
+  const err = createError(error);
+
+  const [deleteUser] = useDeleteUserMutation();
+  const [recycleUser] = useRecycleUserMutation();
+
+  const asyncMutationTrigger = (
+    callback: () => Promise<any>,
+    title: string,
+    message: string,
+    successMsg: string,
+  ) => {
+    confirm({
+      title: title,
+      message: message,
+      onConfirm: () => {
+        callback()
+          .then(() => {
+            refetch();
+            toast.success(successMsg);
+          })
+          .catch(() => {
+            toast.success(t("toast.error"));
+          });
+      },
+    });
+  };
 
   // Define table columns
   const col = createColumnHelper<User>();
   const columns = [
     col.accessor("id", {
-      header: "ID",
+      header: t("user.id"),
       cell: (info) => (
         <span className="font-mono text-white/30">#{info.getValue()}</span>
       ),
@@ -45,13 +80,26 @@ export function UserTable({
       header: t("user.createdAt"),
       cell: (info) => info.getValue().toLocaleDateString(locale),
     }),
-    col.accessor("isAdmin", {
-      header: t("user.isAdmin"),
-      cell: (info) =>
-        t(info.getValue() ? "generic.yes" : "generic.no", {
+    col.accessor(
+      (row) =>
+        t(row.isAdmin ? "generic.yes" : "generic.no", {
           capitalize: true,
         }),
-    }),
+      {
+        id: "isAdmin",
+        header: t("user.isAdmin"),
+      },
+    ),
+    col.accessor(
+      (row) =>
+        t(row.isDeleted ? "generic.yes" : "generic.no", {
+          capitalize: true,
+        }),
+      {
+        id: "isDeleted",
+        header: t("user.isDeleted"),
+      },
+    ),
     col.display({
       id: "actions",
       cell: ({ row }) => {
@@ -67,25 +115,38 @@ export function UserTable({
               size={20}
               className="cursor-pointer hover:text-blue-500"
             />
-            <MdDelete
-              size={20}
-              className="cursor-pointer hover:text-red-500"
-              onClick={() =>
-                confirm({
-                  title: t("user.action.delete"),
-                  message: `${t("user.action.delete.message", {
-                    parameters: { username: row.original.username },
-                  })} ${t("generic.action.cannotbeundone")}.`,
-                  onConfirm: () => {
-                    toast.success(
-                      t("user.action.deleted", {
-                        parameters: { username: row.original.username },
-                      }),
-                    );
-                  },
-                })
-              }
-            />
+            {row.original.isDeleted && (
+              <MdRecycling
+                size={20}
+                className="cursor-pointer hover:text-amber-500"
+                onClick={() =>
+                  asyncMutationTrigger(
+                    async () => await recycleUser({ id: row.original.id }),
+                    t("user.action.recycle"),
+                    t("user.action.recycle.message", {
+                      parameters: { username: row.original.username },
+                    }),
+                    t("toast.recycle.user.success"),
+                  )
+                }
+              />
+            )}
+            {!row.original.isDeleted && (
+              <MdDelete
+                size={20}
+                className="cursor-pointer hover:text-red-500"
+                onClick={() =>
+                  asyncMutationTrigger(
+                    async () => await deleteUser({ id: row.original.id }),
+                    t("user.action.delete"),
+                    t("user.action.delete.message", {
+                      parameters: { username: row.original.username },
+                    }),
+                    t("toast.delete.user.success"),
+                  )
+                }
+              />
+            )}
           </div>
         );
       },
@@ -94,10 +155,11 @@ export function UserTable({
 
   return (
     <GenericTable
-      list={userList}
+      list={users}
       columns={columns}
       isLoading={isLoading}
-      error={error}
+      error={err}
+      className={className}
     />
   );
 }

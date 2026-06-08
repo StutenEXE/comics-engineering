@@ -20,6 +20,7 @@ public class UserMapper {
             USERS.EMAIL, "user_email",
             USERS.PASSWORD, "user_password",
             USERS.IS_ADMIN, "user_is_admin",
+            USERS.IS_DELETED, "user_is_deleted",
             USERS.CREATED_AT, "user_created_at",
             USERS.MODIFIED_AT, "user_modified_at");
 
@@ -27,20 +28,19 @@ public class UserMapper {
         return fieldMapping.get(field);
     }
 
-    @SuppressWarnings("null")
     public static UserDTO mapToDTO(Record r) {
         UserDTO dto = UserDTO.builder()
                 .id(r.get(getFieldName(USERS.ID), Integer.class))
                 .username(r.get(getFieldName(USERS.USERNAME), String.class))
                 .email(r.get(getFieldName(USERS.EMAIL), String.class))
                 .isAdmin(r.get(getFieldName(USERS.IS_ADMIN), Boolean.class))
+                .isDeleted(r.get(getFieldName(USERS.IS_DELETED), Boolean.class))
                 .createdAt(r.get(getFieldName(USERS.CREATED_AT), LocalDateTime.class))
                 .modifiedAt(r.get(getFieldName(USERS.MODIFIED_AT), LocalDateTime.class))
                 .build();
         return dto;
     }
 
-    @SuppressWarnings("null")
     public static SimpleUserDTO mapToSimpleDTO(Record r) {
         SimpleUserDTO dto = SimpleUserDTO.builder()
                 .id(r.get(getFieldName(USERS.ID), Integer.class))
@@ -57,6 +57,7 @@ public class UserMapper {
                 .email(r.get(getFieldName(USERS.EMAIL), String.class))
                 .password(r.get(getFieldName(USERS.PASSWORD), String.class))
                 .isAdmin(r.get(getFieldName(USERS.IS_ADMIN), Boolean.class))
+                .isDeleted(r.get(getFieldName(USERS.IS_DELETED), Boolean.class))
                 .createdAt(r.get(getFieldName(USERS.CREATED_AT), LocalDateTime.class))
                 .modifiedAt(r.get(getFieldName(USERS.MODIFIED_AT), LocalDateTime.class))
                 .build();
