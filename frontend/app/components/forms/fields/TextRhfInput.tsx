@@ -1,7 +1,7 @@
 import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
 import { HelpBadgeTooltip } from "~/components/badges/HelpBadge";
-import { Input } from "~/components/ui/input";
+import { Input } from "~/components/shadcn/ui/input";
 
 interface TextRhfInputProps {
   label: string;

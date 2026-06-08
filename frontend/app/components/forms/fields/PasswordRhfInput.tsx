@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
-import { Input } from "~/components/ui/input";
+import { Input } from "~/components/shadcn/ui/input";
 
 interface PasswordRhfInputProps {
   label: string;

@@ -145,6 +145,7 @@ export default {
     "cbundle.form.cancel.title": "Annuler la soumission",
     "cbundle.form.cancel.message": "Êtes-vous sûr de vouloir annuler cette soumission ?\nToutes les données seront perdues.",
     // Edition
+    "editions": "Editions",
     "edition.nonefound": "Aucune édition trouvée",
     "edition.book": "Livre",
     "edition.ean": "EAN",
@@ -227,6 +228,7 @@ export default {
     "oedition.form.totalCost": "Coût total",
     "oedition.form.saved": "Economies",
     // Serie
+    "series": "Séries",
     "serie.nonefound": "Aucune série trouvée",
     "serie.header": "Série",
     "serie.name": "Nom",
@@ -313,6 +315,8 @@ export default {
     "search.noresults": "Aucun résultat",
     // Collection
     "collection.title": "Ma collection",
+    "collection.library": "Bibliothèque",
+    "collection.statistics": "Statistiques",
     "collection.remove.title": "Retirer de la collection",
     "collection.remove.message": "Voulez-vous vraiment retirer cette édition de votre collection ?\nLes informations associées seront perdues.",
     // Contribute

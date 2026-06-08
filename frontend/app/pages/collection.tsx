@@ -1,14 +1,10 @@
-import { useMemo } from "react";
 import { LoggedProtectedRoute } from "~/components/security/LoggedProtectedRoute";
-import { OwnedEditionTab } from "~/components/tabs/collection/OwnedEditionTab";
-import { Tabs, type TabItem } from "~/components/tabs/Tabs";
+import { SidebarInset, SidebarProvider } from "~/components/shadcn/ui/sidebar";
+import { CollectionSidebar } from "~/components/sidebars/CollectionSidebar";
 import { useTranslation } from "~/i18n/i18n";
 import { useAppSelector } from "~/store/hooks";
-import { useCollectionQuery } from "~/store/services/api";
-import { createError } from "~/utils/error";
 import type { Route } from "../+types/root";
-import { OwnedSeriesTab } from "~/components/tabs/collection/OwnedSeriesTab";
-import { GenericPageTemplate } from "~/components/templates/GenericPageTemplate";
+import { Outlet } from "react-router";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -21,29 +17,16 @@ export default function CollectionPage() {
   const { t } = useTranslation();
   const { user } = useAppSelector((state) => state.user);
 
-  const tabs: TabItem[] = [
-    {
-      id: "editions",
-      label: t("editions", { capitalize: true }),
-      content: <OwnedEditionTab />,
-    },
-    {
-      id: "series",
-      label: t("series", { capitalize: true }),
-      content: <OwnedSeriesTab />,
-    },
-  ];
-
   return (
-    <LoggedProtectedRoute>
-      <GenericPageTemplate>
-        <h1 className="text-3xl font-bold text-gray-200 mb-6">
-          {t("collection.title")}
-        </h1>
-        <div className="w-full max-w-6xl">
-          <Tabs tabs={tabs} defaultTabId="editions" />
-        </div>
-      </GenericPageTemplate>
-    </LoggedProtectedRoute>
+    <>
+      <LoggedProtectedRoute>
+        <SidebarProvider>
+          <CollectionSidebar variant="inset" />
+          <SidebarInset>
+            <Outlet />
+          </SidebarInset>
+        </SidebarProvider>
+      </LoggedProtectedRoute>
+    </>
   );
 }

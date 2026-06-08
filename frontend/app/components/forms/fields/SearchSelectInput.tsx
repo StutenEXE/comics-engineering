@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { FieldError } from "react-hook-form";
 import { MdDelete } from "react-icons/md";
-import { Input } from "~/components/ui/input";
+import { Input } from "~/components/shadcn/ui/input";
 import { useTranslation } from "~/i18n/i18n";
 
 export interface SearchSelectItem {

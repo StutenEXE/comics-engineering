@@ -1,6 +1,6 @@
 import type { MouseEventHandler, ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
-import { Button } from "~/components/ui/button";
+import { Button } from "~/components/shadcn/ui/button";
 
 export interface ButtonProps {
   onClick?: MouseEventHandler;

@@ -65,7 +65,7 @@ export function UserTable({ showActions, className }: UserTableProps) {
   const col = createColumnHelper<User>();
   const columns = [
     col.accessor("id", {
-      header: "ID",
+      header: t("user.id"),
       cell: (info) => (
         <span className="font-mono text-white/30">#{info.getValue()}</span>
       ),

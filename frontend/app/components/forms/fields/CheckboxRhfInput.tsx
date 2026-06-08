@@ -1,5 +1,5 @@
 import type { UseFormRegisterReturn, FieldError } from "react-hook-form";
-import { Input } from "~/components/ui/input";
+import { Input } from "~/components/shadcn/ui/input";
 
 interface CheckboxRhfInputProps {
   label: string;
