@@ -128,16 +128,18 @@ export function GenericTable<T extends Record<string, any>>({
                     key={header.id}
                     className="text-xs font-medium uppercase tracking-widest text-white/30 h-10"
                   >
-                    <div className="flex gap-2">
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
+                    <div className="flex gap-2 items-center">
+                      <div className="max-w-40 text-wrap">
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                      </div>
                       {/* Sorting arrows */}
                       {header.column.getCanSort() && (
                         <ArrowUpDown
                           size={16}
-                          className="cursor-pointer rounded p-0.5 hover:bg-white/10 hover:scale-105 active:scale-95"
+                          className="cursor-pointer rounded p-0.5 hover:bg-white/10 hover:scale-105 active:scale-95 flex-shrink-0"
                           onClick={() =>
                             header.column.toggleSorting(
                               header.column.getIsSorted() === "asc",
@@ -161,7 +163,7 @@ export function GenericTable<T extends Record<string, any>>({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className="text-sm text-white/60 group-hover:text-white/80 transition-colors py-3"
+                      className="max-w-50 text-sm text-white/60 group-hover:text-white/80 transition-colors py-3 truncate"
                     >
                       {flexRender(
                         cell.column.columnDef.cell,

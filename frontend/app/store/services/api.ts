@@ -187,6 +187,9 @@ export const publicApi = createApi({
         contributions: resp.contributions.map(parseToContribution),
       }),
     }),
+    contributionStatsBySubmitterId: build.query<{ stats: { total: number, approved: number, rejected: number, pending: number, needs_revision: number, skipped: number } }, { id: number }>({
+      query: (params) => ({ url: "/contributions/submitter/stats", method: 'GET', params: params }),
+    }),
   }),
 });
 
@@ -204,7 +207,8 @@ export const {
   useLazySearchIssueSeriesByNameQuery,
   // Lazyfy ?
   useSearchBooksAndSeriesByNameQuery,
-  useContributionBySubmitterIdQuery
+  useContributionBySubmitterIdQuery,
+  useContributionStatsBySubmitterIdQuery
 } = publicApi;
 
 

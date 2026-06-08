@@ -3,9 +3,11 @@ package dev.stuten.vps.models.daos;
 import static dev.stuten.vps.jooq.tables.ContributionBundles.CONTRIBUTION_BUNDLES;
 import static dev.stuten.vps.jooq.tables.Contributions.CONTRIBUTIONS;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
+import static org.jooq.impl.DSL.count;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.jooq.DSLContext;
