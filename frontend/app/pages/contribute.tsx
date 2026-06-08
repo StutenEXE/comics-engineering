@@ -95,6 +95,7 @@ export default function ContributePage() {
     if (isSuccess) {
       toast.success(t("contribute.success"));
       closeContributionModal();
+      refetch();
       contributionTableRef.current?.refetch();
     }
   }, [isSuccess]);
