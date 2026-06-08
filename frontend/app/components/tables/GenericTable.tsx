@@ -162,82 +162,47 @@ export function GenericTable<T extends Record<string, any>>({
                       switch (meta.filterType) {
                         case "boolean":
                           return (
-                            <Select
-                              value={(filterValue as string) ?? ""}
+                            <SelectInput
+                              options={[
+                                {
+                                  label: t("generic.yes", { capitalize: true }),
+                                  value: "true",
+                                },
+                                {
+                                  label: t("generic.no", { capitalize: true }),
+                                  value: "false",
+                                },
+                              ]}
+                              filterValue={(filterValue as string) ?? ""}
+                              selectAll
                               onValueChange={(value) => {
                                 table.setPageIndex(0);
                                 header.column.setFilterValue(
                                   value === "any" ? undefined : value,
                                 );
                               }}
-                            >
-                              <SelectTrigger className="w-full max-w-48">
-                                <SelectValue
-                                  placeholder={
-                                    meta.placeholder ||
-                                    t("generic.search.placeholder")
-                                  }
-                                />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectGroup>
-                                  <SelectItem value="any">
-                                    {t("generic.all", {
-                                      capitalize: true,
-                                    })}
-                                  </SelectItem>
-                                  <SelectItem value="true">
-                                    {t("generic.yes", {
-                                      capitalize: true,
-                                    })}
-                                  </SelectItem>
-                                  <SelectItem value="false">
-                                    {t("generic.no", {
-                                      capitalize: true,
-                                    })}
-                                  </SelectItem>
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
+                              placeholder={meta.placeholder}
+                            />
                           );
 
                         case "single":
                           return (
-                            <Select
-                              value={(filterValue as string) ?? ""}
+                            <SelectInput
+                              options={
+                                meta.options?.map((o: string) => {
+                                  return { label: o, value: o };
+                                }) || []
+                              }
+                              filterValue={(filterValue as string) ?? ""}
+                              selectAll
                               onValueChange={(value) => {
                                 table.setPageIndex(0);
                                 header.column.setFilterValue(
                                   value === "any" ? undefined : value,
                                 );
                               }}
-                            >
-                              <SelectTrigger className="w-full max-w-48">
-                                <SelectValue
-                                  placeholder={
-                                    meta.placeholder ||
-                                    t("generic.search.placeholder")
-                                  }
-                                />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectGroup>
-                                  <SelectLabel>
-                                    {meta.placeholder || t("generic.select")}
-                                  </SelectLabel>
-                                  <SelectItem value="any">
-                                    {t("generic.all", {
-                                      capitalize: true,
-                                    })}
-                                  </SelectItem>
-                                  {meta.options?.map((o) => (
-                                    <SelectItem key={o} value={o}>
-                                      {o}
-                                    </SelectItem>
-                                  ))}
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
+                              placeholder={meta.placeholder}
+                            />
                           );
 
                         default:
@@ -379,5 +344,54 @@ export function GenericTable<T extends Record<string, any>>({
         </div>
       )}
     </div>
+  );
+}
+
+interface SelectInputProps {
+  options: {
+    label: string;
+    value: string;
+  }[];
+  filterValue: string;
+  placeholder?: string;
+  selectAll?: boolean;
+  onValueChange: (val: string) => void;
+}
+
+function SelectInput({
+  options,
+  filterValue,
+  placeholder,
+  selectAll,
+  onValueChange,
+}: SelectInputProps) {
+  const { t } = useTranslation();
+  return (
+    <Select value={filterValue} onValueChange={onValueChange}>
+      <SelectTrigger className="w-full max-w-48">
+        <SelectValue
+          placeholder={placeholder || t("generic.search.placeholder")}
+        />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectLabel>
+            {placeholder || t("generic.search.placeholder")}
+          </SelectLabel>
+          {selectAll && (
+            <SelectItem value="any">
+              {t("generic.all", {
+                capitalize: true,
+              })}
+            </SelectItem>
+          )}
+          {options.map((o) => (
+            <SelectItem key={o.value} value={o.value}>
+              {o.label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
   );
 }

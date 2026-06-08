@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { MdDelete, MdModeEdit } from "react-icons/md";
+import {
+  MdCheckBox,
+  MdCheckBoxOutlineBlank,
+  MdDelete,
+  MdModeEdit,
+} from "react-icons/md";
 import { useTranslation } from "~/i18n/i18n";
 import { type OwnedEdition } from "~/models/ownedEdition";
 import { useAppSelector } from "~/store/hooks";
@@ -164,7 +169,16 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
     // Read
     col.accessor("read", {
       header: t("oedition.read"),
-      cell: (info) => t(info.getValue() ? "generic.yes" : "generic.no", { capitalize: true }),
+      cell: (info) => (
+        <div className="flex gap-1 items-center">
+          {info.getValue() && (
+            <MdCheckBox size={20} className="text-green-500" />
+          )}
+          {!info.getValue() && (
+            <MdCheckBoxOutlineBlank size={20} className="text-grey-500" />
+          )}
+        </div>
+      ),
       meta: { filterType: "boolean" },
       filterFn: "equals",
     }),
