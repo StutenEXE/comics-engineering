@@ -29,13 +29,13 @@ export default {
     // ============================
     // == Toasts
     // ============================
+    "toast.error": "Une erreur est survenue",
     "toast.notconnected": "Vous n'êtes pas connecté",
     "toast.adminroute.access_denied": "Accès refusé. Réservé aux admins.",
     "toast.loggedroute.access_denied": "Accès refusé. Veuillez vous connecter.",
     "toast.addToCollection.success": "Edition ajoutée à la collection",
-    "toast.addToCollection.error": "Une erreur est survenue lors de l'ajout",
     "toast.removeFromCollection.success": "Edition retirée de la collection",
-    "toast.removeFromCollection.error": "Une erreur est survenue",
+    "toast.delete.user.success": "Utilisateur supprimé",
     // ============================
     // == Loading
     // ============================
@@ -247,6 +247,9 @@ export default {
     "user.username": "Nom d'utilisateur",
     "user.createdAt": "Date de création",
     "user.isAdmin": "Administrateur",
+    "user.isDeleted": "Supprimé",
+    "user.action.delete": "Supprimer l'utilisateur",
+    "user.action.delete.message": "Vous allez supprimer l'utilisateur %username%.",
     // ============================
     // == COMPONENTS 
     // ============================

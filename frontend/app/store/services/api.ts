@@ -291,6 +291,9 @@ export const adminApi = createApi({
         users: resp.users.map((usr) => parseToUser(usr)),
       }),
     }),
+    deleteUser: build.mutation<{ id: number }, {}>({
+      query: (params) => ({ url: "/users/delete", method: 'DELETE', params: params }),
+    }),
     // Get list of contribution bundles
     bundleList: build.query<{ bundles: ContributionBundle[] }, { from: number, limit: number }>({
       query: (params) => ({ url: "/bundles/all", method: 'GET', params: params }),
@@ -325,6 +328,7 @@ export const adminApi = createApi({
 
 export const {
   useUserListQuery,
+  useDeleteUserMutation,
   useLazyBundleListQuery,
   useCreateContributionMutation,
   useUpdateContributionMutation,

@@ -22,4 +22,7 @@ public class SimpleUserDTO extends IdDTO {
 
     @JsonProperty("username")
     private String username;
+
+    @JsonProperty("isDeleted")
+    private Boolean isDeleted;
 }

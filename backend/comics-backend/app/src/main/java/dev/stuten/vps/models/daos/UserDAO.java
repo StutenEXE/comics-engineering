@@ -27,19 +27,18 @@ public class UserDAO extends DAO {
         return BCrypt.checkpw(password, hash);
     }
 
-    @SuppressWarnings("null")
     public static UserDTO removePassword(UserWithPasswordDTO user) {
         return UserDTO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .isAdmin(user.getIsAdmin())
+                .isDeleted(user.getIsDeleted())
                 .createdAt(user.getCreatedAt())
                 .modifiedAt(user.getModifiedAt())
                 .build();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected RecordMapper<? super Record, UserDTO> getDefaultMapper() {
         return UserMapper::mapToDTO;
@@ -53,6 +52,7 @@ public class UserDAO extends DAO {
                 USERS.EMAIL.as(UserMapper.getFieldName(USERS.EMAIL)),
                 USERS.PASSWORD.as(UserMapper.getFieldName(USERS.PASSWORD)),
                 USERS.IS_ADMIN.as(UserMapper.getFieldName(USERS.IS_ADMIN)),
+                USERS.IS_DELETED.as(UserMapper.getFieldName(USERS.IS_DELETED)),
                 USERS.CREATED_AT.as(UserMapper.getFieldName(USERS.CREATED_AT)),
                 USERS.MODIFIED_AT.as(UserMapper.getFieldName(USERS.MODIFIED_AT)));
     }
@@ -78,6 +78,13 @@ public class UserDAO extends DAO {
                 .returning(USERS.ID)
                 .fetchOptional()
                 .map(record -> record.get(USERS.ID));
+    }
+
+    public Boolean delete(Integer id) {
+        return DSL().update(USERS)
+                .set(USERS.IS_DELETED, true)
+                .where(USERS.ID.eq(id))
+                .execute() > 0;
     }
 
     public Optional<UserDTO> findById(Integer id) {

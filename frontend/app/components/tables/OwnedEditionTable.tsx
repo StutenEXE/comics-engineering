@@ -56,10 +56,10 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
     useRemoveFromCollectionMutation();
   useEffect(() => {
     if (isSuccess) {
-      toast.success("toast.removeFromCollection.success");
+      toast.success(t("toast.removeFromCollection.success"));
       refetch();
     } else if (isError) {
-      toast.success("toast.removeFromCollection.error");
+      toast.success(t("toast.error"));
     }
   }, [isSuccess, isError]);
 

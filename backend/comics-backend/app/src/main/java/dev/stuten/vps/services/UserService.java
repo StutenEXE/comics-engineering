@@ -61,6 +61,11 @@ public class UserService {
         }
 
         UserWithPasswordDTO userPwd = optUser.get();
+        
+        // Check if user has been deleted
+        if (userPwd.getIsDeleted()) {
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, "User deleted", "");
+        }
         // Check password validity
         if (!UserDAO.checkPassword(userPwd.getPassword(), dto.getPassword())) {
             ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid credentials", "");
@@ -101,7 +106,7 @@ public class UserService {
 
         // Get user in session
         Optional<UserDTO> user = dao.findById(Integer.parseInt(session.userId()));
-        if (user.isEmpty()) {
+        if (user.isEmpty() || user.get().getIsDeleted()) {
             ctx.removeCookie(SessionStore.COOKIE_SESSION_KEY);
             SessionStore.delete(sessionKey);
             ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid session", "No user found for this session");
@@ -131,5 +136,25 @@ public class UserService {
         List<UserDTO> users = dao.getUsers(from, limit);
 
         ctx.json(Map.of("users", users));
+    }
+
+    public static void delete(Context ctx) {
+        // Retreive user ID from request
+        Integer userId;
+        try {
+            userId = Integer.parseInt(ctx.queryParam("id"));
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            return; // For compiler
+        }
+
+        Boolean deleted = dao.delete(userId);
+
+        if (!deleted) {
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", "Failed to delete user");
+            return;
+        }
+
+        ctx.status(HttpStatus.OK);
     }
 }
