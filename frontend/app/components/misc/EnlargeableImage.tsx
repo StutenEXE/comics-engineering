@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ImgHTMLAttributes, MouseEvent } from "react";
 import { twMerge } from "tailwind-merge";
@@ -13,6 +13,20 @@ export function EnlargeableImage({
   ...props
 }: EnlargeableImageProps) {
   const [open, setOpen] = useState(false);
+  const [animateOpen, setAnimateOpen] = useState(false);
+
+  useEffect(() => {
+    // Reset animation on close
+    if (!open) {
+      setAnimateOpen(false);
+      return;
+    }
+
+    // Callback after animation
+    requestAnimationFrame(() => {
+      setAnimateOpen(true);
+    });
+  }, [open]);
 
   const handleClick = (event: MouseEvent<HTMLImageElement>) => {
     onClick?.(event);
@@ -40,11 +54,14 @@ export function EnlargeableImage({
             aria-modal="true"
             aria-label="Enlarged image"
             onClick={noPropagationEvt(() => setOpen(false))}
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 cursor-zoom-out"
+            className="fixed inset-0 z-[51] flex items-center justify-center bg-black/50 cursor-zoom-out"
           >
             <img
               {...props}
-              className="max-w-[100%] max-h-[100%] object-contain"
+              className={twMerge(
+                "max-w-full max-h-full object-contain transition-all duration-300 ease-out",
+                animateOpen ? "opacity-100 scale-100" : "opacity-0 scale-95",
+              )}
             />
           </div>,
           portalTarget,
