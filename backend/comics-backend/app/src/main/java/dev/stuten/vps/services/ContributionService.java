@@ -111,7 +111,7 @@ public class ContributionService {
             return;
         }
         Optional<Integer> contributionId = createContribution(contribution);
-        
+
         ContributionDTO<? extends IdDTO> createdContribution = contributionDAO.findById(contributionId.get()).get();
 
         ctx.status(HttpStatus.CREATED).json(Map.of("contribution", createdContribution));
@@ -132,12 +132,13 @@ public class ContributionService {
             return;
         }
 
-        if (contribution.getStatus() == ContributionStatusEnum.approved || contribution.getStatus() == ContributionStatusEnum.rejected) {
+        if (contribution.getStatus() == ContributionStatusEnum.approved
+                || contribution.getStatus() == ContributionStatusEnum.rejected) {
             String message = "Cannot update contribution with already accepted or rejected status";
             ErrorResponse.send(HttpStatus.METHOD_NOT_ALLOWED, "Invalid contribution update", message);
             return;
         }
-        
+
         boolean updated = contributionDAO.update(contribution);
         if (!updated) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", "Failed to update contribution");
@@ -176,7 +177,8 @@ public class ContributionService {
             String message = "Contribution already has this status : %s".formatted(previousStatus);
             ErrorResponse.send(HttpStatus.METHOD_NOT_ALLOWED, "Contribution already has this status", message);
         }
-        // If the contribution bundle is already accepted or rejected, we don't allow status change of individual contributions
+        // If the contribution bundle is already accepted or rejected, we don't allow
+        // status change of individual contributions
         if (previousStatus == ContributionStatusEnum.approved || previousStatus == ContributionStatusEnum.rejected) {
             String message = "Cannot change status of contribution with already accepted or rejected status";
             ErrorResponse.send(HttpStatus.METHOD_NOT_ALLOWED, "Invalid contribution status change", message);
@@ -213,9 +215,35 @@ public class ContributionService {
             return; // For compiler
         }
 
-        // Retreive books
+        // Retreive contributions
         List<ContributionDTO<? extends IdDTO>> contributions = contributionDAO.findBySubmitterId(submitterId);
 
         ctx.json(Map.of("contributions", contributions));
+    }
+
+    public static void getStatsBySubmitterId(Context ctx) {
+        // Retreive submitter ID from request
+        Integer submitterId;
+        try {
+            submitterId = Integer.parseInt(ctx.queryParam("id"));
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            return; // For compiler
+        }
+
+        // Retreive books
+        Map<String, Integer> stats = new HashMap<String, Integer>();
+        List<ContributionDTO<? extends IdDTO>> contributions = contributionDAO.findBySubmitterId(submitterId);
+
+        stats.put("total", contributions.size());
+        for (ContributionStatusEnum status : ContributionStatusEnum.values()) {
+            stats.put(status.getLiteral(), 0);
+        }
+        contributions.forEach(c -> {
+            Integer oldStat = stats.get(c.getStatus().getLiteral());
+            stats.put(c.getStatus().getLiteral(), oldStat + 1);
+        });
+
+        ctx.json(Map.of("stats", stats));
     }
 }
