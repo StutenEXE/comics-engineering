@@ -86,6 +86,13 @@ public class UserDAO extends DAO {
                 .where(USERS.ID.eq(id))
                 .execute() > 0;
     }
+    
+    public Boolean recycle(Integer id) {
+        return DSL().update(USERS)
+                .set(USERS.IS_DELETED, false)
+                .where(USERS.ID.eq(id))
+                .execute() > 0;
+    }
 
     public Optional<UserDTO> findById(Integer id) {
         return selectOne(USERS.ID.eq(id));

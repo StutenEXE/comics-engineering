@@ -157,4 +157,24 @@ public class UserService {
 
         ctx.status(HttpStatus.OK);
     }
+    
+    public static void recycle(Context ctx) {
+        // Retreive user ID from request
+        Integer userId;
+        try {
+            userId = Integer.parseInt(ctx.queryParam("id"));
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            return; // For compiler
+        }
+
+        Boolean deleted = dao.recycle(userId);
+
+        if (!deleted) {
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", "Failed to recycle user");
+            return;
+        }
+
+        ctx.status(HttpStatus.OK);
+    }
 }

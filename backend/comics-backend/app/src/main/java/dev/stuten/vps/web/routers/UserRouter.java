@@ -17,6 +17,7 @@ public class UserRouter implements Router {
         // Admin
         app.get(APIPathBuilder.buildAdminPath("/users/list"), UserService::getList);
         app.delete(APIPathBuilder.buildAdminPath("/users/delete"), UserService::delete);
+        app.get(APIPathBuilder.buildAdminPath("/users/recycle"), UserService::recycle);
     }
     
 }

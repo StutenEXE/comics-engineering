@@ -36,6 +36,7 @@ export default {
     "toast.addToCollection.success": "Edition ajoutée à la collection",
     "toast.removeFromCollection.success": "Edition retirée de la collection",
     "toast.delete.user.success": "Utilisateur supprimé",
+    "toast.recycle.user.success": "Utilisateur recyclé",
     // ============================
     // == Loading
     // ============================
@@ -250,6 +251,8 @@ export default {
     "user.isDeleted": "Supprimé",
     "user.action.delete": "Supprimer l'utilisateur",
     "user.action.delete.message": "Vous allez supprimer l'utilisateur %username%.",
+    "user.action.recycle": "Recycler l'utilisateur",
+    "user.action.recycle.message": "Vous allez recycler (dé-supprimer) l'utilisateur %username%.",
     // ============================
     // == COMPONENTS 
     // ============================

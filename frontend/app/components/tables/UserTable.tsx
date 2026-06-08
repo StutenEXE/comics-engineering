@@ -1,13 +1,22 @@
 import { type User } from "~/models/user";
 import { GenericTable } from "./GenericTable";
 import { createError, type Error } from "~/utils/error";
-import { MdDelete, MdModeEdit, MdRemoveRedEye } from "react-icons/md";
+import {
+  MdDelete,
+  MdModeEdit,
+  MdRecycling,
+  MdRemoveRedEye,
+} from "react-icons/md";
 import { Link } from "react-router";
 import { useConfirm } from "../modals/ConfirmModalProvider";
 import { useTranslation } from "~/i18n/i18n";
 import { useToast } from "../toast/Toast";
 import { createColumnHelper } from "@tanstack/react-table";
-import { useDeleteUserMutation, useUserListQuery } from "~/store/services/api";
+import {
+  useDeleteUserMutation,
+  useRecycleUserMutation,
+  useUserListQuery,
+} from "~/store/services/api";
 
 interface UserTableProps {
   showActions?: boolean;
@@ -28,6 +37,29 @@ export function UserTable({ showActions, className }: UserTableProps) {
   const err = createError(error);
 
   const [deleteUser] = useDeleteUserMutation();
+  const [recycleUser] = useRecycleUserMutation();
+
+  const asyncMutationTrigger = (
+    callback: () => Promise<any>,
+    title: string,
+    message: string,
+    successMsg: string,
+  ) => {
+    confirm({
+      title: title,
+      message: message,
+      onConfirm: () => {
+        callback()
+          .then(() => {
+            refetch();
+            toast.success(successMsg);
+          })
+          .catch(() => {
+            toast.success(t("toast.error"));
+          });
+      },
+    });
+  };
 
   // Define table columns
   const col = createColumnHelper<User>();
@@ -83,28 +115,38 @@ export function UserTable({ showActions, className }: UserTableProps) {
               size={20}
               className="cursor-pointer hover:text-blue-500"
             />
-            <MdDelete
-              size={20}
-              className="cursor-pointer hover:text-red-500"
-              onClick={() =>
-                confirm({
-                  title: t("user.action.delete"),
-                  message: `${t("user.action.delete.message", {
-                    parameters: { username: row.original.username },
-                  })}`,
-                  onConfirm: () => {
-                    deleteUser({ id: row.original.id })
-                      .then(() => {
-                        refetch();
-                        toast.success(t("toast.delete.user.success"));
-                      })
-                      .catch(() => {
-                        toast.success(t("toast.error"));
-                      });
-                  },
-                })
-              }
-            />
+            {row.original.isDeleted && (
+              <MdRecycling
+                size={20}
+                className="cursor-pointer hover:text-amber-500"
+                onClick={() =>
+                  asyncMutationTrigger(
+                    async () => await recycleUser({ id: row.original.id }),
+                    t("user.action.recycle"),
+                    t("user.action.recycle.message", {
+                      parameters: { username: row.original.username },
+                    }),
+                    t("toast.recycle.user.success"),
+                  )
+                }
+              />
+            )}
+            {!row.original.isDeleted && (
+              <MdDelete
+                size={20}
+                className="cursor-pointer hover:text-red-500"
+                onClick={() =>
+                  asyncMutationTrigger(
+                    async () => await deleteUser({ id: row.original.id }),
+                    t("user.action.delete"),
+                    t("user.action.delete.message", {
+                      parameters: { username: row.original.username },
+                    }),
+                    t("toast.delete.user.success"),
+                  )
+                }
+              />
+            )}
           </div>
         );
       },
