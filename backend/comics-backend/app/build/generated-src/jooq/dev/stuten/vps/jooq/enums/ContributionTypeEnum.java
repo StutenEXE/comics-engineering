@@ -27,9 +27,7 @@ public enum ContributionTypeEnum implements EnumType {
 
     issueserie("issueserie"),
 
-    publisher("publisher"),
-
-    link_book_issue("link_book_issue");
+    publisher("publisher");
 
     private final String literal;
 

@@ -43,7 +43,6 @@ public class ContributionService {
             case ContributionTypeEnum.issue -> IssueService.getDAO();
             case ContributionTypeEnum.issueserie -> IssueSerieService.getDAO();
             case ContributionTypeEnum.publisher -> PublisherService.getDAO();
-            case ContributionTypeEnum.link_book_issue -> BookService.getDAO(); // TODO CHANGE
         };
     }
 
