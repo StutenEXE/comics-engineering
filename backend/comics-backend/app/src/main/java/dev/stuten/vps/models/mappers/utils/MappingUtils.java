@@ -70,8 +70,6 @@ public final class MappingUtils {
             return null;
         try {
             return new ObjectMapper().readValue(jsonb.data(), IDDTO_TYPE_REF.get(type));
-            // return new ObjectMapper().readValue(jsonb.data(), new TypeReference<IdDTO>()
-            // {}); // TODO CHECK IF GOOD
         } catch (Exception e) {
             return null;
         }
