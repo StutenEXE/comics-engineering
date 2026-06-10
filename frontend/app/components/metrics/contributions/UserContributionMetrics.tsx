@@ -10,10 +10,16 @@ export function UserContributionMetrics({
   userId,
   className,
 }: UserContributionMetricsProps) {
-  const { data } = useContributionStatsBySubmitterIdQuery(
+  const { data, isLoading } = useContributionStatsBySubmitterIdQuery(
     { id: userId || 0 },
     { skip: !userId },
   );
   const stats = data?.stats;
-  return <ContributionMetrics metrics={stats} className={className} />;
+  return (
+    <ContributionMetrics
+      metrics={stats}
+      isLoading={isLoading}
+      className={className}
+    />
+  );
 }
