@@ -86,8 +86,10 @@ public class ContributionDAO extends DAO {
      * 
      * To modify status, use updateStatus
      * 
-     * @param dto The contribution data to update. Must contain the ID of the contribution to update.
-     * @return True if the contribution was updated, false otherwise (not found or no change)
+     * @param dto The contribution data to update. Must contain the ID of the
+     *            contribution to update.
+     * @return True if the contribution was updated, false otherwise (not found or
+     *         no change)
      */
     public Boolean update(SimpleContributionDTO<? extends IdDTO> dto) {
         return DSL().update(CONTRIBUTIONS)
@@ -121,5 +123,9 @@ public class ContributionDAO extends DAO {
 
     public List<ContributionDTO<? extends IdDTO>> findBySubmitterId(Integer submitterId) {
         return super.selectMany(CONTRIBUTION_BUNDLES.SUBMITTER_ID.eq(submitterId));
+    }
+
+    public List<ContributionDTO<? extends IdDTO>> findByStatus(ContributionStatusEnum status) {
+        return super.selectMany(CONTRIBUTIONS.STATUS.eq(status));
     }
 }

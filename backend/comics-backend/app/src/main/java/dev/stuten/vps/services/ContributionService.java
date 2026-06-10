@@ -17,6 +17,8 @@ import dev.stuten.vps.models.daos.ContributionDAO;
 import dev.stuten.vps.models.dtos.full.ContributionBundleDTO;
 import dev.stuten.vps.models.dtos.full.ContributionDTO;
 import dev.stuten.vps.models.dtos.request.UpdateContributionStatusDTO;
+import dev.stuten.vps.models.dtos.response.ContributionsStatsDTO;
+import dev.stuten.vps.models.dtos.response.ContributionsStatsDTO.ContributionStatusStatsDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionDTO;
 import dev.stuten.vps.models.dtos.template.IdDTO;
 import dev.stuten.vps.web.ErrorResponse;
@@ -205,6 +207,36 @@ public class ContributionService {
         ctx.status(HttpStatus.OK);
     }
 
+    public static void getStats(Context ctx) {
+        // Counts the total number of contributions
+        Integer total = 0;
+        // For each status of contribution, get all stats
+        Map<ContributionStatusEnum, ContributionStatusStatsDTO> statusStats = new HashMap<ContributionStatusEnum, ContributionStatusStatsDTO>();
+
+        // For each possible status, calculate stats
+        for (ContributionStatusEnum status : ContributionStatusEnum.values()) {
+            // For each possible contribution type, calculate stats
+            Map<ContributionTypeEnum, Integer> typeStats = new HashMap<ContributionTypeEnum, Integer>();
+            // Init for all types
+            for (ContributionTypeEnum type : ContributionTypeEnum.values()) {
+                typeStats.put(type, 0);
+            }
+            // Group count of contributions by type
+            List<ContributionDTO<? extends IdDTO>> contributions = contributionDAO.findByStatus(status);
+            contributions.forEach(c -> {
+                Integer currentCount = typeStats.get(c.getEntityType());
+                typeStats.put(c.getEntityType(), currentCount + 1);
+            });
+            // Calculate the total number of contributions for this status
+            Integer totalStatus = contributions.size();
+            statusStats.put(status, new ContributionStatusStatsDTO(totalStatus, typeStats));
+            // Add number of contrib for this status to the total count
+            total += totalStatus;
+        }
+
+        ctx.json(Map.of("stats", new ContributionsStatsDTO(total, statusStats)));
+    }
+
     public static void getBySubmitterId(Context ctx) {
         // Retreive submitter ID from request
         Integer submitterId;
@@ -231,19 +263,37 @@ public class ContributionService {
             return; // For compiler
         }
 
-        // Retreive books
-        Map<String, Integer> stats = new HashMap<String, Integer>();
+        // Counts the total number of contributions
+        Integer total = 0;
+        // For each status of contribution, get all stats
+        Map<ContributionStatusEnum, ContributionStatusStatsDTO> statusStats = new HashMap<ContributionStatusEnum, ContributionStatusStatsDTO>();
+        // Get all contributions
         List<ContributionDTO<? extends IdDTO>> contributions = contributionDAO.findBySubmitterId(submitterId);
 
-        stats.put("total", contributions.size());
+        // For each possible status, calculate stats
         for (ContributionStatusEnum status : ContributionStatusEnum.values()) {
-            stats.put(status.getLiteral(), 0);
+            // Filter only the relevant contributions
+            List<ContributionDTO<? extends IdDTO>> statusContributions = contributions.stream()
+                    .filter(c -> c.getStatus() == status)
+                    .toList();
+            // For each possible contribution type, calculate stats
+            Map<ContributionTypeEnum, Integer> typeStats = new HashMap<ContributionTypeEnum, Integer>();
+            // Init for all types
+            for (ContributionTypeEnum type : ContributionTypeEnum.values()) {
+                typeStats.put(type, 0);
+            }
+            // Group count of contributions by type
+            statusContributions.forEach(c -> {
+                Integer currentCount = typeStats.get(c.getEntityType());
+                typeStats.put(c.getEntityType(), currentCount + 1);
+            });
+            // Calculate the total number of contributions for this status
+            Integer totalStatus = statusContributions.size();
+            statusStats.put(status, new ContributionStatusStatsDTO(totalStatus, typeStats));
+            // Add number of contrib for this status to the total count
+            total += totalStatus;
         }
-        contributions.forEach(c -> {
-            Integer oldStat = stats.get(c.getStatus().getLiteral());
-            stats.put(c.getStatus().getLiteral(), oldStat + 1);
-        });
 
-        ctx.json(Map.of("stats", stats));
+        ctx.json(Map.of("stats", new ContributionsStatsDTO(total, statusStats)));
     }
 }

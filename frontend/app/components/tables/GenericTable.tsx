@@ -281,9 +281,9 @@ export function GenericTable<T extends Record<string, any>>({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className="w-fit max-w-50 text-sm text-white/60 group-hover:text-white/80 transition-colors py-3 truncate"
+                      className="w-fit max-w-50 text-sm text-white/60 group-hover:text-white/80 transition-colors py-3"
                     >
-                      <div className="w-full flex justify-center">
+                      <div className="w-full flex justify-center text-wrap">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),

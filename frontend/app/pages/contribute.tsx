@@ -8,12 +8,14 @@ import { useTranslation } from "~/i18n/i18n";
 import type { ContributionBundle } from "~/models/contributionBundle";
 import { useAppSelector } from "~/store/hooks";
 import {
-  useContributionStatsBySubmitterIdQuery,
+  useContributionStatsQuery,
   useSubmitContributionBundleMutation,
 } from "~/store/services/api";
 import type { Route } from "../+types/root";
-import { ContributionStatusEnum } from "~/models/contribution";
-import { createError } from "~/utils/error";
+import {
+  AllContributionMetrics,
+  type AllContributionMetricsHandle,
+} from "~/components/metrics/contributions/AllContributionMetrics";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -42,11 +44,7 @@ export default function ContributePage() {
     }
   }, [isSuccess]);
 
-  const { data, isLoading, refetch } = useContributionStatsBySubmitterIdQuery(
-    user ? { id: user.id } : { id: 0 },
-    { skip: !user }, // Doesn't execute if user is undefined
-  );
-  const stats = data?.stats;
+  const statsRef = useRef<AllContributionMetricsHandle>(null);
 
   // Handles contribution modal state
   const [isContributionModalOpen, setisContributionModalOpen] = useState(false);
@@ -88,7 +86,7 @@ export default function ContributePage() {
     if (isSuccess) {
       toast.success(t("contribute.success"));
       closeContributionModal();
-      refetch();
+      statsRef.current?.refetch();
     }
   }, [isSuccess]);
 
@@ -118,48 +116,10 @@ export default function ContributePage() {
         </div>
 
         {/* Statistics */}
-        <div className="flex flex-col gap-6">
-          <h2 className="text-2xl font-semibold text-gray-200">
-            {t("contribute.stats")}
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
-              <p className="text-3xl font-bold text-blue-400">
-                {stats?.total}
-                {/* X */}
-              </p>
-              <p className="text-gray-400">{t("contribute.stats.total")}</p>
-            </div>
-            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
-              <p className="text-3xl font-bold text-green-400">
-                {stats?.approved}
-                {/* Y */}
-              </p>
-              <p className="text-gray-400">{t("contribute.stats.approved")}</p>
-            </div>
-            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
-              <p className="text-3xl font-bold text-yellow-400">
-                {stats?.pending}
-                {/* Z */}
-              </p>
-              <p className="text-gray-400">{t("contribute.stats.pending")}</p>
-            </div>
-            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
-              <p className="text-3xl font-bold text-purple-400">
-                {stats?.needs_revision}
-              </p>
-              <p className="text-gray-400">
-                {t("contribute.stats.needsRevision")}
-              </p>
-            </div>
-            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
-              <p className="text-3xl font-bold text-red-400">
-                {stats?.rejected}
-              </p>
-              <p className="text-gray-400">{t("contribute.stats.rejected")}</p>
-            </div>
-          </div>
-        </div>
+        <h2 className="text-2xl font-semibold text-gray-200">
+          {t("contribute.stats")}
+        </h2>
+        <AllContributionMetrics ref={statsRef} />
 
         <ContributionBundleModal
           action="create"
