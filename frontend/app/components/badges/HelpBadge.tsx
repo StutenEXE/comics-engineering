@@ -1,5 +1,6 @@
-import Tooltip from "@mui/material/Tooltip";
 import { GoQuestion } from "react-icons/go";
+import { Tooltip } from "../misc/Tooltip";
+// import { Tooltip, TooltipContent, TooltipTrigger } from "../shadcn/ui/tooltip";
 
 interface HelpBadgeTooltipProps {
   size?: number;
@@ -13,8 +14,16 @@ export function HelpBadgeTooltip({
   placement = "top",
 }: HelpBadgeTooltipProps) {
   return (
-    <Tooltip id="tooltip" title={tooltipContent} placement={placement} arrow>
-      <GoQuestion size={size} className="inline-block text-xs text-white/40" />
-    </Tooltip>
+    <Tooltip
+      delay={100}
+      side={placement}
+      trigger={
+        <GoQuestion
+          size={size}
+          className="inline-block text-xs text-white/40"
+        />
+      }
+      content={<p>{tooltipContent}</p>}
+    />
   );
 }

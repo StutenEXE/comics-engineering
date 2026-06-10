@@ -2,10 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { GenericButton } from "~/components/buttons/GenericButton";
 import { ContributionBundleModal } from "~/components/modals/contribution/ContributionBundleModal";
 import { LoggedProtectedRoute } from "~/components/security/LoggedProtectedRoute";
-import {
-  ContributionTable,
-  type ContributionTableHandle,
-} from "~/components/tables/ContributionTable";
 import { GenericPageTemplate } from "~/components/templates/GenericPageTemplate";
 import { useToast } from "~/components/toast/Toast";
 import { useTranslation } from "~/i18n/i18n";
@@ -165,12 +161,6 @@ export default function ContributePage() {
           </div>
         </div>
 
-        {/* Previous contributions table */}
-        <div className="flex flex-col gap-6 pb-8">
-          <h2 className="text-2xl font-semibold text-gray-200">
-            {t("contribute.history")}
-          </h2>
-        </div>
         <ContributionBundleModal
           action="create"
           isOpen={isContributionModalOpen}
