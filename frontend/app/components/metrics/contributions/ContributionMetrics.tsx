@@ -71,7 +71,7 @@ function MetricCard({ val, label, valClassName, isLoading }: MetricCardProps) {
   return (
     <div
       className={twMerge(
-        "bg-gray-800 p-6 rounded-lg border border-gray-700 text-center",
+        "bg-neutral-900 p-6 rounded-lg border border-neutral-800 text-center",
         isLoading && "animate-pulse",
       )}
     >
