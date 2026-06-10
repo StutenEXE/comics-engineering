@@ -13,6 +13,7 @@ import { Provider } from "react-redux";
 import { store } from "./store/store";
 import App from "./app";
 import { ConfirmModalProvider } from "./components/modals/ConfirmModalProvider";
+import { TooltipProvider } from "./components/shadcn/ui/tooltip";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -50,7 +51,9 @@ export default function Root() {
     <Provider store={store}>
       <ConfirmModalProvider>
         <ToastProvider>
-          <App />
+          <TooltipProvider>
+            <App />
+          </TooltipProvider>
         </ToastProvider>
       </ConfirmModalProvider>
     </Provider>

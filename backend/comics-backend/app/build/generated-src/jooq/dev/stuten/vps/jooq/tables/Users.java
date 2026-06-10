@@ -91,7 +91,7 @@ public class Users extends TableImpl<UsersRecord> {
     /**
      * The column <code>public.users.is_deleted</code>.
      */
-    public final TableField<UsersRecord, Boolean> IS_DELETED = createField(DSL.name("is_deleted"), SQLDataType.BOOLEAN, this, "");
+    public final TableField<UsersRecord, Boolean> IS_DELETED = createField(DSL.name("is_deleted"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
 
     private Users(Name alias, Table<UsersRecord> aliased) {
         this(alias, aliased, null);

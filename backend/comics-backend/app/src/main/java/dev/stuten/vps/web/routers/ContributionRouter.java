@@ -10,8 +10,10 @@ public class ContributionRouter implements Router {
     @Override
     public void register(Javalin app) {
         // Public endpoints
+        app.get(APIPathBuilder.buildPublicPath("/contributions/stats"), ContributionService::getStats);
         app.get(APIPathBuilder.buildPublicPath("/contributions/submitter"), ContributionService::getBySubmitterId);
-        app.get(APIPathBuilder.buildPublicPath("/contributions/submitter/stats"), ContributionService::getStatsBySubmitterId);
+        app.get(APIPathBuilder.buildPublicPath("/contributions/submitter/stats"),
+                ContributionService::getStatsBySubmitterId);
 
         // Private endpoints
         app.post(APIPathBuilder.buildPrivatePath("/contribute"), ContributionBundleService::submit);
