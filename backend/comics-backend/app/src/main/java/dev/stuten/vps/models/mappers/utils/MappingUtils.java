@@ -63,10 +63,7 @@ public final class MappingUtils {
             Map.entry(ContributionTypeEnum.issueserie, new TypeReference<IssueSerieDTO>() {
             }),
             Map.entry(ContributionTypeEnum.publisher, new TypeReference<PublisherDTO>() {
-            }),
-            Map.entry(ContributionTypeEnum.link_book_issue, new TypeReference<BookDTO>() {
-            }) // TODO REMOVE
-    );
+            }));
 
     public static IdDTO jsonbToIdDTO(JSONB jsonb, ContributionTypeEnum type) {
         if (jsonb == null)
