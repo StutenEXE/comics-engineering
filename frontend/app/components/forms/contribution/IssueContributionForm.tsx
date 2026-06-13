@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm, type FieldValues } from "react-hook-form";
 import z from "zod";
 import { useTranslation } from "~/i18n/i18n";
@@ -11,12 +11,16 @@ import {
 import type { ContributionIssue, Issue } from "~/models/issue";
 import type { SimpleIssueSerie } from "~/models/issue-serie";
 import { useLazySearchIssueSeriesByNameQuery } from "~/store/services/api";
+import { useLazyScrapeUrlQuery } from "~/store/services/scrapers";
 import { toHtmlInputString, toYYYYmmDD, zDateRequired } from "~/utils/date";
 import { noPropagationEvt } from "~/utils/events";
+import { isntEmpty } from "~/utils/strings";
 import { DateRhfInput } from "../fields/DateRhfInput";
 import { SearchSelectInput } from "../fields/SearchSelectInput";
 import { TextRhfInput } from "../fields/TextRhfInput";
+import { TextRhfInputWithAction } from "../fields/TextRhfInputWithAction";
 import { GenericForm } from "../GenericForm";
+import { useToast } from "~/components/toast/Toast";
 
 interface IssueFormProps {
   issue?: Issue;
@@ -34,9 +38,11 @@ export function IssueContributionForm({
   onCancel,
 }: IssueFormProps) {
   const { t } = useTranslation();
+  const toast = useToast();
 
   // Validation schema
   const schema = z.object({
+    fandomUrl : z.url().optional(),
     name: z.string().min(1, t("generic.required", { capitalize: true })),
     number: z.coerce
       .number()
@@ -51,15 +57,23 @@ export function IssueContributionForm({
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors, isValid },
   } = useForm<FormData>({
     resolver: zodResolver(schema) as any,
     defaultValues: {
+      fandomUrl: issue?.fandomUrl,
       name: issue?.name,
       number: issue?.number,
-      // dates set manually
+      parutionDate: issue?.parutionDate,
+      coverDate: issue?.coverDate
     },
   });
+
+  // Watchers are here to format the date properly in the input
+  const watchedParutionDate = watch("parutionDate")
+  const watchedCoverDate = watch("coverDate")
 
   const triggerSubmission = (data: FieldValues) => {
     const newIssue: ContributionIssue = {
@@ -68,6 +82,7 @@ export function IssueContributionForm({
       number: data.number,
       coverDate: toYYYYmmDD(data.coverDate),
       parutionDate: toYYYYmmDD(data.parutionDate),
+      fandomUrl: data.fandomUrl,
       issueSerie: issueSerieLocalRef ?? {
         id: selectedIssueSerie?.id!,
         name: selectedIssueSerie?.name!,
@@ -96,6 +111,61 @@ export function IssueContributionForm({
     SimpleIssueSerie | undefined
   >(issue?.issueSerie ?? undefined);
 
+  
+  // Scraper used for autofill
+  const [scrape, { isLoading: scraperLoading }] = useLazyScrapeUrlQuery();
+  const triggerScraping = async (url: string) => {
+    if (errors.fandomUrl?.message) return;
+    try {
+      const res = await scrape({ url });
+      if (res.error) throw new Error()
+      
+      // Wrong data source
+      if (res?.data?.resultType !== "issue") {
+        toast.info(t("form.autofill.wrongSource"))
+        return
+      };
+      const scraped = res.data.result;
+
+      // Fill form fields from scraped data
+      if (isntEmpty(scraped.name)) {
+        setValue("name", scraped.name, {
+          shouldTouch: true,
+          shouldValidate: true
+        });
+      }      
+      if (scraped.number !== undefined) {
+        setValue("number", scraped.number, {
+          shouldTouch: true,
+          shouldValidate: true
+        });
+      }
+      if (isntEmpty(scraped.parutionDate)) 
+        setValue("parutionDate", new Date(scraped.parutionDate), {
+          shouldTouch: true,
+          shouldValidate: true
+        });
+      if (isntEmpty(scraped.coverDate)) 
+        setValue("coverDate", new Date(scraped.coverDate), {
+          shouldTouch: true,
+          shouldValidate: true
+        });
+    } catch (e) {
+      toast.error(t("form.autofill.sourceNotFound"))
+    }
+  };
+
+  // Ref ensures we only scrape once
+  const scrapedOnceRef = useRef(false);
+  useEffect(() => {
+    if (scrapedOnceRef.current) return;
+    // If issue has no real id and a fandom url, scrape fandom once when component mounts or when fandomUrl changes
+    if ((!issue?.id || issue?.id < 0) && isntEmpty(issue?.fandomUrl)) {
+      triggerScraping(issue.fandomUrl);
+      scrapedOnceRef.current = true;
+    }
+  }, [issue?.id, issue?.fandomUrl]);
+
   return (
     <GenericForm
       title={
@@ -109,6 +179,16 @@ export function IssueContributionForm({
       }
       onSubmit={handleSubmit(triggerSubmission)}
     >
+      {/* Fandom Url field */}
+      <TextRhfInputWithAction
+        inputLabel={t("issue.fandomUrl")}
+        registration={register("fandomUrl")}
+        buttonLabel={t("form.autofill")}
+        buttonOnClick={(val) => triggerScraping(val)}
+        isLoading={scraperLoading}
+        error={errors.fandomUrl}
+      />
+
       {/* Name field */}
       <TextRhfInput
         label={t("issue.name")}
@@ -151,7 +231,7 @@ export function IssueContributionForm({
             valueAsDate: true,
           })}
           inputProps={{
-            defaultValue: toHtmlInputString(issue?.parutionDate),
+            defaultValue: toHtmlInputString(watchedParutionDate),
           }}
           error={errors.parutionDate}
           tooltip={t("issue.parutionDateExplanation")}
@@ -163,7 +243,7 @@ export function IssueContributionForm({
             valueAsDate: true,
           })}
           inputProps={{
-            defaultValue: toHtmlInputString(issue?.coverDate),
+            defaultValue: toHtmlInputString(watchedCoverDate),
           }}
           error={errors.coverDate}
           tooltip={t("issue.coverDateExplanation")}

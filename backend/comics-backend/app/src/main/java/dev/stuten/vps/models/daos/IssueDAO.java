@@ -46,6 +46,7 @@ public class IssueDAO extends ContributableDAO<IssueDTO> {
                                 ISSUES.NUMBER.as(IssueMapper.getFieldName(ISSUES.NUMBER)),
                                 ISSUES.COVER_DATE.as(IssueMapper.getFieldName(ISSUES.COVER_DATE)),
                                 ISSUES.PARUTION_DATE.as(IssueMapper.getFieldName(ISSUES.PARUTION_DATE)),
+                                ISSUES.FANDOM_URL.as(IssueMapper.getFieldName(ISSUES.FANDOM_URL)),
                                 ISSUES.SERIES_ID.as(IssueMapper.getFieldName(ISSUES.SERIES_ID)),
                                 ISSUE_SERIES.NAME.as(IssueMapper.getFieldName(ISSUE_SERIES.NAME)),
                                 ISSUES.ADDED_BY.as(IssueMapper.getFieldName(ISSUES.ADDED_BY)),
@@ -96,6 +97,7 @@ public class IssueDAO extends ContributableDAO<IssueDTO> {
                                 .set(ISSUES.NUMBER, dto.getNumber())
                                 .set(ISSUES.COVER_DATE, dto.getCoverDate())
                                 .set(ISSUES.PARUTION_DATE, dto.getParutionDate())
+                                .set(ISSUES.FANDOM_URL, dto.getFandomUrl())
                                 .set(ISSUES.SERIES_ID, dto.getIssueSerie().getId())
                                 .set(ISSUES.ADDED_BY, dto.getAddedBy().getId())
                                 .returning(ISSUES.ID)
@@ -110,6 +112,7 @@ public class IssueDAO extends ContributableDAO<IssueDTO> {
                                 .set(ISSUES.NUMBER, dto.getNumber())
                                 .set(ISSUES.COVER_DATE, dto.getCoverDate())
                                 .set(ISSUES.PARUTION_DATE, dto.getParutionDate())
+                                .set(ISSUES.FANDOM_URL, dto.getFandomUrl())
                                 .set(ISSUES.SERIES_ID, dto.getIssueSerie().getId())
                                 .set(ISSUES.MODIFIED_AT, LocalDateTime.now())
                                 .where(ISSUES.ID.eq(dto.getId()))

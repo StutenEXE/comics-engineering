@@ -1,3 +1,4 @@
+import { createColumnHelper } from "@tanstack/react-table";
 import { forwardRef, useEffect, useImperativeHandle } from "react";
 import { useTranslation } from "~/i18n/i18n";
 import {
@@ -7,12 +8,11 @@ import {
   getContributionName,
   type Contribution,
 } from "~/models/contribution";
-import { createError, type Error } from "~/utils/error";
-import { GenericTable, type ColumnDef } from "./GenericTable";
-import { ContributionStatusBadge } from "../badges/ContributionStatusBadge";
-import { createColumnHelper } from "@tanstack/react-table";
-import { useContributionBySubmitterIdQuery } from "~/store/services/api";
 import { useAppSelector } from "~/store/hooks";
+import { useContributionBySubmitterIdQuery } from "~/store/services/api";
+import { createError } from "~/utils/error";
+import { ContributionStatusBadge } from "../badges/ContributionStatusBadge";
+import { GenericTable } from "./GenericTable";
 
 export interface ContributionTableHandle {
   refetch: () => void;
@@ -124,9 +124,9 @@ export const ContributionTable = forwardRef<
       list={
         contributions
           ? [...contributions]?.sort(
-              (c1, c2) =>
-                c2.bundle.createdAt.getTime() - c1.bundle.createdAt.getTime(),
-            )
+            (c1, c2) =>
+              c2.bundle.createdAt.getTime() - c1.bundle.createdAt.getTime(),
+          )
           : []
       }
       columns={columns}

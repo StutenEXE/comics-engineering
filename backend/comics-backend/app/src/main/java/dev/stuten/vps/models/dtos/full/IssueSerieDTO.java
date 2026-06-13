@@ -47,6 +47,9 @@ public class IssueSerieDTO extends ModifiedAtDTO {
         @JsonDeserialize(using = LocalDateDeserializer.class)
         private LocalDate endDate;
 
+        @JsonProperty("fandomUrl")
+        private String fandomUrl;
+
         @JsonProperty("issues")
         private List<SimpleIssueDTO> issues;
         

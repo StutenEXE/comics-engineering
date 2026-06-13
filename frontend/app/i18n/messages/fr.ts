@@ -161,6 +161,8 @@ export default {
   "cbundle.form.addIssue": "Issue",
   "cbundle.form.addIssueSerie": "Série d'issue",
   "cbundle.form.newContributions": "Nouvelles contributions",
+  "cbundle.form.remove.title": "Retirer la contribution",
+  "cbundle.form.remove.message": "Voulez-vous retirer cette contribution ?\nLes informations renseignées seront perdues.",
   "cbundle.action.seeContributions": "Voir les contributions",
   "cbundle.toast.updateSuccess": "Lot de contributions mis à jour avec succès",
   "cbundle.toast.updateError":
@@ -172,7 +174,7 @@ export default {
     "Êtes-vous sûr de vouloir annuler cette soumission ?\nToutes les données seront perdues.",
   "cbundle.status.select": "Choisir un statut",
   // Edition
-  editions: "Editions",
+  "editions": "Editions",
   "edition.nonefound": "Aucune édition trouvée",
   "edition.book": "Livre",
   "edition.ean": "EAN",
@@ -192,7 +194,6 @@ export default {
   "edition.addToCollection": "Ajouter à la collection",
   "edition.form.title.create": "Créer une édition",
   "edition.form.title.modify": "Modifier une édition",
-  "edition.form.autofill": "Pré-remplir",
   "edition.form.create": "Créer l'édition",
   "edition.form.modify": "Modifier l'édition",
   "edition.form.book.required": "Livre requis",
@@ -207,6 +208,7 @@ export default {
   "issueserie.startDate": "Date de début",
   "issueserie.endDate": "Date de fin",
   "issueserie.description": "Description",
+  "issueserie.fandomUrl": "Lien vers la page du fandom",
   "issueserie.issues": "Issues",
   "issueserie.form.title.create": "Créer une série d'issues",
   "issueserie.form.title.modify": "Modifier une série d'issues",
@@ -225,6 +227,7 @@ export default {
   "issue.coverDate": "Date de couverture",
   "issue.coverDateExplanation":
     "Date écrite sur la couverture de l'issue, en général deux mois après la date de parution (tradition)",
+  "issue.fandomUrl": "Lien vers la page du fandom",
   "issue.form.title.create": "Créer une issue",
   "issue.form.title.modify": "Modifier une issue",
   "issue.form.localRefPresent": "Série d'issues créée localement",
@@ -293,6 +296,11 @@ export default {
   // ============================
   // == COMPONENTS
   // ============================
+  // Forms
+  "form.autofill": "Pré-remplir",
+  "form.autofill.sourceNotFound": "Donnée introuvables",
+  "form.autofill.wrongSource": "Source non compatible avec l'objet",
+  "form.autofill.sourceNotYetImpl": "Source non reconnue",
   // Header
   "header.home": "Accueil",
   "header.search": "Rechercher",

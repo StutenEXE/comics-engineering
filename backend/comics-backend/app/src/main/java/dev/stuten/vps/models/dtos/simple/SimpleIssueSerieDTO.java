@@ -44,4 +44,7 @@ public class SimpleIssueSerieDTO extends IdDTO {
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate endDate;
+
+    @JsonProperty("fandomUrl")
+    private String fandomUrl;
 }

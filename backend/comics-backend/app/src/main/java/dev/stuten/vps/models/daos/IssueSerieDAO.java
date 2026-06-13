@@ -44,6 +44,7 @@ public class IssueSerieDAO extends ContributableDAO<IssueSerieDTO> {
                 ISSUE_SERIES.DESC.as(IssueSerieMapper.getFieldName(ISSUE_SERIES.DESC)),
                 ISSUE_SERIES.START_DATE.as(IssueSerieMapper.getFieldName(ISSUE_SERIES.START_DATE)),
                 ISSUE_SERIES.END_DATE.as(IssueSerieMapper.getFieldName(ISSUE_SERIES.END_DATE)),
+                ISSUE_SERIES.FANDOM_URL.as(IssueSerieMapper.getFieldName(ISSUE_SERIES.FANDOM_URL)),
                 ISSUE_SERIES.ADDED_BY.as(IssueSerieMapper.getFieldName(ISSUE_SERIES.ADDED_BY)),
                 ISSUE_SERIES.CREATED_AT.as(IssueSerieMapper.getFieldName(ISSUE_SERIES.CREATED_AT)),
                 ISSUE_SERIES.MODIFIED_AT.as(IssueSerieMapper.getFieldName(ISSUE_SERIES.MODIFIED_AT)));
@@ -89,6 +90,7 @@ public class IssueSerieDAO extends ContributableDAO<IssueSerieDTO> {
                 .set(ISSUE_SERIES.DESC, dto.getDesc())
                 .set(ISSUE_SERIES.START_DATE, dto.getStartDate())
                 .set(ISSUE_SERIES.END_DATE, dto.getEndDate())
+                .set(ISSUE_SERIES.FANDOM_URL, dto.getFandomUrl())
                 .set(ISSUE_SERIES.ADDED_BY, dto.getAddedBy().getId())
                 .returning(ISSUE_SERIES.ID)
                 .fetchOptional()
@@ -102,6 +104,7 @@ public class IssueSerieDAO extends ContributableDAO<IssueSerieDTO> {
                 .set(ISSUE_SERIES.DESC, dto.getDesc())
                 .set(ISSUE_SERIES.START_DATE, dto.getStartDate())
                 .set(ISSUE_SERIES.END_DATE, dto.getEndDate())
+                .set(ISSUE_SERIES.FANDOM_URL, dto.getFandomUrl())
                 .set(ISSUE_SERIES.MODIFIED_AT, LocalDateTime.now())
                 .where(ISSUE_SERIES.ID.eq(dto.getId()))
                 .execute() > 0;

@@ -26,6 +26,7 @@ import { SearchSelectInput } from "../fields/SearchSelectInput";
 import { SelectRhfInput } from "../fields/SelectRhfInput";
 import { TextRhfInput } from "../fields/TextRhfInput";
 import { GenericForm } from "../GenericForm";
+import { TextRhfInputWithAction } from "../fields/TextRhfInputWithAction";
 
 interface EditionFormProps {
   edition?: Edition;
@@ -195,23 +196,22 @@ export function EditionContributionForm({
       />
 
       {/* ISBN */}
-      <div className="flex items-end gap-3">
-        <TextRhfInput
-          label={t("edition.isbn")}
-          registration={register("isbn", {
-            onChange: (e) => {
-              const raw = e.target.value.replace(/\D/g, ""); // Replace anything that is not a digit
-              setIsbnDisplay(raw);
-            },
-          })}
-          inputProps={{
-            value: isbnDisplay,
-            inputMode: "numeric",
-          }}
-          error={errors.isbn}
-        />
-        <GenericButton disabled>{t("edition.form.autofill")}</GenericButton>
-      </div>
+      <TextRhfInputWithAction
+        inputLabel={t("edition.isbn")}
+        registration={register("isbn", {
+          onChange: (e) => {
+            const raw = e.target.value.replace(/\D/g, ""); // Replace anything that is not a digit
+            setIsbnDisplay(raw);
+          },
+        })}
+        inputProps={{
+          value: isbnDisplay,
+          inputMode: "numeric",
+        }}
+        buttonLabel={t("form.autofill")}
+        buttonOnClick={(v) => {console.log(v)}}
+        error={errors.isbn}
+      />
 
       <div className="flex items-start gap-3">
         {/* EAN */}

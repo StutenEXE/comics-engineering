@@ -8,11 +8,12 @@ export interface Issue {
     number: number,
     coverDate: Date,
     parutionDate: Date,
-    issueSerie: SimpleIssueSerie | null,
+    fandomUrl?: string,
+    issueSerie?: SimpleIssueSerie,
     books: SimpleBook[]
     createdAt: Date,
     modifiedAt: Date,
-    addedBy: SimpleUser | null
+    addedBy?: SimpleUser
 }
 
 // Utility function to transform the api data to an instance of Issue
@@ -23,11 +24,12 @@ export function parseToIssue(data: Record<string, any>): Issue {
         number: data.number,
         coverDate: new Date(data.coverDate),
         parutionDate: new Date(data.parutionDate),
-        issueSerie: data.issueSerie ? parseToSimpleIssueSerie(data.issueSerie) : null,
+        fandomUrl: data.fandomUrl,
+        issueSerie: data.issueSerie ? parseToSimpleIssueSerie(data.issueSerie) : undefined,
         books: data.books?.map((bk: Record<string, any>) => parseToSimpleBook(bk)) ?? [],
         createdAt: new Date(data.createdAt),
         modifiedAt: new Date(data.modifiedAt),
-        addedBy: data.addedBy ? parseToSimpleUser(data.addedBy) : null
+        addedBy: data.addedBy ? parseToSimpleUser(data.addedBy) : undefined
     }
 }
 
@@ -37,6 +39,7 @@ export interface SimpleIssue {
     number: number,
     coverDate: Date,
     parutionDate: Date,
+    fandomUrl?: string,
     issueSerieId?: number,
     issueSerieName?: string
 }
@@ -48,6 +51,7 @@ export function parseToSimpleIssue(data: Record<string, any>): SimpleIssue {
         number: data.number,
         coverDate: new Date(data.coverDate),
         parutionDate: new Date(data.parutionDate),
+        fandomUrl: data.fandomUrl,
         issueSerieId: data.issueSerieId,
         issueSerieName: data.issueSerieName
     }
@@ -59,6 +63,7 @@ export interface ContributionIssue {
     number: number,
     coverDate: string,
     parutionDate: string,
+    fandomUrl?: string,
     issueSerie: { id: number, name: string }
 }
 
@@ -73,6 +78,7 @@ export function issueToSimpleIssue(issue: Issue): SimpleIssue {
         number: issue.number,
         coverDate: issue.coverDate,
         parutionDate: issue.parutionDate,
+        fandomUrl: issue.fandomUrl,
         issueSerieId: issue.issueSerie ? issue.issueSerie.id : undefined,
         issueSerieName: issue.issueSerie ? issue.issueSerie.name : undefined
     }
@@ -82,6 +88,6 @@ export function buildIssueShortName(is: Issue | SimpleIssue | undefined): string
     if (!is) {
         return "";
     }
-    let shortTitle =`${isSimpleIssue(is) ? is.issueSerieName : is.issueSerie?.name}`
+    let shortTitle = `${isSimpleIssue(is) ? is.issueSerieName : is.issueSerie?.name}`
     return `${shortTitle} #${is.number}`
 }
