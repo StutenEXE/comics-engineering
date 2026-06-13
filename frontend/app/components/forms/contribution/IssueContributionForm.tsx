@@ -37,6 +37,7 @@ export function IssueContributionForm({
 
   // Validation schema
   const schema = z.object({
+    fandomUrl : z.url().optional(),
     name: z.string().min(1, t("generic.required", { capitalize: true })),
     number: z.coerce
       .number()
@@ -55,6 +56,7 @@ export function IssueContributionForm({
   } = useForm<FormData>({
     resolver: zodResolver(schema) as any,
     defaultValues: {
+      fandomUrl: issue?.fandomUrl,
       name: issue?.name,
       number: issue?.number,
       // dates set manually
@@ -68,6 +70,7 @@ export function IssueContributionForm({
       number: data.number,
       coverDate: toYYYYmmDD(data.coverDate),
       parutionDate: toYYYYmmDD(data.parutionDate),
+      fandomUrl: data.fandomUrl,
       issueSerie: issueSerieLocalRef ?? {
         id: selectedIssueSerie?.id!,
         name: selectedIssueSerie?.name!,
@@ -109,6 +112,13 @@ export function IssueContributionForm({
       }
       onSubmit={handleSubmit(triggerSubmission)}
     >
+      {/* Fandom Url field */}
+      <TextRhfInput
+        label={t("issue.fandomUrl")}
+        registration={register("fandomUrl")}
+        error={errors.fandomUrl}
+      />
+
       {/* Name field */}
       <TextRhfInput
         label={t("issue.name")}

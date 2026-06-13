@@ -172,7 +172,7 @@ export default {
     "Êtes-vous sûr de vouloir annuler cette soumission ?\nToutes les données seront perdues.",
   "cbundle.status.select": "Choisir un statut",
   // Edition
-  editions: "Editions",
+  "editions": "Editions",
   "edition.nonefound": "Aucune édition trouvée",
   "edition.book": "Livre",
   "edition.ean": "EAN",
@@ -207,6 +207,7 @@ export default {
   "issueserie.startDate": "Date de début",
   "issueserie.endDate": "Date de fin",
   "issueserie.description": "Description",
+  "issueserie.fandomUrl": "Lien vers la page du fandom",
   "issueserie.issues": "Issues",
   "issueserie.form.title.create": "Créer une série d'issues",
   "issueserie.form.title.modify": "Modifier une série d'issues",
@@ -225,6 +226,7 @@ export default {
   "issue.coverDate": "Date de couverture",
   "issue.coverDateExplanation":
     "Date écrite sur la couverture de l'issue, en général deux mois après la date de parution (tradition)",
+  "issue.fandomUrl": "Lien vers la page du fandom",
   "issue.form.title.create": "Créer une issue",
   "issue.form.title.modify": "Modifier une issue",
   "issue.form.localRefPresent": "Série d'issues créée localement",

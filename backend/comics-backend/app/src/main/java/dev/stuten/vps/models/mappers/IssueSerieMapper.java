@@ -26,6 +26,7 @@ public class IssueSerieMapper {
             ISSUE_SERIES.DESC, "issue_serie_desc",
             ISSUE_SERIES.START_DATE, "issue_serie_start_date",
             ISSUE_SERIES.END_DATE, "issue_serie_end_date",
+            ISSUE_SERIES.FANDOM_URL, "issue_serie_fandom_url",
             ISSUE_SERIES.ADDED_BY, "issue_serie_added_by",
             ISSUE_SERIES.CREATED_AT, "issue_serie_created_at",
             ISSUE_SERIES.MODIFIED_AT, "issue_serie_modified_at");
@@ -49,6 +50,7 @@ public class IssueSerieMapper {
                 .desc(r.get(getFieldName(ISSUE_SERIES.DESC), String.class))
                 .startDate(r.get(getFieldName(ISSUE_SERIES.START_DATE), LocalDate.class))
                 .endDate(r.get(getFieldName(ISSUE_SERIES.END_DATE), LocalDate.class))
+                .fandomUrl(r.get(getFieldName(ISSUE_SERIES.FANDOM_URL), String.class))
                 .issues(issues)
                 .books(books)
                 .createdAt(r.get(getFieldName(ISSUE_SERIES.CREATED_AT), LocalDateTime.class))
@@ -66,6 +68,7 @@ public class IssueSerieMapper {
                 .desc(r.get(getFieldName(ISSUE_SERIES.DESC), String.class))
                 .startDate(r.get(getFieldName(ISSUE_SERIES.START_DATE), LocalDate.class))
                 .endDate(r.get(getFieldName(ISSUE_SERIES.END_DATE), LocalDate.class))
+                .fandomUrl(r.get(getFieldName(ISSUE_SERIES.FANDOM_URL), String.class))
                 .build();
         return dto;
     }

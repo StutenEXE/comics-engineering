@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS issue_series (
 	"desc" TEXT,
 	start_date DATE NOT NULL,
 	end_date DATE,
+	fandom_url TEXT,
 	added_by INT REFERENCES users(id) ON DELETE SET NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT now(),
 	modified_at TIMESTAMP NOT NULL DEFAULT now()
@@ -31,6 +32,7 @@ CREATE TABLE IF NOT EXISTS issues (
 	number INTEGER,
 	cover_date DATE,
 	parution_date DATE,
+	fandom_url TEXT,
 	series_id INT REFERENCES issue_series(id) ON DELETE SET NULL,
 	added_by INT REFERENCES users(id) ON DELETE SET NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT now(),

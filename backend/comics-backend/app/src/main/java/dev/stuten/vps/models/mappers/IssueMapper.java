@@ -20,17 +20,18 @@ import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 import dev.stuten.vps.models.mappers.utils.MappingUtils;
 
 public class IssueMapper {
-    private static Map<TableField<? extends Record, ? extends Object>, String> fieldMapping = Map.of(
-            ISSUES.ID, "issue_id",
-            ISSUES.NAME, "issue_name",
-            ISSUES.NUMBER, "issue_number",
-            ISSUES.COVER_DATE, "issue_cover_date",
-            ISSUES.PARUTION_DATE, "issue_parution_date",
-            ISSUES.SERIES_ID, "issue_issue_series_id",
-            ISSUE_SERIES.NAME, "issue_issue_series_name",
-            ISSUES.ADDED_BY, "issue_added_by",
-            ISSUES.CREATED_AT, "issue_created_at",
-            ISSUES.MODIFIED_AT, "issue_modified_at");
+    private static Map<TableField<? extends Record, ? extends Object>, String> fieldMapping = Map.ofEntries(
+            Map.entry(ISSUES.ID, "issue_id"),
+            Map.entry(ISSUES.NAME, "issue_name"),
+            Map.entry(ISSUES.NUMBER, "issue_number"),
+            Map.entry(ISSUES.COVER_DATE, "issue_cover_date"),
+            Map.entry(ISSUES.PARUTION_DATE, "issue_parution_date"),
+            Map.entry(ISSUES.FANDOM_URL, "issue_fandom_url"),
+            Map.entry(ISSUES.SERIES_ID, "issue_issue_series_id"),
+            Map.entry(ISSUE_SERIES.NAME, "issue_issue_series_name"),
+            Map.entry(ISSUES.ADDED_BY, "issue_added_by"),
+            Map.entry(ISSUES.CREATED_AT, "issue_created_at"),
+            Map.entry(ISSUES.MODIFIED_AT, "issue_modified_at"));
 
     public static String getFieldName(TableField<? extends Record, ? extends Object> field) {
         return fieldMapping.get(field);
@@ -52,6 +53,7 @@ public class IssueMapper {
                 .number(r.get(getFieldName(ISSUES.NUMBER), Integer.class))
                 .coverDate(r.get(getFieldName(ISSUES.COVER_DATE), LocalDate.class))
                 .parutionDate(r.get(getFieldName(ISSUES.PARUTION_DATE), LocalDate.class))
+                .fandomUrl(r.get(getFieldName(ISSUES.FANDOM_URL), String.class))
                 .issueSerie(issueSerie)
                 .books(books)
                 .createdAt(r.get(getFieldName(ISSUES.CREATED_AT), LocalDateTime.class))
@@ -69,6 +71,7 @@ public class IssueMapper {
                 .number(r.get(getFieldName(ISSUES.NUMBER), Integer.class))
                 .coverDate(r.get(getFieldName(ISSUES.COVER_DATE), LocalDate.class))
                 .parutionDate(r.get(getFieldName(ISSUES.PARUTION_DATE), LocalDate.class))
+                .fandomUrl(r.get(getFieldName(ISSUES.FANDOM_URL), String.class))
                 .issueSerieId(r.get(getFieldName(ISSUES.SERIES_ID), Integer.class))
                 .issueSerieName(r.get(getFieldName(ISSUE_SERIES.NAME), String.class))
                 .build();
