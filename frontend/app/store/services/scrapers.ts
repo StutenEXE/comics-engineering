@@ -10,10 +10,10 @@ export const scraper = createApi({
   reducerPath: 'scraper',
   baseQuery: fetchBaseQuery({ baseUrl: SCRAPER_BASE_URL, credentials: 'omit' }),
   endpoints: (build) => ({
-    scrapeUrl: build.query<{ result: ScrapeResult }, { url: string }>({
+    scrapeUrl: build.query<ScrapeResult, { url: string }>({
       query: (data) => ({ url: '/scrape', method: 'POST', body: data })
     }),
-    scrapeIsbn: build.query<{ result: ScrapeResult }, { isbn: string }>({
+    scrapeIsbn: build.query<ScrapeResult, { isbn: string }>({
       query: (data) => ({ url: '/isbn', method: 'POST', body: data })
     }),
   }),

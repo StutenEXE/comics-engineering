@@ -192,7 +192,6 @@ export default {
   "edition.addToCollection": "Ajouter à la collection",
   "edition.form.title.create": "Créer une édition",
   "edition.form.title.modify": "Modifier une édition",
-  "edition.form.autofill": "Pré-remplir",
   "edition.form.create": "Créer l'édition",
   "edition.form.modify": "Modifier l'édition",
   "edition.form.book.required": "Livre requis",
@@ -295,6 +294,11 @@ export default {
   // ============================
   // == COMPONENTS
   // ============================
+  // Forms
+  "form.autofill": "Pré-remplir",
+  "form.autofill.sourceNotFound": "Donnée introuvables",
+  "form.autofill.wrongSource": "Source non compatible avec l'objet",
+  "form.autofill.sourceNotYetImpl": "Source non reconnue",
   // Header
   "header.home": "Accueil",
   "header.search": "Rechercher",

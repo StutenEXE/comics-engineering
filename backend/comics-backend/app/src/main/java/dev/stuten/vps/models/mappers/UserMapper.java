@@ -20,7 +20,7 @@ public class UserMapper {
             USERS.EMAIL, "user_email",
             USERS.PASSWORD, "user_password",
             USERS.IS_ADMIN, "user_is_admin",
-            // USERS.IS_DELETED, "user_is_deleted",
+            USERS.IS_DELETED, "user_is_deleted",
             USERS.CREATED_AT, "user_created_at",
             USERS.MODIFIED_AT, "user_modified_at");
 

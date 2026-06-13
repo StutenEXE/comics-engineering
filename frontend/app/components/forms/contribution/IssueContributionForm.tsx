@@ -11,12 +11,16 @@ import {
 import type { ContributionIssue, Issue } from "~/models/issue";
 import type { SimpleIssueSerie } from "~/models/issue-serie";
 import { useLazySearchIssueSeriesByNameQuery } from "~/store/services/api";
+import { useLazyScrapeUrlQuery } from "~/store/services/scrapers";
 import { toHtmlInputString, toYYYYmmDD, zDateRequired } from "~/utils/date";
 import { noPropagationEvt } from "~/utils/events";
+import { isntEmpty } from "~/utils/strings";
 import { DateRhfInput } from "../fields/DateRhfInput";
 import { SearchSelectInput } from "../fields/SearchSelectInput";
 import { TextRhfInput } from "../fields/TextRhfInput";
+import { TextRhfInputWithAction } from "../fields/TextRhfInputWithAction";
 import { GenericForm } from "../GenericForm";
+import { useToast } from "~/components/toast/Toast";
 
 interface IssueFormProps {
   issue?: Issue;
@@ -34,6 +38,7 @@ export function IssueContributionForm({
   onCancel,
 }: IssueFormProps) {
   const { t } = useTranslation();
+  const toast = useToast();
 
   // Validation schema
   const schema = z.object({
@@ -52,6 +57,7 @@ export function IssueContributionForm({
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isValid },
   } = useForm<FormData>({
     resolver: zodResolver(schema) as any,
@@ -62,6 +68,9 @@ export function IssueContributionForm({
       // dates set manually
     },
   });
+
+  const [defaultParutionDate, setDefaultParutionDate] = useState<string | undefined>(toHtmlInputString(issue?.parutionDate)) 
+  const [defaultCoverDate, setDefaultCoverDate] = useState<string | undefined>(toHtmlInputString(issue?.coverDate)) 
 
   const triggerSubmission = (data: FieldValues) => {
     const newIssue: ContributionIssue = {
@@ -99,6 +108,38 @@ export function IssueContributionForm({
     SimpleIssueSerie | undefined
   >(issue?.issueSerie ?? undefined);
 
+  
+  // Scraper used for autofill
+  const [scrape, { isLoading, isSuccess }] = useLazyScrapeUrlQuery();
+  const triggerScraping = async (url: string) => {
+    if (errors.fandomUrl?.message) return;
+    try {
+      const res = await scrape({ url });
+      if (res.error) throw new Error()
+      
+      // Wrong data source
+      if (res?.data?.resultType !== "issue") {
+        toast.info(t("form.autofill.wrongSource"))
+        return
+      };
+      const scraped = res.data.result;
+
+      // Fill form fields from scraped data
+      if (isntEmpty(scraped.name)) setValue("name", scraped.name);
+      if (scraped.number) setValue("number", scraped.number);
+      if (isntEmpty(scraped.parutionDate)) 
+        setDefaultParutionDate(
+          toHtmlInputString(new Date(scraped.parutionDate))
+        );
+      if (isntEmpty(scraped.coverDate)) 
+        setDefaultCoverDate(
+          toHtmlInputString(new Date(scraped.coverDate))
+        );
+    } catch (e) {
+      toast.error(t("form.autofill.sourceNotFound"))
+    }
+  };
+
   return (
     <GenericForm
       title={
@@ -113,9 +154,11 @@ export function IssueContributionForm({
       onSubmit={handleSubmit(triggerSubmission)}
     >
       {/* Fandom Url field */}
-      <TextRhfInput
-        label={t("issue.fandomUrl")}
+      <TextRhfInputWithAction
+        inputLabel={t("issue.fandomUrl")}
         registration={register("fandomUrl")}
+        buttonLabel={t("form.autofill")}
+        buttonOnClick={(val) => triggerScraping(val)}
         error={errors.fandomUrl}
       />
 
@@ -161,7 +204,7 @@ export function IssueContributionForm({
             valueAsDate: true,
           })}
           inputProps={{
-            defaultValue: toHtmlInputString(issue?.parutionDate),
+            defaultValue: defaultParutionDate,
           }}
           error={errors.parutionDate}
           tooltip={t("issue.parutionDateExplanation")}
@@ -173,7 +216,7 @@ export function IssueContributionForm({
             valueAsDate: true,
           })}
           inputProps={{
-            defaultValue: toHtmlInputString(issue?.coverDate),
+            defaultValue: defaultCoverDate,
           }}
           error={errors.coverDate}
           tooltip={t("issue.coverDateExplanation")}

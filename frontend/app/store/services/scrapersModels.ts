@@ -1,15 +1,12 @@
+type ResultType = "isbn" | "issue" | "issueSerie" | "book" | "edition"
 
 export type ScrapeResult = IsbnResult | IssueResult | IssueSerieResult | BookResult | EditionResult
 
-function getTypecheckedData(res: ScrapeResult) {
-    switch (res.resultType) {
-        case ("isbn"): return res.result
-        case ("issue"): return res.result
-        case ("issueserie"): return res.result
-        case ("book"): return res.result
-        case ("edition"): return res.result
-    }
-}
+// export function getTypecheckedData(res: ScrapeResult, type: ResultType) {
+//     if (res.resultType === type) {
+//         return res.result
+//     }
+// }
 
 interface IsbnResult {
     resultType: "isbn"
@@ -24,8 +21,8 @@ interface IssueResult {
     result: {
         name: string
         number: number
-        parutiontDate: string
-        covertDate: string
+        parutionDate: string
+        coverDate: string
     }
 }
 

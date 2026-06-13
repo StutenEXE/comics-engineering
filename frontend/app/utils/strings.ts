@@ -25,3 +25,7 @@ export function formatToIsbn(digits: string) {
     // ISBN-10: 0-306-40615-2
     // return `${digits.slice(0,1)}-${digits.slice(1,4)}-${digits.slice(4,9)}-${digits.slice(9)}`;
 }
+
+export function isntEmpty(string?: string) {
+    return string && string !== "";
+}
