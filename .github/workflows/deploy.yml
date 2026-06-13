@@ -30,7 +30,7 @@ jobs:
         working-directory: frontend
         env:
           VITE_API_HOST: ${{ secrets.API_HOST }}
-          VITE_SCRAPER_HOST: ${{ sercrets.SCRAPER_HOST }}
+          VITE_SCRAPER_HOST: ${{ secrets.SCRAPER_HOST }}
 
       # Deploy to VPS
       - name: Copy built frontend to VPS
