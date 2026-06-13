@@ -20,6 +20,10 @@ import { DateRangeRhfInput } from "../fields/DateRangeRhfInput";
 import { TextAreaRhfInput } from "../fields/TextAreaRhfInput";
 import { TextRhfInput } from "../fields/TextRhfInput";
 import { GenericForm } from "../GenericForm";
+import { TextRhfInputWithAction } from "../fields/TextRhfInputWithAction";
+import { useLazyScrapeUrlQuery } from "~/store/services/scrapers";
+import { isntEmpty } from "~/utils/strings";
+import { useToast } from "~/components/toast/Toast";
 
 interface IssueSerieFormProps {
   issueSerie?: IssueSerie;
@@ -35,6 +39,7 @@ export function IssueSerieContributionForm({
   onCancel,
 }: IssueSerieFormProps) {
   const { t } = useTranslation();
+  const toast = useToast();
 
   // Validation schema
   const schema = z
@@ -48,7 +53,7 @@ export function IssueSerieContributionForm({
     .refine(
       (data) => {
         if (!data.endDate) return true;
-        return data.endDate > data.startDate;
+        return data.endDate >= data.startDate;
       },
       { message: t("issueserie.form.endDate.afterStart"), path: ["endDate"] },
     );
@@ -57,6 +62,8 @@ export function IssueSerieContributionForm({
   // Form operations
   const {
     register,
+    setValue,
+    watch,
     handleSubmit,
     formState: { errors },
   } = useForm<FormData>({
@@ -65,9 +72,14 @@ export function IssueSerieContributionForm({
       fandomUrl: issueSerie?.fandomUrl,
       name: issueSerie?.name,
       desc: issueSerie?.desc,
-      // dates set manually
+      startDate: issueSerie?.startDate,
+      endDate: issueSerie?.endDate
     },
   });
+  
+  // Watchers are here to format the date properly in the input
+  const watchedStartDate = watch("startDate");
+  const watchedEndDate = watch("endDate");
 
   const triggerSubmission = (data: FieldValues) => {
     const newIssueSerie: ContributionIssueSerie = {
@@ -107,6 +119,58 @@ export function IssueSerieContributionForm({
     }
   };
 
+  // Scraper used for autofill
+  const [scrape, { isLoading: scraperLoading }] = useLazyScrapeUrlQuery();
+  const triggerScraping = async (url: string) => {
+    if (errors.fandomUrl?.message) return;
+    try {
+      const res = await scrape({ url });
+      if (res.error) throw new Error()
+      
+      // Wrong data source
+      if (res?.data?.resultType !== "issueserie") {
+        toast.info(t("form.autofill.wrongSource"))
+        return
+      };
+      const scraped = res.data.result;
+
+      // Fill form fields from scraped data
+      if (isntEmpty(scraped.name)) {
+        setValue("name", scraped.name, {
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+      }
+
+      if (scraped.description) {
+        setValue("desc", scraped.description, {
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+      }
+
+      if (isntEmpty(scraped.startDate)) {
+        const startDate = new Date(scraped.startDate);
+        setValue("startDate", new Date(scraped.startDate), {
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+        setEndDateDisabled(false);
+        setMinEndDate(toHtmlInputString(startDate));
+      }
+
+      if (isntEmpty(scraped.endDate)) {
+        setValue("endDate", new Date(scraped.endDate), {
+          shouldTouch: true,
+          shouldValidate: true
+        });
+      }
+    } catch (e) {
+      toast.error(t("form.autofill.sourceNotFound"))
+    }
+  };
+
+
   return (
     <GenericForm
       title={
@@ -121,9 +185,12 @@ export function IssueSerieContributionForm({
       onSubmit={handleSubmit(triggerSubmission)}
     >
       {/* Fandom Url field */}
-      <TextRhfInput
-        label={t("issueserie.fandomUrl")}
+      <TextRhfInputWithAction
+        inputLabel={t("issueserie.fandomUrl")}
         registration={register("fandomUrl")}
+        buttonLabel={t("form.autofill")}
+        buttonOnClick={(val) => triggerScraping(val)}
+        isLoading={scraperLoading}
         error={errors.fandomUrl}
       />
 
@@ -143,7 +210,7 @@ export function IssueSerieContributionForm({
             valueAsDate: true,
           }),
           inputProps: {
-            defaultValue: toHtmlInputString(issueSerie?.startDate),
+            value: toHtmlInputString(watchedStartDate)
           },
           error: errors.startDate,
         }}
@@ -155,11 +222,9 @@ export function IssueSerieContributionForm({
           inputProps: {
             disabled: endDateDisabled,
             min: minEndDate,
-            defaultValue: issueSerie?.endDate
-              ? toHtmlInputString(issueSerie?.endDate)
-              : undefined,
+            value: toHtmlInputString(watchedEndDate) 
           },
-          error: errors.startDate,
+          error: errors.endDate,
         }}
       />
 
@@ -167,6 +232,10 @@ export function IssueSerieContributionForm({
       <TextAreaRhfInput
         label={t("issueserie.description")}
         registration={register("desc")}
+        inputProps={{
+          rows: 6
+        }}
+        className="min-w-200"
         error={errors.desc}
       />
     </GenericForm>

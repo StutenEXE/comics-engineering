@@ -26,6 +26,7 @@ export function formatToIsbn(digits: string) {
     // return `${digits.slice(0,1)}-${digits.slice(1,4)}-${digits.slice(4,9)}-${digits.slice(9)}`;
 }
 
-export function isntEmpty(string?: string) {
-    return string && string !== "";
+export function isntEmpty(string?: string | null):  string is string {
+    return string !== undefined && string !== null && string !== "";
 }
+

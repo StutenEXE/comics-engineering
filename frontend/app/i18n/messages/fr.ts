@@ -161,6 +161,8 @@ export default {
   "cbundle.form.addIssue": "Issue",
   "cbundle.form.addIssueSerie": "Série d'issue",
   "cbundle.form.newContributions": "Nouvelles contributions",
+  "cbundle.form.remove.title": "Retirer la contribution",
+  "cbundle.form.remove.message": "Voulez-vous retirer cette contribution ?\nLes informations renseignées seront perdues.",
   "cbundle.action.seeContributions": "Voir les contributions",
   "cbundle.toast.updateSuccess": "Lot de contributions mis à jour avec succès",
   "cbundle.toast.updateError":

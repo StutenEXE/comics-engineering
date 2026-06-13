@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm, type FieldValues } from "react-hook-form";
 import z from "zod";
 import { useTranslation } from "~/i18n/i18n";
@@ -58,6 +58,7 @@ export function IssueContributionForm({
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors, isValid },
   } = useForm<FormData>({
     resolver: zodResolver(schema) as any,
@@ -65,12 +66,14 @@ export function IssueContributionForm({
       fandomUrl: issue?.fandomUrl,
       name: issue?.name,
       number: issue?.number,
-      // dates set manually
+      parutionDate: issue?.parutionDate,
+      coverDate: issue?.coverDate
     },
   });
 
-  const [defaultParutionDate, setDefaultParutionDate] = useState<string | undefined>(toHtmlInputString(issue?.parutionDate)) 
-  const [defaultCoverDate, setDefaultCoverDate] = useState<string | undefined>(toHtmlInputString(issue?.coverDate)) 
+  // Watchers are here to format the date properly in the input
+  const watchedParutionDate = watch("parutionDate")
+  const watchedCoverDate = watch("coverDate")
 
   const triggerSubmission = (data: FieldValues) => {
     const newIssue: ContributionIssue = {
@@ -110,7 +113,7 @@ export function IssueContributionForm({
 
   
   // Scraper used for autofill
-  const [scrape, { isLoading, isSuccess }] = useLazyScrapeUrlQuery();
+  const [scrape, { isLoading: scraperLoading }] = useLazyScrapeUrlQuery();
   const triggerScraping = async (url: string) => {
     if (errors.fandomUrl?.message) return;
     try {
@@ -125,20 +128,43 @@ export function IssueContributionForm({
       const scraped = res.data.result;
 
       // Fill form fields from scraped data
-      if (isntEmpty(scraped.name)) setValue("name", scraped.name);
-      if (scraped.number) setValue("number", scraped.number);
+      if (isntEmpty(scraped.name)) {
+        setValue("name", scraped.name, {
+          shouldTouch: true,
+          shouldValidate: true
+        });
+      }      
+      if (scraped.number !== undefined) {
+        setValue("number", scraped.number, {
+          shouldTouch: true,
+          shouldValidate: true
+        });
+      }
       if (isntEmpty(scraped.parutionDate)) 
-        setDefaultParutionDate(
-          toHtmlInputString(new Date(scraped.parutionDate))
-        );
+        setValue("parutionDate", new Date(scraped.parutionDate), {
+          shouldTouch: true,
+          shouldValidate: true
+        });
       if (isntEmpty(scraped.coverDate)) 
-        setDefaultCoverDate(
-          toHtmlInputString(new Date(scraped.coverDate))
-        );
+        setValue("coverDate", new Date(scraped.coverDate), {
+          shouldTouch: true,
+          shouldValidate: true
+        });
     } catch (e) {
       toast.error(t("form.autofill.sourceNotFound"))
     }
   };
+
+  // Ref ensures we only scrape once
+  const scrapedOnceRef = useRef(false);
+  useEffect(() => {
+    if (scrapedOnceRef.current) return;
+    // If issue has no real id and a fandom url, scrape fandom once when component mounts or when fandomUrl changes
+    if ((!issue?.id || issue?.id < 0) && isntEmpty(issue?.fandomUrl)) {
+      triggerScraping(issue.fandomUrl);
+      scrapedOnceRef.current = true;
+    }
+  }, [issue?.id, issue?.fandomUrl]);
 
   return (
     <GenericForm
@@ -159,6 +185,7 @@ export function IssueContributionForm({
         registration={register("fandomUrl")}
         buttonLabel={t("form.autofill")}
         buttonOnClick={(val) => triggerScraping(val)}
+        isLoading={scraperLoading}
         error={errors.fandomUrl}
       />
 
@@ -204,7 +231,7 @@ export function IssueContributionForm({
             valueAsDate: true,
           })}
           inputProps={{
-            defaultValue: defaultParutionDate,
+            defaultValue: toHtmlInputString(watchedParutionDate),
           }}
           error={errors.parutionDate}
           tooltip={t("issue.parutionDateExplanation")}
@@ -216,7 +243,7 @@ export function IssueContributionForm({
             valueAsDate: true,
           })}
           inputProps={{
-            defaultValue: defaultCoverDate,
+            defaultValue: toHtmlInputString(watchedCoverDate),
           }}
           error={errors.coverDate}
           tooltip={t("issue.coverDateExplanation")}

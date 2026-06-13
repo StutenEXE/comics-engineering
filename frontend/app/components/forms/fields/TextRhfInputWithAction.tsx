@@ -1,8 +1,8 @@
+import React, { useRef } from "react";
+import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
 import { GenericButton } from "~/components/buttons/GenericButton";
 import { TextRhfInput, type TextRhfInputHandle } from "./TextRhfInput";
-import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
-import React, { useRef } from "react";
-import { preventDefaultEvt } from "~/utils/events";
+import LoadingBadge from "~/components/badges/LoadingBadge";
 
 interface TextRhfInputWithActionProps {
     inputLabel: string;
@@ -12,13 +12,23 @@ interface TextRhfInputWithActionProps {
     buttonOnClick?: (val: string) => void
     error?: FieldError;
     tooltip?: string;
+    isLoading?: boolean;
     className?: string;
 }
 
-export function TextRhfInputWithAction({ inputLabel, registration, inputProps, buttonLabel, buttonOnClick, error, tooltip, className }: TextRhfInputWithActionProps) {
+export function TextRhfInputWithAction({ 
+    inputLabel, 
+    registration, 
+    inputProps, 
+    buttonLabel, 
+    buttonOnClick, 
+    error, 
+    tooltip,
+    isLoading = false, 
+    className 
+}: TextRhfInputWithActionProps) {
     
     const iptRef = useRef<TextRhfInputHandle>(null);
-
 
     const handleClick = () => {
         buttonOnClick?.(iptRef.current?.getValue() || "");
@@ -47,7 +57,10 @@ export function TextRhfInputWithAction({ inputLabel, registration, inputProps, b
             tooltip={tooltip}
             className={className}
         />
-        <GenericButton onClick={handleClick}>{buttonLabel}</GenericButton>
+        <GenericButton onClick={handleClick}>
+            {buttonLabel}
+            <LoadingBadge size={20} isLoading={isLoading} className="text-white" />
+        </GenericButton>
     </div>
     )
 }

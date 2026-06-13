@@ -140,8 +140,11 @@ export function ContributionBundleForm({
 
     switch (c.entityType) {
       case ContributionTypeEnum.ISSUE:
+        const newNumber = newContribution.proposedData.number + 1
         newContribution.proposedData = {
-          number: newContribution.proposedData.number + 1,
+          // Replaces the last number in the url (ex : https://xxx.fandom.com/wiki/IssueSerie_Vol_1_XXX)
+          fandomUrl: (newContribution.proposedData.fandomUrl as string).replace(/\d+$/, newNumber),
+          number: newNumber,
           issueSerie: newContribution.proposedData.issueSerie,
         } as Partial<Issue>;
         setContribToModify(newContribution);
@@ -264,7 +267,7 @@ export function ContributionBundleForm({
       name: c.proposedData.name,
       desc: "",
       startDate: new Date(),
-      endDate: null,
+      endDate: undefined,
     }));
 
   const modalAction =
