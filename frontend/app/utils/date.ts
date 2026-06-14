@@ -48,6 +48,14 @@ export function toHtmlInputString(d: Date | undefined | null): string {
 }
 
 export function toYYYYmmDD(d: Date | undefined | null): string {
+    if (typeof d === "string") {
+        try {
+            d = new Date(d);
+        }
+        catch {
+            return ""
+        }
+    }
     if (!d || isNaN(d.getTime())) {
         return ""
     }

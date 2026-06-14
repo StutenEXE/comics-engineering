@@ -170,7 +170,6 @@ export function BookContributionForm({
         ? s
         : [...s, issue],
     );
-    console.log("Added linked issue:", issue);
   };
 
   const removeLinked = (idx: number) => {
