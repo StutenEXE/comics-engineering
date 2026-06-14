@@ -154,7 +154,7 @@ export function InfoPageFields({
   return (
     <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2.5 items-baseline">
       {fieldProps.map((props) => (
-        <InfoPageField {...props} isLoading={isLoading} />
+        <InfoPageField key={props.label} {...props} isLoading={isLoading} />
       ))}
     </div>
   );

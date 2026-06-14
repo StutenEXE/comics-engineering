@@ -47,7 +47,9 @@ export function toHtmlInputString(d: Date | undefined | null): string {
     if (!d || isNaN(d.getTime())) {
         return ""
     }
-    return d.toISOString().substring(0, 10);
+    var z  = (n: number) =>  ('0' + n).slice(-2);
+
+    return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`; 
 }
 
 export function toYYYYmmDD(d: Date | undefined | null): string {

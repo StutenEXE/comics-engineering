@@ -120,7 +120,7 @@ export function IssueSerieContributionForm({
   };
 
   // Scraper used for autofill
-  const [scrape, { isLoading: scraperLoading }] = useLazyScrapeUrlQuery();
+  const [scrape, { isFetching: scraperLoading }] = useLazyScrapeUrlQuery();
   const triggerScraping = async (url: string) => {
     if (errors.fandomUrl?.message) return;
     try {

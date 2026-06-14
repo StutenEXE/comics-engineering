@@ -91,6 +91,8 @@ export default function IssuePage({ params }: { params: { id: number } }) {
           fieldProps={[
             // Story
             { label: t("issue.name"), value: issue?.name },
+            // Issue number
+            { label: t("issue.number"), value: issue?.number },
             // Parutiondate
             {
               label: t("issue.parutionDate"),
@@ -102,6 +104,13 @@ export default function IssuePage({ params }: { params: { id: number } }) {
               label: t("issue.coverDate"),
               labelTooltip: t("issue.coverDateExplanation"),
               value: dateToMonthYearString(locale, issue?.coverDate),
+            },
+            // Fandom link
+            {
+              label: t("issue.fandomUrl"),
+              // https://[xxx.fandom.com]/wiki/xxxxxxx
+              value: issue?.fandomUrl?.split('/')[2],
+              href: issue?.fandomUrl,
             },
           ]}
         />
