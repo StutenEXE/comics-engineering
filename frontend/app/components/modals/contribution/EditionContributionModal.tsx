@@ -27,7 +27,7 @@ export function EditionContributionModal({
   };
 
   return (
-    <GenericModal isOpen={isOpen} onClose={onClose}>
+    <GenericModal shouldCloseOnOOBClick={false} isOpen={isOpen} onClose={onClose}>
       <EditionContributionForm
         edition={edition}
         bookLocalRef={bookLocalRef}
