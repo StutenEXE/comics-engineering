@@ -170,7 +170,6 @@ export function IssueSerieContributionForm({
     }
   };
 
-
   return (
     <GenericForm
       title={

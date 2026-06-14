@@ -159,11 +159,14 @@ export function IssueContributionForm({
   const scrapedOnceRef = useRef(false);
   useEffect(() => {
     if (scrapedOnceRef.current) return;
+    scrapedOnceRef.current = true;
+    // If some data is already present (e.g name), do not auto scrape
+    if (isntEmpty(issue?.name)) return; 
     // If issue has no real id and a fandom url, scrape fandom once when component mounts or when fandomUrl changes
     if ((!issue?.id || issue?.id < 0) && isntEmpty(issue?.fandomUrl)) {
       triggerScraping(issue.fandomUrl);
-      scrapedOnceRef.current = true;
     }
+  
   }, [issue?.id, issue?.fandomUrl]);
 
   return (
