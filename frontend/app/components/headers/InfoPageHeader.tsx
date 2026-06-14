@@ -138,8 +138,11 @@ export function InfoPageHeaderComponent({
 
       {/* If there is an expected behavior for edition, show edition button */}
       {!isLoading && onEditClick && (
-        <div className="group flex gap-1 text-xs text-white/25 cursor-pointer hover:underline hover:text-white/75">
-          <p className="" onClick={onEditClick}>
+        <div
+          onClick={onEditClick} 
+          className="group flex gap-1 text-xs text-white/25 cursor-pointer hover:underline hover:text-white/75"
+        >
+          <p>
             {t("generic.edit")}
           </p>
           <MdModeEdit size={16} />

@@ -72,8 +72,8 @@ export function IssueContributionForm({
   });
 
   // Watchers are here to format the date properly in the input
-  const watchedParutionDate = watch("parutionDate")
-  const watchedCoverDate = watch("coverDate")
+  const watchedParutionDate = watch("parutionDate");
+  const watchedCoverDate = watch("coverDate");
 
   const triggerSubmission = (data: FieldValues) => {
     const newIssue: ContributionIssue = {
@@ -113,7 +113,7 @@ export function IssueContributionForm({
 
   
   // Scraper used for autofill
-  const [scrape, { isLoading: scraperLoading }] = useLazyScrapeUrlQuery();
+  const [scrape, { isFetching: scraperLoading }] = useLazyScrapeUrlQuery();
   const triggerScraping = async (url: string) => {
     if (errors.fandomUrl?.message) return;
     try {
@@ -231,7 +231,7 @@ export function IssueContributionForm({
             valueAsDate: true,
           })}
           inputProps={{
-            defaultValue: toHtmlInputString(watchedParutionDate),
+            value: toHtmlInputString(watchedParutionDate),
           }}
           error={errors.parutionDate}
           tooltip={t("issue.parutionDateExplanation")}
@@ -243,7 +243,7 @@ export function IssueContributionForm({
             valueAsDate: true,
           })}
           inputProps={{
-            defaultValue: toHtmlInputString(watchedCoverDate),
+            value : toHtmlInputString(watchedCoverDate),
           }}
           error={errors.coverDate}
           tooltip={t("issue.coverDateExplanation")}
