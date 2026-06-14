@@ -555,6 +555,7 @@ export function IndentedContributionList({
       emptyMsg={t("contribution.nonefound")}
       elemGenerator={(c: ContributionTree) => (
         <ContributionTreeRow
+          key={c.id}
           contribution={c}
           indent={0}
           buttons={buttons}
