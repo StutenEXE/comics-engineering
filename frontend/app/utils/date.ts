@@ -44,20 +44,15 @@ export function zDateOptional() {
 }
 
 export function toHtmlInputString(d: Date | undefined | null): string {
-    if (!d || isNaN(d.getTime())) {
-        return ""
-    }
-    var z  = (n: number) =>  ('0' + n).slice(-2);
-
-    return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`; 
+    return toYYYYmmDD(d);
 }
 
 export function toYYYYmmDD(d: Date | undefined | null): string {
     if (!d || isNaN(d.getTime())) {
         return ""
     }
-    if (typeof d === "string") {
-        return d
-    }
-    return d.toISOString().split('T')[0];
+    var z  = (n: number) =>  ('0' + n).slice(-2);
+
+    // Decomposing to avoid unwanted changes from the timezone
+    return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`; 
 }

@@ -170,6 +170,7 @@ export function IssueSerieContributionForm({
     }
   };
 
+  console.log(watchedStartDate, watchedEndDate)
 
   return (
     <GenericForm
