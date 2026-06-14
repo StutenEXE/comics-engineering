@@ -14,7 +14,7 @@ export const AllContributionMetrics = forwardRef<
   AllContributionMetricsHandle,
   AllContributionMetricsProps
 >(function AllContributionMetrics({ className }, ref) {
-  const { data, isLoading, refetch } = useContributionStatsQuery({});
+  const { data, isFetching, refetch } = useContributionStatsQuery({});
   const stats = data?.stats;
 
   // Wrapper to call the query's refetch function safely.
@@ -28,7 +28,7 @@ export const AllContributionMetrics = forwardRef<
   return (
     <ContributionMetrics
       metrics={stats}
-      isLoading={isLoading}
+      isLoading={isFetching}
       className={className}
     />
   );

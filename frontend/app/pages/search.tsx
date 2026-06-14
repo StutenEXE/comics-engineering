@@ -21,7 +21,7 @@ export default function SearchPage() {
   const { t } = useTranslation();
 
   const [query, setQuery] = useState("");
-  const { data, error, isLoading } = useSearchBooksAndSeriesByNameQuery({
+  const { data, error, isFetching } = useSearchBooksAndSeriesByNameQuery({
     query,
   });
   const books = data?.books ?? [];
@@ -94,7 +94,7 @@ export default function SearchPage() {
         {!isShort && (
           <div className="w-full max-w-xl flex flex-col gap-3">
             {/* Results header */}
-            {!isLoading && !err && (
+            {!isFetching && !err && (
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium uppercase tracking-widest text-white/40">
                   {t("search.results")}
@@ -108,16 +108,16 @@ export default function SearchPage() {
             )}
 
             {/* Results */}
-            {!isLoading && !err && hasResults && (
+            {!isFetching && !err && hasResults && (
               <CollapsableSerieList
                 serieList={allSeries}
-                isLoading={isLoading}
+                isLoading={isFetching}
                 error={err}
               />
             )}
 
             {/* No results */}
-            {!isLoading && !err && !hasResults && (
+            {!isFetching && !err && !hasResults && (
               <div className="flex flex-col items-center gap-2 py-12 border border-white/8 rounded-lg">
                 <MdSearch size={32} className="text-white/10" />
                 <p className="text-sm text-white/25 italic">

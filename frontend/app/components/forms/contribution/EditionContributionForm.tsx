@@ -27,6 +27,9 @@ import { SelectRhfInput } from "../fields/SelectRhfInput";
 import { TextRhfInput } from "../fields/TextRhfInput";
 import { GenericForm } from "../GenericForm";
 import { TextRhfInputWithAction } from "../fields/TextRhfInputWithAction";
+import { useLazyScrapeIsbnQuery } from "~/store/services/scrapers";
+import { isntEmpty } from "~/utils/strings";
+import { useToast } from "~/components/toast/Toast";
 
 interface EditionFormProps {
   edition?: Edition;
@@ -44,6 +47,7 @@ export function EditionContributionForm({
   onCancel,
 }: EditionFormProps) {
   const { t } = useTranslation();
+  const toast = useToast();
 
   // Validation schema
   const schema = z
@@ -78,6 +82,8 @@ export function EditionContributionForm({
   // Form operations
   const {
     register,
+    setValue,
+    watch,
     handleSubmit,
     formState: { errors, isValid },
   } = useForm<FormData>({
@@ -90,9 +96,11 @@ export function EditionContributionForm({
       url: edition?.url,
       imgUrl: edition?.imgUrl,
       coverType: edition?.coverType,
-      // dates set manually
+      parutionDate: edition?.parutionDate
     },
   });
+
+  const watchedParutionDate = watch("parutionDate")
 
   const triggerSubmission = (data: FieldValues) => {
     const newEdition: ContributionEdition = {
@@ -147,6 +155,51 @@ export function EditionContributionForm({
   const [selectedPublisher, setSelectedPublisher] = useState<
     SimplePublisher | undefined
   >(edition?.publisher ?? undefined);
+
+  // Scraper used for autofill
+    const [scrape, { isFetching: scraperLoading }] = useLazyScrapeIsbnQuery();
+    const triggerScraping = async (isbn: string) => {
+      if (errors.isbn?.message) return;
+      try {
+        const res = await scrape({ isbn });
+        if (res.error) throw new Error()
+        
+        // Wrong data source
+        if (res?.data?.resultType !== "isbn") {
+          toast.info(t("form.autofill.wrongSource"))
+          return
+        };
+        const scraped = res.data.result.edition;
+  
+        // Fill form fields from scraped data
+        if (isntEmpty(scraped.isbn13)) {
+          setValue("isbn", scraped.isbn13, {
+            shouldTouch: true,
+            shouldValidate: true
+          });
+        }      
+        if (scraped.pageCount !== undefined) {
+          setValue("npages", scraped.pageCount, {
+            shouldTouch: true,
+            shouldValidate: true
+          });
+        }
+        if (isntEmpty(scraped.publishDate)) {
+          setValue("parutionDate", new Date(scraped.publishDate), {
+            shouldTouch: true,
+            shouldValidate: true
+          });
+        }
+        if (isntEmpty(scraped.cover)) { 
+          setValue("imgUrl", scraped.cover, {
+            shouldTouch: true,
+            shouldValidate: true
+          });
+        }
+      } catch (e) {
+        toast.error(t("form.autofill.sourceNotFound"))
+      }
+    };
 
   return (
     <GenericForm
@@ -209,7 +262,8 @@ export function EditionContributionForm({
           inputMode: "numeric",
         }}
         buttonLabel={t("form.autofill")}
-        buttonOnClick={(v) => {console.log(v)}}
+        buttonOnClick={triggerScraping}
+        isLoading={scraperLoading}
         error={errors.isbn}
       />
 
@@ -231,7 +285,7 @@ export function EditionContributionForm({
             valueAsDate: true,
           })}
           inputProps={{
-            defaultValue: toHtmlInputString(edition?.parutionDate),
+            value: toHtmlInputString(watchedParutionDate),
           }}
           error={errors.parutionDate}
         />
@@ -274,6 +328,7 @@ export function EditionContributionForm({
         {/* CoverType*/}
         <SelectRhfInput
           label={t("edition.coverType")}
+          defaultVal={edition?.coverType}
           options={[
             { label: t("edition.coverType.hardcover"), value: "hardcover" },
             { label: t("edition.coverType.paperback"), value: "paperback" },

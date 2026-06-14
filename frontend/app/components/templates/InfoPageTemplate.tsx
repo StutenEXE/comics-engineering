@@ -124,7 +124,7 @@ export function InfoPageField({
           to={to}
           className="text-sm text-indigo-300/70 hover:underline hover:text-indigo-300 transition-colors w-fit"
         >
-          {displayValue} ↗
+          {displayValue}&nbsp;↗
         </Link>
       // External link found
       ) : href ? (
@@ -134,7 +134,7 @@ export function InfoPageField({
           rel="noopener noreferrer"
           className="text-sm text-indigo-300/70 hover:underline hover:text-indigo-300 transition-colors truncate"
         >
-          {displayValue} ↗
+          {displayValue}&nbsp;↗
         </a>
       // No link
       ) : (

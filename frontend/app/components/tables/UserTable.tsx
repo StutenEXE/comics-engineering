@@ -29,7 +29,7 @@ export function UserTable({ showActions, className }: UserTableProps) {
   const toast = useToast();
 
   // Fetch users for current page
-  const { data, error, isLoading, refetch } = useUserListQuery(
+  const { data, error, isFetching, refetch } = useUserListQuery(
     { from: 0, limit: 10 },
     { refetchOnMountOrArgChange: true },
   );
@@ -150,7 +150,7 @@ export function UserTable({ showActions, className }: UserTableProps) {
     <GenericTable
       list={users}
       columns={columns}
-      isLoading={isLoading}
+      isLoading={isFetching}
       error={err}
       className={className}
     />

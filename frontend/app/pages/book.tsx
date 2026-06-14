@@ -35,7 +35,7 @@ export default function BookPage({ params }: { params: { id: number } }) {
   const toast = useToast();
   const { user, isAuthenticated } = useAppSelector((state) => state.user);
 
-  const { data, isLoading, error } = useBookByIdQuery({ id: params.id });
+  const { data, isFetching, error } = useBookByIdQuery({ id: params.id });
   const book = data?.book;
   const err = createError(error);
 
@@ -63,13 +63,15 @@ export default function BookPage({ params }: { params: { id: number } }) {
     submitBundle(b);
   };
 
+
+
   return (
     <>
       <InfoPageTemplate
         hasImg={true}
         imgUrl={book?.imgUrl}
         imgAlt={book?.name}
-        isLoading={isLoading}
+        isLoading={isFetching}
         error={err}
       >
         <InfoPageHeaderComponent
@@ -87,25 +89,25 @@ export default function BookPage({ params }: { params: { id: number } }) {
             }
             openEditModal();
           }}
-          isLoading={isLoading}
+          isLoading={isFetching}
         />
 
         {/* Description */}
-        <InfoPageSection label={t("book.description")} isLoading={isLoading}>
+        <InfoPageSection label={t("book.description")} isLoading={isFetching}>
           <p className="text-sm text-white/60 leading-relaxed">
             {insertLinebreaks(book?.desc)}
           </p>
         </InfoPageSection>
 
         {/* VO Content */}
-        <InfoPageSection label={t("book.voContent")} isLoading={isLoading}>
+        <InfoPageSection label={t("book.voContent")} isLoading={isFetching}>
           <p className="text-sm text-white/60 leading-relaxed">
             {insertLinebreaks(book?.voContent)}
           </p>
         </InfoPageSection>
 
         {/* Editions */}
-        <InfoPageSection label={t("book.editions")} isLoading={isLoading}>
+        <InfoPageSection label={t("book.editions")} isLoading={isFetching}>
           <EditionList
             editionList={book?.editions}
             className="border border-white/8 rounded-lg"
@@ -115,7 +117,7 @@ export default function BookPage({ params }: { params: { id: number } }) {
         {/* Same series */}
         <InfoPageSection
           label={t("page.book.sameseries")}
-          isLoading={isLoading}
+          isLoading={isFetching}
         >
           <BookListBySerieId
             serieId={book?.serie?.id}
@@ -125,7 +127,7 @@ export default function BookPage({ params }: { params: { id: number } }) {
         </InfoPageSection>
 
         {/* Issues */}
-        <InfoPageSection label={t("book.issues")} isLoading={isLoading}>
+        <InfoPageSection label={t("book.issues")} isLoading={isFetching}>
           <IssueListByBookId
             bookId={book?.id}
             className="border border-white/8 rounded-lg"
