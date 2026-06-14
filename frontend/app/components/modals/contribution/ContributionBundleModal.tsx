@@ -22,7 +22,7 @@ export function ContributionBundleModal({
   onClose,
 }: ContributionBundleModalProps) {
   return (
-    <GenericModal isOpen={isOpen} onClose={onClose}>
+    <GenericModal shouldCloseOnOOBClick={false} isOpen={isOpen} onClose={onClose}>
       {action === "create" && (
         <CreateContributionBundleForm onSubmit={onSubmit} onCancel={onClose} />
       )}

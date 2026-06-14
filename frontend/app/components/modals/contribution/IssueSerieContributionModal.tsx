@@ -26,7 +26,7 @@ export function IssueSerieContributionModal({
   };
 
   return (
-    <GenericModal isOpen={isOpen} onClose={onClose}>
+    <GenericModal shouldCloseOnOOBClick={false} isOpen={isOpen} onClose={onClose}>
       <IssueSerieContributionForm
         issueSerie={issueSerie}
         action={action}

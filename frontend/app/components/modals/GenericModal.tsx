@@ -4,9 +4,10 @@ import { noPropagationEvt } from "~/utils/events";
 interface GenericModalProps {
   isOpen: boolean;
   onClose: () => void;
+  shouldCloseOnOOBClick?: boolean;
   children: React.ReactNode;
 }
-export function GenericModal({ isOpen, onClose, children }: GenericModalProps) {
+export function GenericModal({ isOpen, onClose, shouldCloseOnOOBClick = true, children }: GenericModalProps) {
   useEffect(() => {
     if (!isOpen) return;
 
@@ -22,7 +23,7 @@ export function GenericModal({ isOpen, onClose, children }: GenericModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose}></div>
+      <div className="absolute inset-0 bg-black/50" onClick={shouldCloseOnOOBClick ? onClose : () => {}}></div>
       <div
         role="dialog"
         aria-modal="true"

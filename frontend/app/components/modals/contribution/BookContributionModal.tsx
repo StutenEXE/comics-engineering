@@ -34,7 +34,7 @@ export function BookContributionModal({
   };
 
   return (
-    <GenericModal isOpen={isOpen} onClose={onClose}>
+    <GenericModal shouldCloseOnOOBClick={false} isOpen={isOpen} onClose={onClose}>
       <BookContributionForm
         book={book}
         serieLocalRef={serieLocalRef}
