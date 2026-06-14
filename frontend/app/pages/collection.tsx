@@ -14,9 +14,6 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function CollectionPage() {
-  const { t } = useTranslation();
-  const { user } = useAppSelector((state) => state.user);
-
   return (
     <>
       <LoggedProtectedRoute>

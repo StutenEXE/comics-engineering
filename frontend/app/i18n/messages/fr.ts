@@ -80,6 +80,7 @@ export default {
   "book.form.issueSerieUnknown": "Série d'issue inconnue",
   "book.form.add": "Ajouter",
   "book.form.added": "Ajouté",
+  "book.form.isbnautofill": "Pré-remplir à partir d'un ISBN",
   "book.form.noIssuesInSerie": "Aucune issue trouvée pour cette série",
   // Contribution
   "contributions": "Contributions",

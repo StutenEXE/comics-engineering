@@ -13,6 +13,7 @@ import { useTranslation } from "~/i18n/i18n";
 
 interface SelectRhfInputProps {
   label?: string;
+  defaultVal?: string;
   options: { label: string; value: string | number }[];
   registration: UseFormRegisterReturn;
   placeholder?: string;
@@ -20,13 +21,14 @@ interface SelectRhfInputProps {
 
 export function SelectRhfInput({
   label,
+  defaultVal,
   options,
   registration,
   placeholder,
 }: SelectRhfInputProps) {
   const { t } = useTranslation();
 
-  const [selectedValue, setSelectedValue] = useState("");
+  const [selectedValue, setSelectedValue] = useState(defaultVal);
 
   const handleValueChange = (value: string) => {
     setSelectedValue(value);

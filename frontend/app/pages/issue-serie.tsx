@@ -1,12 +1,21 @@
+import { useEffect, useState } from "react";
 import { InfoPageHeaderComponent } from "~/components/headers/InfoPageHeader";
 import { BookList } from "~/components/lists/booklists/BookList";
 import { IssueList } from "~/components/lists/issuelists/IssueList";
+import { IssueSerieContributionModal } from "~/components/modals/contribution/IssueSerieContributionModal";
 import {
+  InfoPageFields,
   InfoPageSection,
-  InfoPageTemplate,
+  InfoPageTemplate
 } from "~/components/templates/InfoPageTemplate";
+import { useToast } from "~/components/toast/Toast";
 import { useTranslation } from "~/i18n/i18n";
 import type { SimpleBook } from "~/models/book";
+import {
+  type SimpleContribution,
+  wrapInNewBundle,
+} from "~/models/contribution";
+import { useAppSelector } from "~/store/hooks";
 import {
   useIssueSerieByIdQuery,
   useSubmitContributionBundleMutation,
@@ -14,14 +23,6 @@ import {
 import { dateToMonthYearString } from "~/utils/date";
 import { createError } from "~/utils/error";
 import type { Route } from "../+types/root";
-import { useEffect, useState } from "react";
-import { useToast } from "~/components/toast/Toast";
-import {
-  type SimpleContribution,
-  wrapInNewBundle,
-} from "~/models/contribution";
-import { useAppSelector } from "~/store/hooks";
-import { IssueSerieContributionModal } from "~/components/modals/contribution/IssueSerieContributionModal";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -35,7 +36,7 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
   const toast = useToast();
   const { user, isAuthenticated } = useAppSelector((state) => state.user);
 
-  const { data, isLoading, error } = useIssueSerieByIdQuery({ id: params.id });
+  const { data, isFetching, error } = useIssueSerieByIdQuery({ id: params.id });
   const issueSerie = data?.issueSerie;
   const err = createError(error);
 
@@ -80,7 +81,7 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
 
   return (
     <>
-      <InfoPageTemplate hasImg={false} isLoading={isLoading} error={err}>
+      <InfoPageTemplate hasImg={false} isLoading={isFetching} error={err}>
         <InfoPageHeaderComponent
           headerTitle={t("page.issueserie.header")}
           title={issueSerie?.name || ""}
@@ -95,19 +96,41 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
             }
             openModal();
           }}
-          isLoading={isLoading}
+          isLoading={isFetching}
         />
 
         <InfoPageSection
           label={t("issueserie.description")}
-          isLoading={isLoading}
+          isLoading={isFetching}
         >
           <p className="text-sm text-white/60 leading-relaxed">
             {issueSerie?.desc}
           </p>
         </InfoPageSection>
 
-        <InfoPageSection label={t("issueserie.issues")} isLoading={isLoading}>
+        <InfoPageSection
+          label={t("issueserie.fandomUrl")}
+          isLoading={isFetching}
+        >
+          { !issueSerie?.fandomUrl && (
+            <p className="text-sm text-white/60 leading-relaxed">
+              { t("generic.unknown") }
+            </p>
+          )}
+          { issueSerie?.fandomUrl && (
+            <a
+              href={issueSerie?.fandomUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-indigo-300/70 hover:underline hover:text-indigo-300 transition-colors truncate"
+            >
+                {/* https://[xxx.fandom.com]/wiki/xxxxxxx */}
+                {issueSerie?.fandomUrl?.split('/')[2]}&nbsp;↗
+            </a>
+          )}
+        </InfoPageSection>
+
+        <InfoPageSection label={t("issueserie.issues")} isLoading={isFetching}>
           <IssueList
             issueList={issueSerie?.issues.map((is) => ({
               ...is,
@@ -119,7 +142,7 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
 
         <InfoPageSection
           label={t("page.issueserie.books")}
-          isLoading={isLoading}
+          isLoading={isFetching}
         >
           <BookList
             bookList={books}

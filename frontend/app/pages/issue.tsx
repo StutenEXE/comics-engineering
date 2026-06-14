@@ -35,7 +35,7 @@ export default function IssuePage({ params }: { params: { id: number } }) {
   const toast = useToast();
   const { user, isAuthenticated } = useAppSelector((state) => state.user);
 
-  const { data, isLoading, error } = useIssueByIdQuery({ id: params.id });
+  const { data, isFetching, error } = useIssueByIdQuery({ id: params.id });
   const issue = data?.issue;
   const err = createError(error);
 
@@ -67,7 +67,7 @@ export default function IssuePage({ params }: { params: { id: number } }) {
 
   return (
     <>
-      <InfoPageTemplate isLoading={isLoading} error={err}>
+      <InfoPageTemplate isLoading={isFetching} error={err}>
         <InfoPageHeaderComponent
           headerTitle={t("page.issue.header")}
           title={issue?.name || ""}
@@ -83,11 +83,11 @@ export default function IssuePage({ params }: { params: { id: number } }) {
             }
             openModal();
           }}
-          isLoading={isLoading}
+          isLoading={isFetching}
         />
 
         <InfoPageFields
-          isLoading={isLoading}
+          isLoading={isFetching}
           fieldProps={[
             // Story
             { label: t("issue.name"), value: issue?.name },
@@ -115,7 +115,7 @@ export default function IssuePage({ params }: { params: { id: number } }) {
           ]}
         />
 
-        <InfoPageSection label={t("page.issue.books")} isLoading={isLoading}>
+        <InfoPageSection label={t("page.issue.books")} isLoading={isFetching}>
           <BookList
             bookList={issue?.books}
             className="border border-white/8 rounded-lg"

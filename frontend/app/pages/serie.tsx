@@ -33,7 +33,7 @@ export default function SeriePage({ params }: { params: { id: number } }) {
   const toast = useToast();
   const { user, isAuthenticated } = useAppSelector((state) => state.user);
 
-  const { data, isLoading, error } = useSerieByIdQuery({
+  const { data, isFetching, error } = useSerieByIdQuery({
     id: params.id,
   });
   const serie = data?.serie;
@@ -76,7 +76,7 @@ export default function SeriePage({ params }: { params: { id: number } }) {
 
   return (
     <>
-      <InfoPageTemplate hasImg={false} isLoading={isLoading} error={err}>
+      <InfoPageTemplate hasImg={false} isLoading={isFetching} error={err}>
         <InfoPageHeaderComponent
           headerTitle={t("serie.header")}
           title={serie?.name || ""}
@@ -91,12 +91,12 @@ export default function SeriePage({ params }: { params: { id: number } }) {
             }
             openModal();
           }}
-          isLoading={isLoading}
+          isLoading={isFetching}
         />
 
         <InfoPageSection
           label={`${t("serie.books")} (${serie?.books.length}/${serie?.nvolumes})`}
-          isLoading={isLoading}
+          isLoading={isFetching}
         >
           <BookList
             bookList={serie?.books.map((bk) => {

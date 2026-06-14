@@ -23,6 +23,10 @@ import { SearchSelectInput } from "../fields/SearchSelectInput";
 import { TextAreaRhfInput } from "../fields/TextAreaRhfInput";
 import { TextRhfInput } from "../fields/TextRhfInput";
 import { GenericForm } from "../GenericForm";
+import { useLazyScrapeIsbnQuery } from "~/store/services/scrapers";
+import { TextRhfInputWithAction } from "../fields/TextRhfInputWithAction";
+import { isntEmpty } from "~/utils/strings";
+import { useToast } from "~/components/toast/Toast";
 
 interface BookFormProps {
   book?: Book;
@@ -46,6 +50,7 @@ export function BookContributionForm({
   onCancel,
 }: BookFormProps) {
   const { t } = useTranslation();
+  const toast = useToast();
 
   // Validation schema
   const schema = z
@@ -64,6 +69,8 @@ export function BookContributionForm({
   // Form operations
   const {
     register,
+    setValue,
+    watch,
     handleSubmit,
     formState: { errors, isValid },
   } = useForm<FormData>({
@@ -76,6 +83,10 @@ export function BookContributionForm({
       imgUrl: book?.imgUrl,
     },
   });
+
+  // UX : show selected image preview to user
+  const watchedImgUrl = watch("imgUrl");
+
 
   const triggerSubmission = (data: FieldValues) => {
     const newBook: ContributionBook = {
@@ -114,9 +125,6 @@ export function BookContributionForm({
 
     onSubmit?.(contrib);
   };
-
-  // UX : show selected image preview to user
-  const [newImgUrl, setNewImgUrl] = useState<string>(book?.imgUrl || "");
 
   // Searching for book series
   const [searchBookSeries, { data: bookSeriesResults }] =
@@ -216,6 +224,44 @@ export function BookContributionForm({
     return acc;
   }, {});
 
+  // Scraper used for autofill
+  const [scrape, { isFetching: scraperLoading }] = useLazyScrapeIsbnQuery();
+  const triggerScraping = async (isbn: string) => {
+    try {
+      const res = await scrape({ isbn });
+      if (res.error) throw new Error()
+      
+      // Wrong data source
+      if (res?.data?.resultType !== "isbn") {
+        toast.info(t("form.autofill.wrongSource"))
+        return
+      };
+      const scraped = res.data.result.book;
+
+      // Fill form fields from scraped data
+      if (isntEmpty(scraped.title)) {
+        setValue("name", scraped.title, {
+          shouldTouch: true,
+          shouldValidate: true
+        });
+      }      
+      if (isntEmpty(scraped.description)) {
+        setValue("desc", scraped.description, {
+          shouldTouch: true,
+          shouldValidate: true
+        });
+      }
+      if (isntEmpty(scraped.cover)) { 
+        setValue("imgUrl", scraped.cover, {
+          shouldTouch: true,
+          shouldValidate: true
+        });
+      }
+    } catch (e) {
+      toast.error(t("form.autofill.sourceNotFound"))
+    }
+  };
+
   return (
     <GenericForm
       title={
@@ -229,6 +275,15 @@ export function BookContributionForm({
       }
       onSubmit={handleSubmit(triggerSubmission)}
     >
+
+      {/* ISBN for autofill */}
+      <TextRhfInputWithAction
+        inputLabel={t("book.form.isbnautofill")}
+        buttonLabel={t("form.autofill")}
+        buttonOnClick={triggerScraping}
+        isLoading={scraperLoading}
+      />
+
       {/* Name field */}
       <TextRhfInput
         label={t("book.name")}
@@ -283,15 +338,13 @@ export function BookContributionForm({
       <div className="flex gap-3">
         <TextRhfInput
           label={t("book.imgUrl")}
-          registration={register("imgUrl", {
-            onChange: (e) => setNewImgUrl(e.target.value),
-          })}
+          registration={register("imgUrl")}
           error={errors.imgUrl}
           className="w-[100%]"
         />
-        {!errors.imgUrl && newImgUrl && (
+        {!errors.imgUrl && watchedImgUrl && (
           <img
-            src={newImgUrl}
+            src={watchedImgUrl}
             alt={t("book.form.altNewImage")}
             className="w-[100px]"
           />
