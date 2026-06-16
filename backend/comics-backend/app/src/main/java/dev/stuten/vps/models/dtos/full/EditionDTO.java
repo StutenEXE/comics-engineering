@@ -1,5 +1,6 @@
 package dev.stuten.vps.models.dtos.full;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -28,7 +29,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 public class EditionDTO extends ModifiedAtDTO {
-    
+
     @JsonProperty("isbn")
     private String isbn;
 
@@ -56,15 +57,30 @@ public class EditionDTO extends ModifiedAtDTO {
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate parutionDate;
 
+    @JsonProperty("dimensions")
+    private Dimensions dimensions;
+
+    @JsonProperty("width")
+    private BigDecimal width;
+
+    @JsonProperty("thickness")
+    private BigDecimal thickness;
+
     @JsonProperty("publisher")
     private SimplePublisherDTO publisher;
 
     @JsonProperty("book")
     private SimpleBookDTO book;
-    
+
     @JsonProperty("serie")
     private SimpleSerieDTO serie;
 
     @JsonProperty("addedBy")
     private SimpleUserDTO addedBy;
+
+    public record Dimensions(
+            @JsonProperty("height") BigDecimal height,
+            @JsonProperty("width") BigDecimal width,
+            @JsonProperty("thickness") BigDecimal thickness) {
+    }
 }

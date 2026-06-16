@@ -78,7 +78,7 @@ export default function IssuePage({ params }: { params: { id: number } }) {
           addedBy={issue?.addedBy?.username}
           onEditClick={() => {
             if (!isAuthenticated) {
-              toast.info("toast.notconnected");
+              toast.info(t("toast.notconnected"));
               return;
             }
             openModal();
@@ -109,7 +109,7 @@ export default function IssuePage({ params }: { params: { id: number } }) {
             {
               label: t("issue.fandomUrl"),
               // https://[xxx.fandom.com]/wiki/xxxxxxx
-              value: issue?.fandomUrl?.split('/')[2],
+              value: issue?.fandomUrl?.split("/")[2],
               href: issue?.fandomUrl,
             },
           ]}

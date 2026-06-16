@@ -8,6 +8,7 @@ import dev.stuten.vps.jooq.Keys;
 import dev.stuten.vps.jooq.Public;
 import dev.stuten.vps.jooq.tables.records.EditionsRecord;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -16,12 +17,12 @@ import java.util.function.Function;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Function14;
+import org.jooq.Function17;
 import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Records;
-import org.jooq.Row14;
+import org.jooq.Row17;
 import org.jooq.Schema;
 import org.jooq.SelectField;
 import org.jooq.Table;
@@ -123,6 +124,21 @@ public class Editions extends TableImpl<EditionsRecord> {
      * The column <code>public.editions.modified_at</code>.
      */
     public final TableField<EditionsRecord, LocalDateTime> MODIFIED_AT = createField(DSL.name("modified_at"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
+
+    /**
+     * The column <code>public.editions.height</code>.
+     */
+    public final TableField<EditionsRecord, BigDecimal> HEIGHT = createField(DSL.name("height"), SQLDataType.NUMERIC(5, 2).defaultValue(DSL.field(DSL.raw("26.50"), SQLDataType.NUMERIC)), this, "");
+
+    /**
+     * The column <code>public.editions.width</code>.
+     */
+    public final TableField<EditionsRecord, BigDecimal> WIDTH = createField(DSL.name("width"), SQLDataType.NUMERIC(5, 2).defaultValue(DSL.field(DSL.raw("17.00"), SQLDataType.NUMERIC)), this, "");
+
+    /**
+     * The column <code>public.editions.thickness</code>.
+     */
+    public final TableField<EditionsRecord, BigDecimal> THICKNESS = createField(DSL.name("thickness"), SQLDataType.NUMERIC(5, 2).defaultValue(DSL.field(DSL.raw("1.60"), SQLDataType.NUMERIC)), this, "");
 
     private Editions(Name alias, Table<EditionsRecord> aliased) {
         this(alias, aliased, null);
@@ -251,18 +267,18 @@ public class Editions extends TableImpl<EditionsRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row14 type methods
+    // Row17 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row14<Integer, Integer, Integer, String, String, Integer, Float, String, String, String, LocalDate, Integer, LocalDateTime, LocalDateTime> fieldsRow() {
-        return (Row14) super.fieldsRow();
+    public Row17<Integer, Integer, Integer, String, String, Integer, Float, String, String, String, LocalDate, Integer, LocalDateTime, LocalDateTime, BigDecimal, BigDecimal, BigDecimal> fieldsRow() {
+        return (Row17) super.fieldsRow();
     }
 
     /**
      * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
      */
-    public <U> SelectField<U> mapping(Function14<? super Integer, ? super Integer, ? super Integer, ? super String, ? super String, ? super Integer, ? super Float, ? super String, ? super String, ? super String, ? super LocalDate, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Function17<? super Integer, ? super Integer, ? super Integer, ? super String, ? super String, ? super Integer, ? super Float, ? super String, ? super String, ? super String, ? super LocalDate, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? super BigDecimal, ? super BigDecimal, ? super BigDecimal, ? extends U> from) {
         return convertFrom(Records.mapping(from));
     }
 
@@ -270,7 +286,7 @@ public class Editions extends TableImpl<EditionsRecord> {
      * Convenience mapping calling {@link SelectField#convertFrom(Class,
      * Function)}.
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function14<? super Integer, ? super Integer, ? super Integer, ? super String, ? super String, ? super Integer, ? super Float, ? super String, ? super String, ? super String, ? super LocalDate, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Class<U> toType, Function17<? super Integer, ? super Integer, ? super Integer, ? super String, ? super String, ? super Integer, ? super Float, ? super String, ? super String, ? super String, ? super LocalDate, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? super BigDecimal, ? super BigDecimal, ? super BigDecimal, ? extends U> from) {
         return convertFrom(toType, Records.mapping(from));
     }
 }

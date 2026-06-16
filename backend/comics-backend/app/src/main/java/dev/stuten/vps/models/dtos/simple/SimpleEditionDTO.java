@@ -1,5 +1,6 @@
 package dev.stuten.vps.models.dtos.simple;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -53,6 +54,9 @@ public class SimpleEditionDTO extends IdDTO {
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate parutionDate;
 
+    @JsonProperty("dimensions")
+    private Dimensions dimensions;
+
     @JsonProperty("publisherId")
     private Integer publisherId;
 
@@ -61,4 +65,10 @@ public class SimpleEditionDTO extends IdDTO {
 
     @JsonProperty("bookId")
     private Integer bookId;
+
+    public record Dimensions(
+            @JsonProperty("height") BigDecimal height,
+            @JsonProperty("width") BigDecimal width,
+            @JsonProperty("thickness") BigDecimal thickness) {
+    }
 }

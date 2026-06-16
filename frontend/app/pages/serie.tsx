@@ -86,7 +86,7 @@ export default function SeriePage({ params }: { params: { id: number } }) {
           addedBy={serie?.addedBy?.username}
           onEditClick={() => {
             if (!isAuthenticated) {
-              toast.info("toast.notconnected");
+              toast.info(t("toast.notconnected"));
               return;
             }
             openModal();

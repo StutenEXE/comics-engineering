@@ -6,7 +6,7 @@ import { IssueSerieContributionModal } from "~/components/modals/contribution/Is
 import {
   InfoPageFields,
   InfoPageSection,
-  InfoPageTemplate
+  InfoPageTemplate,
 } from "~/components/templates/InfoPageTemplate";
 import { useToast } from "~/components/toast/Toast";
 import { useTranslation } from "~/i18n/i18n";
@@ -91,7 +91,7 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
           addedBy={issueSerie?.addedBy?.username}
           onEditClick={() => {
             if (!isAuthenticated) {
-              toast.info("toast.notconnected");
+              toast.info(t("toast.notconnected"));
               return;
             }
             openModal();
@@ -112,20 +112,20 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
           label={t("issueserie.fandomUrl")}
           isLoading={isFetching}
         >
-          { !issueSerie?.fandomUrl && (
+          {!issueSerie?.fandomUrl && (
             <p className="text-sm text-white/60 leading-relaxed">
-              { t("generic.unknown") }
+              {t("generic.unknown")}
             </p>
           )}
-          { issueSerie?.fandomUrl && (
+          {issueSerie?.fandomUrl && (
             <a
               href={issueSerie?.fandomUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-indigo-300/70 hover:underline hover:text-indigo-300 transition-colors truncate"
             >
-                {/* https://[xxx.fandom.com]/wiki/xxxxxxx */}
-                {issueSerie?.fandomUrl?.split('/')[2]}&nbsp;↗
+              {/* https://[xxx.fandom.com]/wiki/xxxxxxx */}
+              {issueSerie?.fandomUrl?.split("/")[2]}&nbsp;↗
             </a>
           )}
         </InfoPageSection>

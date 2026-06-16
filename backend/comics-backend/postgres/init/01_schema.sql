@@ -88,6 +88,9 @@ CREATE TABLE IF NOT EXISTS editions (
 	img_url TEXT,
 	cover_type TEXT,
 	parution_date DATE,
+	height NUMERIC(5,2) DEFAULT 26.50, -- Centimeters
+	width NUMERIC(5,2) DEFAULT 17.00, -- Centimeters
+	thickness NUMERIC(5,2) DEFAULT 1.60, -- Centimeters
 	added_by INT REFERENCES users(id) ON DELETE SET NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT now(),
 	modified_at TIMESTAMP NOT NULL DEFAULT now()

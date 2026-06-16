@@ -4,6 +4,12 @@ import { parseToSimplePublisher, type SimplePublisher } from "./publisher"
 import { parseToSimpleSerie, type SimpleSerie } from "./serie"
 import { parseToSimpleUser, type SimpleUser } from "./user"
 
+interface EditionDims {
+    width: number,
+    height: number,
+    thickness: number,
+}
+
 export interface Edition {
     id: number,
     isbn: string,
@@ -14,6 +20,7 @@ export interface Edition {
     imgUrl: string,
     coverType: string,
     parutionDate: Date,
+    dimensions: EditionDims
     publisher?: SimplePublisher,
     book?: SimpleBook,
     serie?: SimpleSerie,
@@ -32,6 +39,7 @@ export interface SimpleEdition {
     imgUrl: string,
     coverType: string,
     parutionDate: Date,
+    dimensions: EditionDims,
     publisherId?: number,
     publisherName?: string,
     bookId?: number
@@ -47,6 +55,7 @@ export interface ContributionEdition {
     imgUrl: string,
     coverType: string,
     parutionDate: string,
+    dimensions: EditionDims,
     publisher: { id: number, name: string },
     book: { id: number, name: string }
 }
@@ -61,6 +70,7 @@ export interface EditionDTO {
     imgUrl: string,
     coverType: string,
     parutionDate: string,
+    dimensions: EditionDims
 }
 
 // Utility function to transform the api data to an instance of Edition
@@ -75,6 +85,7 @@ export function parseToEdition(data: Record<string, any>): Edition {
         imgUrl: data.imgUrl,
         coverType: data.coverType,
         parutionDate: new Date(data.parutionDate),
+        dimensions: data.dimensions,
         publisher: data.publisher ? parseToSimplePublisher(data.publisher) : undefined,
         book: data.book ? parseToSimpleBook(data.book) : undefined,
         serie: data.serie ? parseToSimpleSerie(data.serie) : undefined,
@@ -95,6 +106,7 @@ export function parseToSimpleEdition(data: Record<string, any>): SimpleEdition {
         imgUrl: data.imgUrl,
         coverType: data.coverType,
         parutionDate: new Date(data.parutionDate),
+        dimensions: data.dimensions,
         publisherId: data.publisherId,
         publisherName: data.publisherName,
         bookId: data.bookId,
@@ -116,6 +128,7 @@ export function editionToSimpleEdition(edition: Edition): SimpleEdition {
         imgUrl: edition.imgUrl,
         coverType: edition.coverType,
         parutionDate: edition.parutionDate,
+        dimensions: edition.dimensions,
         publisherId: edition.publisher ? edition.publisher.id : undefined,
         publisherName: edition.publisher ? edition.publisher.name : undefined,
         bookId: edition.book ? edition.book.id : undefined,
@@ -133,5 +146,6 @@ export function editionToDTO(edition: Edition): EditionDTO {
         imgUrl: edition.imgUrl,
         coverType: edition.coverType,
         parutionDate: toYYYYmmDD(edition.parutionDate),
+        dimensions: edition.dimensions
     }
 }

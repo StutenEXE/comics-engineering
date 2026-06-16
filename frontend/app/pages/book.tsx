@@ -63,8 +63,6 @@ export default function BookPage({ params }: { params: { id: number } }) {
     submitBundle(b);
   };
 
-
-
   return (
     <>
       <InfoPageTemplate
@@ -84,7 +82,7 @@ export default function BookPage({ params }: { params: { id: number } }) {
           addedBy={book?.addedBy?.username}
           onEditClick={() => {
             if (!isAuthenticated) {
-              toast.info("toast.notconnected");
+              toast.info(t("toast.notconnected"));
               return;
             }
             openEditModal();

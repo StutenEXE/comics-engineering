@@ -74,6 +74,15 @@ export function EditionContributionForm({
         .min(1, t("generic.required", { capitalize: true })),
       coverType: z.string(), //z.literal(["Hardcover", "Paperback", "Single issue"]),
       parutionDate: zDateRequired(t("generic.required", { capitalize: true })),
+      width: z.coerce.number().gte(0, t("edition.form.width.gte0")).optional(),
+      height: z.coerce
+        .number()
+        .gte(0, t("edition.form.height.gte0"))
+        .optional(),
+      thickness: z.coerce
+        .number()
+        .gte(0, t("edition.form.thickness.gte0"))
+        .optional(),
     })
     .refine(() => bookLocalRef || selectedBook)
     .refine(() => selectedPublisher);
@@ -83,6 +92,7 @@ export function EditionContributionForm({
   const {
     register,
     setValue,
+    setValues,
     watch,
     handleSubmit,
     formState: { errors, isValid },
@@ -96,11 +106,14 @@ export function EditionContributionForm({
       url: edition?.url,
       imgUrl: edition?.imgUrl,
       coverType: edition?.coverType,
-      parutionDate: edition?.parutionDate
+      parutionDate: edition?.parutionDate,
+      height: edition?.dimensions.height,
+      width: edition?.dimensions.width,
+      thickness: edition?.dimensions.thickness,
     },
   });
 
-  const watchedParutionDate = watch("parutionDate")
+  const watchedParutionDate = watch("parutionDate");
   // UX : show selected image preview to user
   const watchedImgUrl = watch("imgUrl");
   // UX : Copy paste isbns with dashes
@@ -117,6 +130,11 @@ export function EditionContributionForm({
       imgUrl: data?.imgUrl,
       coverType: data?.coverType,
       parutionDate: toYYYYmmDD(data?.parutionDate),
+      dimensions: {
+        height: data?.height,
+        width: data?.width,
+        thickness: data?.thickness,
+      },
       book: bookLocalRef ?? {
         id: selectedBook?.id!,
         name: selectedBook?.name!,
@@ -161,42 +179,68 @@ export function EditionContributionForm({
     if (errors.isbn?.message) return;
     try {
       const res = await scrape({ isbn });
-      if (res.error) throw new Error()
-      
+      if (res.error) throw new Error();
+
       // Wrong data source
       if (res?.data?.resultType !== "isbn") {
-        toast.info(t("form.autofill.wrongSource"))
-        return
-      };
+        toast.info(t("form.autofill.wrongSource"));
+        return;
+      }
       const scraped = res.data.result.edition;
 
       // Fill form fields from scraped data
       if (isntEmpty(scraped.isbn13)) {
         setValue("isbn", scraped.isbn13, {
           shouldTouch: true,
-          shouldValidate: true
+          shouldValidate: true,
         });
-      }      
+      }
       if (scraped.pageCount !== undefined) {
         setValue("npages", scraped.pageCount, {
           shouldTouch: true,
-          shouldValidate: true
+          shouldValidate: true,
+        });
+      }
+      if (scraped.dimensions !== undefined) {
+        setValue("height", scraped.dimensions.height, {
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+        setValue("width", scraped.dimensions.width, {
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+        setValue("thickness", scraped.dimensions.thickness, {
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+      }
+      if (scraped.pageCount !== undefined) {
+        setValue("npages", scraped.pageCount, {
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+      }
+      if (scraped.pageCount !== undefined) {
+        setValue("npages", scraped.pageCount, {
+          shouldTouch: true,
+          shouldValidate: true,
         });
       }
       if (isntEmpty(scraped.publishDate)) {
         setValue("parutionDate", new Date(scraped.publishDate), {
           shouldTouch: true,
-          shouldValidate: true
+          shouldValidate: true,
         });
       }
-      if (isntEmpty(scraped.cover)) { 
+      if (isntEmpty(scraped.cover)) {
         setValue("imgUrl", scraped.cover, {
           shouldTouch: true,
-          shouldValidate: true
+          shouldValidate: true,
         });
       }
     } catch (e) {
-      toast.error(t("form.autofill.sourceNotFound"))
+      toast.error(t("form.autofill.sourceNotFound"));
     }
   };
 
@@ -209,7 +253,9 @@ export function EditionContributionForm({
       }
       onCancel={noPropagationEvt(onCancel)}
       submitLabel={
-        action === "update" ? t("edition.form.modify") : t("edition.form.create")
+        action === "update"
+          ? t("edition.form.modify")
+          : t("edition.form.create")
       }
       onSubmit={handleSubmit(triggerSubmission)}
     >
@@ -316,12 +362,57 @@ export function EditionContributionForm({
         />
       </div>
 
+      <div>
+        <label className="flex items-center gap-2 text-xs  font-medium uppercase tracking-widest text-white/40">
+          {t("edition.dimensions")}
+        </label>
+        <div className="flex items-start gap-3">
+          {/* Height */}
+          <TextRhfInput
+            label={t("edition.dimensions.height")}
+            registration={register("height")}
+            inputProps={{
+              type: "number",
+              step: ".01",
+              inputMode: "numeric",
+              min: 0,
+            }}
+            error={errors.height}
+          />
+          {/* Width */}
+          <TextRhfInput
+            label={t("edition.dimensions.width")}
+            registration={register("width")}
+            inputProps={{
+              type: "number",
+              step: ".01",
+              inputMode: "numeric",
+              min: 0,
+            }}
+            error={errors.width}
+          />
+          {/* Thickness */}
+          <TextRhfInput
+            label={t("edition.dimensions.thickness")}
+            registration={register("thickness")}
+            inputProps={{
+              type: "number",
+              step: ".01",
+              inputMode: "numeric",
+              min: 0,
+            }}
+            error={errors.thickness}
+          />
+        </div>
+      </div>
+
       <div className="flex items-end gap-3">
         {/* Url */}
         <TextRhfInput
           label={t("edition.url")}
           registration={register("url")}
           error={errors.url}
+          className="w-100"
         />
 
         {/* CoverType*/}
@@ -342,7 +433,7 @@ export function EditionContributionForm({
           label={t("edition.imgUrl")}
           registration={register("imgUrl")}
           error={errors.imgUrl}
-          className="w-[100%]"
+          className="w-100"
         />
         {!errors.imgUrl && watchedImgUrl && (
           <img
