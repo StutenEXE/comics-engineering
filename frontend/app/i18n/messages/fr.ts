@@ -306,7 +306,7 @@ export default {
   "header.home": "Accueil",
   "header.search": "Rechercher",
   "header.contribute": "Contribuer",
-  "header.collection": "Ma Collection",
+  "header.stash": "Ma Stash",
   "header.profile": "Mon Profil",
   "header.users": "Utilisateurs",
   "header.contributions": "Contributions",

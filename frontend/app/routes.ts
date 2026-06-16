@@ -5,15 +5,15 @@ export default [
   route("search", "pages/search.tsx"),
 
   route("book/:id", "pages/book.tsx"),
-  route("issue_serie/:id", "pages/issue-serie.tsx"),
+  route("issueserie/:id", "pages/issue-serie.tsx"),
   route("issue/:id", "pages/issue.tsx"),
   route("serie/:id", "pages/serie.tsx"),
 
   route("contribute", "pages/contribute.tsx"),
-  route("collection", "pages/collection.tsx", [
-    index("pages/collection/editions.tsx"),
-    route("series", "pages/collection/series.tsx"),
-    route("contributions", "pages/collection/contributions.tsx"),
+  route("stash", "pages/stash.tsx", [
+    index("pages/stash/editions.tsx"),
+    route("series", "pages/stash/series.tsx"),
+    route("contributions", "pages/stash/contributions.tsx"),
   ]),
 
   route("users", "pages/users.tsx"),

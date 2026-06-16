@@ -3,7 +3,11 @@ import { useState } from "react";
 import { useForm, type FieldValues } from "react-hook-form";
 import z from "zod";
 import { useTranslation } from "~/i18n/i18n";
-import type { Book, ContributionBook, SimpleIssueStringDates } from "~/models/book";
+import type {
+  Book,
+  ContributionBook,
+  SimpleIssueStringDates,
+} from "~/models/book";
 import {
   ContributionActionEnum,
   ContributionTypeEnum,
@@ -87,7 +91,6 @@ export function BookContributionForm({
   // UX : show selected image preview to user
   const watchedImgUrl = watch("imgUrl");
 
-
   const triggerSubmission = (data: FieldValues) => {
     const newBook: ContributionBook = {
       id: book?.id,
@@ -107,7 +110,7 @@ export function BookContributionForm({
           number: issue.number,
           coverDate: toYYYYmmDD(issue.coverDate),
           parutionDate: toYYYYmmDD(issue.parutionDate),
-          issueSerieId: issue.issueSerieId, 
+          issueSerieId: issue.issueSerieId,
           issueSerieName: issue.issueSerieName,
         };
         return issueCopy;
@@ -228,36 +231,36 @@ export function BookContributionForm({
   const triggerScraping = async (isbn: string) => {
     try {
       const res = await scrape({ isbn });
-      if (res.error) throw new Error()
-      
+      if (res.error) throw new Error();
+
       // Wrong data source
       if (res?.data?.resultType !== "isbn") {
-        toast.info(t("form.autofill.wrongSource"))
-        return
-      };
+        toast.info(t("form.autofill.wrongSource"));
+        return;
+      }
       const scraped = res.data.result.book;
 
       // Fill form fields from scraped data
       if (isntEmpty(scraped.title)) {
         setValue("name", scraped.title, {
           shouldTouch: true,
-          shouldValidate: true
+          shouldValidate: true,
         });
-      }      
+      }
       if (isntEmpty(scraped.description)) {
         setValue("desc", scraped.description, {
           shouldTouch: true,
-          shouldValidate: true
+          shouldValidate: true,
         });
       }
-      if (isntEmpty(scraped.cover)) { 
+      if (isntEmpty(scraped.cover)) {
         setValue("imgUrl", scraped.cover, {
           shouldTouch: true,
-          shouldValidate: true
+          shouldValidate: true,
         });
       }
     } catch (e) {
-      toast.error(t("form.autofill.sourceNotFound"))
+      toast.error(t("form.autofill.sourceNotFound"));
     }
   };
 
@@ -274,7 +277,6 @@ export function BookContributionForm({
       }
       onSubmit={handleSubmit(triggerSubmission)}
     >
-
       {/* ISBN for autofill */}
       <TextRhfInputWithAction
         inputLabel={t("book.form.isbnautofill")}
@@ -415,13 +417,13 @@ export function BookContributionForm({
                               key={issue.id}
                               onClick={() => addLinkedIssue(issue)}
                               disabled={linked}
-                              className={`rounded-md border px-2 py-2 text-sm ${
+                              className={`rounded-md border px-2 py-2 text-sm cursor-pointer ${
                                 linked
                                   ? "border-white/10 bg-white/10 text-white/50 cursor-not-allowed"
                                   : "border-white/10 bg-black/10 text-white hover:border-white/30"
                               }`}
                             >
-                              #{issue.number ?? issue.name}
+                              #{issue.number}
                             </button>
                           );
                         })}
@@ -451,27 +453,29 @@ export function BookContributionForm({
                     <div key={serieLabel} className="space-y-2">
                       <div className="text-xs text-white/50">{serieLabel}</div>
                       <div className="flex flex-wrap gap-2">
-                        {issues.map((issue) => (
-                          <div
-                            key={issue.id}
-                            className="flex items-center gap-2 rounded-full border border-white/10 bg-black/10 px-3 py-1 text-sm"
-                          >
-                            <span>{issue.number ?? issue.name}</span>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                removeLinked(
-                                  selectedLinkedIssues.findIndex(
-                                    (li) => li.id === issue.id,
-                                  ),
-                                )
-                              }
-                              className="text-rose-400 text-xs"
+                        {issues
+                          .sort((a, b) => a.number - b.number)
+                          .map((issue) => (
+                            <div
+                              key={issue.id}
+                              className="flex items-center gap-2 rounded-full border border-white/10 bg-black/10 px-3 py-1 text-sm"
                             >
-                              x
-                            </button>
-                          </div>
-                        ))}
+                              <span>{issue.number ?? issue.name}</span>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  removeLinked(
+                                    selectedLinkedIssues.findIndex(
+                                      (li) => li.id === issue.id,
+                                    ),
+                                  )
+                                }
+                                className="text-rose-400 text-xs cursor-pointer"
+                              >
+                                x
+                              </button>
+                            </div>
+                          ))}
                       </div>
                     </div>
                   ),

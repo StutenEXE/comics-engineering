@@ -76,7 +76,7 @@ export function Header() {
                 <span className="w-px h-4 bg-white/10 mx-1" />
 
                 {/* User links */}
-                {[{ to: "/collection", label: t("header.collection") }].map(
+                {[{ to: "/stash", label: t("header.stash") }].map(
                   ({ to, label }) => (
                     <Link
                       key={to}

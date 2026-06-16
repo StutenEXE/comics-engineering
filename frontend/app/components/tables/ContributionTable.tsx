@@ -90,7 +90,7 @@ export const ContributionTable = forwardRef<
         if (c.resolvedEntityId || c.entityId) {
           return (
             <a
-              href={`${c.entityType}/${c.resolvedEntityId || c.entityId}`}
+              href={`/${c.entityType}/${c.resolvedEntityId || c.entityId}`}
               className="hover:underline"
             >
               {name}&nbsp;<span className="font-normal">↗</span>
@@ -124,9 +124,9 @@ export const ContributionTable = forwardRef<
       list={
         contributions
           ? [...contributions]?.sort(
-            (c1, c2) =>
-              c2.bundle.createdAt.getTime() - c1.bundle.createdAt.getTime(),
-          )
+              (c1, c2) =>
+                c2.bundle.createdAt.getTime() - c1.bundle.createdAt.getTime(),
+            )
           : []
       }
       columns={columns}
