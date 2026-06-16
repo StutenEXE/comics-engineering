@@ -41,6 +41,7 @@ export default function ContributePage() {
     if (isSuccess) {
       toast.success(t("contribute.success"));
       closeContributionModal();
+      statsRef.current?.refetch();
     }
   }, [isSuccess]);
 
@@ -81,14 +82,6 @@ export default function ContributePage() {
   ) => {
     submitBundle(bundle);
   };
-
-  useEffect(() => {
-    if (isSuccess) {
-      toast.success(t("contribute.success"));
-      closeContributionModal();
-      statsRef.current?.refetch();
-    }
-  }, [isSuccess]);
 
   return (
     <LoggedProtectedRoute>

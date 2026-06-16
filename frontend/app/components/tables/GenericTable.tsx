@@ -243,7 +243,7 @@ export function GenericTable<T extends Record<string, any>>({
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className="w-fit max-w-40 text-xs font-medium uppercase tracking-widest text-white/30 h-10 border-r"
+                      className="w-fit max-w-50 text-xs font-medium uppercase tracking-widest text-white/40 h-10 border-r"
                     >
                       <div className="flex gap-2 justify-center items-center">
                         <div className="text-wrap text-center">
@@ -281,9 +281,9 @@ export function GenericTable<T extends Record<string, any>>({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className="w-fit max-w-50 text-sm text-white/60 group-hover:text-white/80 transition-colors py-3"
+                      className="w-fit max-w-50 text-sm text-white/70 group-hover:text-white/80 transition-colors py-3"
                     >
-                      <div className="w-full flex justify-center text-wrap">
+                      <div className="w-full min-w-fit flex justify-center text-wrap">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),

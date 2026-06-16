@@ -41,16 +41,18 @@ export function IssueContributionForm({
   const toast = useToast();
 
   // Validation schema
-  const schema = z.object({
-    fandomUrl : z.url().optional(),
-    name: z.string().min(1, t("generic.required", { capitalize: true })),
-    number: z.coerce
-      .number()
-      .gte(0, t("issue.form.number.gte0"))
-      .min(1, t("generic.required", { capitalize: true })),
-    coverDate: zDateRequired(t("generic.required", { capitalize: true })),
-    parutionDate: zDateRequired(t("generic.required", { capitalize: true })),
-  });
+  const schema = z
+    .object({
+      fandomUrl: z.url().optional(),
+      name: z.string().min(1, t("generic.required", { capitalize: true })),
+      number: z.coerce
+        .number()
+        .gte(0, t("issue.form.number.gte0"))
+        .min(0, t("generic.required", { capitalize: true })),
+      coverDate: zDateRequired(t("generic.required", { capitalize: true })),
+      parutionDate: zDateRequired(t("generic.required", { capitalize: true })),
+    })
+    .refine(() => issueSerieLocalRef || selectedIssueSerie);
 
   type FormData = z.infer<typeof schema>;
   // Form operations
@@ -67,7 +69,7 @@ export function IssueContributionForm({
       name: issue?.name,
       number: issue?.number,
       parutionDate: issue?.parutionDate,
-      coverDate: issue?.coverDate
+      coverDate: issue?.coverDate,
     },
   });
 
@@ -111,47 +113,46 @@ export function IssueContributionForm({
     SimpleIssueSerie | undefined
   >(issue?.issueSerie ?? undefined);
 
-  
   // Scraper used for autofill
   const [scrape, { isFetching: scraperLoading }] = useLazyScrapeUrlQuery();
   const triggerScraping = async (url: string) => {
     if (errors.fandomUrl?.message) return;
     try {
       const res = await scrape({ url });
-      if (res.error) throw new Error()
-      
+      if (res.error) throw new Error();
+
       // Wrong data source
       if (res?.data?.resultType !== "issue") {
-        toast.info(t("form.autofill.wrongSource"))
-        return
-      };
+        toast.info(t("form.autofill.wrongSource"));
+        return;
+      }
       const scraped = res.data.result;
 
       // Fill form fields from scraped data
       if (isntEmpty(scraped.name)) {
         setValue("name", scraped.name, {
           shouldTouch: true,
-          shouldValidate: true
+          shouldValidate: true,
         });
-      }      
+      }
       if (scraped.number !== undefined) {
         setValue("number", scraped.number, {
           shouldTouch: true,
-          shouldValidate: true
+          shouldValidate: true,
         });
       }
-      if (isntEmpty(scraped.parutionDate)) 
+      if (isntEmpty(scraped.parutionDate))
         setValue("parutionDate", new Date(scraped.parutionDate), {
           shouldTouch: true,
-          shouldValidate: true
+          shouldValidate: true,
         });
-      if (isntEmpty(scraped.coverDate)) 
+      if (isntEmpty(scraped.coverDate))
         setValue("coverDate", new Date(scraped.coverDate), {
           shouldTouch: true,
-          shouldValidate: true
+          shouldValidate: true,
         });
     } catch (e) {
-      toast.error(t("form.autofill.sourceNotFound"))
+      toast.error(t("form.autofill.sourceNotFound"));
     }
   };
 
@@ -161,12 +162,11 @@ export function IssueContributionForm({
     if (scrapedOnceRef.current) return;
     scrapedOnceRef.current = true;
     // If some data is already present (e.g name), do not auto scrape
-    if (isntEmpty(issue?.name)) return; 
+    if (isntEmpty(issue?.name)) return;
     // If issue has no real id and a fandom url, scrape fandom once when component mounts or when fandomUrl changes
     if ((!issue?.id || issue?.id < 0) && isntEmpty(issue?.fandomUrl)) {
       triggerScraping(issue.fandomUrl);
     }
-  
   }, [issue?.id, issue?.fandomUrl]);
 
   return (
@@ -246,7 +246,7 @@ export function IssueContributionForm({
             valueAsDate: true,
           })}
           inputProps={{
-            value : toHtmlInputString(watchedCoverDate),
+            value: toHtmlInputString(watchedCoverDate),
           }}
           error={errors.coverDate}
           tooltip={t("issue.coverDateExplanation")}
