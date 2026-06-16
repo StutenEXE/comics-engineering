@@ -1,6 +1,7 @@
 import { useTranslation } from "~/i18n/i18n";
 import { GenericButton } from "../buttons/GenericButton";
 import { noPropagationEvt } from "~/utils/events";
+import LoadingBadge from "../badges/LoadingBadge";
 
 interface GenericFormProps {
   title: string;
@@ -9,6 +10,7 @@ interface GenericFormProps {
   submitLabel?: string;
   onSubmit?: (event: React.SubmitEvent<HTMLFormElement>) => void;
   disabled?: boolean;
+  isLoading?: boolean;
   children?: React.ReactNode;
 }
 
@@ -19,6 +21,7 @@ export function GenericForm({
   submitLabel,
   onSubmit,
   disabled,
+  isLoading = false,
   children,
 }: GenericFormProps) {
   const { t } = useTranslation();
@@ -47,6 +50,7 @@ export function GenericForm({
           className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm py-2 rounded-md transition-all shadow-lg shadow-indigo-900/40 disabled:opacity-30 disabled:cursor-not-allowed"
         >
           {submitLabel ?? t("generic.submit", { capitalize: true })}
+          <LoadingBadge className="text-white" isLoading={isLoading} />
         </GenericButton>
       </div>
     </form>

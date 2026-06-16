@@ -38,7 +38,10 @@ interface ContributionBundleFormProps {
   bundle?: ContributionBundle;
   action: "create" | "update";
   disableNewContributions?: boolean;
-  onSubmit?: (bundle: Partial<ContributionBundle>, hasChanges: boolean) => void;
+  onSubmit?: (
+    bundle: Partial<ContributionBundle>,
+    hasChanges: boolean,
+  ) => Promise<void>;
   onCancel?: () => void;
   // Returing boolean : didn't create a new contribution in DB
   onContributionAdd?: (
@@ -140,10 +143,13 @@ export function ContributionBundleForm({
 
     switch (c.entityType) {
       case ContributionTypeEnum.ISSUE:
-        const newNumber = newContribution.proposedData.number + 1
+        const newNumber = newContribution.proposedData.number + 1;
         newContribution.proposedData = {
           // Replaces the last number in the url (ex : https://xxx.fandom.com/wiki/IssueSerie_Vol_1_XXX)
-          fandomUrl: (newContribution.proposedData.fandomUrl as string).replace(/\d+$/, newNumber),
+          fandomUrl: (newContribution.proposedData.fandomUrl as string).replace(
+            /\d+$/,
+            newNumber,
+          ),
           number: newNumber,
           issueSerie: newContribution.proposedData.issueSerie,
         } as Partial<Issue>;
@@ -238,8 +244,12 @@ export function ContributionBundleForm({
     });
   };
 
-  const triggerSubmission = (data: FormData) => {
-    onSubmit?.(
+  // Used to disable the confirm button
+  const [disabled, setDisabled] = useState(false);
+
+  const triggerSubmission = async (data: FormData) => {
+    setDisabled(true);
+    await onSubmit?.(
       {
         id: bundle?.id,
         contributions: contributions,
@@ -248,6 +258,7 @@ export function ContributionBundleForm({
       },
       isDirty,
     );
+    setDisabled(false);
   };
 
   const localIssueCandidates: SimpleIssue[] = contributions
@@ -290,7 +301,8 @@ export function ContributionBundleForm({
             : t("cbundle.form.create")
         }
         onSubmit={handleSubmit(triggerSubmission)}
-        disabled={contributions.length <= 0}
+        isLoading={disabled}
+        disabled={contributions.length <= 0 || disabled}
       >
         <div className="flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-widest text-white/40">

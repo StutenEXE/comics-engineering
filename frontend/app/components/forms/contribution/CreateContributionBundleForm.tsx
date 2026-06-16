@@ -4,7 +4,10 @@ import { useConfirm } from "~/components/modals/ConfirmModalProvider";
 import { useTranslation } from "~/i18n/i18n";
 
 interface CreateContributionBundleFormProps {
-  onSubmit?: (bundle: Partial<ContributionBundle>, hasChanges: boolean) => void;
+  onSubmit?: (
+    bundle: Partial<ContributionBundle>,
+    hasChanges: boolean,
+  ) => Promise<void>;
   onCancel?: () => void;
 }
 
@@ -32,4 +35,3 @@ export function CreateContributionBundleForm({
     />
   );
 }
-

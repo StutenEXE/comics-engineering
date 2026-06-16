@@ -42,7 +42,7 @@ export function CollectionSidebar({
           items={[
             {
               title: t("contributions"),
-              url: "/collection/contributions",
+              url: "/stash/contributions",
               icon: MdEditDocument,
             },
           ]}
@@ -52,12 +52,12 @@ export function CollectionSidebar({
           items={[
             {
               title: t("editions", { capitalize: true }),
-              url: "/collection",
+              url: "/stash",
               icon: MdBook,
             },
             {
               title: t("series", { capitalize: true }),
-              url: "/collection/series",
+              url: "/stash/series",
               icon: MdLibraryBooks,
             },
           ]}
