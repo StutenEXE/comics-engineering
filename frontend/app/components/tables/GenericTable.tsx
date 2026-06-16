@@ -34,6 +34,7 @@ import {
   SelectValue,
 } from "../shadcn/ui/select";
 import { Separator } from "../shadcn/ui/separator";
+import { SelectInput } from "../forms/fields/SelectInput";
 
 // Re-export ColumnDef so callers import from one place
 export type { ColumnDef };
@@ -348,55 +349,6 @@ export function GenericTable<T extends Record<string, any>>({
         </div>
       )}
     </div>
-  );
-}
-
-interface SelectInputProps {
-  options: {
-    label: string;
-    value: any;
-  }[];
-  filterValue: string;
-  placeholder?: string;
-  selectAll?: boolean;
-  onValueChange: (val: string) => void;
-}
-
-function SelectInput({
-  options,
-  filterValue,
-  placeholder,
-  selectAll,
-  onValueChange,
-}: SelectInputProps) {
-  const { t } = useTranslation();
-  return (
-    <Select value={filterValue} onValueChange={onValueChange}>
-      <SelectTrigger className="w-full max-w-48">
-        <SelectValue
-          placeholder={placeholder || t("generic.search.placeholder")}
-        />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectGroup>
-          <SelectLabel>
-            {placeholder || t("generic.search.placeholder")}
-          </SelectLabel>
-          {selectAll && (
-            <SelectItem value="any">
-              {t("generic.all", {
-                capitalize: true,
-              })}
-            </SelectItem>
-          )}
-          {options.map((o) => (
-            <SelectItem key={o.value} value={o.value}>
-              {o.label}
-            </SelectItem>
-          ))}
-        </SelectGroup>
-      </SelectContent>
-    </Select>
   );
 }
 

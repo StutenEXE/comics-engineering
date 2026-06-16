@@ -113,7 +113,7 @@ export function EditionModal({
             addedBy={edition?.addedBy?.username}
             onEditClick={() => {
               if (!isAuthenticated) {
-                toast.info("toast.notconnected");
+                toast.info(t("toast.notconnected"));
                 return;
               }
               openEditModal();
@@ -163,7 +163,23 @@ export function EditionModal({
               // Price
               {
                 label: t("edition.price"),
-                value: `${edition?.price.toPrecision(4)}€`,
+                value: `${edition?.price.toFixed(2)}€`,
+              },
+              // Dimensions
+              {
+                label: t("edition.dimensions"),
+                value: (
+                  <>
+                    {t("edition.dimensions.height")}:&nbsp;
+                    {edition?.dimensions.height.toFixed(2)}&nbsp;cm
+                    <br />
+                    {t("edition.dimensions.width")}:&nbsp;
+                    {edition?.dimensions.width.toFixed(2)}&nbsp;cm
+                    <br />
+                    {t("edition.dimensions.thickness")}:&nbsp;
+                    {edition?.dimensions.thickness.toFixed(2)}&nbsp;cm
+                  </>
+                ),
               },
             ]}
           />

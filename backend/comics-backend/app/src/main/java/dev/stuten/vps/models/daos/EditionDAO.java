@@ -49,6 +49,9 @@ public class EditionDAO extends ContributableDAO<EditionDTO> {
                 EDITIONS.IMG_URL.as(EditionMapper.getFieldName(EDITIONS.IMG_URL)),
                 EDITIONS.COVER_TYPE.as(EditionMapper.getFieldName(EDITIONS.COVER_TYPE)),
                 EDITIONS.PARUTION_DATE.as(EditionMapper.getFieldName(EDITIONS.PARUTION_DATE)),
+                EDITIONS.HEIGHT.as(EditionMapper.getFieldName(EDITIONS.HEIGHT)),
+                EDITIONS.WIDTH.as(EditionMapper.getFieldName(EDITIONS.WIDTH)),
+                EDITIONS.THICKNESS.as(EditionMapper.getFieldName(EDITIONS.THICKNESS)),
                 EDITIONS.PUBLISHER_ID.as(EditionMapper.getFieldName(EDITIONS.PUBLISHER_ID)),
                 PUBLISHERS.NAME.as(EditionMapper.getFieldName(PUBLISHERS.NAME)),
                 EDITIONS.BOOK_ID.as(EditionMapper.getFieldName(EDITIONS.BOOK_ID)),
@@ -104,6 +107,9 @@ public class EditionDAO extends ContributableDAO<EditionDTO> {
                 .set(EDITIONS.IMG_URL, dto.getImgUrl())
                 .set(EDITIONS.COVER_TYPE, dto.getCoverType())
                 .set(EDITIONS.PARUTION_DATE, dto.getParutionDate())
+                .set(EDITIONS.HEIGHT, dto.getDimensions().height())
+                .set(EDITIONS.WIDTH, dto.getDimensions().width())
+                .set(EDITIONS.THICKNESS, dto.getDimensions().thickness())
                 .set(EDITIONS.PUBLISHER_ID, dto.getPublisher().getId())
                 .set(EDITIONS.BOOK_ID, dto.getBook().getId())
                 .set(EDITIONS.ADDED_BY, dto.getAddedBy().getId())
@@ -123,6 +129,9 @@ public class EditionDAO extends ContributableDAO<EditionDTO> {
                 .set(EDITIONS.IMG_URL, dto.getImgUrl())
                 .set(EDITIONS.COVER_TYPE, dto.getCoverType())
                 .set(EDITIONS.PARUTION_DATE, dto.getParutionDate())
+                .set(EDITIONS.HEIGHT, dto.getDimensions().height())
+                .set(EDITIONS.WIDTH, dto.getDimensions().width())
+                .set(EDITIONS.THICKNESS, dto.getDimensions().thickness())
                 .set(EDITIONS.PUBLISHER_ID, dto.getPublisher().getId())
                 .set(EDITIONS.BOOK_ID, dto.getBook().getId())
                 .set(EDITIONS.MODIFIED_AT, LocalDateTime.now())

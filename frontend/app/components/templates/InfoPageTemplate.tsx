@@ -126,8 +126,8 @@ export function InfoPageField({
         >
           {displayValue}&nbsp;↗
         </Link>
-      // External link found
-      ) : href ? (
+      ) : // External link found
+      href ? (
         <a
           href={href}
           target="_blank"
@@ -136,8 +136,8 @@ export function InfoPageField({
         >
           {displayValue}&nbsp;↗
         </a>
-      // No link
       ) : (
+        // No link
         <span className="text-sm text-white/70">{displayValue}</span>
       )}
     </>

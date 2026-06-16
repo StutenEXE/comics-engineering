@@ -6,6 +6,7 @@ import static dev.stuten.vps.jooq.tables.Publishers.PUBLISHERS;
 import static dev.stuten.vps.jooq.tables.Series.SERIES;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -32,6 +33,9 @@ public class EditionMapper {
                         Map.entry(EDITIONS.IMG_URL, "edition_img_url"),
                         Map.entry(EDITIONS.COVER_TYPE, "edition_cover_type"),
                         Map.entry(EDITIONS.PARUTION_DATE, "edition_parution_date"),
+                        Map.entry(EDITIONS.HEIGHT, "edition_height"),
+                        Map.entry(EDITIONS.WIDTH, "edition_width"),
+                        Map.entry(EDITIONS.THICKNESS, "edition_thickness"),
                         Map.entry(EDITIONS.PUBLISHER_ID, "edition_publisher_id"),
                         Map.entry(PUBLISHERS.NAME, "edition_publisher_name"),
                         Map.entry(EDITIONS.BOOK_ID, "edition_book_id"),
@@ -65,6 +69,12 @@ public class EditionMapper {
                                 .imgUrl(r.get(getFieldName(EDITIONS.IMG_URL), String.class))
                                 .coverType(r.get(getFieldName(EDITIONS.COVER_TYPE), String.class))
                                 .parutionDate(r.get(getFieldName(EDITIONS.PARUTION_DATE), LocalDate.class))
+                                .dimensions(
+                                                new EditionDTO.Dimensions(
+                                                                r.get(getFieldName(EDITIONS.HEIGHT), BigDecimal.class),
+                                                                r.get(getFieldName(EDITIONS.WIDTH), BigDecimal.class),
+                                                                r.get(getFieldName(EDITIONS.THICKNESS),
+                                                                                BigDecimal.class)))
                                 .publisher(publisher)
                                 .book(book)
                                 .serie(serie)
@@ -87,6 +97,12 @@ public class EditionMapper {
                                 .imgUrl(r.get(getFieldName(EDITIONS.IMG_URL), String.class))
                                 .coverType(r.get(getFieldName(EDITIONS.COVER_TYPE), String.class))
                                 .parutionDate(r.get(getFieldName(EDITIONS.PARUTION_DATE), LocalDate.class))
+                                .dimensions(
+                                                new SimpleEditionDTO.Dimensions(
+                                                                r.get(getFieldName(EDITIONS.HEIGHT), BigDecimal.class),
+                                                                r.get(getFieldName(EDITIONS.WIDTH), BigDecimal.class),
+                                                                r.get(getFieldName(EDITIONS.THICKNESS),
+                                                                                BigDecimal.class)))
                                 .publisherId(r.get(getFieldName(EDITIONS.PUBLISHER_ID), Integer.class))
                                 .publisherName(r.get(getFieldName(PUBLISHERS.NAME), String.class))
                                 .bookId(r.get(getFieldName(EDITIONS.BOOK_ID), Integer.class))

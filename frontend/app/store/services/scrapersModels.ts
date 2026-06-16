@@ -60,4 +60,9 @@ interface EditionResultData {
     pageCount: number
     cover: string
     publishDate: string
+    dimensions: {
+        height: number
+        width: number
+        thickness: number
+    }
 }
