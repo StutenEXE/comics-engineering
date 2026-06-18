@@ -89,7 +89,7 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
         <div
           className="cursor-pointer"
           onClick={() => {
-            setEditionToShowId(row.original.id);
+            setEditionToShowId(row.original.edition.id);
             openEditionModal();
           }}
         >
