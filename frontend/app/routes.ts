@@ -12,6 +12,7 @@ export default [
   route("contribute", "pages/contribute.tsx"),
   route("stash", "pages/stash.tsx", [
     index("pages/stash/editions.tsx"),
+    route("bookshelf", "pages/stash/bookshelf.tsx"),
     route("series", "pages/stash/series.tsx"),
     route("contributions", "pages/stash/contributions.tsx"),
   ]),

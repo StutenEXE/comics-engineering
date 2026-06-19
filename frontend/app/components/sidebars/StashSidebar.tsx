@@ -1,3 +1,4 @@
+import { BsBookshelf } from "react-icons/bs";
 import { MdBook, MdEditDocument, MdLibraryBooks } from "react-icons/md";
 import { useTranslation } from "~/i18n/i18n";
 import {
@@ -31,7 +32,7 @@ export function CollectionSidebar({
                 href="#"
                 className="text-lg font-medium uppercase tracking-wide"
               >
-                {t("collection.title")}
+                {t("stash.title")}
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -48,8 +49,13 @@ export function CollectionSidebar({
           ]}
         />
         <NavSection
-          label={t("collection.library")}
+          label={t("stash.library")}
           items={[
+            {
+              title: t("stash.bookshelf", { capitalize: true }),
+              url: "/stash/bookshelf",
+              icon: BsBookshelf,
+            },
             {
               title: t("editions", { capitalize: true }),
               url: "/stash",
