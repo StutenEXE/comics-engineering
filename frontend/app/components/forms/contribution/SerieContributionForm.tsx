@@ -37,25 +37,15 @@ export function SerieContributionForm({
   const { t } = useTranslation();
 
   // Validation schema
-  const schema = z
-    .object({
-      name: z.string().min(1, t("generic.required", { capitalize: true })),
-      ongoing: z.boolean(),
-      oneshot: z.boolean(),
-      nvolumes: z.coerce
-        .number()
-        .gte(0, t("serie.form.nvolumes.gte0"))
-        .optional(),
-      startDate: zDateRequired(t("generic.required", { capitalize: true })),
-      endDate: zDateOptional(),
-    })
-    .refine(
-      (data) => {
-        if (!data.endDate) return true;
-        return data.endDate > data.startDate;
-      },
-      { message: t("serie.form.endDate.afterStart"), path: ["endDate"] },
-    );
+  const schema = z.object({
+    name: z.string().min(1, t("generic.required", { capitalize: true })),
+    ongoing: z.boolean(),
+    oneshot: z.boolean(),
+    nvolumes: z.coerce
+      .number()
+      .gte(0, t("serie.form.nvolumes.gte0"))
+      .optional(),
+  });
 
   type FormData = z.infer<typeof schema>;
   // Form operations
@@ -81,8 +71,6 @@ export function SerieContributionForm({
       ongoing: data.ongoing,
       oneshot: data.oneshot,
       nvolumes: data.nvolumes,
-      startDate: toYYYYmmDD(data.startDate),
-      endDate: toYYYYmmDD(data.endDate),
     };
     const contrib: Partial<SimpleContribution> = {
       action:
@@ -97,24 +85,12 @@ export function SerieContributionForm({
     onSubmit?.(contrib);
   };
 
-  // Handle specific UX case : endDate always after startDate
-  const [endDateDisabled, setEndDateDisabled] = useState(serie === undefined);
-  const [minEndDate, setMinEndDate] = useState(
-    toHtmlInputString(serie?.startDate),
-  );
-
-  const onStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setEndDateDisabled(!val);
-    if (val) {
-      setMinEndDate(val);
-    }
-  };
-
   return (
     <GenericForm
       title={
-        action === "update" ? t("serie.form.title.modify") : t("serie.form.title.create")
+        action === "update"
+          ? t("serie.form.title.modify")
+          : t("serie.form.title.create")
       }
       onCancel={noPropagationEvt(onCancel)}
       submitLabel={
@@ -153,33 +129,6 @@ export function SerieContributionForm({
           error={errors.nvolumes}
         />
       </div>
-
-      {/* Date range */}
-      <DateRangeRhfInput
-        startProps={{
-          label: t("serie.startDate"),
-          registration: register("startDate", {
-            onChange: onStartDateChange,
-            valueAsDate: true,
-          }),
-          inputProps: { defaultValue: toHtmlInputString(serie?.startDate) },
-          error: errors.startDate,
-        }}
-        endProps={{
-          label: t("serie.endDate"),
-          registration: register("endDate", {
-            valueAsDate: true,
-          }),
-          inputProps: {
-            disabled: endDateDisabled,
-            min: minEndDate,
-            defaultValue: serie?.endDate
-              ? toHtmlInputString(serie?.endDate)
-              : undefined,
-          },
-          error: errors.startDate,
-        }}
-      />
     </GenericForm>
   );
 }

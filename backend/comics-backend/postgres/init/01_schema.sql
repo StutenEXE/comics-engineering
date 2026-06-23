@@ -54,8 +54,6 @@ CREATE TABLE IF NOT EXISTS series (
 	ongoing BOOLEAN NOT NULL DEFAULT FALSE,
 	oneshot BOOLEAN NOT NULL DEFAULT FALSE,
 	nvolumes SMALLINT,
-	start_date DATE NOT NULL,
-	end_date DATE,
 	added_by INT REFERENCES users(id) ON DELETE SET NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT now(),
 	modified_at TIMESTAMP NOT NULL DEFAULT now()

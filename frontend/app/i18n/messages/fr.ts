@@ -15,7 +15,7 @@ export default {
   "generic.all": "tous",
   "generic.the": "le",
   "generic.present": "présent",
-  "generic.oneshot": "oneshot",
+  "generic.oneshot": "récit complet",
   "generic.volume": "tome",
   "generic.admin": "admin",
   "generic.actions": "actions",
@@ -29,6 +29,7 @@ export default {
   "generic.local": "Locale",
   "generic.localRefPresent": "Référence locale présente",
   "generic.currencyDisclaimer": "Tous les prix sont indiqués en euros (€)",
+  "generic.errorOccured": "Une erreur est survenue",
   // ============================
   // == Toasts
   // ============================
@@ -394,4 +395,6 @@ export default {
   // Issue
   "page.issue.header": "Issue",
   "page.issue.books": "Livres associés",
+  // Serie
+  "page.serie.serieOfXVolumes": "Série de %x% tomes"
 };

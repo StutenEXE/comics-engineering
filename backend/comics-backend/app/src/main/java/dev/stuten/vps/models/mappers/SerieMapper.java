@@ -3,7 +3,6 @@ package dev.stuten.vps.models.mappers;
 import static dev.stuten.vps.jooq.tables.Series.SERIES;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +24,6 @@ public class SerieMapper {
             SERIES.ONGOING, "serie_ongoing",
             SERIES.ONESHOT, "serie_oneshot",
             SERIES.NVOLUMES, "serie_nvolumes",
-            SERIES.START_DATE, "serie_start_date",
-            SERIES.END_DATE, "serie_end_date",
             SERIES.ADDED_BY, "serie_added_by",
             SERIES.CREATED_AT, "serie_created_at",
             SERIES.MODIFIED_AT, "serie_modified_at");
@@ -47,8 +44,6 @@ public class SerieMapper {
                 .ongoing(r.get(getFieldName(SERIES.ONGOING), Boolean.class))
                 .oneshot(r.get(getFieldName(SERIES.ONESHOT), Boolean.class))
                 .nvolumes(r.get(getFieldName(SERIES.NVOLUMES), Short.class))
-                .startDate(r.get(getFieldName(SERIES.START_DATE), LocalDate.class))
-                .endDate(r.get(getFieldName(SERIES.END_DATE), LocalDate.class))
                 .books(books)
                 .createdAt(r.get(getFieldName(SERIES.CREATED_AT), LocalDateTime.class))
                 .modifiedAt(r.get(getFieldName(SERIES.MODIFIED_AT), LocalDateTime.class))
@@ -65,39 +60,6 @@ public class SerieMapper {
                 .ongoing(r.get(getFieldName(SERIES.ONGOING), Boolean.class))
                 .oneshot(r.get(getFieldName(SERIES.ONESHOT), Boolean.class))
                 .nvolumes(r.get(getFieldName(SERIES.NVOLUMES), Short.class))
-                .startDate(r.get(getFieldName(SERIES.START_DATE), LocalDate.class))
-                .endDate(r.get(getFieldName(SERIES.END_DATE), LocalDate.class))
                 .build();
     }
-
-    // public static SerieDTO mapGenericMapToDTO(Map<String, Object> map) {
-    // SerieDTO dto = new SerieDTO(
-    // (Integer) map.get("id"),
-    // (String) map.get("name"),
-    // (Boolean) map.get("ongoing"),
-    // (Boolean) map.get("oneshot"),
-    // ((Integer) map.get("nvolumes")).shortValue(),
-    // MappingUtils.stringToLocalDate((String) map.get("startDate")),
-    // MappingUtils.stringToLocalDate((String) map.get("endDate")),
-    // (List<SimpleBookDTO>) map.get("books"),
-    // MappingUtils.stringToLocalDateTime((String) map.get("createdAt")),
-    // MappingUtils.stringToLocalDateTime((String) map.get("modifiedAt")),
-    // UserMapper.mapGenericMapToSimpleDTO((Map<String, Object>)
-    // map.get("addedBy")));
-    // return dto;
-    // }
-
-    // public static SimpleSerieDTO mapGenericMapToSimpleDTO(Map<String, Object>
-    // map) {
-    // SimpleSerieDTO dto = new SimpleSerieDTO(
-    // (Integer) map.get("id"),
-    // (String) map.get("name"),
-    // (Boolean) map.get("ongoing"),
-    // (Boolean) map.get("oneshot"),
-    // map.get("nvolumes") == null ? null
-    // : ((Integer) map.get("nvolumes")).shortValue(),
-    // MappingUtils.stringToLocalDate((String) map.get("startDate")),
-    // MappingUtils.stringToLocalDate((String) map.get("endDate")));
-    // return dto;
-    // }
 }

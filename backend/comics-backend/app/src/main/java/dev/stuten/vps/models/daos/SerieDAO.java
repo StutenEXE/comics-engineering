@@ -43,8 +43,6 @@ public class SerieDAO extends ContributableDAO<SerieDTO> {
                 SERIES.ONGOING.as(SerieMapper.getFieldName(SERIES.ONGOING)),
                 SERIES.ONESHOT.as(SerieMapper.getFieldName(SERIES.ONESHOT)),
                 SERIES.NVOLUMES.as(SerieMapper.getFieldName(SERIES.NVOLUMES)),
-                SERIES.START_DATE.as(SerieMapper.getFieldName(SERIES.START_DATE)),
-                SERIES.END_DATE.as(SerieMapper.getFieldName(SERIES.END_DATE)),
                 SERIES.ADDED_BY.as(SerieMapper.getFieldName(SERIES.ADDED_BY)),
                 SERIES.CREATED_AT.as(SerieMapper.getFieldName(SERIES.CREATED_AT)),
                 SERIES.MODIFIED_AT.as(SerieMapper.getFieldName(SERIES.MODIFIED_AT)));
@@ -85,8 +83,6 @@ public class SerieDAO extends ContributableDAO<SerieDTO> {
                 .set(SERIES.ONGOING, dto.getOngoing())
                 .set(SERIES.ONESHOT, dto.getOneshot())
                 .set(SERIES.NVOLUMES, dto.getNvolumes())
-                .set(SERIES.START_DATE, dto.getStartDate())
-                .set(SERIES.END_DATE, dto.getEndDate())
                 .set(SERIES.ADDED_BY, dto.getAddedBy().getId())
                 .returning(SERIES.ID)
                 .fetchOptional()
@@ -100,8 +96,6 @@ public class SerieDAO extends ContributableDAO<SerieDTO> {
                 .set(SERIES.ONGOING, dto.getOngoing())
                 .set(SERIES.ONESHOT, dto.getOneshot())
                 .set(SERIES.NVOLUMES, dto.getNvolumes())
-                .set(SERIES.START_DATE, dto.getStartDate())
-                .set(SERIES.END_DATE, dto.getEndDate())
                 .set(SERIES.MODIFIED_AT, LocalDateTime.now())
                 .where(SERIES.ID.eq(dto.getId()))
                 .execute() > 0;
