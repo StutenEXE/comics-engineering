@@ -74,7 +74,7 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
   } else if (
     issueSerie?.startDate.getTime() === issueSerie?.endDate.getTime()
   ) {
-    subtitle += ` - ${t("generic.oneshot", { capitalize: true })}`;
+    subtitle += ` - ${t("serie.oneshot")}`;
   } else {
     subtitle += ` - ${dateToMonthYearString(locale, issueSerie?.endDate)}`;
   }

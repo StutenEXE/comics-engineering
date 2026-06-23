@@ -63,6 +63,11 @@ export default function BookPage({ params }: { params: { id: number } }) {
     submitBundle(b);
   };
 
+  const subtSuffix = book?.serie?.oneshot
+    ? t("serie.oneshot")
+    : `#${book?.number}/${book?.serie?.nvolumes}`;
+  const subtitle = `${book?.serie?.name} (${subtSuffix})`;
+
   return (
     <>
       <InfoPageTemplate
@@ -75,7 +80,7 @@ export default function BookPage({ params }: { params: { id: number } }) {
         <InfoPageHeaderComponent
           headerTitle={t("page.book.header")}
           title={book?.name || ""}
-          subtitle={`${book?.serie?.name} (#${book?.number}/${book?.serie?.nvolumes})`}
+          subtitle={subtitle}
           subtitleTo={`/serie/${book?.serie?.id}`}
           createdAt={book?.createdAt}
           modifiedAt={book?.modifiedAt}
