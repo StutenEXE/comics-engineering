@@ -1,9 +1,7 @@
 import { OwnedEditionTable } from "~/components/tables/OwnedEditionTable";
-import type { Route } from "../../+types/root";
-import { GenericPageTemplate } from "~/components/templates/GenericPageTemplate";
-import { SideContentHeader } from "~/components/headers/SideContentHeader";
 import { SideContentTemplate } from "~/components/templates/SideContentTemplate";
 import { useTranslation } from "~/i18n/i18n";
+import type { Route } from "../../+types/root";
 
 export function meta({}: Route.MetaArgs) {
   return [

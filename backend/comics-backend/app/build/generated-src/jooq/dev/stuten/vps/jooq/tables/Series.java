@@ -8,7 +8,6 @@ import dev.stuten.vps.jooq.Keys;
 import dev.stuten.vps.jooq.Public;
 import dev.stuten.vps.jooq.tables.records.SeriesRecord;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -16,12 +15,12 @@ import java.util.function.Function;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Function10;
+import org.jooq.Function8;
 import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Records;
-import org.jooq.Row10;
+import org.jooq.Row8;
 import org.jooq.Schema;
 import org.jooq.SelectField;
 import org.jooq.Table;
@@ -78,16 +77,6 @@ public class Series extends TableImpl<SeriesRecord> {
      * The column <code>public.series.nvolumes</code>.
      */
     public final TableField<SeriesRecord, Short> NVOLUMES = createField(DSL.name("nvolumes"), SQLDataType.SMALLINT, this, "");
-
-    /**
-     * The column <code>public.series.start_date</code>.
-     */
-    public final TableField<SeriesRecord, LocalDate> START_DATE = createField(DSL.name("start_date"), SQLDataType.LOCALDATE.nullable(false), this, "");
-
-    /**
-     * The column <code>public.series.end_date</code>.
-     */
-    public final TableField<SeriesRecord, LocalDate> END_DATE = createField(DSL.name("end_date"), SQLDataType.LOCALDATE, this, "");
 
     /**
      * The column <code>public.series.added_by</code>.
@@ -209,18 +198,18 @@ public class Series extends TableImpl<SeriesRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row10 type methods
+    // Row8 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row10<Integer, String, Boolean, Boolean, Short, LocalDate, LocalDate, Integer, LocalDateTime, LocalDateTime> fieldsRow() {
-        return (Row10) super.fieldsRow();
+    public Row8<Integer, String, Boolean, Boolean, Short, Integer, LocalDateTime, LocalDateTime> fieldsRow() {
+        return (Row8) super.fieldsRow();
     }
 
     /**
      * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
      */
-    public <U> SelectField<U> mapping(Function10<? super Integer, ? super String, ? super Boolean, ? super Boolean, ? super Short, ? super LocalDate, ? super LocalDate, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Function8<? super Integer, ? super String, ? super Boolean, ? super Boolean, ? super Short, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
         return convertFrom(Records.mapping(from));
     }
 
@@ -228,7 +217,7 @@ public class Series extends TableImpl<SeriesRecord> {
      * Convenience mapping calling {@link SelectField#convertFrom(Class,
      * Function)}.
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function10<? super Integer, ? super String, ? super Boolean, ? super Boolean, ? super Short, ? super LocalDate, ? super LocalDate, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Class<U> toType, Function8<? super Integer, ? super String, ? super Boolean, ? super Boolean, ? super Short, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
         return convertFrom(toType, Records.mapping(from));
     }
 }

@@ -31,7 +31,7 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
   const toast = useToast();
   const { user } = useAppSelector((state) => state.user);
 
-  const { data, isLoading, error, refetch } = useCollectionQuery(
+  const { data, isFetching, error, refetch } = useCollectionQuery(
     user ? { id: user.id } : { id: 0 },
     { skip: !user },
   );
@@ -189,8 +189,8 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
             size={20}
             onClick={() => {
               confirm({
-                title: t("collection.remove.title"),
-                message: t("collection.remove.message"),
+                title: t("stash.remove.title"),
+                message: t("stash.remove.message"),
                 onConfirm: () => {
                   removeFromCollection({ id: row.original.id });
                 },
@@ -208,7 +208,7 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
       <GenericTable
         list={[...editionList].sort((a, b) => -compareDates(a.date, b.date))}
         columns={columns}
-        isLoading={isLoading}
+        isLoading={isFetching}
         error={err}
       />
       <EditOwnedEditionModal

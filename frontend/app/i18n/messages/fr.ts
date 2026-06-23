@@ -15,7 +15,7 @@ export default {
   "generic.all": "tous",
   "generic.the": "le",
   "generic.present": "présent",
-  "generic.oneshot": "oneshot",
+  "generic.oneshot": "récit complet",
   "generic.volume": "tome",
   "generic.admin": "admin",
   "generic.actions": "actions",
@@ -29,6 +29,7 @@ export default {
   "generic.local": "Locale",
   "generic.localRefPresent": "Référence locale présente",
   "generic.currencyDisclaimer": "Tous les prix sont indiqués en euros (€)",
+  "generic.errorOccured": "Une erreur est survenue",
   // ============================
   // == Toasts
   // ============================
@@ -362,12 +363,13 @@ export default {
   "search.gte3chars": "Veuillez rentrer au moins 3 caractères",
   "search.results": "Résultats",
   "search.noresults": "Aucun résultat",
-  // Collection
-  "collection.title": "Ma collection",
-  "collection.library": "Bibliothèque",
-  "collection.statistics": "Statistiques",
-  "collection.remove.title": "Retirer de la collection",
-  "collection.remove.message":
+  // Stash
+  "stash.title": "Ma stash",
+  "stash.library": "Bibliothèque",
+  "stash.bookshelf": "Mon étagère",
+  "stash.statistics": "Statistiques",
+  "stash.remove.title": "Retirer de la collection",
+  "stash.remove.message":
     "Voulez-vous vraiment retirer cette édition de votre collection ?\nLes informations associées seront perdues.",
   // Contribute
   "contribute.loginRequired": "Veuillez vous connecter",
@@ -393,4 +395,6 @@ export default {
   // Issue
   "page.issue.header": "Issue",
   "page.issue.books": "Livres associés",
+  // Serie
+  "page.serie.serieOfXVolumes": "Série de %x% tomes"
 };

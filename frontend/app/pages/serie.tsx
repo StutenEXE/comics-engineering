@@ -65,14 +65,19 @@ export default function SeriePage({ params }: { params: { id: number } }) {
   const openModal = () => setIsEditModalOpen(true);
   const closeModal = () => setIsEditModalOpen(false);
 
-  let subtitle = dateToMonthYearString(locale, serie?.startDate);
-  if (!serie?.endDate && serie?.ongoing) {
-    subtitle += ` - ${t("generic.present", { capitalize: true })}`;
-  } else if (serie?.oneshot) {
-    subtitle += ` - ${t("generic.oneshot", { capitalize: true })}`;
-  } else {
-    subtitle += ` - ${dateToMonthYearString(locale, serie?.endDate)}`;
-  }
+  // let subtitle = dateToMonthYearString(locale, serie?.startDate);
+  // if (!serie?.endDate && serie?.ongoing) {
+  //   subtitle += ` - ${t("generic.present", { capitalize: true })}`;
+  // } else if (serie?.oneshot) {
+  //   subtitle += ` - ${t("generic.oneshot", { capitalize: true })}`;
+  // } else {
+  //   subtitle += ` - ${dateToMonthYearString(locale, serie?.endDate)}`;
+  // }
+  const subtitle = serie?.oneshot
+    ? t("generic.oneshot", { capitalize: true })
+    : t("page.serie.serieOfXVolumes", {
+        parameters: { x: serie?.nvolumes },
+      });
 
   return (
     <>

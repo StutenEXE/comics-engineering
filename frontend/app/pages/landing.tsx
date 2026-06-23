@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  BsArrowLeft,
-  BsArrowRight
-} from "react-icons/bs";
+import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { GenericButton } from "~/components/buttons/GenericButton";
 import { BookCard } from "~/components/cards/BookCard";
 import { GenericPageTemplate } from "~/components/templates/GenericPageTemplate";
@@ -35,7 +32,7 @@ export default function LandingPage() {
   const toast = useToast();
   useEffect(() => {
     if (!error) return;
-    toast.error(t("loader.book.error"));
+    toast.error(t("generic.errorOccured"));
   }, [error]);
 
   return (

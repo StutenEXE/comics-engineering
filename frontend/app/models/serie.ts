@@ -7,8 +7,6 @@ export interface Serie {
     ongoing: boolean,
     oneshot: boolean,
     nvolumes: number,
-    startDate: Date,
-    endDate: Date | null,
     books: SimpleBook[],
     createdAt: Date,
     modifiedAt: Date,
@@ -23,8 +21,6 @@ export function parseToSerie(data: Record<string, any>): Serie {
         ongoing: data.ongoing,
         oneshot: data.oneshot,
         nvolumes: data.nvolumes,
-        startDate: new Date(data.startDate),
-        endDate: data.endDate ? new Date(data.endDate) : null, 
         books: data.books?.map((bk: Record<string, any>) => parseToSimpleBook(bk)) ?? [],
         createdAt: new Date(data.createdAt),
         modifiedAt: new Date(data.modifiedAt),
@@ -38,8 +34,6 @@ export interface SimpleSerie {
     ongoing: boolean,
     oneshot: boolean,
     nvolumes: number,
-    startDate: Date,
-    endDate: Date | null,
 }
 
 export function parseToSimpleSerie(data: Record<string, any>): SimpleSerie {
@@ -49,8 +43,6 @@ export function parseToSimpleSerie(data: Record<string, any>): SimpleSerie {
         ongoing: data.ongoing,
         oneshot: data.oneshot,
         nvolumes: data.nvolumes,
-        startDate: new Date(data.startDate),
-        endDate: data.endDate ? new Date(data.endDate) : null, 
     }
 }
 
@@ -60,8 +52,6 @@ export interface ContributionSerie {
     ongoing: boolean,
     oneshot: boolean,
     nvolumes?: number,
-    startDate: string,
-    endDate?: string,
 }
 
 export function simplifySerie(ser: Serie): SimpleSerie {
