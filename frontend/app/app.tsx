@@ -15,12 +15,11 @@ export default function App() {
     {
       skip: !isAuthenticated && !firstLoad, // Skip the refresh query if the user is not authenticated and it's not the first load
       refetchOnReconnect: true, // Refetch when the browser regains network connections
-      pollingInterval: 15 * 60 * 1000, // Poll every 15 minutes (automatic token refresh)
-    }, 
+    },
   );
   const dispatch = useDispatch();
 
-  // Run once when refresh gives result
+  // Runs once when refresh gives result
   useEffect(() => {
     firstLoad = false;
     if (isSuccess && data?.user) {

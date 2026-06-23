@@ -13,12 +13,6 @@ public final class SessionStore {
 
     public static final String SESSION_PREFIX = "comics-session:";
 
-    // private static final RedisClient redisClient = RedisClient.create(
-    // RedisURI.Builder.redis(System.getenv("REDIS_URL"))
-    // .withAuthentication(System.getenv("REDIS_USER"),
-    // System.getenv("REDIS_PASSWORD"))
-    // .build());
-
     public static final RedisURI uri = RedisURI.Builder
             .redis(Objects.requireNonNull(System.getenv("REDIS_HOST"), "REDIS_HOST not set"))
             .withPort(6379)
@@ -31,7 +25,7 @@ public final class SessionStore {
 
     private static final RedisCommands<String, String> redis = redisClient.connect().sync();
 
-    private static final int TTL_SECONDS = 30 * 60; // 30 minutes sliding session
+    private static final int TTL_SECONDS = 60 * 24 * 14; // 14 days sliding session
 
     private SessionStore() {
     }
