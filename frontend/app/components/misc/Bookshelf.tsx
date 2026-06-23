@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { twMerge } from "tailwind-merge";
+import { useTranslation } from "~/i18n/i18n";
 import type { OwnedEdition } from "~/models/ownedEdition";
 
 interface BookshelfProps {
@@ -11,19 +10,30 @@ export function Bookshelf({
   oeditions = [],
   isLoading = false,
 }: BookshelfProps) {
-  const [spineColorById, setSpineColorById] = useState<Map<number, string>>(
-    new Map(),
-  );
+  const { locale } = useTranslation();
+  // Regroup by series (series sorted by ascending name)
+  const sortedEditions = [...oeditions].sort((a, b) => {
+    if (!a?.edition?.serie?.name) {
+      return -1;
+    }
+    if (!b?.edition?.serie?.name) {
+      return 1;
+    }
+    const serieComp = a?.edition?.serie?.name.localeCompare(
+      b?.edition?.serie?.name,
+    );
+    if (serieComp !== 0) {
+      return serieComp;
+    }
+    // If same serie, compare on vol number
+    return a?.edition?.book?.number! - b?.edition?.book?.number!;
+  });
 
-  //   oeditions.forEach((oe) => {
-  //     getBookSpineColor(oe.edition.imgUrl).then((col) =>
-  //       spineColorById.set(oe.id, col),
-  //     );
-  //   });
+  console.log(sortedEditions.map((e) => e.edition.book?.name));
 
   return (
     <div className="flex flex-wrap w-full items-end border-10 border-orange-900 border-t-0">
-      {oeditions.map((oe) => (
+      {sortedEditions.map((oe) => (
         <div
           key={oe.id}
           className={

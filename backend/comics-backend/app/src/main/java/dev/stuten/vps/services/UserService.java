@@ -1,5 +1,6 @@
 package dev.stuten.vps.services;
 
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -61,7 +62,7 @@ public class UserService {
         }
 
         UserWithPasswordDTO userPwd = optUser.get();
-        
+
         // Check if user has been deleted
         if (userPwd.getIsDeleted()) {
             ErrorResponse.send(HttpStatus.UNAUTHORIZED, "User deleted", "");
@@ -157,7 +158,7 @@ public class UserService {
 
         ctx.status(HttpStatus.OK);
     }
-    
+
     public static void recycle(Context ctx) {
         // Retreive user ID from request
         Integer userId;
