@@ -4,7 +4,6 @@ import { BookList } from "~/components/lists/booklists/BookList";
 import { IssueList } from "~/components/lists/issuelists/IssueList";
 import { IssueSerieContributionModal } from "~/components/modals/contribution/IssueSerieContributionModal";
 import {
-  InfoPageFields,
   InfoPageSection,
   InfoPageTemplate,
 } from "~/components/templates/InfoPageTemplate";
@@ -54,6 +53,13 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
       closeModal();
     }
   }, [isSuccess]);
+
+  // Page title update
+  useEffect(() => {
+    if (issueSerie?.name) {
+      document.title = issueSerie.name;
+    }
+  }, [issueSerie]);
 
   const handleEditSubmit = (c: Partial<SimpleContribution>) => {
     // Cannot access function if not connected
