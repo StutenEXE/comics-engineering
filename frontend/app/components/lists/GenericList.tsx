@@ -1,11 +1,14 @@
 import type { JSX } from "react";
 import { twMerge } from "tailwind-merge";
+import { useTranslation } from "~/i18n/i18n";
+import LoadingBadge from "../badges/LoadingBadge";
 
 interface GenericListProps<T> {
   list: T[] | null | undefined;
   emptyMsg: string;
   elemGenerator: (l: T) => JSX.Element;
   vertical?: boolean;
+  isLoading?: boolean;
   className?: string;
 }
 
@@ -14,8 +17,11 @@ export function GenericList<T>({
   emptyMsg,
   elemGenerator,
   vertical,
+  isLoading,
   className,
 }: GenericListProps<T>) {
+  const { t } = useTranslation();
+
   const isEmpty = !list || list.length === 0;
 
   const divClassName = vertical
@@ -30,11 +36,16 @@ export function GenericList<T>({
 
   return (
     <div className={divClassName}>
-      {isEmpty ? (
-        <p className="text-xs text-white/25 italic px-1 py-2">{emptyMsg}</p>
-      ) : (
-        list.map(elemGenerator)
+      {isLoading && (
+        <p className="flex gap-1 text-xs text-white/30 italic px-1 py-2">
+          {t("generic.loading", { capitalize: true })}{" "}
+          <LoadingBadge className="text-white/30" />
+        </p>
       )}
+      {!isLoading && isEmpty && (
+        <p className="text-xs text-white/30 italic px-1 py-2">{emptyMsg}</p>
+      )}
+      {!isLoading && !isEmpty && list.map(elemGenerator)}
     </div>
   );
 }

@@ -16,6 +16,9 @@ export default {
   "generic.the": "le",
   "generic.present": "présent",
   "generic.volume": "tome",
+  "generic.volumes": "tomes",
+  "generic.ongoing": "en cours",
+  "generic.loading": "chargement",
   "generic.admin": "admin",
   "generic.actions": "actions",
   "generic.search.placeholder": "Rechercher...",
@@ -50,6 +53,7 @@ export default {
   // == MODELS
   // ============================
   // Book
+  "books": "Livres",
   "book.nonefound": "Aucun livre trouvé",
   "book.name": "Nom",
   "book.serie": "Serie",
@@ -209,6 +213,8 @@ export default {
   "edition.form.price.gte0": "Le prix ne peut pas être négatif",
   "edition.form.localRefPresent": "Livre crée localement",
   // Issue series
+  "issueseries": "Séries d'issues",
+  "issueserie.nonefound": "Aucun série d'issue trouvée",
   "issueserie.name": "Nom",
   "issueserie.startDate": "Date de début",
   "issueserie.endDate": "Date de fin",
@@ -357,8 +363,8 @@ export default {
   "landing.latestBooks": "Derniers livres ajoutés à notre bibliothèque",
   "landing.page": "Page",
   // Search
-  "search.header": "Rechercher des livres et séries",
-  "search.placeholder": "Rechercher des livres et séries",
+  "search.header": "Rechercher dans la bibliothèque",
+  "search.placeholder": "Rechercher",
   "search.gte3chars": "Veuillez rentrer au moins 3 caractères",
   "search.results": "Résultats",
   "search.noresults": "Aucun résultat",
