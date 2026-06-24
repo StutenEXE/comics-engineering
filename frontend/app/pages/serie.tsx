@@ -54,6 +54,13 @@ export default function SeriePage({ params }: { params: { id: number } }) {
     }
   }, [isSuccess]);
 
+  // Page title update
+  useEffect(() => {
+    if (serie?.name) {
+      document.title = serie.name;
+    }
+  }, [serie]);
+
   const handleEditSubmit = (c: Partial<SimpleContribution>) => {
     // Cannot access function if not connected
     const b = wrapInNewBundle(c, user!);

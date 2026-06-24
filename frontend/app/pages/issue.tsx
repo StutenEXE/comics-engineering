@@ -54,6 +54,11 @@ export default function IssuePage({ params }: { params: { id: number } }) {
     }
   }, [isSuccess]);
 
+  // Page title update
+  useEffect(() => {
+    document.title = buildIssueShortName(issue);
+  }, [issue]);
+
   const handleEditSubmit = (c: Partial<SimpleContribution>) => {
     // Cannot access function if not connected
     const b = wrapInNewBundle(c, user!);
@@ -72,7 +77,7 @@ export default function IssuePage({ params }: { params: { id: number } }) {
           headerTitle={t("page.issue.header")}
           title={issue?.name || ""}
           subtitle={buildIssueShortName(issue)}
-          subtitleTo={`/issue_serie/${issue?.issueSerie?.id}`}
+          subtitleTo={`/issueserie/${issue?.issueSerie?.id}`}
           createdAt={issue?.createdAt}
           modifiedAt={issue?.modifiedAt}
           addedBy={issue?.addedBy?.username}

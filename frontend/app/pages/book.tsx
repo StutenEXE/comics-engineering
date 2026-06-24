@@ -53,6 +53,13 @@ export default function BookPage({ params }: { params: { id: number } }) {
     }
   }, [isSuccess]);
 
+  // Page title update
+  useEffect(() => {
+    if (book?.name) {
+      document.title = book.name;
+    }
+  }, [book]);
+
   // Edit modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const openEditModal = () => setIsEditModalOpen(true);
