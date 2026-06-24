@@ -6,10 +6,12 @@ import java.util.Map;
 
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.BookDAO;
+import dev.stuten.vps.models.daos.IssueDAO;
 import dev.stuten.vps.models.daos.IssueSerieDAO;
 import dev.stuten.vps.models.daos.PublisherDAO;
 import dev.stuten.vps.models.daos.SerieDAO;
 import dev.stuten.vps.models.dtos.full.BookDTO;
+import dev.stuten.vps.models.dtos.full.IssueDTO;
 import dev.stuten.vps.models.dtos.full.IssueSerieDTO;
 import dev.stuten.vps.models.dtos.full.PublisherDTO;
 import dev.stuten.vps.models.dtos.full.SerieDTO;
@@ -31,10 +33,13 @@ public class SearchService {
     private static PublisherDAO publisherDao = new PublisherDAO(
             JooqProvider.get());
 
+    private static IssueDAO issueDao = new IssueDAO(
+            JooqProvider.get());
+
     private static IssueSerieDAO issueSeriesDao = new IssueSerieDAO(
             JooqProvider.get());
 
-    public static void searchBooksAndSeries(Context ctx) {
+    public static void searchBooksSeriesIssuesIssueSeries(Context ctx) {
         // Retreive query from request
         String query = "";
         try {
@@ -47,18 +52,30 @@ public class SearchService {
         // Lists of elements to retreive
         List<BookDTO> books = Arrays.asList();
         List<SerieDTO> series = Arrays.asList();
+        List<IssueDTO> issues = Arrays.asList();
+        List<IssueSerieDTO> issueseries = Arrays.asList();
 
         // To broad queries are not handled
         if (query.length() < 3) {
-            ctx.json(Map.of("books", books, "series", series));
+            ctx.json(Map.of(
+                    "books", books,
+                    "series", series,
+                    "issues", issues,
+                    "issueseries", issueseries));
             return;
         }
 
         // Retreive books
         books = bookDao.searchByName(query);
         series = serieDao.searchByName(query);
+        issues = issueDao.searchByName(query);
+        issueseries = issueSeriesDao.searchByName(query);
 
-        ctx.json(Map.of("books", books, "series", series));
+        ctx.json(Map.of(
+                "books", books,
+                "series", series,
+                "issues", issues,
+                "issueseries", issueseries));
     }
 
     public static void searchBooks(Context ctx) {
@@ -126,7 +143,7 @@ public class SearchService {
 
         ctx.json(Map.of("publishers", publishers));
     }
-    
+
     public static void searchIssueSeries(Context ctx) {
         // Retreive query from request
         String query = "";

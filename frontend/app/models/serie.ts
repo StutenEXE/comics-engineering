@@ -54,6 +54,10 @@ export interface ContributionSerie {
     nvolumes?: number,
 }
 
+export function isSerie(serie: Serie | SimpleSerie | ContributionSerie): serie is Serie {
+    return (serie as Serie).createdAt !== undefined;
+}
+
 export function simplifySerie(ser: Serie): SimpleSerie {
     return parseToSimpleSerie(ser)
 }

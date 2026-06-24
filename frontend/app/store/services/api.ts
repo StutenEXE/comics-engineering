@@ -169,11 +169,13 @@ export const publicApi = createApi({
       }),
     }),
     // Search books and series
-    searchBooksAndSeriesByName: build.query<{ books: Book[], series: Serie[] }, { query: string }>({
-      query: ({ query }) => ({ url: "/search/books_and_series", method: 'GET', params: { query: query.trim().toLowerCase() } }),
-      transformResponse: (resp: { books: Book[], series: Serie[] }) => ({
+    searchBooksSeriesIssuesIssueseriesByName: build.query<{ books: Book[], series: Serie[], issues: Issue[], issueseries: IssueSerie[] }, { query: string }>({
+      query: ({ query }) => ({ url: "/search/books_series_issues_issueseries", method: 'GET', params: { query: query.trim().toLowerCase() } }),
+      transformResponse: (resp: { books: Book[], series: Serie[], issues: Issue[], issueseries: IssueSerie[] }) => ({
         books: resp.books.map(parseToBook),
         series: resp.series.map(parseToSerie),
+        issues: resp.issues.map(parseToIssue),
+        issueseries: resp.issueseries.map(parseToIssueSerie),
       }),
     }),
 
@@ -210,7 +212,7 @@ export const {
   useLazySearchSeriesByNameQuery,
   useLazySearchPublishersByNameQuery,
   useLazySearchIssueSeriesByNameQuery,
-  useSearchBooksAndSeriesByNameQuery,
+  useLazySearchBooksSeriesIssuesIssueseriesByNameQuery,
   useContributionStatsQuery,
   useContributionBySubmitterIdQuery,
   useContributionStatsBySubmitterIdQuery

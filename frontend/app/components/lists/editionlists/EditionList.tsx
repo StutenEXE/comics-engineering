@@ -12,12 +12,14 @@ import { useTranslation } from "~/i18n/i18n";
 interface EditionListProps {
   editionList: Edition[] | SimpleEdition[] | null | undefined;
   descOrder?: boolean;
+  isLoading?: boolean;
   className?: string;
 }
 
 export function EditionList({
   editionList,
   descOrder,
+  isLoading,
   className,
 }: EditionListProps) {
   const { t } = useTranslation();
@@ -52,6 +54,7 @@ export function EditionList({
       list={list}
       emptyMsg={t("edition.nonefound")}
       elemGenerator={mapper}
+      isLoading={isLoading}
       className={className}
     />
   );

@@ -25,11 +25,11 @@ export function parseToIssueSerie(data: Record<string, any>): IssueSerie {
         startDate: new Date(data.startDate),
         endDate: data.endDate ? new Date(data.endDate) : undefined,
         fandomUrl: data.fandomUrl,
-        issues: data.issues?.map((i: Record<string, any>) =>  parseToSimpleIssue(i)) ?? [],
+        issues: data.issues?.map((i: Record<string, any>) => parseToSimpleIssue(i)) ?? [],
         books: data.books?.map((b: Record<string, any>) => parseToSimpleBook(b)) ?? [],
         createdAt: new Date(data.createdAt),
         modifiedAt: new Date(data.modifiedAt),
-        addedBy: data.addedBy ? parseToSimpleUser(data.addedBy) : undefined  
+        addedBy: data.addedBy ? parseToSimpleUser(data.addedBy) : undefined
     }
 }
 
@@ -60,4 +60,12 @@ export interface ContributionIssueSerie {
     startDate: string,
     endDate?: string,
     fandomUrl?: string,
+}
+
+export function isIssueSerie(issueserie: IssueSerie | SimpleIssueSerie | ContributionIssueSerie): issueserie is IssueSerie {
+    return (issueserie as IssueSerie).createdAt !== undefined;
+}
+
+export function simplifyIssueSerie(iser: IssueSerie): SimpleIssueSerie {
+    return parseToSimpleIssueSerie(iser)
 }

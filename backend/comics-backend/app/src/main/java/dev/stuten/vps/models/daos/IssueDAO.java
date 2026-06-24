@@ -131,6 +131,11 @@ public class IssueDAO extends ContributableDAO<IssueDTO> {
                 return super.selectOne(ISSUES.ID.eq(id));
         }
 
+        public List<IssueDTO> searchByName(String query) {
+                String searchPattern = toSearchPattern(query);
+                return super.selectMany(ISSUES.NAME.likeIgnoreCase(searchPattern));
+        }
+
         public List<IssueDTO> findByBookId(Integer bookID) {
                 return super.selectMany(ISSUES.ID.in(
                                 select(BOOKS_ISSUES.ISSUE_ID)
