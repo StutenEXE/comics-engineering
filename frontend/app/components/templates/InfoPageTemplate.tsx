@@ -13,6 +13,7 @@ interface PageTemplateProps {
   imgAlt?: string;
   isLoading?: boolean;
   error?: Error;
+  className?: string;
   children?: ReactNode;
 }
 
@@ -22,12 +23,13 @@ export function InfoPageTemplate({
   imgAlt,
   isLoading,
   error,
+  className,
   children,
 }: PageTemplateProps) {
   const { t } = useTranslation();
 
   return (
-    <GenericPageTemplate>
+    <GenericPageTemplate className={className}>
       <div className="flex gap-8 items-start">
         {hasImg && (
           <div className="w-50 shrink-0 sticky top-24">
@@ -36,7 +38,7 @@ export function InfoPageTemplate({
             ) : (
               <EnlargeableImage
                 src={imgUrl ?? "/placeholder.jpg"}
-                alt={imgUrl ?? "/placeholder.jpg"}
+                alt={imgUrl ?? imgAlt}
                 className="w-full rounded-lg border border-white/8 shadow-xl shadow-black/40 object-cover"
               />
             )}
@@ -114,7 +116,7 @@ export function InfoPageField({
 
   return (
     <>
-      <span className="flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-white/30 whitespace-nowrap">
+      <span className="flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-white/40 whitespace-nowrap">
         {label}
         {labelTooltip && <HelpBadgeTooltip tooltipContent={labelTooltip} />}
       </span>
@@ -138,7 +140,7 @@ export function InfoPageField({
         </a>
       ) : (
         // No link
-        <span className="text-sm text-white/70">{displayValue}</span>
+        <span className="text-sm text-white/80">{displayValue}</span>
       )}
     </>
   );

@@ -12,7 +12,9 @@ export function SideContentTemplate({
   return (
     <div>
       <SideContentHeader title={title} />
-      <main className="w-full py-4 px-4 flex flex-col gap-6">{children}</main>
+      <main className="w-full py-4 px-4 flex flex-col gap-6 relative">
+        {children}
+      </main>
     </div>
   );
 }

@@ -11,13 +11,8 @@ import {
   useSubmitContributionBundleMutation,
 } from "~/store/services/api";
 import { createError } from "~/utils/error";
-import { formatToIsbn } from "~/utils/strings";
 import { GenericButton } from "../buttons/GenericButton";
-import { InfoPageHeaderComponent } from "../headers/InfoPageHeader";
-import {
-  InfoPageTemplate,
-  InfoPageFields,
-} from "../templates/InfoPageTemplate";
+import { EditionDataDisplay } from "../datadisplay/EditionDataDisplay";
 import { useToast } from "../toast/Toast";
 import { AddToCollectionModal } from "./AddToCollectionModal";
 import { EditionContributionModal } from "./contribution/EditionContributionModal";
@@ -34,12 +29,12 @@ export function EditionModal({
   isOpen,
   onClose,
 }: EditionModalProps) {
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
   const toast = useToast();
   const { user, isAuthenticated } = useAppSelector((state) => state.user);
 
   // Main edition data
-  const { data, isLoading, error } = useEditionByIdQuery({ id: editionId });
+  const { data, isFetching, error } = useEditionByIdQuery({ id: editionId });
   const edition = data?.edition;
   const err = createError(error);
 
@@ -95,94 +90,18 @@ export function EditionModal({
   return (
     <>
       <GenericModal isOpen={isOpen} onClose={onClose}>
-        <InfoPageTemplate
-          hasImg={true}
-          imgUrl={edition?.imgUrl}
-          imgAlt={edition?.book?.name}
-          isLoading={isLoading}
+        <EditionDataDisplay
+          edition={edition}
+          onEditClick={() => {
+            if (!isAuthenticated) {
+              toast.info(t("toast.notconnected"));
+              return;
+            }
+            openEditModal();
+          }}
+          isLoading={isFetching}
           error={err}
         >
-          <InfoPageHeaderComponent
-            headerTitle={t("page.edition.header")}
-            headerTitleTo={`/book/${edition?.book?.id}`}
-            title={edition?.book?.name || ""}
-            subtitle={`${edition?.serie?.name} (#${edition?.book?.number}/${edition?.serie?.nvolumes})`}
-            subtitleTo={`/serie/${edition?.book?.serieId}`}
-            createdAt={edition?.createdAt}
-            modifiedAt={edition?.modifiedAt}
-            addedBy={edition?.addedBy?.username}
-            onEditClick={() => {
-              if (!isAuthenticated) {
-                toast.info(t("toast.notconnected"));
-                return;
-              }
-              openEditModal();
-            }}
-            isLoading={false}
-          />
-
-          <InfoPageFields
-            isLoading={isLoading}
-            fieldProps={[
-              // EAN
-              { label: t("edition.ean"), value: edition?.ean },
-              // ISBN
-              {
-                label: t("edition.isbn"),
-                value: formatToIsbn(edition?.isbn || ""),
-              },
-              // Publisher
-              {
-                label: t("edition.publisher"),
-                value: edition?.publisher?.name,
-                // to: `/publisher/${edition?.publisher?.id}`,
-              },
-              // Link
-              {
-                label: t("edition.link"),
-                value: edition?.book?.name,
-                href: edition?.url,
-              },
-              // Covertype
-              {
-                label: t("edition.coverType"),
-                value: edition?.coverType
-                  ? t(`edition.coverType.${edition?.coverType}`)
-                  : undefined,
-              },
-              // Parutiondate
-              {
-                label: t("edition.parutionDate"),
-                value: edition?.parutionDate.toLocaleDateString(locale),
-              },
-              // Npages
-              {
-                label: t("edition.npages"),
-                value: edition?.npages,
-              },
-              // Price
-              {
-                label: t("edition.price"),
-                value: `${edition?.price.toFixed(2)}€`,
-              },
-              // Dimensions
-              {
-                label: t("edition.dimensions"),
-                value: (
-                  <>
-                    {t("edition.dimensions.height")}:&nbsp;
-                    {edition?.dimensions.height.toFixed(2)}&nbsp;cm
-                    <br />
-                    {t("edition.dimensions.width")}:&nbsp;
-                    {edition?.dimensions.width.toFixed(2)}&nbsp;cm
-                    <br />
-                    {t("edition.dimensions.thickness")}:&nbsp;
-                    {edition?.dimensions.thickness.toFixed(2)}&nbsp;cm
-                  </>
-                ),
-              },
-            ]}
-          />
           {isAuthenticated && (
             <GenericButton
               onClick={openAddToCollectionModal}
@@ -193,8 +112,7 @@ export function EditionModal({
                 : t("edition.addToCollection")}
             </GenericButton>
           )}
-        </InfoPageTemplate>
-
+        </EditionDataDisplay>
         <EditionContributionModal
           edition={edition}
           action="update"

@@ -270,9 +270,11 @@ export default {
   "oedition.form.title.modify": "Modifier une édition de ma collection",
   "oedition.form.create": "Ajouter à ma collection",
   "oedition.form.modify": "Modifier",
-  "oedition.form.totalCost": "Coût total",
-  "oedition.form.saved": "Economies",
+  "oedition.totalCost": "Coût total",
+  "oedition.saved": "Economies",
+  "oedition.saved.percentOfPrice": "%percent%% d'économies",
   "oedition.publisher.select": "Choisir un éditeur",
+  "oedition.spending": "Dépenses",
   // Serie
   "series": "Séries",
   "serie.nonefound": "Aucune série trouvée",
