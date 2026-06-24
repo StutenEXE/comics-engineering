@@ -230,9 +230,9 @@ export function OwnedEditionForm({
               </span>
               <br />
               <span>
-                {t("oedition.form.totalCost")} : {totalCost.toFixed(2)} €{" "}
+                {t("oedition.totalCost")} : {totalCost.toFixed(2)} €{" "}
                 {savings > 0 &&
-                  `(${t("oedition.form.saved")} ${savings.toFixed(2)}€)`}
+                  `(${t("oedition.saved")} ${savings.toFixed(2)}€)`}
               </span>
             </div>
           </div>
