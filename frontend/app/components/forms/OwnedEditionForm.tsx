@@ -18,6 +18,7 @@ import { TextAreaRhfInput } from "./fields/TextAreaRhfInput";
 import { TextRhfInput } from "./fields/TextRhfInput";
 import { GenericForm } from "./GenericForm";
 import { useAppSelector } from "~/store/hooks";
+import { formatCurrency } from "~/utils/currency";
 
 interface OwnedEditionFormProps {
   ownedEdition: Partial<OwnedEdition>;
@@ -32,7 +33,7 @@ export function OwnedEditionForm({
   onSubmit = () => {},
   onCancel = () => {},
 }: OwnedEditionFormProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const { user } = useAppSelector((state) => state.user);
 
@@ -230,9 +231,10 @@ export function OwnedEditionForm({
               </span>
               <br />
               <span>
-                {t("oedition.totalCost")} : {totalCost.toFixed(2)} €{" "}
+                {t("oedition.totalCost")} :{" "}
+                {formatCurrency(totalCost, "EUR", locale)}
                 {savings > 0 &&
-                  `(${t("oedition.saved")} ${savings.toFixed(2)}€)`}
+                  `(${t("oedition.saved")} ${formatCurrency(savings, "EUR", locale)})`}
               </span>
             </div>
           </div>

@@ -7,6 +7,7 @@ import { InfoPageFields, InfoPageSection } from "../templates/InfoPageTemplate";
 import { EditionDataDisplay } from "./EditionDataDisplay";
 import { insertLinebreaks } from "~/utils/strings";
 import { HelpBadgeTooltip } from "../badges/HelpBadge";
+import { formatCurrency } from "~/utils/currency";
 
 interface OwnedEditionDataDisplayProps {
   oedition?: OwnedEdition;
@@ -100,9 +101,13 @@ export function OwnedEditionDataDisplay({
             </tr>
             {/* User data */}
             <tr className="text-white/60">
-              <td>{oedition?.purchasePrice.toFixed(2)}€</td>
-              <td>{oedition?.fees.toFixed(2)}€</td>
-              <td>{oedition?.retailPrice.toFixed(2)}€</td>
+              <td>
+                {formatCurrency(oedition?.purchasePrice || 0, "EUR", locale)}
+              </td>
+              <td>{formatCurrency(oedition?.fees || 0, "EUR", locale)}</td>
+              <td>
+                {formatCurrency(oedition?.retailPrice || 0, "EUR", locale)}
+              </td>
             </tr>
           </table>
           {/* Costs */}
@@ -110,14 +115,16 @@ export function OwnedEditionDataDisplay({
             {/* Total cost */}
             <p className="whitespace-nowrap">
               {t("oedition.totalCost")} :{" "}
-              <span className="text-white/60">{totalCost.toFixed(2)}€</span>
+              <span className="text-white/60">
+                {formatCurrency(totalCost, "EUR", locale)}
+              </span>
             </p>
             {/* Savings (num & percent) */}
             {savingsNum > 0 && (
               <p className="whitespace-nowrap">
                 {t("oedition.saved")} :{" "}
                 <span className="text-white/60">
-                  {savingsNum.toFixed(2)}€ (
+                  {formatCurrency(savingsNum || 0, "EUR", locale)} (
                   {t("oedition.saved.percentOfPrice", {
                     parameters: { percent: savingsPer.toFixed(2) },
                   })}
