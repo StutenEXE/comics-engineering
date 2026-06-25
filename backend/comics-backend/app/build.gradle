@@ -61,9 +61,10 @@ dependencies {
 
     // jOOQ
     implementation 'org.jooq:jooq:3.20.11'
-    // implementation 'org.jooq:jooq-meta:3.20.11'
-    // implementation 'org.jooq:jooq-codegen:3.20.11'
     jooqGenerator 'org.postgresql:postgresql:42.7.3'
+
+    // S3
+    implementation 'software.amazon.awssdk:s3:2.25.0'
 }
 
 testing {

@@ -24,6 +24,7 @@ import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.jooq.tables.records.BooksIssuesRecord;
+import dev.stuten.vps.models.daos.utils.ImageUploader;
 import dev.stuten.vps.models.dtos.full.BookDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleIssueDTO;
@@ -129,12 +130,13 @@ public class BookDAO extends ContributableDAO<BookDTO> {
 
         @Override
         public Optional<Integer> create(BookDTO dto) {
+                String imgUrl = ImageUploader.uploadImage(dto.getImgUrl());
                 Optional<Integer> result = DSL().insertInto(BOOKS)
                                 .set(BOOKS.NAME, dto.getName())
                                 .set(BOOKS.DESC, dto.getDesc())
                                 .set(BOOKS.NUMBER, dto.getNumber())
                                 .set(BOOKS.VO_CONTENT, dto.getVoContent())
-                                .set(BOOKS.IMG_URL, dto.getImgUrl())
+                                .set(BOOKS.IMG_URL, imgUrl)
                                 .set(BOOKS.SERIES_ID, dto.getSerie().getId())
                                 .set(BOOKS.ADDED_BY, dto.getAddedBy().getId())
                                 .returning(BOOKS.ID)
@@ -152,13 +154,17 @@ public class BookDAO extends ContributableDAO<BookDTO> {
 
         @Override
         public boolean update(BookDTO dto) {
+                // Generate new image url if needed
+                String currentImgUrl = DSL().select(BOOKS.IMG_URL).from(BOOKS).where(BOOKS.ID.eq(dto.getId()))
+                                .fetchSingle((Record r) -> r.get(BOOKS.IMG_URL));
+                String newImgUrl = ImageUploader.deleteAndCreateImage(currentImgUrl, dto.getImgUrl());
                 linkToIssues(dto.getId(), dto.getIssues());
                 return DSL().update(BOOKS)
                                 .set(BOOKS.NAME, dto.getName())
                                 .set(BOOKS.DESC, dto.getDesc())
                                 .set(BOOKS.NUMBER, dto.getNumber())
                                 .set(BOOKS.VO_CONTENT, dto.getVoContent())
-                                .set(BOOKS.IMG_URL, dto.getImgUrl())
+                                .set(BOOKS.IMG_URL, newImgUrl)
                                 .set(BOOKS.SERIES_ID, dto.getSerie().getId())
                                 .set(BOOKS.MODIFIED_AT, LocalDateTime.now())
                                 .where(BOOKS.ID.eq(dto.getId()))
@@ -167,6 +173,7 @@ public class BookDAO extends ContributableDAO<BookDTO> {
 
         @Override
         public boolean delete(BookDTO dto) {
+                ImageUploader.deleteImage(dto.getImgUrl());
                 return DSL().delete(BOOKS)
                                 .where(BOOKS.ID.eq(dto.getId()))
                                 .execute() > 0;

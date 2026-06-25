@@ -9,6 +9,7 @@ import {
 } from "../templates/InfoPageTemplate";
 import type { ReactNode } from "react";
 import { Separator } from "../shadcn/ui/separator";
+import { formatCurrency } from "~/utils/currency";
 
 interface EditionDataDisplayProps {
   edition?: Edition;
@@ -94,7 +95,7 @@ export function EditionDataDisplay({
           // Price
           {
             label: t("edition.price"),
-            value: `${edition?.price.toFixed(2)}€`,
+            value: formatCurrency(edition?.price || 0, "EUR", locale),
           },
           // Dimensions
           {
