@@ -176,7 +176,7 @@ export function GenericTable<T extends Record<string, any>>({
                                   value: false,
                                 },
                               ]}
-                              filterValue={(filterValue as string) ?? ""}
+                              value={(filterValue as string) ?? ""}
                               selectAll
                               onValueChange={(value) => {
                                 table.setPageIndex(0);
@@ -196,7 +196,7 @@ export function GenericTable<T extends Record<string, any>>({
                                   return { label: o, value: o };
                                 }) || []
                               }
-                              filterValue={(filterValue as string) ?? ""}
+                              value={(filterValue as string) ?? ""}
                               selectAll
                               onValueChange={(value) => {
                                 table.setPageIndex(0);
@@ -332,7 +332,7 @@ export function GenericTable<T extends Record<string, any>>({
               size="sm"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
-              className="bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white/80 disabled:opacity-20 h-8 w-8 p-0"
+              className="bg-white/5 border-white/10 text-white/50 cursor-pointer hover:bg-white/10 hover:text-white/80 disabled:opacity-20 h-8 w-8 p-0"
             >
               <BsArrowLeft size={14} />
             </Button>
@@ -341,7 +341,7 @@ export function GenericTable<T extends Record<string, any>>({
               size="sm"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
-              className="bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white/80 disabled:opacity-20 h-8 w-8 p-0"
+              className="bg-white/5 border-white/10 text-white/50 cursor-pointer hover:bg-white/10 hover:text-white/80 disabled:opacity-20 h-8 w-8 p-0"
             >
               <BsArrowRight size={14} />
             </Button>

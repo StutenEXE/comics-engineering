@@ -1,6 +1,12 @@
-import { type ReactNode } from "react";
+import { use, useState, type ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
 import type { OwnedEdition } from "~/models/ownedEdition";
+import { SelectInput } from "../forms/fields/SelectInput";
+import {
+  TbSortAscendingLetters,
+  TbSortDescendingLetters,
+} from "react-icons/tb";
+import { useTranslation } from "~/i18n/i18n";
 
 //===== Color palette (dark wood theme)=====
 const WOOD_DARK = "#3B1F0A"; // deep background for shelf interior depth
@@ -26,18 +32,63 @@ interface ShelfDimensions {
 interface BookshelfProps {
   oeditions?: OwnedEdition[];
   onClick?: (oe: OwnedEdition) => void;
+  sortable?: boolean;
+  dimensions?: ShelfDimensions;
   isLoading?: boolean;
   className?: string;
-  dimensions?: ShelfDimensions;
 }
+
+// Sort by series name (alphabetical), then by volume number within a series
+// Books without a series are sorted to the back
+function sortBySerie(a: OwnedEdition, b: OwnedEdition, asc: boolean) {
+  if (!a?.edition?.serie?.name) return 1;
+  if (!b?.edition?.serie?.name) return -1;
+  const serieComp =
+    (asc ? 1 : -1) * a.edition.serie.name.localeCompare(b.edition.serie.name);
+  if (serieComp !== 0) return serieComp;
+  return (a.edition.book?.number ?? 0) - (b.edition.book?.number ?? 0);
+}
+
+// Sort by height (if same height, use sort by serie)
+// Books without a height are sorted to the back
+function sortByHeight(a: OwnedEdition, b: OwnedEdition, asc: boolean) {
+  if (!a.edition?.dimensions?.height) return 1;
+  if (!b.edition?.dimensions?.height) return -1;
+  const heightComp =
+    (asc ? 1 : -1) *
+    (a.edition?.dimensions?.height - b.edition?.dimensions?.height);
+  if (heightComp !== 0) return heightComp;
+  return sortBySerie(a, b, true);
+}
+
+// Sort by thickness (if same width, use sort by serie)
+// Books without a width are sorted to the back
+function sortByThickness(a: OwnedEdition, b: OwnedEdition, asc: boolean) {
+  if (!a.edition?.dimensions?.thickness) return 1;
+  if (!b.edition?.dimensions?.thickness) return -1;
+  const thicknessComp =
+    (asc ? 1 : -1) *
+    (a.edition?.dimensions?.thickness - b.edition?.dimensions?.thickness);
+  if (thicknessComp !== 0) return thicknessComp;
+  return sortBySerie(a, b, true);
+}
+
+const sortingAlgorithmsRegistry = {
+  sortBySerie,
+  sortByHeight,
+  sortByThickness,
+};
 
 export function Bookshelf({
   oeditions = [],
   onClick,
   dimensions = {},
+  sortable = true,
   isLoading = false,
   className,
 }: BookshelfProps) {
+  const { t } = useTranslation();
+
   // Define base values
   const {
     rowHeightCm = 30,
@@ -54,15 +105,13 @@ export function Bookshelf({
   const SHELF_PLANK_THICKNESS = plankThicknessCm * LIFE_TO_RENDER_SCALE;
   const FRAME_BORDER = frameBorderCm * LIFE_TO_RENDER_SCALE;
 
-  // Sort by series name (alphabetical), then by volume number within a series.
-  // Books without a series are sorted to the front.
-  const sortedEditions = [...oeditions].sort((a, b) => {
-    if (!a?.edition?.serie?.name) return -1;
-    if (!b?.edition?.serie?.name) return 1;
-    const serieComp = a.edition.serie.name.localeCompare(b.edition.serie.name);
-    if (serieComp !== 0) return serieComp;
-    return (a.edition.book?.number ?? 0) - (b.edition.book?.number ?? 0);
-  });
+  // Sorting algorithm change
+  const [sortingAlgorithm, setSortingAlgorithm] = useState(() => sortBySerie); // Wrap in a function prevent it being used as a lazy initializer
+  // Ascending or descending sorting
+  const [ascSort, setAscSort] = useState(true);
+  const sortedEditions = [...oeditions].sort((a, b) =>
+    sortingAlgorithm(a, b, ascSort),
+  );
 
   const INNER_WIDTH = WIDTH_OF_SHELF - FRAME_BORDER * 2;
 
@@ -333,6 +382,45 @@ export function Bookshelf({
         className,
       )}
     >
+      {sortable && (
+        <div className="flex py-2 px-1 gap-2 items-center">
+          <SelectInput
+            options={[
+              {
+                label: t("stash.bookshelf.sortBySerie"),
+                value: "sortBySerie",
+              },
+              {
+                label: t("stash.bookshelf.sortByHeight"),
+                value: "sortByHeight",
+              },
+              {
+                label: t("stash.bookshelf.sortByThickness"),
+                value: "sortByThickness",
+              },
+            ]}
+            defaultValue="sortBySerie"
+            onValueChange={(value) => {
+              const key = value as keyof typeof sortingAlgorithmsRegistry;
+              setSortingAlgorithm(() => sortingAlgorithmsRegistry[key]);
+            }}
+          />
+          {ascSort && (
+            <TbSortAscendingLetters
+              className="p-1 cursor-pointer rounded duration-150 hover:bg-neutral-600/40 active:scale-95"
+              size={30}
+              onClick={() => setAscSort(false)}
+            />
+          )}
+          {!ascSort && (
+            <TbSortDescendingLetters
+              className="p-1 cursor-pointer rounded duration-150 hover:bg-neutral-600/40 active:scale-95"
+              size={30}
+              onClick={() => setAscSort(true)}
+            />
+          )}
+        </div>
+      )}
       <svg
         width={TOTAL_WIDTH}
         height={TOTAL_HEIGHT}

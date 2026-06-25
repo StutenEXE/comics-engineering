@@ -374,6 +374,9 @@ export default {
   "stash.title": "Ma stash",
   "stash.library": "Bibliothèque",
   "stash.bookshelf": "Mon étagère",
+  "stash.bookshelf.sortBySerie": "Trier par série",
+  "stash.bookshelf.sortByHeight": "Trier par hauteur",
+  "stash.bookshelf.sortByThickness": "Trier par épaisseur",
   "stash.statistics": "Statistiques",
   "stash.remove.title": "Retirer de la collection",
   "stash.remove.message":
