@@ -14,7 +14,8 @@ interface SelectInputProps {
     label: string;
     value: any;
   }[];
-  filterValue: string;
+  value?: string;
+  defaultValue?: string;
   placeholder?: string;
   selectAll?: boolean;
   onValueChange?: (val: string) => void;
@@ -22,14 +23,19 @@ interface SelectInputProps {
 
 export function SelectInput({
   options,
-  filterValue,
+  value,
+  defaultValue,
   placeholder,
   selectAll,
   onValueChange,
 }: SelectInputProps) {
   const { t } = useTranslation();
   return (
-    <Select value={filterValue} onValueChange={onValueChange}>
+    <Select
+      defaultValue={defaultValue}
+      value={value}
+      onValueChange={onValueChange}
+    >
       <SelectTrigger className="w-full max-w-48">
         <SelectValue
           placeholder={placeholder || t("generic.search.placeholder")}
