@@ -2,6 +2,7 @@
 
 - REST API built with **Javalin** + **jOOQ**
 - Databases : **PostgreSQL 18** and **Redis**.
+- S3 : **Garage** (self hosted)
 
 ---
 
@@ -32,6 +33,13 @@ KYS_REDIS_PASSWORD=<text>
 
 APP_PORT=<number>
 CORS_ALLOWED_ORIGIN=https://<dns / ip>
+
+S3_ENDPOINT=https://<dns / ip>
+S3_REGION=<text>
+S3_BUCKET=<text>
+S3_ACCESS_KEY_ID=<text>
+S3_SECRET_ACCESS_KEY=<text>
+S3_PUBLIC_URL=https://<dn /ip>/<bucket name>
 ```
 
 ---

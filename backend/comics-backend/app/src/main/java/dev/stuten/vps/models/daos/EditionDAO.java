@@ -20,6 +20,7 @@ import org.jooq.RecordMapper;
 import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
 
+import dev.stuten.vps.models.daos.utils.ImageUploader;
 import dev.stuten.vps.models.dtos.full.EditionDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
 import dev.stuten.vps.models.dtos.simple.SimplePublisherDTO;
@@ -98,13 +99,14 @@ public class EditionDAO extends ContributableDAO<EditionDTO> {
 
     @Override
     public Optional<Integer> create(EditionDTO dto) {
+        String imgUrl = ImageUploader.uploadImage(dto.getImgUrl());
         return DSL().insertInto(EDITIONS)
                 .set(EDITIONS.ISBN, dto.getIsbn())
                 .set(EDITIONS.EAN, dto.getEan())
                 .set(EDITIONS.NPAGES, dto.getNpages())
                 .set(EDITIONS.PRICE, dto.getPrice())
                 .set(EDITIONS.URL, dto.getUrl())
-                .set(EDITIONS.IMG_URL, dto.getImgUrl())
+                .set(EDITIONS.IMG_URL, imgUrl)
                 .set(EDITIONS.COVER_TYPE, dto.getCoverType())
                 .set(EDITIONS.PARUTION_DATE, dto.getParutionDate())
                 .set(EDITIONS.HEIGHT, dto.getDimensions().height())
@@ -120,13 +122,17 @@ public class EditionDAO extends ContributableDAO<EditionDTO> {
 
     @Override
     public boolean update(EditionDTO dto) {
+        // Generate new image url if needed
+        String currentImgUrl = DSL().select(EDITIONS.IMG_URL).from(EDITIONS).where(EDITIONS.ID.eq(dto.getId()))
+                .fetchSingle((Record r) -> r.get(EDITIONS.IMG_URL));
+        String newImgUrl = ImageUploader.deleteAndCreateImage(currentImgUrl, dto.getImgUrl());
         return DSL().update(EDITIONS)
                 .set(EDITIONS.ISBN, dto.getIsbn())
                 .set(EDITIONS.EAN, dto.getEan())
                 .set(EDITIONS.NPAGES, dto.getNpages())
                 .set(EDITIONS.PRICE, dto.getPrice())
                 .set(EDITIONS.URL, dto.getUrl())
-                .set(EDITIONS.IMG_URL, dto.getImgUrl())
+                .set(EDITIONS.IMG_URL, newImgUrl)
                 .set(EDITIONS.COVER_TYPE, dto.getCoverType())
                 .set(EDITIONS.PARUTION_DATE, dto.getParutionDate())
                 .set(EDITIONS.HEIGHT, dto.getDimensions().height())
@@ -141,6 +147,7 @@ public class EditionDAO extends ContributableDAO<EditionDTO> {
 
     @Override
     public boolean delete(EditionDTO dto) {
+        ImageUploader.deleteImage(dto.getImgUrl());
         return DSL().delete(EDITIONS)
                 .where(EDITIONS.ID.eq(dto.getId()))
                 .execute() > 0;
