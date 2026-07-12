@@ -1,18 +1,25 @@
 import { useState } from "react";
 import { useTranslation } from "~/i18n/i18n";
-import type { OwnedEdition } from "~/models/ownedEdition";
+import type { SimpleOwnedEdition } from "~/models/ownedEdition";
 import { OwnedEditionModal } from "../modals/OwnedEditionModal";
+import { useOwnedEditionByIdQuery } from "~/store/services/api";
 
 type OwnedEditionCardProps = {
-  oedition?: OwnedEdition;
+  simpleOedition?: SimpleOwnedEdition;
   className?: string;
 };
 
 export function OwnedEditionCard({
-  oedition,
+  simpleOedition,
   className,
 }: OwnedEditionCardProps) {
   const { locale } = useTranslation();
+
+  const { data, isFetching } = useOwnedEditionByIdQuery(
+    { id: simpleOedition?.id || 0 },
+    { skip: !simpleOedition?.id },
+  );
+  const oedition = data?.ownedEdition;
 
   // Owned edition modal
   const [isOeditionModalOpen, setIsOeditionModalOpen] = useState(false);
@@ -20,7 +27,7 @@ export function OwnedEditionCard({
   const closeOeditionModal = () => setIsOeditionModalOpen(false);
 
   // If no edition provided, return null (can happen when edition is deleted but still in cache somewhere)
-  if (!oedition) return null;
+  if (!simpleOedition || !oedition) return null;
 
   return (
     <>

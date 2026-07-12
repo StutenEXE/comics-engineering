@@ -9,16 +9,17 @@ import {
   type ChartConfig,
 } from "~/components/shadcn/ui/chart";
 import { SideContentTemplate } from "~/components/templates/SideContentTemplate";
-import StatisticPageTemplate, {
+import {
   NumericalStatisticCard,
   StatisticCard,
+  StatisticPageTemplate,
 } from "~/components/templates/StatisticPageTemplate";
 import { useTranslation } from "~/i18n/i18n";
-import type { OwnedEdition } from "~/models/ownedEdition";
+import type { SimpleOwnedEdition } from "~/models/ownedEdition";
 import { useAppSelector } from "~/store/hooks";
-import { useCollectionQuery } from "~/store/services/api";
+import { useCollectionSpendingStatsQuery } from "~/store/services/api";
 import { formatCurrency } from "~/utils/currency";
-import { dateToMonthYearString } from "~/utils/date";
+import { dateToShortMonthYearString } from "~/utils/date";
 import type { Route } from "../../+types/root";
 
 export function meta({}: Route.MetaArgs) {
@@ -32,69 +33,23 @@ export default function StashBookshelfPage() {
   const { t, locale } = useTranslation();
   const { user } = useAppSelector((state) => state.user);
 
-  const { data, isFetching } = useCollectionQuery(
+  const { data, isFetching } = useCollectionSpendingStatsQuery(
     user ? { id: user.id } : { id: 0 },
     { skip: !user },
   );
-  const oeditions = data?.ownedEditions;
-
-  const totalPurchasePrice =
-    oeditions?.reduce((acc, oe) => acc + (oe.purchasePrice ?? 0), 0) ?? 0;
-  const totalFees =
-    oeditions?.reduce((acc, oe) => acc + (oe.fees ?? 0), 0) ?? 0;
-  const totalSpent = totalPurchasePrice + totalFees;
-  const totalCollectionValue =
-    oeditions?.reduce((acc, oe) => acc + (oe.retailPrice ?? 0), 0) ?? 0;
-  const totalSavings = totalCollectionValue - totalSpent;
-  const totalSavingsPercentage = (totalSavings / totalCollectionValue) * 100;
-
-  const mostCostlyEdition = [...(oeditions ?? [])]?.sort(
-    (a, b) => b.purchasePrice + b.fees - (a.purchasePrice + a.fees),
-  )[0];
-  const bestDealObtainedSum = [...(oeditions ?? [])]
-    ?.filter((oe) => !oe.gift)
-    ?.sort(
-      (a, b) =>
-        b.retailPrice -
-        (b.purchasePrice + b.fees) -
-        (a.retailPrice - (a.purchasePrice + a.fees)),
-    )[0];
-  const mostValuableEdition = [...(oeditions ?? [])]?.sort(
-    (a, b) => (b.retailPrice ?? 0) - (a.retailPrice ?? 0),
-  )[0];
+  const stats = data?.stats;
 
   /**
    * Calculate spending per month
-   * [{ month: "2023-01", totalSpent: 100, totalPurchasePrice: 80, totalFees: 20 }, ...]
+   * [{ month: Date, totalSpent: 100, totalPurchasePrice: 80, totalFees: 20 }, ...]
    */
-  const spendingPerMonthTmp = (oeditions ?? []).reduce(
-    (acc, oe) => {
-      const month = oe.date.toISOString().slice(0, 7);
-      if (!acc[month]) {
-        acc[month] = {
-          month: oe.date,
-          totalSpent: 0,
-          totalPurchasePrice: 0,
-          totalFees: 0,
-        };
-      }
-      acc[month].totalSpent += (oe.purchasePrice ?? 0) + (oe.fees ?? 0);
-      acc[month].totalPurchasePrice += oe.purchasePrice ?? 0;
-      acc[month].totalFees += oe.fees ?? 0;
-      return acc;
-    },
-    {} as Record<
-      string,
-      {
-        month: Date;
-        totalSpent: number;
-        totalPurchasePrice: number;
-        totalFees: number;
-      }
-    >,
-  );
-  const spendingPerMonth = Object.fromEntries(
-    Object.entries(spendingPerMonthTmp).sort(([a], [b]) => a.localeCompare(b)),
+  const spendingPerMonth = Object.entries(stats?.spendingPerMonth ?? {}).map(
+    ([month, monthStats]) => ({
+      month: new Date(month),
+      totalPurchasePrice: monthStats.totalPurchasePrice,
+      totalFees: monthStats.totalFees,
+      totalSpent: monthStats.totalSpent,
+    }),
   );
 
   return (
@@ -103,42 +58,47 @@ export default function StashBookshelfPage() {
         <NumericalStatisticCard
           colSpan={1}
           title={t("stash.spending.totalSpent")}
-          value={formatCurrency(totalSpent, "EUR", locale)}
+          value={formatCurrency(stats?.totalSpent ?? 0, "EUR", locale)}
           additionalInfo={t("stash.spending.totalSpent.info", {
             parameters: {
-              purchasePrice: formatCurrency(totalPurchasePrice, "EUR", locale),
-              fees: formatCurrency(totalFees, "EUR", locale),
+              purchasePrice: formatCurrency(
+                stats?.totalPurchasePrice ?? 0,
+                "EUR",
+                locale,
+              ),
+              fees: formatCurrency(stats?.totalFees ?? 0, "EUR", locale),
             },
           })}
         />
         <NumericalStatisticCard
           colSpan={1}
-          title={t("stash.spending.collectionRetailValue")}
-          value={formatCurrency(totalCollectionValue, "EUR", locale)}
+          title={t("stash.spending.totalRetailPrice")}
+          value={formatCurrency(stats?.totalRetailPrice ?? 0, "EUR", locale)}
         />
         <NumericalStatisticCard
           colSpan={1}
           title={t("stash.spending.totalSavings")}
-          value={formatCurrency(totalSavings, "EUR", locale)}
+          value={formatCurrency(stats?.totalSavings ?? 0, "EUR", locale)}
           additionalInfo={t("stash.spending.totalSavings.info", {
             parameters: {
-              percentage: totalSavingsPercentage.toFixed(2),
+              percentage: stats?.totalSavingsPercentage.toFixed(2),
             },
           })}
         />
+        {/* Spendings per month */}
         <StatisticCard
           colSpan={3}
           rowSpan={2}
           title={t("stash.spending.spendingPerMonth")}
         >
-          <SpendingPerMonthChart data={Object.values(spendingPerMonth)} />
+          <SpendingPerMonthChart data={spendingPerMonth} />
         </StatisticCard>
         <EditionStatisticCard
-          oedition={mostCostlyEdition}
+          oedition={stats?.mostCostlyEdition}
           value={t("stash.spending.costed", {
             parameters: {
               amount: formatCurrency(
-                mostCostlyEdition?.purchasePrice ?? 0,
+                stats?.mostCostlyEdition?.purchasePrice ?? 0,
                 "EUR",
                 locale,
               ),
@@ -149,13 +109,13 @@ export default function StashBookshelfPage() {
           title={t("stash.spending.mostExpensive")}
         />
         <EditionStatisticCard
-          oedition={bestDealObtainedSum}
+          oedition={stats?.bestDealObtainedByPrice}
           value={t("stash.spending.saved", {
             parameters: {
               amount: formatCurrency(
-                (bestDealObtainedSum?.retailPrice ?? 0) -
-                  (bestDealObtainedSum?.purchasePrice ?? 0) +
-                  (bestDealObtainedSum?.fees ?? 0),
+                (stats?.bestDealObtainedByPrice?.retailPrice ?? 0) -
+                  (stats?.bestDealObtainedByPrice?.purchasePrice ?? 0) +
+                  (stats?.bestDealObtainedByPrice?.fees ?? 0),
                 "EUR",
                 locale,
               ),
@@ -166,11 +126,11 @@ export default function StashBookshelfPage() {
           title={t("stash.spending.bestDeal")}
         />
         <EditionStatisticCard
-          oedition={mostValuableEdition}
+          oedition={stats?.mostValuableEdition}
           value={t("stash.spending.retailsAt", {
             parameters: {
               amount: formatCurrency(
-                mostValuableEdition?.retailPrice ?? 0,
+                stats?.mostValuableEdition?.retailPrice ?? 0,
                 "EUR",
                 locale,
               ),
@@ -187,7 +147,7 @@ export default function StashBookshelfPage() {
 
 interface EditionStatisticCardProps {
   title: string;
-  oedition?: OwnedEdition;
+  oedition?: SimpleOwnedEdition;
   value?: string | number;
   colSpan?: number;
   rowSpan?: number;
@@ -218,7 +178,10 @@ function EditionStatisticCard({
         {oedition && (
           <>
             <p className="text-sm whitespace-nowrap">{value}</p>
-            <OwnedEditionCard oedition={oedition} className="max-w-[100px]" />
+            <OwnedEditionCard
+              simpleOedition={oedition}
+              className="max-w-[100px]"
+            />
           </>
         )}
       </div>
@@ -252,7 +215,7 @@ function SpendingPerMonthChart({ data }: SpendingPerMonthChartProps) {
 
   // Transform data to the shape expected by recharts
   const chartData = data.map((d) => ({
-    month: dateToMonthYearString(locale, d.month),
+    month: dateToShortMonthYearString(locale, d.month),
     purchasePrice: d.totalPurchasePrice,
     fees: d.totalFees,
     totalSpent: d.totalSpent,
@@ -267,11 +230,11 @@ function SpendingPerMonthChart({ data }: SpendingPerMonthChartProps) {
         />
         <XAxis
           dataKey="month"
-          tickLine={false}
+          tickLine={true}
           tickMargin={10}
-          axisLine={false}
+          axisLine={true}
         />
-        <ChartTooltip content={<ChartTooltipContentWithTotal hideLabel />} />
+        <ChartTooltip content={<ChartTooltipContentWithTotal />} />
         <ChartLegend content={<ChartLegendContent />} />
         <Bar
           dataKey="purchasePrice"

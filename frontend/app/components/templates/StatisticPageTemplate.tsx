@@ -91,5 +91,3 @@ export function NumericalStatisticCard({
     </StatisticCard>
   );
 }
-
-export default StatisticPageTemplate;

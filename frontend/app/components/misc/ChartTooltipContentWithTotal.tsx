@@ -1,6 +1,5 @@
 import { useTranslation } from "~/i18n/i18n";
 import { ChartTooltipContent } from "../shadcn/ui/chart";
-import { capitalize } from "~/utils/strings";
 
 // Custom tooltip content wrapping shadcn's default, adding a total row
 export function ChartTooltipContentWithTotal({

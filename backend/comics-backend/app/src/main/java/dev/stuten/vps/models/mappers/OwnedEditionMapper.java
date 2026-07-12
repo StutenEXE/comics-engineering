@@ -17,6 +17,7 @@ import org.jooq.TableField;
 import dev.stuten.vps.jooq.tables.records.EditionOwnershipRecord;
 import dev.stuten.vps.models.dtos.full.EditionDTO;
 import dev.stuten.vps.models.dtos.full.OwnedEditionDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleOwnedEditionDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 import dev.stuten.vps.models.mappers.utils.MappingUtils;
 
@@ -45,24 +46,44 @@ public class OwnedEditionMapper {
         EditionDTO edition = MappingUtils.getSingleDTOFromRecord(r, EDITIONS, EditionMapper::mapToDTO);
         // Map user
         SimpleUserDTO user = MappingUtils.getSingleDTOFromRecord(r, USERS, UserMapper::mapToSimpleDTO);
-        // Map edition
+        // Convert datetime from LocalDateTime to OffsetDateTime
         LocalDateTime ldt = r.get(getFieldName(EDITION_OWNERSHIP.DATE), LocalDateTime.class);
         OffsetDateTime odt = ldt == null ? null : ldt.atOffset(ZoneOffset.UTC);
 
         OwnedEditionDTO dto = OwnedEditionDTO.builder()
-            .id(r.get(getFieldName(EDITION_OWNERSHIP.ID), Integer.class))
-            .date(odt)
-            .read(r.get(getFieldName(EDITION_OWNERSHIP.READ), Boolean.class))
-            .dateRead(r.get(getFieldName(EDITION_OWNERSHIP.DATE_READ), LocalDate.class))
-            .gift(r.get(getFieldName(EDITION_OWNERSHIP.GIFT), Boolean.class))
-            .signed(r.get(getFieldName(EDITION_OWNERSHIP.SIGNED), Boolean.class))
-            .purchasePrice(r.get(getFieldName(EDITION_OWNERSHIP.PURCHASE_PRICE), BigDecimal.class))
-            .fees(r.get(getFieldName(EDITION_OWNERSHIP.FEES), BigDecimal.class))
-            .retailPrice(r.get(getFieldName(EDITION_OWNERSHIP.RETAIL_PRICE), BigDecimal.class))
-            .note(r.get(getFieldName(EDITION_OWNERSHIP.NOTE), String.class))
-            .edition(edition)
-            .user(user)
-            .build();
+                .id(r.get(getFieldName(EDITION_OWNERSHIP.ID), Integer.class))
+                .date(odt)
+                .read(r.get(getFieldName(EDITION_OWNERSHIP.READ), Boolean.class))
+                .dateRead(r.get(getFieldName(EDITION_OWNERSHIP.DATE_READ), LocalDate.class))
+                .gift(r.get(getFieldName(EDITION_OWNERSHIP.GIFT), Boolean.class))
+                .signed(r.get(getFieldName(EDITION_OWNERSHIP.SIGNED), Boolean.class))
+                .purchasePrice(r.get(getFieldName(EDITION_OWNERSHIP.PURCHASE_PRICE), BigDecimal.class))
+                .fees(r.get(getFieldName(EDITION_OWNERSHIP.FEES), BigDecimal.class))
+                .retailPrice(r.get(getFieldName(EDITION_OWNERSHIP.RETAIL_PRICE), BigDecimal.class))
+                .note(r.get(getFieldName(EDITION_OWNERSHIP.NOTE), String.class))
+                .edition(edition)
+                .user(user)
+                .build();
         return dto;
+    }
+
+    public static SimpleOwnedEditionDTO mapToSimpleDTO(Record r) {
+        // Convert datetime from LocalDateTime to OffsetDateTime
+        LocalDateTime ldt = r.get(getFieldName(EDITION_OWNERSHIP.DATE), LocalDateTime.class);
+        OffsetDateTime odt = ldt == null ? null : ldt.atOffset(ZoneOffset.UTC);
+
+        return SimpleOwnedEditionDTO.builder()
+                .id(r.get(getFieldName(EDITION_OWNERSHIP.ID), Integer.class))
+                .date(odt)
+                .read(r.get(getFieldName(EDITION_OWNERSHIP.READ), Boolean.class))
+                .dateRead(r.get(getFieldName(EDITION_OWNERSHIP.DATE_READ), LocalDate.class))
+                .gift(r.get(getFieldName(EDITION_OWNERSHIP.GIFT), Boolean.class))
+                .signed(r.get(getFieldName(EDITION_OWNERSHIP.SIGNED), Boolean.class))
+                .purchasePrice(r.get(getFieldName(EDITION_OWNERSHIP.PURCHASE_PRICE), BigDecimal.class))
+                .fees(r.get(getFieldName(EDITION_OWNERSHIP.FEES), BigDecimal.class))
+                .retailPrice(r.get(getFieldName(EDITION_OWNERSHIP.RETAIL_PRICE), BigDecimal.class))
+                .note(r.get(getFieldName(EDITION_OWNERSHIP.NOTE), String.class))
+                .editionId(r.get(getFieldName(EDITION_OWNERSHIP.EDITION_ID), Integer.class))
+                .build();
     }
 }
