@@ -11,7 +11,6 @@ import { formatCurrency } from "~/utils/currency";
 
 interface OwnedEditionDataDisplayProps {
   oedition?: OwnedEdition;
-  onEditClick?: () => void;
   isLoading?: boolean;
   error?: Error;
   className?: string;
@@ -20,7 +19,6 @@ interface OwnedEditionDataDisplayProps {
 
 export function OwnedEditionDataDisplay({
   oedition,
-  onEditClick,
   isLoading,
   error,
   className,
@@ -35,7 +33,6 @@ export function OwnedEditionDataDisplay({
   return (
     <EditionDataDisplay
       edition={oedition?.edition}
-      onEditClick={() => {}}
       isLoading={isLoading}
       error={error}
       className={className}
