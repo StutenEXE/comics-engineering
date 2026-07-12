@@ -1,5 +1,12 @@
 import { BsBookshelf } from "react-icons/bs";
-import { MdBook, MdEditDocument, MdLibraryBooks } from "react-icons/md";
+import {
+  Md10Mp,
+  MdBook,
+  MdEditDocument,
+  MdLibraryBooks,
+  MdMoney,
+  MdWallet,
+} from "react-icons/md";
 import { useTranslation } from "~/i18n/i18n";
 import {
   Sidebar,
@@ -61,10 +68,15 @@ export function CollectionSidebar({
               url: "/stash",
               icon: MdBook,
             },
+          ]}
+        />
+        <NavSection
+          label={t("stash.statistics")}
+          items={[
             {
-              title: t("series", { capitalize: true }),
-              url: "/stash/series",
-              icon: MdLibraryBooks,
+              title: t("stash.spending", { capitalize: true }),
+              url: "/stash/spending",
+              icon: MdWallet,
             },
           ]}
         />

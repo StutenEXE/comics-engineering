@@ -1,6 +1,6 @@
 import { SideContentHeader } from "../headers/SideContentHeader";
 
-interface GenericPageTemplateProps {
+interface SideContentTemplateProps {
   title?: string;
   children: React.ReactNode;
 }
@@ -8,7 +8,7 @@ interface GenericPageTemplateProps {
 export function SideContentTemplate({
   title,
   children,
-}: GenericPageTemplateProps) {
+}: SideContentTemplateProps) {
   return (
     <div>
       <SideContentHeader title={title} />

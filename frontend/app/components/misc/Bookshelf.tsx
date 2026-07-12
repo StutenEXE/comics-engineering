@@ -349,7 +349,7 @@ export function Bookshelf({
               </text>
             )}
             {/* Volume number at spine bottom, hidden on spines narrower than 10px */}
-            {thickness >= 10 && (
+            {!oe.edition.serie?.oneshot && thickness >= 10 && (
               <text
                 x={xoffset + thickness / 2}
                 y={plankY - TEXT_BOTTOM_PADDING}
