@@ -51,3 +51,17 @@ export interface OwnedEditionDTO {
     edition: EditionDTO,
     user: User,
 }
+
+export interface SimpleOwnedEdition {
+    id: number,
+    date: Date,
+    read: boolean,
+    dateRead?: Date,
+    gift: boolean,
+    signed: boolean,
+    purchasePrice: number,
+    fees: number,
+    retailPrice: number,
+    note: string,
+    editionId: number,
+}

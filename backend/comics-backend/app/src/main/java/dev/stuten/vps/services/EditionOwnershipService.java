@@ -1,5 +1,9 @@
 package dev.stuten.vps.services;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -7,6 +11,9 @@ import java.util.Optional;
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.OwnedEditionDAO;
 import dev.stuten.vps.models.dtos.full.OwnedEditionDTO;
+import dev.stuten.vps.models.dtos.response.UserSpendingStatsDTO;
+import dev.stuten.vps.models.dtos.response.UserSpendingStatsDTO.SpendingPerMonthStats;
+import dev.stuten.vps.models.dtos.simple.SimpleOwnedEditionDTO;
 import dev.stuten.vps.web.ErrorResponse;
 import dev.stuten.vps.web.middleware.AuthContext;
 import dev.stuten.vps.web.middleware.AuthMiddleware;
@@ -89,7 +96,8 @@ public class EditionOwnershipService {
 
         Optional<OwnedEditionDTO> optOe = dao.findOwnedById(ownershipID);
         if (optOe.isEmpty()) {
-            ErrorResponse.send(HttpStatus.NOT_FOUND, "Ownership not found", "This ownerhip relation has not been found");
+            ErrorResponse.send(HttpStatus.NOT_FOUND, "Ownership not found",
+                    "This ownerhip relation has not been found");
             return;
         }
         OwnedEditionDTO oe = optOe.get();
@@ -116,6 +124,26 @@ public class EditionOwnershipService {
         ctx.status(HttpStatus.OK);
     }
 
+    public static void getById(Context ctx) {
+        // Retreive user ID from request
+        Integer id;
+        try {
+            id = Integer.parseInt(ctx.queryParam("id"));
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            return; // For compiler
+        }
+
+        // Retreive owned editions
+        Optional<OwnedEditionDTO> ownedEdition = dao.findOwnedById(id);
+        if (ownedEdition.isEmpty()) {
+            String message = String.format("Owned edition of id %s not found", id);
+            ErrorResponse.send(HttpStatus.NOT_FOUND, "Owned edition not found", message);
+        }
+
+        ctx.json(Map.of("ownedEdition", ownedEdition));
+    }
+
     public static void getByUserID(Context ctx) {
         // Retreive user ID from request
         Integer userID;
@@ -130,5 +158,114 @@ public class EditionOwnershipService {
         List<OwnedEditionDTO> ownedEditions = dao.findOwnedByUserId(userID);
 
         ctx.json(Map.of("ownedEditions", ownedEditions));
+    }
+
+    public static void getUserSpendingStats(Context ctx) {
+        // Retreive user ID from request
+        Integer userID;
+        try {
+            userID = Integer.parseInt(ctx.queryParam("id"));
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            return; // For compiler
+        }
+
+        // Retreive owned editions
+        List<SimpleOwnedEditionDTO> oeditions = dao.findSimpleOwnedByUserId(userID);
+
+        // If no oeditions returned, exit early to simplify the following logic
+        if (oeditions.size() == 0) {
+            ctx.json(
+                    Map.of("stats", new UserSpendingStatsDTO(
+                            new BigDecimal("0.00"), new BigDecimal("0.00"), new BigDecimal("0.00"),
+                            new BigDecimal("0.00"),
+                            new BigDecimal("0.00"), new BigDecimal("0.00"),
+                            null, null, null, null,
+                            null)));
+            return;
+        }
+
+        // Total prices
+        BigDecimal totalPurchasePrice = new BigDecimal("0.00");
+        BigDecimal totalFees = new BigDecimal("0.00");
+        BigDecimal totalRetailPrice = new BigDecimal("0.00");
+        // Most/best of something variables
+        SimpleOwnedEditionDTO mostCostly = oeditions.get(0),
+                bestDealByPrice = oeditions.get(0),
+                bestDealByReduction = oeditions.get(0),
+                mostValuable = oeditions.get(0);
+        // Spending per month
+        Map<String, Map<SpendingPerMonthStats, BigDecimal>> spendingPerMonth = new HashMap<String, Map<SpendingPerMonthStats, BigDecimal>>();
+
+        for (SimpleOwnedEditionDTO oe : oeditions) {
+            // Update the month to month spending (yyyy-MM-01)
+            String yearmonth = oe.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM")) + "-01";
+            // Create month if not created yet
+            if (!spendingPerMonth.containsKey(yearmonth)) {
+                spendingPerMonth.put(yearmonth, new HashMap<SpendingPerMonthStats, BigDecimal>(
+                        Map.of(SpendingPerMonthStats.totalPurchasePrice, new BigDecimal("0.00"),
+                                SpendingPerMonthStats.totalFees, new BigDecimal("0.00"),
+                                SpendingPerMonthStats.totalSpent, new BigDecimal("0.00"))));
+            }
+            Map<SpendingPerMonthStats, BigDecimal> monthStats = spendingPerMonth.get(yearmonth);
+            monthStats.put(SpendingPerMonthStats.totalPurchasePrice,
+                    monthStats.get(SpendingPerMonthStats.totalPurchasePrice).add(oe.getPurchasePrice()));
+            monthStats.put(SpendingPerMonthStats.totalFees,
+                    monthStats.get(SpendingPerMonthStats.totalFees).add(oe.getFees()));
+            monthStats.put(SpendingPerMonthStats.totalSpent,
+                    monthStats.get(SpendingPerMonthStats.totalSpent).add(oe.getPurchasePrice().add(oe.getFees())));
+
+            // Prices
+            totalPurchasePrice = totalPurchasePrice.add(oe.getPurchasePrice());
+            totalFees = totalFees.add(oe.getFees());
+            totalRetailPrice = totalRetailPrice.add(oe.getRetailPrice());
+
+            // Most costly
+            BigDecimal spent = oe.getPurchasePrice().add(oe.getFees());
+            BigDecimal highestSpending = mostCostly.getPurchasePrice().add(mostCostly.getFees());
+            if (highestSpending.compareTo(spent) < 0) {
+                mostCostly = oe;
+            }
+            // Most valuable
+            if (mostValuable.getRetailPrice().compareTo(oe.getRetailPrice()) < 0) {
+                mostValuable = oe;
+            }
+
+            // Deals, not applicable to gifts
+            if (oe.getGift()) {
+                continue;
+            }
+            // Best deal by price
+            BigDecimal deal = oe.getRetailPrice().subtract(spent);
+            BigDecimal bestDealPrice = bestDealByPrice.getPurchasePrice().add(bestDealByPrice.getFees());
+            BigDecimal bestDealDeal = bestDealByPrice.getRetailPrice().subtract(bestDealPrice);
+            if (bestDealDeal.compareTo(deal) < 0) {
+                bestDealByPrice = oe;
+            }
+            // Best deal by reduction
+            BigDecimal dealRed = deal.divide(oe.getRetailPrice(), RoundingMode.HALF_UP);
+            BigDecimal bestReductionDealPrice = bestDealByReduction.getPurchasePrice()
+                    .add(bestDealByReduction.getFees());
+            // Savings in €
+            BigDecimal bestReductionDealDeal = bestDealByReduction.getRetailPrice().subtract(bestReductionDealPrice);
+            // Savings in %
+            BigDecimal bestReductionDealRed = bestReductionDealDeal.divide(oe.getRetailPrice(), RoundingMode.HALF_UP);
+            if (bestReductionDealRed.compareTo(dealRed) < 0) {
+                bestDealByReduction = oe;
+            }
+        }
+
+        BigDecimal totalSpent = totalPurchasePrice.add(totalFees);
+        BigDecimal totalSavings = totalRetailPrice.subtract(totalSpent);
+        BigDecimal totalSavingsPercentage = totalSavings.multiply(new BigDecimal(100)).divide(totalRetailPrice,
+                RoundingMode.HALF_UP);
+
+        UserSpendingStatsDTO stats = new UserSpendingStatsDTO(
+                totalSpent, totalPurchasePrice, totalFees, totalRetailPrice,
+                totalSavings, totalSavingsPercentage,
+                mostCostly, mostValuable, bestDealByPrice, bestDealByReduction,
+                spendingPerMonth);
+
+        ctx.json(Map.of("stats", stats));
     }
 }

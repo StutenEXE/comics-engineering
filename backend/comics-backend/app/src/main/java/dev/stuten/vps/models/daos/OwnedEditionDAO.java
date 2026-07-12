@@ -15,6 +15,7 @@ import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.models.dtos.full.OwnedEditionDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleOwnedEditionDTO;
 import dev.stuten.vps.models.mappers.OwnedEditionMapper;
 
 public class OwnedEditionDAO extends EditionDAO {
@@ -28,10 +29,14 @@ public class OwnedEditionDAO extends EditionDAO {
         return OwnedEditionMapper::mapToDTO;
     }
 
-    @Override
-    protected Collection<SelectFieldOrAsterisk> getSimpleSelectFields() {
-        Collection<SelectFieldOrAsterisk> editionFields = new ArrayList<SelectFieldOrAsterisk>(
-                super.getSimpleSelectFields());
+    protected Collection<SelectFieldOrAsterisk> getSimpleSelectFields(Boolean withEdition) {
+        Collection<SelectFieldOrAsterisk> editionFields = new ArrayList<SelectFieldOrAsterisk>();
+        if (withEdition) {
+            editionFields.addAll(super.getSimpleSelectFields());
+        } else {
+            editionFields.add(
+                    EDITION_OWNERSHIP.EDITION_ID.as(OwnedEditionMapper.getFieldName(EDITION_OWNERSHIP.EDITION_ID)));
+        }
         editionFields.addAll(List.of(
                 EDITION_OWNERSHIP.ID.as(OwnedEditionMapper.getFieldName(EDITION_OWNERSHIP.ID)),
                 EDITION_OWNERSHIP.DATE.as(OwnedEditionMapper.getFieldName(EDITION_OWNERSHIP.DATE)),
@@ -44,6 +49,11 @@ public class OwnedEditionDAO extends EditionDAO {
                 EDITION_OWNERSHIP.RETAIL_PRICE.as(OwnedEditionMapper.getFieldName(EDITION_OWNERSHIP.RETAIL_PRICE)),
                 EDITION_OWNERSHIP.NOTE.as(OwnedEditionMapper.getFieldName(EDITION_OWNERSHIP.NOTE))));
         return editionFields;
+    }
+
+    @Override
+    protected Collection<SelectFieldOrAsterisk> getSimpleSelectFields() {
+        return this.getSimpleSelectFields(true);
     }
 
     protected SelectJoinStep<? extends Record> getSimpleFromClause() {
@@ -76,7 +86,7 @@ public class OwnedEditionDAO extends EditionDAO {
                 .fetchOptional()
                 .map(record -> record.get(EDITION_OWNERSHIP.ID));
     }
-    
+
     public Boolean update(OwnedEditionDTO dto) {
         return DSL().update(EDITION_OWNERSHIP)
                 .set(EDITION_OWNERSHIP.DATE, dto.getDate() == null ? null : dto.getDate().toLocalDateTime())
@@ -106,7 +116,15 @@ public class OwnedEditionDAO extends EditionDAO {
         return super.selectMany(EDITION_OWNERSHIP.USER_ID.eq(userId));
     }
 
+    public List<SimpleOwnedEditionDTO> findSimpleOwnedByUserId(Integer userId) {
+        return DSL().selectDistinct(this.getSimpleSelectFields(false))
+                .from(EDITION_OWNERSHIP)
+                .where(EDITION_OWNERSHIP.USER_ID.eq(userId))
+                .fetch(OwnedEditionMapper::mapToSimpleDTO);
+    }
+
     public Boolean doesUserOwnEdition(Integer userId, Integer editionId) {
-        return super.selectOne(EDITION_OWNERSHIP.USER_ID.eq(userId).and(EDITION_OWNERSHIP.EDITION_ID.eq(editionId))).isPresent();
+        return super.selectOne(EDITION_OWNERSHIP.USER_ID.eq(userId).and(EDITION_OWNERSHIP.EDITION_ID.eq(editionId)))
+                .isPresent();
     }
 }

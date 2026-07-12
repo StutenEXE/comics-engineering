@@ -1,4 +1,6 @@
-interface ContributionStatusStats {
+import type { SimpleOwnedEdition } from "~/models/ownedEdition"
+
+export interface ContributionStatusStats {
     total: number,
     types: {
         book: number,
@@ -9,7 +11,7 @@ interface ContributionStatusStats {
     }
 }
 
-interface ContributionsStats {
+export interface ContributionsStats {
     total: number,
     status: {
         approved: ContributionStatusStats,
@@ -18,4 +20,21 @@ interface ContributionsStats {
         needs_revision: ContributionStatusStats,
         skipped: ContributionStatusStats
     }
+}
+
+export interface OwnedEditionSpendingStats {
+    totalSpent: number,
+    totalPurchasePrice: number,
+    totalFees: number,
+    totalRetailPrice: number,
+
+    totalSavings: number,
+    totalSavingsPercentage: number,
+
+    mostCostlyEdition?: SimpleOwnedEdition,
+    mostValuableEdition?: SimpleOwnedEdition,
+    bestDealObtainedByPrice?: SimpleOwnedEdition,
+    bestDealObtainedByReduction?: SimpleOwnedEdition,
+
+    spendingPerMonth?: Record<string, { totalPurchasePrice: number, totalFees: number, totalSpent: number }>
 }

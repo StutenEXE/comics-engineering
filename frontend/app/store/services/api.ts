@@ -9,6 +9,7 @@ import { parseToOwnedEdition, type OwnedEdition, type OwnedEditionDTO } from "~/
 import { parseToPublisher, type Publisher } from "~/models/publisher";
 import { parseToSerie, type Serie } from "~/models/serie";
 import { parseToUser, type SignupData, type User, type UserCredentials } from "~/models/user";
+import type { ContributionsStats, OwnedEditionSpendingStats } from "./apiModels";
 
 const API_HOST = (import.meta.env.VITE_API_HOST as string | undefined) ?? "http://localhost:8080";
 
@@ -260,6 +261,9 @@ export const privateApi = createApi({
     removeFromCollection: build.mutation<{ id: number }, {}>({
       query: (params) => ({ url: "/collection/remove", method: 'DELETE', params: params }),
     }),
+    collectionSpendingStats: build.query<{ stats: OwnedEditionSpendingStats }, { id: number }>({
+      query: (params) => ({ url: "/collection/stats/spending", method: 'GET', params: params }),
+    }),
 
     /****************
      * CONTRIBUTIONS
@@ -279,6 +283,7 @@ export const {
   useAddToCollectionMutation,
   useUpdateOwnedEditionMutation,
   useRemoveFromCollectionMutation,
+  useCollectionSpendingStatsQuery,
   useSubmitContributionBundleMutation,
   useUpdateContributionBundleMutation
 } = privateApi;

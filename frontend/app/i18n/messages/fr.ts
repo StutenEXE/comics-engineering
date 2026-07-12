@@ -383,7 +383,7 @@ export default {
   "stash.spending": "Dépenses",
   "stash.spending.totalSpent": "Total des dépenses",
   "stash.spending.totalSpent.info": "%purchasePrice% + %fees% (frais)",
-  "stash.spending.collectionRetailValue": "Valeur de la collection",
+  "stash.spending.totalRetailPrice": "Valeur de la collection",
   "stash.spending.totalSavings": "Total des économies",
   "stash.spending.totalSavings.info": "%percentage%% d'économies",
   "stash.spending.spendingPerMonth": "Dépenses par mois",

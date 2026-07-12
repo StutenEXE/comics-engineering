@@ -17,6 +17,18 @@ export function dateToMonthYearString(lang: string, date: Date | undefined | nul
     }))
 }
 
+export function dateToShortMonthYearString(lang: string, date: Date | undefined | null): string {
+    if (date === undefined || date === null) {
+        return ""
+    }
+    return capitalize(date.toLocaleDateString(lang, {
+        weekday: undefined,
+        year: "numeric",
+        month: "short",
+        day: undefined
+    }))
+}
+
 export function dateToVerboseDateString(lang: string, date: Date | undefined | null): string {
     if (date === undefined || date === null) {
         return ""
@@ -59,8 +71,8 @@ export function toYYYYmmDD(d: Date | undefined | null): string {
     if (!d || isNaN(d.getTime())) {
         return ""
     }
-    var z  = (n: number) =>  ('0' + n).slice(-2);
+    var z = (n: number) => ('0' + n).slice(-2);
 
     // Decomposing to avoid unwanted changes from the timezone
-    return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`; 
+    return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}`;
 }
