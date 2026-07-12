@@ -214,12 +214,14 @@ function SpendingPerMonthChart({ data }: SpendingPerMonthChartProps) {
   } satisfies ChartConfig;
 
   // Transform data to the shape expected by recharts
-  const chartData = data.map((d) => ({
-    month: dateToShortMonthYearString(locale, d.month),
-    purchasePrice: d.totalPurchasePrice,
-    fees: d.totalFees,
-    totalSpent: d.totalSpent,
-  }));
+  const chartData = data
+    .sort((a, b) => a.month.getTime() - b.month.getTime())
+    .map((d) => ({
+      month: dateToShortMonthYearString(locale, d.month),
+      purchasePrice: d.totalPurchasePrice,
+      fees: d.totalFees,
+      totalSpent: d.totalSpent,
+    }));
 
   return (
     <ChartContainer config={chartConfig}>
