@@ -23,6 +23,9 @@ public class UserService {
     private static UserDAO dao = new UserDAO(
             JooqProvider.get());
 
+    // 60 secs * 60 mins * 24 hours * 14 days = 14 days sliding session
+    private static final int COOKIE_TTL_SECONDS = 60 * 60 * 24 * 14;
+
     public static void signupService(Context ctx) {
         UserWithPasswordDTO dto = ctx.bodyAsClass(UserWithPasswordDTO.class);
         // TODO : Validate email format, password strength, etc.
@@ -44,7 +47,7 @@ public class UserService {
         // Log in user
         String sessionKey = SessionStore.createSessionKey();
         SessionStore.save(sessionKey, newUser.getId(), newUser.getIsAdmin() ? Role.ADMIN : Role.USER);
-        ctx.cookie(SessionStore.COOKIE_SESSION_KEY, sessionKey);
+        ctx.cookie(SessionStore.COOKIE_SESSION_KEY, sessionKey, COOKIE_TTL_SECONDS);
 
         // Send back account info to the client
         ctx.json(Map.of("user", newUser));
@@ -77,7 +80,7 @@ public class UserService {
         // Log in user
         String sessionKey = SessionStore.createSessionKey();
         SessionStore.save(sessionKey, user.getId(), user.getIsAdmin() ? Role.ADMIN : Role.USER);
-        ctx.cookie(SessionStore.COOKIE_SESSION_KEY, sessionKey);
+        ctx.cookie(SessionStore.COOKIE_SESSION_KEY, sessionKey, COOKIE_TTL_SECONDS);
 
         // Send back account info to the client
         ctx.json(Map.of("user", user));

@@ -25,7 +25,8 @@ public final class SessionStore {
 
     private static final RedisCommands<String, String> redis = redisClient.connect().sync();
 
-    private static final int TTL_SECONDS = 60 * 24 * 14; // 14 days sliding session
+    // 60 secs * 60 mins * 24 hours * 14 days = 14 days sliding session
+    private static final int TTL_SECONDS = 60 * 60 * 24 * 14;
 
     private SessionStore() {
     }
