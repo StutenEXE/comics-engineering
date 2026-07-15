@@ -25,9 +25,12 @@ public record UserSpendingStatsDTO(
 
     public enum SpendingPerMonthStats {
 
-        totalPurchasePrice("totalPurchasePrice"),
-        totalFees("totalFees"),
-        totalSpent("totalSpent");
+        @JsonProperty("totalPurchasePrice")
+        TOTAL_PURCHASE_PRICE("totalPurchasePrice"),
+        @JsonProperty("totalFees")
+        TOTAL_FEES("totalFees"),
+        @JsonProperty("totalSpent")
+        TOTAL_SPENT("totalSpent");
 
         private final String literal;
 

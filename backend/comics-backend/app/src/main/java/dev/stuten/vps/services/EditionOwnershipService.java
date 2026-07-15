@@ -139,6 +139,7 @@ public class EditionOwnershipService {
         if (ownedEdition.isEmpty()) {
             String message = String.format("Owned edition of id %s not found", id);
             ErrorResponse.send(HttpStatus.NOT_FOUND, "Owned edition not found", message);
+            return;
         }
 
         ctx.json(Map.of("ownedEdition", ownedEdition));
@@ -151,10 +152,26 @@ public class EditionOwnershipService {
             userID = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
             ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
-            return; // For compiler
+            return;
         }
 
-        // Retreive owned editions
+        /*
+         * // Pagination
+         * PaginationDTO pagination = PaginationServiceUtil.getFromContext(ctx);
+         * if (pagination == null) {
+         * return;
+         * }
+         * // Filtering
+         * OwnedEditionFilterDTO filter = FilteringServiceUtil.getFromContext(ctx,
+         * OwnedEditionFilterDTO.class);
+         * // Sorting
+         * 
+         * @SuppressWarnings({ "nullness", "null" })
+         * SortingDTO<OwnedEditionSortingFields> sorting =
+         * SortingServiceUtil.getFromContext(ctx,
+         * OwnedEditionSortingFields.class);
+         */
+        // Retrieve owned editions
         List<OwnedEditionDTO> ownedEditions = dao.findOwnedByUserId(userID);
 
         ctx.json(Map.of("ownedEditions", ownedEditions));
@@ -203,17 +220,17 @@ public class EditionOwnershipService {
             // Create month if not created yet
             if (!spendingPerMonth.containsKey(yearmonth)) {
                 spendingPerMonth.put(yearmonth, new HashMap<SpendingPerMonthStats, BigDecimal>(
-                        Map.of(SpendingPerMonthStats.totalPurchasePrice, new BigDecimal("0.00"),
-                                SpendingPerMonthStats.totalFees, new BigDecimal("0.00"),
-                                SpendingPerMonthStats.totalSpent, new BigDecimal("0.00"))));
+                        Map.of(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE, new BigDecimal("0.00"),
+                                SpendingPerMonthStats.TOTAL_FEES, new BigDecimal("0.00"),
+                                SpendingPerMonthStats.TOTAL_SPENT, new BigDecimal("0.00"))));
             }
             Map<SpendingPerMonthStats, BigDecimal> monthStats = spendingPerMonth.get(yearmonth);
-            monthStats.put(SpendingPerMonthStats.totalPurchasePrice,
-                    monthStats.get(SpendingPerMonthStats.totalPurchasePrice).add(oe.getPurchasePrice()));
-            monthStats.put(SpendingPerMonthStats.totalFees,
-                    monthStats.get(SpendingPerMonthStats.totalFees).add(oe.getFees()));
-            monthStats.put(SpendingPerMonthStats.totalSpent,
-                    monthStats.get(SpendingPerMonthStats.totalSpent).add(oe.getPurchasePrice().add(oe.getFees())));
+            monthStats.put(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE,
+                    monthStats.get(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE).add(oe.getPurchasePrice()));
+            monthStats.put(SpendingPerMonthStats.TOTAL_FEES,
+                    monthStats.get(SpendingPerMonthStats.TOTAL_FEES).add(oe.getFees()));
+            monthStats.put(SpendingPerMonthStats.TOTAL_SPENT,
+                    monthStats.get(SpendingPerMonthStats.TOTAL_SPENT).add(oe.getPurchasePrice().add(oe.getFees())));
 
             // Prices
             totalPurchasePrice = totalPurchasePrice.add(oe.getPurchasePrice());

@@ -32,7 +32,7 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
   const { user } = useAppSelector((state) => state.user);
 
   const { data, isFetching, error, refetch } = useCollectionQuery(
-    user ? { id: user.id } : { id: 0 },
+    { id: user ? user.id : 0 },
     { skip: !user },
   );
   const editionList = data?.ownedEditions ?? [];

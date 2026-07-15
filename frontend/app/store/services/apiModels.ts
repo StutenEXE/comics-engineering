@@ -38,3 +38,8 @@ export interface OwnedEditionSpendingStats {
 
     spendingPerMonth?: Record<string, { totalPurchasePrice: number, totalFees: number, totalSpent: number }>
 }
+
+export interface Pagination {
+    page: number,
+    size: number,
+}
