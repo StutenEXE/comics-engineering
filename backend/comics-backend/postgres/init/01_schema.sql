@@ -144,6 +144,7 @@ CREATE TABLE IF NOT EXISTS contribution_bundles (
 	submitter_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	status contribution_bundle_status_enum NOT NULL DEFAULT 'pending',
 	note TEXT,
+	n_contributions INT,
 	created_at TIMESTAMP NOT NULL DEFAULT now(),
 	modified_at TIMESTAMP NOT NULL DEFAULT now()
 );

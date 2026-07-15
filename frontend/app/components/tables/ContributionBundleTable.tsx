@@ -3,7 +3,7 @@ import { BiRevision, BiSolidDislike, BiSolidLike } from "react-icons/bi";
 import { useTranslation } from "~/i18n/i18n";
 import {
   ContributionBundleStatusEnum,
-  type ContributionBundle,
+  type SimpleContributionBundle,
 } from "~/models/contributionBundle";
 import { useAppSelector } from "~/store/hooks";
 import { useUpdateBundleStatusMutation } from "~/store/services/api";
@@ -13,12 +13,12 @@ import { useToast } from "../toast/Toast";
 import { GenericTable } from "./GenericTable";
 
 interface ContributionBundleTableProps {
-  bundleList: ContributionBundle[] | null | undefined;
+  bundleList: SimpleContributionBundle[] | null | undefined;
   addActions: boolean;
-  onContributionClick?: (b: ContributionBundle) => void;
+  onContributionClick?: (b: SimpleContributionBundle) => void;
   onPageChange?: (page: number) => void;
   onSuccesfulStatusUpdate?: (
-    b: ContributionBundle,
+    b: SimpleContributionBundle,
     newStatus: ContributionBundleStatusEnum,
   ) => void;
   isLoading?: boolean;
@@ -40,7 +40,7 @@ export function ContributionBundleTable({
   const [updateStatus] = useUpdateBundleStatusMutation();
 
   const triggerUpdateStatus = (
-    b: ContributionBundle,
+    b: SimpleContributionBundle,
     newStatus: ContributionBundleStatusEnum,
   ) => {
     updateStatus({ bundleId: b.id, newStatus }).then((res) => {
@@ -54,12 +54,12 @@ export function ContributionBundleTable({
   };
 
   // Define columns
-  const col = createColumnHelper<ContributionBundle>();
+  const col = createColumnHelper<SimpleContributionBundle>();
   const columns = [
     col.accessor("id", {
       header: t("cbundle.id"),
     }),
-    col.accessor("submitter.username", {
+    col.accessor("submitterUsername", {
       header: t("cbundle.submitter"),
       cell: (info) => (
         <span className="hover:underline cursor-pointer">
@@ -87,7 +87,7 @@ export function ContributionBundleTable({
     }),
     col.accessor(
       (row) =>
-        `${t("cbundle.action.seeContributions")} (${row.contributions.length})`,
+        `${t("cbundle.action.seeContributions")} (${row.nContributions})`,
       {
         header: t("cbundle.contributions"),
         cell: (info) => (
@@ -107,7 +107,7 @@ export function ContributionBundleTable({
       cell: ({ row }) => {
         const b = row.original;
         // If is not the author of the bundle and if is not an admin, show no actions
-        if (user && user?.id !== b.submitter?.id && !user?.isAdmin) {
+        if (user && user?.id !== b.submitterId && !user?.isAdmin) {
           return null;
         }
         return (

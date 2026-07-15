@@ -14,6 +14,7 @@ export interface ContributionBundle {
     submitter?: SimpleUser,
     status: ContributionBundleStatusEnum,
     note: string,
+    nContributions: number,
     contributions: SimpleContribution[]
     createdAt: Date,
     modifiedAt: Date,
@@ -25,6 +26,7 @@ export interface SimpleContributionBundle {
     submitterUsername: string,
     status: ContributionBundleStatusEnum,
     note: string,
+    nContributions: number,
     createdAt: Date,
     modifiedAt: Date,
 }
@@ -36,6 +38,7 @@ export function parseToBundle(data: Record<string, any>): ContributionBundle {
         submitter: data.submitter ? parseToSimpleUser(data.submitter) : undefined,
         status: data.status as ContributionBundleStatusEnum,
         note: data.note,
+        nContributions: data.nContributions,
         contributions: data.contributions?.map((c: Record<string, any>) => parseToSimpleContribution(c)) ?? [],
         createdAt: new Date(data.createdAt),
         modifiedAt: new Date(data.modifiedAt),
@@ -49,6 +52,7 @@ export function parseToSimpleBundle(data: Record<string, any>): SimpleContributi
         submitterUsername: data.submitterUsername,
         status: data.status as ContributionBundleStatusEnum,
         note: data.note,
+        nContributions: data.nContributions,
         createdAt: new Date(data.createdAt),
         modifiedAt: new Date(data.modifiedAt),
     }
@@ -61,4 +65,9 @@ export function newBundle(submitter: SimpleUser): Partial<ContributionBundle> {
         contributions: []
     }
     return b;
+}
+
+export function isSimpleBundle(bundle?: ContributionBundle | SimpleContributionBundle): bundle is SimpleContributionBundle {
+    if (!bundle) return false;
+    return (bundle as SimpleContributionBundle).submitterId !== undefined && (bundle as SimpleContributionBundle).submitterUsername !== undefined
 }

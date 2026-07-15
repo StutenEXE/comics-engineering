@@ -24,6 +24,7 @@ public class ContributionBundleMapper {
             Map.entry(CONTRIBUTION_BUNDLES.ID, "bundle_id"),
             Map.entry(CONTRIBUTION_BUNDLES.STATUS, "bundle_status"),
             Map.entry(CONTRIBUTION_BUNDLES.NOTE, "bundle_note"),
+            Map.entry(CONTRIBUTION_BUNDLES.N_CONTRIBUTIONS, "bundle_n_contributions"),
             Map.entry(CONTRIBUTION_BUNDLES.SUBMITTER_ID, "bundle_submitter_id"),
             Map.entry(CONTRIBUTION_BUNDLES.CREATED_AT, "bundle_created_at"),
             Map.entry(CONTRIBUTION_BUNDLES.MODIFIED_AT, "bundle_modified_at"),
@@ -46,6 +47,7 @@ public class ContributionBundleMapper {
                 .id(r.get(getFieldName(CONTRIBUTION_BUNDLES.ID), Integer.class))
                 .status(r.get(getFieldName(CONTRIBUTION_BUNDLES.STATUS), ContributionBundleStatusEnum.class))
                 .note(r.get(getFieldName(CONTRIBUTION_BUNDLES.NOTE), String.class))
+                .nContributions(r.get(getFieldName(CONTRIBUTION_BUNDLES.N_CONTRIBUTIONS), Integer.class))
                 .contributions(contributions)
                 .submitter(user)
                 .createdAt(r.get(getFieldName(CONTRIBUTION_BUNDLES.CREATED_AT), LocalDateTime.class))
@@ -62,6 +64,7 @@ public class ContributionBundleMapper {
                 .submitterUsername(r.get(getFieldName(USERS.USERNAME), String.class))
                 .status(r.get(getFieldName(CONTRIBUTION_BUNDLES.STATUS), ContributionBundleStatusEnum.class))
                 .note(r.get(getFieldName(CONTRIBUTION_BUNDLES.NOTE), String.class))
+                .nContributions(r.get(getFieldName(CONTRIBUTION_BUNDLES.N_CONTRIBUTIONS), Integer.class))
                 .createdAt(r.get(getFieldName(CONTRIBUTION_BUNDLES.CREATED_AT), LocalDateTime.class))
                 .modifiedAt(r.get(getFieldName(CONTRIBUTION_BUNDLES.MODIFIED_AT), LocalDateTime.class))
                 .build();

@@ -30,7 +30,6 @@ export function EditOwnedEditionModal({
         return false;
       }
       toast.success(t("toast.addToCollection.success"));
-      console.log(res);
       onSubmit(res.data.ownedEdition);
       onClose();
       return;

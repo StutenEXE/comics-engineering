@@ -8,6 +8,7 @@ import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.ContributionBundleDAO;
 import dev.stuten.vps.models.dtos.full.ContributionBundleDTO;
 import dev.stuten.vps.models.dtos.request.UpdateContributionBundleStatusDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleContributionBundleDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionDTO;
 import dev.stuten.vps.models.dtos.template.IdDTO;
 import dev.stuten.vps.web.ErrorResponse;
@@ -144,6 +145,26 @@ public class ContributionBundleService {
         ctx.status(HttpStatus.OK);
     }
 
+    public static void getById(Context ctx) {
+        // Retrieve ID from request
+        Integer id;
+        try {
+            id = Integer.parseInt(ctx.queryParam("id"));
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            return; // For compiler
+        }
+
+        // Retrieve bundle
+        Optional<ContributionBundleDTO> bundle = dao.findById(id);
+        if (bundle.isEmpty()) {
+            String message = String.format("Contribution bundle of id %s not found", id);
+            ErrorResponse.send(HttpStatus.NOT_FOUND, "Contribution bundle not found", message);
+        }
+
+        ctx.json(Map.of("bundle", bundle));
+    }
+
     public static void getBySubmitterId(Context ctx) {
         // Retreive submitter ID from request
         Integer submitterId;
@@ -154,7 +175,7 @@ public class ContributionBundleService {
             return; // For compiler
         }
 
-        // Retreive books
+        // Retrieve bundles
         List<ContributionBundleDTO> bundles = dao.findBySubmitterId(submitterId);
 
         ctx.json(Map.of("bundles", bundles));
@@ -175,7 +196,7 @@ public class ContributionBundleService {
         }
 
         // Retreive users
-        List<ContributionBundleDTO> bundles = dao.getBundles(from, limit);
+        List<SimpleContributionBundleDTO> bundles = dao.getSimpleBundles(from, limit);
 
         ctx.json(Map.of("bundles", bundles));
     }

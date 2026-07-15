@@ -73,10 +73,10 @@ export function IssueSerieContributionForm({
       name: issueSerie?.name,
       desc: issueSerie?.desc,
       startDate: issueSerie?.startDate,
-      endDate: issueSerie?.endDate
+      endDate: issueSerie?.endDate,
     },
   });
-  
+
   // Watchers are here to format the date properly in the input
   const watchedStartDate = watch("startDate");
   const watchedEndDate = watch("endDate");
@@ -125,13 +125,13 @@ export function IssueSerieContributionForm({
     if (errors.fandomUrl?.message) return;
     try {
       const res = await scrape({ url });
-      if (res.error) throw new Error()
-      
+      if (res.error) throw new Error();
+
       // Wrong data source
       if (res?.data?.resultType !== "issueserie") {
-        toast.info(t("form.autofill.wrongSource"))
-        return
-      };
+        toast.info(t("form.autofill.wrongSource"));
+        return;
+      }
       const scraped = res.data.result;
 
       // Fill form fields from scraped data
@@ -162,15 +162,13 @@ export function IssueSerieContributionForm({
       if (isntEmpty(scraped.endDate)) {
         setValue("endDate", new Date(scraped.endDate), {
           shouldTouch: true,
-          shouldValidate: true
+          shouldValidate: true,
         });
       }
     } catch (e) {
-      toast.error(t("form.autofill.sourceNotFound"))
+      toast.error(t("form.autofill.sourceNotFound"));
     }
   };
-
-  console.log(watchedStartDate, watchedEndDate)
 
   return (
     <GenericForm
@@ -181,7 +179,9 @@ export function IssueSerieContributionForm({
       }
       onCancel={noPropagationEvt(onCancel)}
       submitLabel={
-        action === "update" ? t("issueserie.form.modify") : t("issueserie.form.create")
+        action === "update"
+          ? t("issueserie.form.modify")
+          : t("issueserie.form.create")
       }
       onSubmit={handleSubmit(triggerSubmission)}
     >
@@ -211,7 +211,7 @@ export function IssueSerieContributionForm({
             valueAsDate: true,
           }),
           inputProps: {
-            value: toHtmlInputString(watchedStartDate)
+            value: toHtmlInputString(watchedStartDate),
           },
           error: errors.startDate,
         }}
@@ -223,7 +223,7 @@ export function IssueSerieContributionForm({
           inputProps: {
             disabled: endDateDisabled,
             min: minEndDate,
-            value: toHtmlInputString(watchedEndDate) 
+            value: toHtmlInputString(watchedEndDate),
           },
           error: errors.endDate,
         }}
@@ -234,7 +234,7 @@ export function IssueSerieContributionForm({
         label={t("issueserie.description")}
         registration={register("desc")}
         inputProps={{
-          rows: 6
+          rows: 6,
         }}
         className="min-w-200"
         error={errors.desc}

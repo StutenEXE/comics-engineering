@@ -2,7 +2,7 @@ import { useToast } from "~/components/toast/Toast";
 import { useTranslation } from "~/i18n/i18n";
 import {
   contributionToSimpleContribution,
-  type SimpleContribution
+  type SimpleContribution,
 } from "~/models/contribution";
 import {
   ContributionBundleStatusEnum,
@@ -15,8 +15,11 @@ import {
 import { ContributionBundleForm } from "./ContributionBundleForm";
 
 interface UpdateContributionBundleFormProps {
-  bundle: ContributionBundle;
-  onSubmit?: (bundle: Partial<ContributionBundle>, hasChanges: boolean) => void;
+  bundle?: ContributionBundle;
+  onSubmit?: (
+    bundle: Partial<ContributionBundle>,
+    hasChanges: boolean,
+  ) => Promise<void>;
   onCancel?: () => void;
 }
 
@@ -58,8 +61,8 @@ export function UpdateContributionBundleForm({
       action="update"
       bundle={bundle}
       disableNewContributions={
-        bundle.status === ContributionBundleStatusEnum.APPROVED ||
-        bundle.status === ContributionBundleStatusEnum.REJECTED
+        bundle?.status === ContributionBundleStatusEnum.APPROVED ||
+        bundle?.status === ContributionBundleStatusEnum.REJECTED
       }
       onSubmit={onSubmit}
       onCancel={onCancel}

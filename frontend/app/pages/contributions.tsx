@@ -2,15 +2,19 @@ import { useEffect, useState } from "react";
 import { ContributionBundleModal } from "~/components/modals/contribution/ContributionBundleModal";
 import { AdminProtectedRoute } from "~/components/security/AdminProtectedRoute";
 import { ContributionBundleTable } from "~/components/tables/ContributionBundleTable";
+import { GenericPageTemplate } from "~/components/templates/GenericPageTemplate";
+import { useToast } from "~/components/toast/Toast";
 import { useTranslation } from "~/i18n/i18n";
-import { type ContributionBundle } from "~/models/contributionBundle";
+import {
+  type ContributionBundle,
+  type SimpleContributionBundle,
+} from "~/models/contributionBundle";
 import {
   useLazyBundleListQuery,
   useUpdateContributionBundleMutation,
 } from "~/store/services/api";
 import type { Route } from "../+types/root";
-import { useToast } from "~/components/toast/Toast";
-import { GenericPageTemplate } from "~/components/templates/GenericPageTemplate";
+import { ContributionBundleModalWithFetch } from "~/components/modals/contribution/ContributionBundleModalWithFetch";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -25,12 +29,12 @@ export default function ContributePage() {
   const itemsPerPage = 500;
 
   // If a bundle is to be edited
-  const [bundleToEdit, setBundleToEdit] = useState<ContributionBundle>();
+  const [bundleToEdit, setBundleToEdit] = useState<SimpleContributionBundle>();
 
   // Handles contribution modal state
   const [isContributionModalOpen, setisContributionModalOpen] = useState(false);
 
-  const openContributionModal = (bundle: ContributionBundle) => {
+  const openContributionModal = (bundle: SimpleContributionBundle) => {
     setBundleToEdit(bundle);
     setisContributionModalOpen(true);
   };
@@ -75,7 +79,6 @@ export default function ContributePage() {
           resetFormAndClose();
           return;
         }
-        console.log("Update bundle response", res);
         toast.success(t("cbundle.toast.updateSuccess"));
         resetFormAndClose();
       })
@@ -98,8 +101,8 @@ export default function ContributePage() {
           onSuccesfulStatusUpdate={triggerGetBundles}
           isLoading={isFetching}
         />
-        <ContributionBundleModal
-          bundle={bundleToEdit}
+        <ContributionBundleModalWithFetch
+          id={bundleToEdit?.id}
           action="update"
           isOpen={isContributionModalOpen}
           onSubmit={updateContributionBundle}

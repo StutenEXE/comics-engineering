@@ -35,4 +35,7 @@ public class SimpleContributionBundleDTO extends ModifiedAtDTO {
 
         @JsonProperty("note")
         private String note;
+
+        @JsonProperty("nContributions")
+        private Integer nContributions;
 }

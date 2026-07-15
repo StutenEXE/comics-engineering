@@ -16,12 +16,12 @@ import java.util.function.Function;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Function6;
+import org.jooq.Function7;
 import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Records;
-import org.jooq.Row6;
+import org.jooq.Row7;
 import org.jooq.Schema;
 import org.jooq.SelectField;
 import org.jooq.Table;
@@ -83,6 +83,11 @@ public class ContributionBundles extends TableImpl<ContributionBundlesRecord> {
      * The column <code>public.contribution_bundles.modified_at</code>.
      */
     public final TableField<ContributionBundlesRecord, LocalDateTime> MODIFIED_AT = createField(DSL.name("modified_at"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
+
+    /**
+     * The column <code>public.contribution_bundles.n_contributions</code>.
+     */
+    public final TableField<ContributionBundlesRecord, Integer> N_CONTRIBUTIONS = createField(DSL.name("n_contributions"), SQLDataType.INTEGER, this, "");
 
     private ContributionBundles(Name alias, Table<ContributionBundlesRecord> aliased) {
         this(alias, aliased, null);
@@ -191,18 +196,18 @@ public class ContributionBundles extends TableImpl<ContributionBundlesRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row6 type methods
+    // Row7 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row6<Integer, Integer, ContributionBundleStatusEnum, String, LocalDateTime, LocalDateTime> fieldsRow() {
-        return (Row6) super.fieldsRow();
+    public Row7<Integer, Integer, ContributionBundleStatusEnum, String, LocalDateTime, LocalDateTime, Integer> fieldsRow() {
+        return (Row7) super.fieldsRow();
     }
 
     /**
      * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
      */
-    public <U> SelectField<U> mapping(Function6<? super Integer, ? super Integer, ? super ContributionBundleStatusEnum, ? super String, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Function7<? super Integer, ? super Integer, ? super ContributionBundleStatusEnum, ? super String, ? super LocalDateTime, ? super LocalDateTime, ? super Integer, ? extends U> from) {
         return convertFrom(Records.mapping(from));
     }
 
@@ -210,7 +215,7 @@ public class ContributionBundles extends TableImpl<ContributionBundlesRecord> {
      * Convenience mapping calling {@link SelectField#convertFrom(Class,
      * Function)}.
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function6<? super Integer, ? super Integer, ? super ContributionBundleStatusEnum, ? super String, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Class<U> toType, Function7<? super Integer, ? super Integer, ? super ContributionBundleStatusEnum, ? super String, ? super LocalDateTime, ? super LocalDateTime, ? super Integer, ? extends U> from) {
         return convertFrom(toType, Records.mapping(from));
     }
 }

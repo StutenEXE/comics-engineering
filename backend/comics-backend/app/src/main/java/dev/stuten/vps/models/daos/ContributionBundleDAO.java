@@ -17,6 +17,7 @@ import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.jooq.enums.ContributionBundleStatusEnum;
 import dev.stuten.vps.models.dtos.full.ContributionBundleDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleContributionBundleDTO;
 import dev.stuten.vps.models.mappers.ContributionBundleMapper;
 
 public class ContributionBundleDAO extends DAO {
@@ -39,6 +40,9 @@ public class ContributionBundleDAO extends DAO {
                                                 .as(ContributionBundleMapper.getFieldName(CONTRIBUTION_BUNDLES.STATUS)),
                                 CONTRIBUTION_BUNDLES.NOTE
                                                 .as(ContributionBundleMapper.getFieldName(CONTRIBUTION_BUNDLES.NOTE)),
+                                CONTRIBUTION_BUNDLES.N_CONTRIBUTIONS
+                                                .as(ContributionBundleMapper
+                                                                .getFieldName(CONTRIBUTION_BUNDLES.N_CONTRIBUTIONS)),
                                 CONTRIBUTION_BUNDLES.SUBMITTER_ID
                                                 .as(ContributionBundleMapper
                                                                 .getFieldName(CONTRIBUTION_BUNDLES.SUBMITTER_ID)),
@@ -75,6 +79,7 @@ public class ContributionBundleDAO extends DAO {
                 return DSL().insertInto(CONTRIBUTION_BUNDLES)
                                 .set(CONTRIBUTION_BUNDLES.STATUS, ContributionBundleStatusEnum.pending)
                                 .set(CONTRIBUTION_BUNDLES.NOTE, dto.getNote())
+                                .set(CONTRIBUTION_BUNDLES.N_CONTRIBUTIONS, dto.getContributions().size())
                                 .set(CONTRIBUTION_BUNDLES.SUBMITTER_ID, dto.getSubmitter().getId())
                                 .returning(CONTRIBUTION_BUNDLES.ID)
                                 .fetchOptional()
@@ -96,6 +101,7 @@ public class ContributionBundleDAO extends DAO {
         public Boolean update(ContributionBundleDTO dto) {
                 return DSL().update(CONTRIBUTION_BUNDLES)
                                 .set(CONTRIBUTION_BUNDLES.NOTE, dto.getNote())
+                                .set(CONTRIBUTION_BUNDLES.N_CONTRIBUTIONS, dto.getContributions().size())
                                 .set(CONTRIBUTION_BUNDLES.SUBMITTER_ID, dto.getSubmitter().getId())
                                 .where(CONTRIBUTION_BUNDLES.ID.eq(dto.getId()))
                                 .execute() > 0;
@@ -122,10 +128,10 @@ public class ContributionBundleDAO extends DAO {
                 return super.selectMany(CONTRIBUTION_BUNDLES.SUBMITTER_ID.eq(submitterId));
         }
 
-        public List<ContributionBundleDTO> getBundles(Integer from, Integer limit) {
-                return getFullFromClause()
+        public List<SimpleContributionBundleDTO> getSimpleBundles(Integer from, Integer limit) {
+                return getSimpleFromClause()
                                 .offset(from)
                                 .limit(limit)
-                                .fetch(getDefaultMapper());
+                                .fetch(ContributionBundleMapper::mapToSimpleDTO);
         }
 }
