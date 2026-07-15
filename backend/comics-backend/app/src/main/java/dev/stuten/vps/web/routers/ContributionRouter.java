@@ -20,6 +20,7 @@ public class ContributionRouter implements Router {
         app.post(APIPathBuilder.buildPrivatePath("/bundles/update"), ContributionBundleService::update);
 
         // Admin endpoints
+        app.get(APIPathBuilder.buildAdminPath("/bundles"), ContributionBundleService::getById);
         app.get(APIPathBuilder.buildAdminPath("/bundles/all"), ContributionBundleService::getAll);
         app.post(APIPathBuilder.buildAdminPath("/contributions/create"), ContributionService::create);
         app.post(APIPathBuilder.buildAdminPath("/contributions/update"), ContributionService::update);

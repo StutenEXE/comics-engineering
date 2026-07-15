@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { parseToBook, parseToSimpleBook, type Book, type SimpleBook } from "~/models/book";
 import { ContributionStatusEnum, parseToContribution, parseToSimpleContribution, type Contribution, type SimpleContribution } from "~/models/contribution";
-import { ContributionBundleStatusEnum, parseToBundle, type ContributionBundle } from "~/models/contributionBundle";
+import { ContributionBundleStatusEnum, parseToBundle, parseToSimpleBundle, type ContributionBundle, type SimpleContributionBundle } from "~/models/contributionBundle";
 import { parseToEdition, type Edition } from "~/models/edition";
 import { parseToIssue, type Issue } from "~/models/issue";
 import { parseToIssueSerie, type IssueSerie } from "~/models/issue-serie";
@@ -307,17 +307,26 @@ export const adminApi = createApi({
         users: resp.users.map((usr) => parseToUser(usr)),
       }),
     }),
+    // Delete user
     deleteUser: build.mutation<{ id: number }, {}>({
       query: (params) => ({ url: "/users/delete", method: 'DELETE', params: params }),
     }),
+    // Recycle a user
     recycleUser: build.mutation<{ id: number }, {}>({
       query: (params) => ({ url: "/users/recycle", method: 'GET', params: params }),
     }),
     // Get list of contribution bundles
-    bundleList: build.query<{ bundles: ContributionBundle[] }, { from: number, limit: number }>({
+    bundleList: build.query<{ bundles: SimpleContributionBundle[] }, { from: number, limit: number }>({
       query: (params) => ({ url: "/bundles/all", method: 'GET', params: params }),
-      transformResponse: (resp: { bundles: ContributionBundle[] }) => ({
-        bundles: resp.bundles.map((b) => parseToBundle(b)),
+      transformResponse: (resp: { bundles: SimpleContributionBundle[] }) => ({
+        bundles: resp.bundles.map((b) => parseToSimpleBundle(b)),
+      }),
+    }),
+    // Get a bundle by id
+    bundleById: build.query<{ bundle: ContributionBundle }, { id: number }>({
+      query: (params) => ({ url: "/bundles", method: 'GET', params: params }),
+      transformResponse: (resp: { bundle: ContributionBundle }) => ({
+        bundle: parseToBundle(resp.bundle),
       }),
     }),
     // Create a contribution
@@ -350,6 +359,7 @@ export const {
   useDeleteUserMutation,
   useRecycleUserMutation,
   useLazyBundleListQuery,
+  useLazyBundleByIdQuery,
   useCreateContributionMutation,
   useUpdateContributionMutation,
   useUpdateContributionStatusMutation,

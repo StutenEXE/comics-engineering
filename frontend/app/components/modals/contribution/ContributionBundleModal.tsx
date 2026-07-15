@@ -1,15 +1,22 @@
-import { ContributionBundleForm } from "~/components/forms/contribution/ContributionBundleForm";
-import { GenericModal } from "../GenericModal";
-import type { ContributionBundle } from "~/models/contributionBundle";
 import { CreateContributionBundleForm } from "~/components/forms/contribution/CreateContributionBundleForm";
-import { ModeNight } from "@mui/icons-material";
 import { UpdateContributionBundleForm } from "~/components/forms/contribution/UpdateContributionBundleForm";
+import {
+  isSimpleBundle,
+  type ContributionBundle,
+  type SimpleContributionBundle,
+} from "~/models/contributionBundle";
+import { GenericModal } from "../GenericModal";
+import { useEffect } from "react";
+import { useLazyBundleByIdQuery } from "~/store/services/api";
 
 interface ContributionBundleModalProps {
-  bundle?: ContributionBundle;
+  bundle?: ContributionBundle | SimpleContributionBundle;
   action: "create" | "update";
   isOpen: boolean;
-  onSubmit?: (bundle: Partial<ContributionBundle>, hasChanges: boolean) => void;
+  onSubmit?: (
+    bundle: Partial<ContributionBundle>,
+    hasChanges: boolean,
+  ) => Promise<void>;
   onClose: () => void;
 }
 
@@ -21,14 +28,30 @@ export function ContributionBundleModal({
   onSubmit,
   onClose,
 }: ContributionBundleModalProps) {
+  const [getBundleById, { data }] = useLazyBundleByIdQuery();
+
+  useEffect(() => {
+    if (isSimpleBundle(bundle)) {
+      getBundleById({ id: bundle.id });
+    }
+  }, [bundle, getBundleById]);
+
+  const fullBundle: ContributionBundle | undefined = isSimpleBundle(bundle)
+    ? data?.bundle
+    : bundle;
+
   return (
-    <GenericModal shouldCloseOnOOBClick={false} isOpen={isOpen} onClose={onClose}>
+    <GenericModal
+      shouldCloseOnOOBClick={false}
+      isOpen={isOpen}
+      onClose={onClose}
+    >
       {action === "create" && (
         <CreateContributionBundleForm onSubmit={onSubmit} onCancel={onClose} />
       )}
       {action === "update" && bundle && (
         <UpdateContributionBundleForm
-          bundle={bundle}
+          bundle={fullBundle}
           onSubmit={onSubmit}
           onCancel={onClose}
         />
