@@ -11,8 +11,9 @@ import java.util.Optional;
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.OwnedEditionDAO;
 import dev.stuten.vps.models.dtos.full.OwnedEditionDTO;
+import dev.stuten.vps.models.dtos.response.UserMonthlySpendingStatsDTO;
+import dev.stuten.vps.models.dtos.response.UserMonthlySpendingStatsDTO.SpendingPerMonthStats;
 import dev.stuten.vps.models.dtos.response.UserSpendingStatsDTO;
-import dev.stuten.vps.models.dtos.response.UserSpendingStatsDTO.SpendingPerMonthStats;
 import dev.stuten.vps.models.dtos.simple.SimpleOwnedEditionDTO;
 import dev.stuten.vps.web.ErrorResponse;
 import dev.stuten.vps.web.middleware.AuthContext;
@@ -187,7 +188,7 @@ public class EditionOwnershipService {
             return; // For compiler
         }
 
-        // Retreive owned editions
+        // Retrieve owned editions
         List<SimpleOwnedEditionDTO> oeditions = dao.findSimpleOwnedByUserId(userID);
 
         // If no oeditions returned, exit early to simplify the following logic
@@ -197,8 +198,7 @@ public class EditionOwnershipService {
                             new BigDecimal("0.00"), new BigDecimal("0.00"), new BigDecimal("0.00"),
                             new BigDecimal("0.00"),
                             new BigDecimal("0.00"), new BigDecimal("0.00"),
-                            null, null, null, null,
-                            null)));
+                            null, null, null, null)));
             return;
         }
 
@@ -211,27 +211,8 @@ public class EditionOwnershipService {
                 bestDealByPrice = oeditions.get(0),
                 bestDealByReduction = oeditions.get(0),
                 mostValuable = oeditions.get(0);
-        // Spending per month
-        Map<String, Map<SpendingPerMonthStats, BigDecimal>> spendingPerMonth = new HashMap<String, Map<SpendingPerMonthStats, BigDecimal>>();
 
         for (SimpleOwnedEditionDTO oe : oeditions) {
-            // Update the month to month spending (yyyy-MM-01)
-            String yearmonth = oe.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM")) + "-01";
-            // Create month if not created yet
-            if (!spendingPerMonth.containsKey(yearmonth)) {
-                spendingPerMonth.put(yearmonth, new HashMap<SpendingPerMonthStats, BigDecimal>(
-                        Map.of(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE, new BigDecimal("0.00"),
-                                SpendingPerMonthStats.TOTAL_FEES, new BigDecimal("0.00"),
-                                SpendingPerMonthStats.TOTAL_SPENT, new BigDecimal("0.00"))));
-            }
-            Map<SpendingPerMonthStats, BigDecimal> monthStats = spendingPerMonth.get(yearmonth);
-            monthStats.put(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE,
-                    monthStats.get(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE).add(oe.getPurchasePrice()));
-            monthStats.put(SpendingPerMonthStats.TOTAL_FEES,
-                    monthStats.get(SpendingPerMonthStats.TOTAL_FEES).add(oe.getFees()));
-            monthStats.put(SpendingPerMonthStats.TOTAL_SPENT,
-                    monthStats.get(SpendingPerMonthStats.TOTAL_SPENT).add(oe.getPurchasePrice().add(oe.getFees())));
-
             // Prices
             totalPurchasePrice = totalPurchasePrice.add(oe.getPurchasePrice());
             totalFees = totalFees.add(oe.getFees());
@@ -280,9 +261,48 @@ public class EditionOwnershipService {
         UserSpendingStatsDTO stats = new UserSpendingStatsDTO(
                 totalSpent, totalPurchasePrice, totalFees, totalRetailPrice,
                 totalSavings, totalSavingsPercentage,
-                mostCostly, mostValuable, bestDealByPrice, bestDealByReduction,
-                spendingPerMonth);
+                mostCostly, mostValuable, bestDealByPrice, bestDealByReduction);
 
+        ctx.json(Map.of("stats", stats));
+    }
+
+    public static void getUserMonthlySpendingStats(Context ctx) {
+        // Retreive user ID from request
+        Integer userID;
+        try {
+            userID = Integer.parseInt(ctx.queryParam("id"));
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            return; // For compiler
+        }
+
+        // Retrieve owned editions
+        List<SimpleOwnedEditionDTO> oeditions = dao.findSimpleOwnedByUserId(userID);
+
+        // Spending per month
+        Map<String, Map<SpendingPerMonthStats, BigDecimal>> spendingPerMonth = new HashMap<String, Map<SpendingPerMonthStats, BigDecimal>>();
+
+        for (SimpleOwnedEditionDTO oe : oeditions) {
+            // Update the month to month spending (yyyy-MM-01)
+            String yearmonth = oe.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM")) + "-01";
+            // Create month if not created yet
+            if (!spendingPerMonth.containsKey(yearmonth)) {
+                spendingPerMonth.put(yearmonth, new HashMap<SpendingPerMonthStats, BigDecimal>(
+                        Map.of(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE, new BigDecimal("0.00"),
+                                SpendingPerMonthStats.TOTAL_FEES, new BigDecimal("0.00"),
+                                SpendingPerMonthStats.TOTAL_SPENT, new BigDecimal("0.00"))));
+            }
+            Map<SpendingPerMonthStats, BigDecimal> monthStats = spendingPerMonth.get(yearmonth);
+            monthStats.put(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE,
+                    monthStats.get(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE)
+                            .add(oe.getPurchasePrice()));
+            monthStats.put(SpendingPerMonthStats.TOTAL_FEES,
+                    monthStats.get(SpendingPerMonthStats.TOTAL_FEES).add(oe.getFees()));
+            monthStats.put(SpendingPerMonthStats.TOTAL_SPENT,
+                    monthStats.get(SpendingPerMonthStats.TOTAL_SPENT).add(oe.getPurchasePrice().add(oe.getFees())));
+        }
+
+        UserMonthlySpendingStatsDTO stats = new UserMonthlySpendingStatsDTO(spendingPerMonth);
         ctx.json(Map.of("stats", stats));
     }
 }

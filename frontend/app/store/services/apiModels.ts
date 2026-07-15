@@ -35,7 +35,9 @@ export interface OwnedEditionSpendingStats {
     mostValuableEdition?: SimpleOwnedEdition,
     bestDealObtainedByPrice?: SimpleOwnedEdition,
     bestDealObtainedByReduction?: SimpleOwnedEdition,
+}
 
+export interface OwnedEditionMonthlySpendingStats {
     spendingPerMonth?: Record<string, { totalPurchasePrice: number, totalFees: number, totalSpent: number }>
 }
 
