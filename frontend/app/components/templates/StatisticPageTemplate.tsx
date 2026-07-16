@@ -56,7 +56,7 @@ export function StatisticCard({
     <div
       style={style}
       className={twMerge(
-        "rounded-lg bg-white/5 p-4 shadow-sm border border-white/5 min-h-[72px]",
+        "rounded-lg bg-white/5 p-2 shadow-sm border border-white/5 min-h-[72px]",
         className,
       )}
     >
@@ -66,14 +66,33 @@ export function StatisticCard({
   );
 }
 
+export function EmptyStatisticCard({
+  colSpan = 1,
+  rowSpan = 1,
+}: StatisticCardProps) {
+  // Constrain span to 1..6
+  const s = Math.max(1, Math.min(6, Math.floor(colSpan)));
+  // Constrain row span to 1..6
+  const r = Math.max(1, Math.min(6, Math.floor(rowSpan)));
+
+  // Use inline gridColumn style so tailwind doesn't need dynamic classes.
+  // On small screens the parent grid has fewer columns; grid-column: span N will adapt.
+  const style: React.CSSProperties = {
+    gridColumn: `span ${s}`,
+    gridRow: `span ${r}`,
+  };
+
+  return <div style={style} className="min-h-[72px]"></div>;
+}
+
 interface NumericalStatisticCardProps extends StatisticCardProps {
-  value: number | string;
+  value?: number | string;
   additionalInfo?: string;
 }
 
 export function NumericalStatisticCard({
   title,
-  value,
+  value = 0,
   additionalInfo,
   colSpan: span = 1,
   rowSpan = 1,

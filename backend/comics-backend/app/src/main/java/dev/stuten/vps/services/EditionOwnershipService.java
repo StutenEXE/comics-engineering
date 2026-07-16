@@ -13,6 +13,7 @@ import dev.stuten.vps.models.daos.OwnedEditionDAO;
 import dev.stuten.vps.models.dtos.full.OwnedEditionDTO;
 import dev.stuten.vps.models.dtos.response.UserMonthlySpendingStatsDTO;
 import dev.stuten.vps.models.dtos.response.UserMonthlySpendingStatsDTO.SpendingPerMonthStats;
+import dev.stuten.vps.models.dtos.response.UserReadingStatsDTO;
 import dev.stuten.vps.models.dtos.response.UserSpendingStatsDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleOwnedEditionDTO;
 import dev.stuten.vps.web.ErrorResponse;
@@ -303,6 +304,66 @@ public class EditionOwnershipService {
         }
 
         UserMonthlySpendingStatsDTO stats = new UserMonthlySpendingStatsDTO(spendingPerMonth);
+        ctx.json(Map.of("stats", stats));
+    }
+
+    public static void getUserReadingStats(Context ctx) {
+        // Retreive user ID from request
+        Integer userID;
+        try {
+            userID = Integer.parseInt(ctx.queryParam("id"));
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            return; // For compiler
+        }
+
+        // Retrieve owned editions
+        List<OwnedEditionDTO> oeditions = dao.findOwnedByUserId(userID);
+        String bigDecimalPrecision = "0.0000";
+
+        // If no oeditions returned, exit early to simplify the following logic
+        if (oeditions.size() == 0) {
+            ctx.json(
+                    Map.of("stats",
+                            new UserReadingStatsDTO(0, 0, 0, 0, new BigDecimal(bigDecimalPrecision),
+                                    new BigDecimal(bigDecimalPrecision))));
+            return;
+        }
+
+        // Books
+        Integer totalBooks = oeditions.size();
+        Integer totalBooksRead = 0;
+        // Pages
+        Integer totalPages = 0;
+        Integer totalPagesRead = 0;
+        // Distance
+        BigDecimal totalDistance = new BigDecimal(bigDecimalPrecision);
+        BigDecimal distanceRead = new BigDecimal(bigDecimalPrecision);
+
+        for (OwnedEditionDTO oe : oeditions) {
+            Integer nPages = oe.getEdition().getNpages();
+            totalPages += nPages;
+
+            BigDecimal distanceCm = new BigDecimal(nPages).multiply(oe.getEdition().getDimensions().height());
+            BigDecimal distanceM = distanceCm.divide(new BigDecimal(100), RoundingMode.HALF_UP);
+            totalDistance = totalDistance.add(distanceM);
+            if (!oe.getRead())
+                continue;
+
+            totalBooksRead++;
+            totalPagesRead += oe.getEdition().getNpages();
+            distanceRead = distanceRead.add(distanceM);
+        }
+
+        Integer totalBooksNotRead = totalBooks - totalBooksRead;
+        Integer totalPagesNotRead = totalPages - totalPagesRead;
+        BigDecimal distanceNotRead = totalDistance.subtract(distanceRead);
+
+        UserReadingStatsDTO stats = new UserReadingStatsDTO(
+                totalBooksRead, totalBooksNotRead,
+                totalPagesRead, totalPagesNotRead,
+                distanceRead, distanceNotRead);
+
         ctx.json(Map.of("stats", stats));
     }
 }

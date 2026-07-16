@@ -1,5 +1,10 @@
 import type { SimpleOwnedEdition } from "~/models/ownedEdition"
 
+export interface Pagination {
+    page: number,
+    size: number,
+}
+
 export interface ContributionStatusStats {
     total: number,
     types: {
@@ -41,7 +46,15 @@ export interface OwnedEditionMonthlySpendingStats {
     spendingPerMonth?: Record<string, { totalPurchasePrice: number, totalFees: number, totalSpent: number }>
 }
 
-export interface Pagination {
-    page: number,
-    size: number,
+export interface OwnedEditionReadingStats {
+    totalBooksRead: number,
+    totalBooksNotRead: number,
+
+    totalPagesRead: number,
+    totalPagesNotRead: number,
+
+    // In meters
+    distanceRead: number,
+    // In meters
+    distanceNotRead: number
 }

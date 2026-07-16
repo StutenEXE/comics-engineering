@@ -1,12 +1,6 @@
 import { BsBookshelf } from "react-icons/bs";
-import {
-  Md10Mp,
-  MdBook,
-  MdEditDocument,
-  MdLibraryBooks,
-  MdMoney,
-  MdWallet,
-} from "react-icons/md";
+import { FaReadme, FaWallet } from "react-icons/fa6";
+import { MdBook, MdEditDocument } from "react-icons/md";
 import { useTranslation } from "~/i18n/i18n";
 import {
   Sidebar,
@@ -76,7 +70,12 @@ export function CollectionSidebar({
             {
               title: t("stash.spending", { capitalize: true }),
               url: "/stash/spending",
-              icon: MdWallet,
+              icon: FaWallet,
+            },
+            {
+              title: t("stash.reading", { capitalize: true }),
+              url: "/stash/reading",
+              icon: FaReadme,
             },
           ]}
         />
