@@ -7,7 +7,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record UserMonthlyReadingStatsDTO(
 
-        @JsonProperty("readingPerMonth") Map<String, Map<ReadingPerMonthStats, BigDecimal>> readingPerMonth) {
+        @JsonProperty("readingPerMonth") Map<String, Map<ReadingPerMonthStats, BigDecimal>> readingPerMonth,
+        @JsonProperty("nBooksReadWithNoDate") Integer nBooksReadWithNoDate) {
 
     public enum ReadingPerMonthStats {
 

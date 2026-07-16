@@ -1,5 +1,6 @@
 import { twMerge } from "tailwind-merge";
 import { useTranslation } from "~/i18n/i18n";
+import type { ContributionsStats } from "~/store/services/apiModels";
 
 interface ContributionMetricsProps {
   metrics?: ContributionsStats;
