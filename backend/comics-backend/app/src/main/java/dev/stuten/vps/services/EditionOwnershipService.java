@@ -11,8 +11,10 @@ import java.util.Optional;
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.OwnedEditionDAO;
 import dev.stuten.vps.models.dtos.full.OwnedEditionDTO;
+import dev.stuten.vps.models.dtos.response.UserMonthlySpendingStatsDTO;
+import dev.stuten.vps.models.dtos.response.UserMonthlySpendingStatsDTO.SpendingPerMonthStats;
+import dev.stuten.vps.models.dtos.response.UserReadingStatsDTO;
 import dev.stuten.vps.models.dtos.response.UserSpendingStatsDTO;
-import dev.stuten.vps.models.dtos.response.UserSpendingStatsDTO.SpendingPerMonthStats;
 import dev.stuten.vps.models.dtos.simple.SimpleOwnedEditionDTO;
 import dev.stuten.vps.web.ErrorResponse;
 import dev.stuten.vps.web.middleware.AuthContext;
@@ -139,6 +141,7 @@ public class EditionOwnershipService {
         if (ownedEdition.isEmpty()) {
             String message = String.format("Owned edition of id %s not found", id);
             ErrorResponse.send(HttpStatus.NOT_FOUND, "Owned edition not found", message);
+            return;
         }
 
         ctx.json(Map.of("ownedEdition", ownedEdition));
@@ -151,10 +154,26 @@ public class EditionOwnershipService {
             userID = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
             ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
-            return; // For compiler
+            return;
         }
 
-        // Retreive owned editions
+        /*
+         * // Pagination
+         * PaginationDTO pagination = PaginationServiceUtil.getFromContext(ctx);
+         * if (pagination == null) {
+         * return;
+         * }
+         * // Filtering
+         * OwnedEditionFilterDTO filter = FilteringServiceUtil.getFromContext(ctx,
+         * OwnedEditionFilterDTO.class);
+         * // Sorting
+         * 
+         * @SuppressWarnings({ "nullness", "null" })
+         * SortingDTO<OwnedEditionSortingFields> sorting =
+         * SortingServiceUtil.getFromContext(ctx,
+         * OwnedEditionSortingFields.class);
+         */
+        // Retrieve owned editions
         List<OwnedEditionDTO> ownedEditions = dao.findOwnedByUserId(userID);
 
         ctx.json(Map.of("ownedEditions", ownedEditions));
@@ -170,7 +189,7 @@ public class EditionOwnershipService {
             return; // For compiler
         }
 
-        // Retreive owned editions
+        // Retrieve owned editions
         List<SimpleOwnedEditionDTO> oeditions = dao.findSimpleOwnedByUserId(userID);
 
         // If no oeditions returned, exit early to simplify the following logic
@@ -180,8 +199,7 @@ public class EditionOwnershipService {
                             new BigDecimal("0.00"), new BigDecimal("0.00"), new BigDecimal("0.00"),
                             new BigDecimal("0.00"),
                             new BigDecimal("0.00"), new BigDecimal("0.00"),
-                            null, null, null, null,
-                            null)));
+                            null, null, null, null)));
             return;
         }
 
@@ -194,27 +212,8 @@ public class EditionOwnershipService {
                 bestDealByPrice = oeditions.get(0),
                 bestDealByReduction = oeditions.get(0),
                 mostValuable = oeditions.get(0);
-        // Spending per month
-        Map<String, Map<SpendingPerMonthStats, BigDecimal>> spendingPerMonth = new HashMap<String, Map<SpendingPerMonthStats, BigDecimal>>();
 
         for (SimpleOwnedEditionDTO oe : oeditions) {
-            // Update the month to month spending (yyyy-MM-01)
-            String yearmonth = oe.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM")) + "-01";
-            // Create month if not created yet
-            if (!spendingPerMonth.containsKey(yearmonth)) {
-                spendingPerMonth.put(yearmonth, new HashMap<SpendingPerMonthStats, BigDecimal>(
-                        Map.of(SpendingPerMonthStats.totalPurchasePrice, new BigDecimal("0.00"),
-                                SpendingPerMonthStats.totalFees, new BigDecimal("0.00"),
-                                SpendingPerMonthStats.totalSpent, new BigDecimal("0.00"))));
-            }
-            Map<SpendingPerMonthStats, BigDecimal> monthStats = spendingPerMonth.get(yearmonth);
-            monthStats.put(SpendingPerMonthStats.totalPurchasePrice,
-                    monthStats.get(SpendingPerMonthStats.totalPurchasePrice).add(oe.getPurchasePrice()));
-            monthStats.put(SpendingPerMonthStats.totalFees,
-                    monthStats.get(SpendingPerMonthStats.totalFees).add(oe.getFees()));
-            monthStats.put(SpendingPerMonthStats.totalSpent,
-                    monthStats.get(SpendingPerMonthStats.totalSpent).add(oe.getPurchasePrice().add(oe.getFees())));
-
             // Prices
             totalPurchasePrice = totalPurchasePrice.add(oe.getPurchasePrice());
             totalFees = totalFees.add(oe.getFees());
@@ -263,8 +262,107 @@ public class EditionOwnershipService {
         UserSpendingStatsDTO stats = new UserSpendingStatsDTO(
                 totalSpent, totalPurchasePrice, totalFees, totalRetailPrice,
                 totalSavings, totalSavingsPercentage,
-                mostCostly, mostValuable, bestDealByPrice, bestDealByReduction,
-                spendingPerMonth);
+                mostCostly, mostValuable, bestDealByPrice, bestDealByReduction);
+
+        ctx.json(Map.of("stats", stats));
+    }
+
+    public static void getUserMonthlySpendingStats(Context ctx) {
+        // Retreive user ID from request
+        Integer userID;
+        try {
+            userID = Integer.parseInt(ctx.queryParam("id"));
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            return; // For compiler
+        }
+
+        // Retrieve owned editions
+        List<SimpleOwnedEditionDTO> oeditions = dao.findSimpleOwnedByUserId(userID);
+
+        // Spending per month
+        Map<String, Map<SpendingPerMonthStats, BigDecimal>> spendingPerMonth = new HashMap<String, Map<SpendingPerMonthStats, BigDecimal>>();
+
+        for (SimpleOwnedEditionDTO oe : oeditions) {
+            // Update the month to month spending (yyyy-MM-01)
+            String yearmonth = oe.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM")) + "-01";
+            // Create month if not created yet
+            if (!spendingPerMonth.containsKey(yearmonth)) {
+                spendingPerMonth.put(yearmonth, new HashMap<SpendingPerMonthStats, BigDecimal>(
+                        Map.of(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE, new BigDecimal("0.00"),
+                                SpendingPerMonthStats.TOTAL_FEES, new BigDecimal("0.00"),
+                                SpendingPerMonthStats.TOTAL_SPENT, new BigDecimal("0.00"))));
+            }
+            Map<SpendingPerMonthStats, BigDecimal> monthStats = spendingPerMonth.get(yearmonth);
+            monthStats.put(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE,
+                    monthStats.get(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE)
+                            .add(oe.getPurchasePrice()));
+            monthStats.put(SpendingPerMonthStats.TOTAL_FEES,
+                    monthStats.get(SpendingPerMonthStats.TOTAL_FEES).add(oe.getFees()));
+            monthStats.put(SpendingPerMonthStats.TOTAL_SPENT,
+                    monthStats.get(SpendingPerMonthStats.TOTAL_SPENT).add(oe.getPurchasePrice().add(oe.getFees())));
+        }
+
+        UserMonthlySpendingStatsDTO stats = new UserMonthlySpendingStatsDTO(spendingPerMonth);
+        ctx.json(Map.of("stats", stats));
+    }
+
+    public static void getUserReadingStats(Context ctx) {
+        // Retreive user ID from request
+        Integer userID;
+        try {
+            userID = Integer.parseInt(ctx.queryParam("id"));
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            return; // For compiler
+        }
+
+        // Retrieve owned editions
+        List<OwnedEditionDTO> oeditions = dao.findOwnedByUserId(userID);
+        String bigDecimalPrecision = "0.0000";
+
+        // If no oeditions returned, exit early to simplify the following logic
+        if (oeditions.size() == 0) {
+            ctx.json(
+                    Map.of("stats",
+                            new UserReadingStatsDTO(0, 0, 0, 0, new BigDecimal(bigDecimalPrecision),
+                                    new BigDecimal(bigDecimalPrecision))));
+            return;
+        }
+
+        // Books
+        Integer totalBooks = oeditions.size();
+        Integer totalBooksRead = 0;
+        // Pages
+        Integer totalPages = 0;
+        Integer totalPagesRead = 0;
+        // Distance
+        BigDecimal totalDistance = new BigDecimal(bigDecimalPrecision);
+        BigDecimal distanceRead = new BigDecimal(bigDecimalPrecision);
+
+        for (OwnedEditionDTO oe : oeditions) {
+            Integer nPages = oe.getEdition().getNpages();
+            totalPages += nPages;
+
+            BigDecimal distanceCm = new BigDecimal(nPages).multiply(oe.getEdition().getDimensions().height());
+            BigDecimal distanceM = distanceCm.divide(new BigDecimal(100), RoundingMode.HALF_UP);
+            totalDistance = totalDistance.add(distanceM);
+            if (!oe.getRead())
+                continue;
+
+            totalBooksRead++;
+            totalPagesRead += oe.getEdition().getNpages();
+            distanceRead = distanceRead.add(distanceM);
+        }
+
+        Integer totalBooksNotRead = totalBooks - totalBooksRead;
+        Integer totalPagesNotRead = totalPages - totalPagesRead;
+        BigDecimal distanceNotRead = totalDistance.subtract(distanceRead);
+
+        UserReadingStatsDTO stats = new UserReadingStatsDTO(
+                totalBooksRead, totalBooksNotRead,
+                totalPagesRead, totalPagesNotRead,
+                distanceRead, distanceNotRead);
 
         ctx.json(Map.of("stats", stats));
     }

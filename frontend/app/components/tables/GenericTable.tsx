@@ -24,16 +24,6 @@ import {
 } from "~/components/shadcn/ui/table";
 import { useTranslation } from "~/i18n/i18n";
 import { type Error } from "~/utils/error";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "../shadcn/ui/select";
-import { Separator } from "../shadcn/ui/separator";
 import { SelectInput } from "../forms/fields/SelectInput";
 
 // Re-export ColumnDef so callers import from one place

@@ -27,7 +27,7 @@ export function ContributionBundleModalWithFetch({
   const currentBundle = isOpen && bundle?.id === id ? bundle : undefined;
 
   useEffect(() => {
-    if (id && isOpen && bundle?.id !== id) {
+    if (id && isOpen) {
       getBundleById({ id });
     }
   }, [id, isOpen, bundle, getBundleById]);

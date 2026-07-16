@@ -1,7 +1,6 @@
 package dev.stuten.vps.models.dtos.response;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -19,28 +18,5 @@ public record UserSpendingStatsDTO(
         @JsonProperty("mostCostlyEdition") SimpleOwnedEditionDTO mostCostlyEdition,
         @JsonProperty("mostValuableEdition") SimpleOwnedEditionDTO mostValuableEdition,
         @JsonProperty("bestDealObtainedByPrice") SimpleOwnedEditionDTO bestDealObtainedByPrice,
-        @JsonProperty("bestDealObtainedByReduction") SimpleOwnedEditionDTO bestDealObtainedByReduction,
-
-        @JsonProperty("spendingPerMonth") Map<String, Map<SpendingPerMonthStats, BigDecimal>> spendingPerMonth) {
-
-    public enum SpendingPerMonthStats {
-
-        totalPurchasePrice("totalPurchasePrice"),
-        totalFees("totalFees"),
-        totalSpent("totalSpent");
-
-        private final String literal;
-
-        private SpendingPerMonthStats(String literal) {
-            this.literal = literal;
-        }
-
-        public String getLiteral() {
-            return literal;
-        }
-
-        public String toString() {
-            return literal;
-        }
-    }
+        @JsonProperty("bestDealObtainedByReduction") SimpleOwnedEditionDTO bestDealObtainedByReduction) {
 }

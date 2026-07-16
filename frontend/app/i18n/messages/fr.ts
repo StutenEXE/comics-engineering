@@ -380,6 +380,10 @@ export default {
   "stash.bookshelf.sortByThickness": "Trier par épaisseur",
   "stash.statistics": "Statistiques",
   // Stash statistics
+  "stash.remove.title": "Retirer de la collection",
+  "stash.remove.message":
+    "Voulez-vous vraiment retirer cette édition de votre collection ?\nLes informations associées seront perdues.",
+  // -- Spending
   "stash.spending": "Dépenses",
   "stash.spending.totalSpent": "Total des dépenses",
   "stash.spending.totalSpent.info": "%purchasePrice% + %fees% (frais)",
@@ -389,13 +393,26 @@ export default {
   "stash.spending.spendingPerMonth": "Dépenses par mois",
   "stash.spending.mostExpensive": "Achat le plus coûteux",
   "stash.spending.costed": "A coûté %amount%",
-  "stash.spending.bestDeal": "Meilleure affaire",
+  "stash.spending.bestDealByPrice": "Meilleure affaire (prix)",
   "stash.spending.saved": "%amount% économisés",
+  "stash.spending.bestDealByReduction": "Meilleure affaire (réduction)",
+  "stash.spending.ofReduction": "%percentage%% de réduction",
   "stash.spending.mostValuable": "Edition la plus chère",
   "stash.spending.retailsAt": "Se vend à %amount%",
-  "stash.remove.title": "Retirer de la collection",
-  "stash.remove.message":
-    "Voulez-vous vraiment retirer cette édition de votre collection ?\nLes informations associées seront perdues.",
+  // -- Reading
+  "stash.reading": "Lecture",
+  "stash.reading.totalBooksRead": "Nombre de livres lus",
+  "stash.reading.totalBooksRead.info": "A trouver",
+  "stash.reading.totalPagesRead": "Nombre de pages lues",
+  "stash.reading.totalPagesRead.info": "Soit %distance% de comics",
+  "stash.reading.totalBooksToRead": "Nombre de livres à lire",
+  "stash.reading.totalBooksToRead.info": "A trouver",
+  "stash.reading.totalPagesToRead": "Nombre de pages à lire",
+  "stash.reading.totalPagesToRead.info": "Soit %distance% de comics",
+  "stash.reading.proportionReadByBook": "Proportion de livres lus",
+  "stash.reading.proportionReadByBook.info": "%read%/%total% lus",
+  "stash.reading.proportionReadByPage": "Proportion de pages lues",
+  "stash.reading.proportionReadByPage.info": "%read%/%total% lues",
   // Contribute
   "contribute.loginRequired": "Veuillez vous connecter",
   "contribute.loginRequiredDesc": "Vous devez être connecté pour contribuer",

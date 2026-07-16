@@ -20,6 +20,7 @@ import { EditOwnedEditionModal } from "../modals/EditOwnedEditionModal";
 import { useToast } from "../toast/Toast";
 import { BooleanCellRenderer, GenericTable } from "./GenericTable";
 import { createColumnHelper } from "@tanstack/react-table";
+import { OwnedEditionModal } from "../modals/OwnedEditionModal";
 
 interface OwnedEditionTableProps {
   className?: string;
@@ -32,7 +33,7 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
   const { user } = useAppSelector((state) => state.user);
 
   const { data, isFetching, error, refetch } = useCollectionQuery(
-    user ? { id: user.id } : { id: 0 },
+    { id: user ? user.id : 0 },
     { skip: !user },
   );
   const editionList = data?.ownedEditions ?? [];
@@ -51,11 +52,11 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
   };
 
   // Handles edition details modal
-  const [isEditionModalOpen, setIsEditionModalOpen] = useState(false);
-  const openEditionModal = () => {
+  const [isOeditionModalOpen, setIsEditionModalOpen] = useState(false);
+  const openOeditionModal = () => {
     setIsEditionModalOpen(true);
   };
-  const closeEditionModal = () => {
+  const closeOeditionModal = () => {
     setIsEditionModalOpen(false);
   };
 
@@ -71,7 +72,7 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
     }
   }, [isSuccess, isError]);
 
-  const [editionToShowId, setEditionToShowId] = useState<number>();
+  const [oeditionToShow, setEditionToShow] = useState<OwnedEdition>();
   const [editedOwnedEdition, setEditedOwnedEdition] = useState<OwnedEdition>();
 
   const handleSubmit = (oe: OwnedEdition) => {
@@ -89,8 +90,8 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
         <div
           className="cursor-pointer"
           onClick={() => {
-            setEditionToShowId(row.original.edition.id);
-            openEditionModal();
+            setEditionToShow(row.original);
+            openOeditionModal();
           }}
         >
           <img
@@ -217,11 +218,11 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
         onSubmit={handleSubmit}
         onClose={closeModal}
       />
-      {editionToShowId && (
-        <EditionModal
-          editionId={editionToShowId}
-          isOpen={isEditionModalOpen}
-          onClose={closeEditionModal}
+      {oeditionToShow && (
+        <OwnedEditionModal
+          oedition={oeditionToShow}
+          isOpen={isOeditionModalOpen}
+          onClose={closeOeditionModal}
         />
       )}
     </>

@@ -11,14 +11,14 @@ export function capitalize(str: string) {
 }
 
 export function formatToIsbn(digits: string) {
-    let isbn = `${digits.slice(0,3)}`
+    let isbn = `${digits.slice(0, 3)}`
     // ISBN-13: 978-3-16-148410-0
     if (digits.length < 3) return isbn
-    isbn = `${isbn}-${digits.slice(3,4)}`
+    isbn = `${isbn}-${digits.slice(3, 4)}`
     if (digits.length < 4) return isbn
-    isbn = `${isbn}-${digits.slice(4,6)}`
+    isbn = `${isbn}-${digits.slice(4, 6)}`
     if (digits.length < 6) return isbn
-    isbn = `${isbn}-${digits.slice(6,12)}`
+    isbn = `${isbn}-${digits.slice(6, 12)}`
     if (digits.length < 12) return isbn
     isbn = `${isbn}-${digits.slice(12)}`
     return isbn;
@@ -26,7 +26,15 @@ export function formatToIsbn(digits: string) {
     // return `${digits.slice(0,1)}-${digits.slice(1,4)}-${digits.slice(4,9)}-${digits.slice(9)}`;
 }
 
-export function isntEmpty(string?: string | null):  string is string {
+export function isntEmpty(string?: string | null): string is string {
     return string !== undefined && string !== null && string !== "";
 }
 
+export function convertToDistance(distanceM: number) {
+    // Under 1 km, display as meters
+    if (distanceM <= 999) {
+        return `${distanceM}m`
+    }
+    // everything else as km
+    return `${(distanceM / 1000).toFixed(2)}km`
+}

@@ -15,9 +15,12 @@ import {
   StatisticPageTemplate,
 } from "~/components/templates/StatisticPageTemplate";
 import { useTranslation } from "~/i18n/i18n";
-import type { SimpleOwnedEdition } from "~/models/ownedEdition";
+import type { OwnedEdition, SimpleOwnedEdition } from "~/models/ownedEdition";
 import { useAppSelector } from "~/store/hooks";
-import { useCollectionSpendingStatsQuery } from "~/store/services/api";
+import {
+  useCollectionMonthlySpendingStatsQuery,
+  useCollectionSpendingStatsQuery,
+} from "~/store/services/api";
 import { formatCurrency } from "~/utils/currency";
 import { dateToShortMonthYearString } from "~/utils/date";
 import type { Route } from "../../+types/root";
@@ -39,18 +42,12 @@ export default function StashBookshelfPage() {
   );
   const stats = data?.stats;
 
-  /**
-   * Calculate spending per month
-   * [{ month: Date, totalSpent: 100, totalPurchasePrice: 80, totalFees: 20 }, ...]
-   */
-  const spendingPerMonth = Object.entries(stats?.spendingPerMonth ?? {}).map(
-    ([month, monthStats]) => ({
-      month: new Date(month),
-      totalPurchasePrice: monthStats.totalPurchasePrice,
-      totalFees: monthStats.totalFees,
-      totalSpent: monthStats.totalSpent,
-    }),
-  );
+  const calcSavings = (oe?: SimpleOwnedEdition) => {
+    return (oe?.retailPrice ?? 0) - (oe?.purchasePrice ?? 0) + (oe?.fees ?? 0);
+  };
+  const calcReduction = (oe?: SimpleOwnedEdition) => {
+    return (calcSavings(oe) / (oe?.retailPrice ?? 1)) * 100;
+  };
 
   return (
     <SideContentTemplate title={t("stash.spending")}>
@@ -91,7 +88,7 @@ export default function StashBookshelfPage() {
           rowSpan={2}
           title={t("stash.spending.spendingPerMonth")}
         >
-          <SpendingPerMonthChart data={spendingPerMonth} />
+          <SpendingPerMonthChart />
         </StatisticCard>
         <EditionStatisticCard
           oedition={stats?.mostCostlyEdition}
@@ -109,23 +106,6 @@ export default function StashBookshelfPage() {
           title={t("stash.spending.mostExpensive")}
         />
         <EditionStatisticCard
-          oedition={stats?.bestDealObtainedByPrice}
-          value={t("stash.spending.saved", {
-            parameters: {
-              amount: formatCurrency(
-                (stats?.bestDealObtainedByPrice?.retailPrice ?? 0) -
-                  (stats?.bestDealObtainedByPrice?.purchasePrice ?? 0) +
-                  (stats?.bestDealObtainedByPrice?.fees ?? 0),
-                "EUR",
-                locale,
-              ),
-            },
-          })}
-          colSpan={1}
-          rowSpan={1}
-          title={t("stash.spending.bestDeal")}
-        />
-        <EditionStatisticCard
           oedition={stats?.mostValuableEdition}
           value={t("stash.spending.retailsAt", {
             parameters: {
@@ -139,6 +119,34 @@ export default function StashBookshelfPage() {
           colSpan={1}
           rowSpan={1}
           title={t("stash.spending.mostValuable")}
+        />
+        <EditionStatisticCard
+          oedition={stats?.bestDealObtainedByPrice}
+          value={t("stash.spending.saved", {
+            parameters: {
+              amount: formatCurrency(
+                calcSavings(stats?.bestDealObtainedByPrice),
+                "EUR",
+                locale,
+              ),
+            },
+          })}
+          colSpan={1}
+          rowSpan={1}
+          title={t("stash.spending.bestDealByPrice")}
+        />
+        <EditionStatisticCard
+          oedition={stats?.bestDealObtainedByReduction}
+          value={t("stash.spending.ofReduction", {
+            parameters: {
+              percentage: calcReduction(
+                stats?.bestDealObtainedByReduction,
+              ).toFixed(2),
+            },
+          })}
+          colSpan={1}
+          rowSpan={1}
+          title={t("stash.spending.bestDealByReduction")}
         />
       </StatisticPageTemplate>
     </SideContentTemplate>
@@ -189,17 +197,58 @@ function EditionStatisticCard({
   );
 }
 
-interface SpendingPerMonthChartProps {
-  data: {
-    month: Date;
-    totalSpent: number;
-    totalPurchasePrice: number;
-    totalFees: number;
-  }[];
-}
+interface SpendingPerMonthChartProps {}
 
-function SpendingPerMonthChart({ data }: SpendingPerMonthChartProps) {
+function SpendingPerMonthChart({}: SpendingPerMonthChartProps) {
   const { t, locale } = useTranslation();
+  const { user } = useAppSelector((state) => state.user);
+
+  const { data, isFetching } = useCollectionMonthlySpendingStatsQuery(
+    user ? { id: user.id } : { id: 0 },
+    { skip: !user },
+  );
+
+  const spendingPerMonth = Object.entries(data?.stats?.spendingPerMonth ?? {})
+    // Convert datestring to date
+    .map(([month, monthStats]) => ({
+      month: new Date(month),
+      totalPurchasePrice: monthStats.totalPurchasePrice,
+      totalFees: monthStats.totalFees,
+      totalSpent: monthStats.totalSpent,
+    }))
+    // Sort by date
+    .sort((a, b) => a.month.getTime() - b.month.getTime());
+  // Fill in empty months between first and last month
+  const chartData = (() => {
+    if (spendingPerMonth.length === 0) return [];
+
+    const firstMonth = spendingPerMonth[0].month;
+    const lastMonth = new Date();
+    const filledData = [];
+
+    // Iterate on all the months
+    for (
+      let d = new Date(firstMonth);
+      d <= lastMonth;
+      d.setMonth(d.getMonth() + 1)
+    ) {
+      // Find month data
+      const existing = spendingPerMonth.find(
+        (item) =>
+          item.month.getFullYear() === d.getFullYear() &&
+          item.month.getMonth() === d.getMonth(),
+      );
+
+      // If month data exists, assign foudn values. If not found, assign empty values
+      filledData.push({
+        month: dateToShortMonthYearString(locale, new Date(d)),
+        purchasePrice: existing?.totalPurchasePrice ?? 0,
+        fees: existing?.totalFees ?? 0,
+        totalSpent: existing?.totalSpent ?? 0,
+      });
+    }
+    return filledData;
+  })();
 
   // Config for the chart, mapping data keys to labels and colors
   const chartConfig = {
@@ -213,16 +262,6 @@ function SpendingPerMonthChart({ data }: SpendingPerMonthChartProps) {
     },
   } satisfies ChartConfig;
 
-  // Transform data to the shape expected by recharts
-  const chartData = data
-    .sort((a, b) => a.month.getTime() - b.month.getTime())
-    .map((d) => ({
-      month: dateToShortMonthYearString(locale, d.month),
-      purchasePrice: d.totalPurchasePrice,
-      fees: d.totalFees,
-      totalSpent: d.totalSpent,
-    }));
-
   return (
     <ChartContainer config={chartConfig}>
       <BarChart accessibilityLayer data={chartData}>
@@ -235,6 +274,10 @@ function SpendingPerMonthChart({ data }: SpendingPerMonthChartProps) {
           tickLine={true}
           tickMargin={10}
           axisLine={true}
+          angle={-45}
+          textAnchor="end"
+          height={60}
+          interval={1}
         />
         <ChartTooltip content={<ChartTooltipContentWithTotal />} />
         <ChartLegend content={<ChartLegendContent />} />

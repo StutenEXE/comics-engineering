@@ -14,8 +14,15 @@ public class UserCollectionRouter implements Router {
         app.delete(APIPathBuilder.buildPrivatePath("/collection/remove"), EditionOwnershipService::remove);
         app.get(APIPathBuilder.buildPrivatePath("/collection"), EditionOwnershipService::getByUserID);
         app.get(APIPathBuilder.buildPrivatePath("/collection/get"), EditionOwnershipService::getById);
+        // -- Stats
         app.get(APIPathBuilder.buildPrivatePath("/collection/stats/spending"),
                 EditionOwnershipService::getUserSpendingStats);
+        app.get(APIPathBuilder.buildPrivatePath("/collection/stats/spending/monthly"),
+                EditionOwnershipService::getUserMonthlySpendingStats);
+        app.get(APIPathBuilder.buildPrivatePath("/collection/stats/reading"),
+                EditionOwnershipService::getUserReadingStats);
+        // app.get(APIPathBuilder.buildPrivatePath("/collection/stats/reading/monthly"),
+        // EditionOwnershipService::getUserMonthlySpendingStats);
     }
 
 }

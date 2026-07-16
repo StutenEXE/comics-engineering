@@ -288,8 +288,8 @@ export function Bookshelf({
         const bookY = plankY - height; // books are bottom-aligned to the plank
 
         // Deterministic hue: sum of char codes mod 360 gives a consistent color per title
-        const colorSeed =
-          (oe.edition.serie?.name ?? "") + (oe.edition.book?.name ?? "");
+        const colorSeed = oe.edition.serie?.name ?? "";
+        // (oe.edition.serie?.name ?? "") + (oe.edition.book?.name ?? "");
         const hue =
           [...colorSeed].reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
         const bookColor = `hsl(${hue}, 55%, 38%)`;

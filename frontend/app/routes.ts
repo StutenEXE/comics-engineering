@@ -15,6 +15,7 @@ export default [
     route("bookshelf", "pages/stash/bookshelf.tsx"),
     route("contributions", "pages/stash/contributions.tsx"),
     route("spending", "pages/stash/spending.tsx"),
+    route("reading", "pages/stash/reading.tsx"),
   ]),
 
   route("users", "pages/users.tsx"),
