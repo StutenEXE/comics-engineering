@@ -11,6 +11,8 @@ import java.util.Optional;
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.OwnedEditionDAO;
 import dev.stuten.vps.models.dtos.full.OwnedEditionDTO;
+import dev.stuten.vps.models.dtos.response.UserMonthlyReadingStatsDTO;
+import dev.stuten.vps.models.dtos.response.UserMonthlyReadingStatsDTO.ReadingPerMonthStats;
 import dev.stuten.vps.models.dtos.response.UserMonthlySpendingStatsDTO;
 import dev.stuten.vps.models.dtos.response.UserMonthlySpendingStatsDTO.SpendingPerMonthStats;
 import dev.stuten.vps.models.dtos.response.UserReadingStatsDTO;
@@ -281,19 +283,19 @@ public class EditionOwnershipService {
         List<SimpleOwnedEditionDTO> oeditions = dao.findSimpleOwnedByUserId(userID);
 
         // Spending per month
-        Map<String, Map<SpendingPerMonthStats, BigDecimal>> spendingPerMonth = new HashMap<String, Map<SpendingPerMonthStats, BigDecimal>>();
+        Map<String, Map<SpendingPerMonthStats, BigDecimal>> readingPerMonth = new HashMap<String, Map<SpendingPerMonthStats, BigDecimal>>();
 
         for (SimpleOwnedEditionDTO oe : oeditions) {
             // Update the month to month spending (yyyy-MM-01)
             String yearmonth = oe.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM")) + "-01";
             // Create month if not created yet
-            if (!spendingPerMonth.containsKey(yearmonth)) {
-                spendingPerMonth.put(yearmonth, new HashMap<SpendingPerMonthStats, BigDecimal>(
+            if (!readingPerMonth.containsKey(yearmonth)) {
+                readingPerMonth.put(yearmonth, new HashMap<SpendingPerMonthStats, BigDecimal>(
                         Map.of(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE, new BigDecimal("0.00"),
                                 SpendingPerMonthStats.TOTAL_FEES, new BigDecimal("0.00"),
                                 SpendingPerMonthStats.TOTAL_SPENT, new BigDecimal("0.00"))));
             }
-            Map<SpendingPerMonthStats, BigDecimal> monthStats = spendingPerMonth.get(yearmonth);
+            Map<SpendingPerMonthStats, BigDecimal> monthStats = readingPerMonth.get(yearmonth);
             monthStats.put(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE,
                     monthStats.get(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE)
                             .add(oe.getPurchasePrice()));
@@ -303,7 +305,7 @@ public class EditionOwnershipService {
                     monthStats.get(SpendingPerMonthStats.TOTAL_SPENT).add(oe.getPurchasePrice().add(oe.getFees())));
         }
 
-        UserMonthlySpendingStatsDTO stats = new UserMonthlySpendingStatsDTO(spendingPerMonth);
+        UserMonthlySpendingStatsDTO stats = new UserMonthlySpendingStatsDTO(readingPerMonth);
         ctx.json(Map.of("stats", stats));
     }
 
@@ -364,6 +366,51 @@ public class EditionOwnershipService {
                 totalPagesRead, totalPagesNotRead,
                 distanceRead, distanceNotRead);
 
+        ctx.json(Map.of("stats", stats));
+    }
+
+    public static void getUserMonthlyReadingStats(Context ctx) {
+        // Retreive user ID from request
+        Integer userID;
+        try {
+            userID = Integer.parseInt(ctx.queryParam("id"));
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            return; // For compiler
+        }
+
+        // Retrieve owned editions
+        List<OwnedEditionDTO> oeditions = dao.findOwnedByUserId(userID);
+
+        // Spending per month
+        Map<String, Map<ReadingPerMonthStats, BigDecimal>> readingPerMonth = new HashMap<String, Map<ReadingPerMonthStats, BigDecimal>>();
+        Integer booksReadWithNoDate = 0;
+
+        for (OwnedEditionDTO oe : oeditions) {
+            if (!oe.getRead()) {
+                continue;
+            }
+            if (oe.getDateRead() == null) {
+                booksReadWithNoDate++;
+                continue;
+            }
+            // Update the month to month spending (yyyy-MM-01)
+            String yearmonth = oe.getDateRead().format(DateTimeFormatter.ofPattern("yyyy-MM")) + "-01";
+            // Create month if not created yet
+            if (!readingPerMonth.containsKey(yearmonth)) {
+                readingPerMonth.put(yearmonth, new HashMap<ReadingPerMonthStats, BigDecimal>(
+                        Map.of(ReadingPerMonthStats.NUMBER_BOOKS_READ, new BigDecimal("0.00"),
+                                ReadingPerMonthStats.NUMBER_PAGES_READ, new BigDecimal("0.00"))));
+            }
+            Map<ReadingPerMonthStats, BigDecimal> monthStats = readingPerMonth.get(yearmonth);
+            monthStats.put(ReadingPerMonthStats.NUMBER_BOOKS_READ,
+                    monthStats.get(ReadingPerMonthStats.NUMBER_BOOKS_READ).add(new BigDecimal(1)));
+            monthStats.put(ReadingPerMonthStats.NUMBER_PAGES_READ,
+                    monthStats.get(ReadingPerMonthStats.NUMBER_PAGES_READ)
+                            .add(new BigDecimal(oe.getEdition().getNpages())));
+        }
+
+        UserMonthlyReadingStatsDTO stats = new UserMonthlyReadingStatsDTO(readingPerMonth, booksReadWithNoDate);
         ctx.json(Map.of("stats", stats));
     }
 }

@@ -58,3 +58,8 @@ export interface OwnedEditionReadingStats {
     // In meters
     distanceNotRead: number
 }
+
+export interface OwnedEditionMonthlyReadingStats {
+    readingPerMonth?: Record<string, { numberOfBooksRead: number, numberOfPagesRead: number }>
+    nBooksReadWithNoDate: number
+}

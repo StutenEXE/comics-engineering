@@ -10,6 +10,7 @@ import {
 } from "~/components/shadcn/ui/chart";
 import { SideContentTemplate } from "~/components/templates/SideContentTemplate";
 import {
+  EmptyStatisticCard,
   NumericalStatisticCard,
   StatisticCard,
   StatisticPageTemplate,
@@ -82,14 +83,7 @@ export default function StashBookshelfPage() {
             },
           })}
         />
-        {/* Spendings per month */}
-        <StatisticCard
-          colSpan={3}
-          rowSpan={2}
-          title={t("stash.spending.spendingPerMonth")}
-        >
-          <SpendingPerMonthChart />
-        </StatisticCard>
+        <EmptyStatisticCard colSpan={1} />
         <EditionStatisticCard
           oedition={stats?.mostCostlyEdition}
           value={t("stash.spending.costed", {
@@ -102,7 +96,7 @@ export default function StashBookshelfPage() {
             },
           })}
           colSpan={1}
-          rowSpan={1}
+          rowSpan={2}
           title={t("stash.spending.mostExpensive")}
         />
         <EditionStatisticCard
@@ -117,9 +111,18 @@ export default function StashBookshelfPage() {
             },
           })}
           colSpan={1}
-          rowSpan={1}
+          rowSpan={2}
           title={t("stash.spending.mostValuable")}
         />
+        {/* Spendings per month */}
+        <StatisticCard
+          colSpan={4}
+          rowSpan={2}
+          title={t("stash.spending.spendingPerMonth")}
+        >
+          <SpendingPerMonthChart />
+        </StatisticCard>
+
         <EditionStatisticCard
           oedition={stats?.bestDealObtainedByPrice}
           value={t("stash.spending.saved", {
@@ -132,7 +135,7 @@ export default function StashBookshelfPage() {
             },
           })}
           colSpan={1}
-          rowSpan={1}
+          rowSpan={2}
           title={t("stash.spending.bestDealByPrice")}
         />
         <EditionStatisticCard
@@ -145,7 +148,7 @@ export default function StashBookshelfPage() {
             },
           })}
           colSpan={1}
-          rowSpan={1}
+          rowSpan={2}
           title={t("stash.spending.bestDealByReduction")}
         />
       </StatisticPageTemplate>

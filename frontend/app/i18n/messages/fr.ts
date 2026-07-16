@@ -401,8 +401,10 @@ export default {
   "stash.spending.retailsAt": "Se vend à %amount%",
   // -- Reading
   "stash.reading": "Lecture",
+  "stash.reading.totalBooks": "Nombre de livres",
   "stash.reading.totalBooksRead": "Nombre de livres lus",
   "stash.reading.totalBooksRead.info": "A trouver",
+  "stash.reading.totalPages": "Nombre de pages",
   "stash.reading.totalPagesRead": "Nombre de pages lues",
   "stash.reading.totalPagesRead.info": "Soit %distance% de comics",
   "stash.reading.totalBooksToRead": "Nombre de livres à lire",
@@ -413,6 +415,9 @@ export default {
   "stash.reading.proportionReadByBook.info": "%read%/%total% lus",
   "stash.reading.proportionReadByPage": "Proportion de pages lues",
   "stash.reading.proportionReadByPage.info": "%read%/%total% lues",
+  "stash.reading.readingPerMonth": "Lectures par mois",
+  "stash.reading.booksReadWithoutADate": "Nombre de livres lus sans date de lecture: %nbooks%",
+  "stash.reading.dataToShow": "Données à afficher",
   // Contribute
   "contribute.loginRequired": "Veuillez vous connecter",
   "contribute.loginRequiredDesc": "Vous devez être connecté pour contribuer",

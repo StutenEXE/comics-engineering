@@ -9,7 +9,7 @@ import { parseToOwnedEdition, type OwnedEdition, type OwnedEditionDTO } from "~/
 import { parseToPublisher, type Publisher } from "~/models/publisher";
 import { parseToSerie, type Serie } from "~/models/serie";
 import { parseToUser, type SignupData, type User, type UserCredentials } from "~/models/user";
-import type { ContributionsStats, OwnedEditionMonthlySpendingStats, OwnedEditionReadingStats, OwnedEditionSpendingStats, Pagination } from "./apiModels";
+import type { ContributionsStats, OwnedEditionMonthlyReadingStats, OwnedEditionMonthlySpendingStats, OwnedEditionReadingStats, OwnedEditionSpendingStats, Pagination } from "./apiModels";
 
 const API_HOST = (import.meta.env.VITE_API_HOST as string | undefined) ?? "http://localhost:8080";
 
@@ -270,6 +270,9 @@ export const privateApi = createApi({
     collectionReadingStats: build.query<{ stats: OwnedEditionReadingStats }, { id: number }>({
       query: (params) => ({ url: "/collection/stats/reading", method: 'GET', params: params }),
     }),
+    collectionMonthlyReadingStats: build.query<{ stats: OwnedEditionMonthlyReadingStats }, { id: number }>({
+      query: (params) => ({ url: "/collection/stats/reading/monthly", method: 'GET', params: params }),
+    }),
     /****************
      * CONTRIBUTIONS
      ****************/
@@ -291,6 +294,7 @@ export const {
   useCollectionSpendingStatsQuery,
   useCollectionMonthlySpendingStatsQuery,
   useCollectionReadingStatsQuery,
+  useCollectionMonthlyReadingStatsQuery,
   useSubmitContributionBundleMutation,
   useUpdateContributionBundleMutation
 } = privateApi;
