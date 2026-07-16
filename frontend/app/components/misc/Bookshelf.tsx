@@ -287,11 +287,7 @@ export function Bookshelf({
         const height = oe.edition.dimensions.height * LIFE_TO_RENDER_SCALE;
         const bookY = plankY - height; // books are bottom-aligned to the plank
 
-        // Deterministic hue: sum of char codes mod 360 gives a consistent color per title
-        const colorSeed = oe.edition.serie?.name ?? "";
-        // (oe.edition.serie?.name ?? "") + (oe.edition.book?.name ?? "");
-        const hue =
-          [...colorSeed].reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
+        const hue = getHueForEdition(oe);
         const bookColor = `hsl(${hue}, 55%, 38%)`;
         const bookColorLight = `hsl(${hue}, 55%, 52%)`;
         const bookColorDark = `hsl(${hue}, 55%, 22%)`;
@@ -432,4 +428,10 @@ export function Bookshelf({
       </svg>
     </div>
   );
+}
+
+function getHueForEdition(oe: OwnedEdition) {
+  // Deterministic hue: sum of char codes mod 360 gives a consistent color per serie
+  const colorSeed = `${oe.edition.serie?.name}-${oe.edition.serie?.name}-${oe.edition.serie?.name}`;
+  return [...colorSeed].reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
 }

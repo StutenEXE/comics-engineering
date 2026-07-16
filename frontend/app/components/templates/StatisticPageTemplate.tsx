@@ -10,7 +10,7 @@ export function StatisticPageTemplate({
   // The grid has 6 columns on xl, 3 on sm, 1 on default.
   // Children can be StatisticCard elements which will control their own grid span.
   return (
-    <div className="min-h-screen px-4 py-6">
+    <div className="min-h-screen">
       <main className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-6">
         {children}
       </main>
