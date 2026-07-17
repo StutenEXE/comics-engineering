@@ -29,7 +29,7 @@ import { useState } from "react";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: `Reading` },
+    { title: `Reading Stats` },
     { name: "description", content: `Summary and details of your reading` },
   ];
 }
@@ -62,7 +62,11 @@ export default function StashBookshelfPage() {
           colSpan={1}
           title={t("stash.reading.totalBooksRead")}
           value={stats?.totalBooksRead}
-          additionalInfo={t("stash.reading.totalBooksRead.info")}
+          additionalInfo={t("stash.reading.totalBooksRead.info", {
+            parameters: {
+              amount: formatCurrency(stats?.valueRead ?? 0, "EUR", locale),
+            },
+          })}
         />
         <NumericalStatisticCard
           colSpan={1}
@@ -87,7 +91,11 @@ export default function StashBookshelfPage() {
           colSpan={1}
           title={t("stash.reading.totalBooksToRead")}
           value={stats?.totalBooksNotRead}
-          additionalInfo={t("stash.reading.totalBooksToRead.info")}
+          additionalInfo={t("stash.reading.totalBooksToRead.info", {
+            parameters: {
+              amount: formatCurrency(stats?.valueNotRead ?? 0, "EUR", locale),
+            },
+          })}
         />
         <NumericalStatisticCard
           colSpan={1}

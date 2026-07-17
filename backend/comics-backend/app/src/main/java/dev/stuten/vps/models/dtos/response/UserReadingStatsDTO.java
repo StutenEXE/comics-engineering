@@ -5,14 +5,17 @@ import java.math.BigDecimal;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record UserReadingStatsDTO(
-                @JsonProperty("totalBooksRead") Integer totalBooksRead,
-                @JsonProperty("totalBooksNotRead") Integer totalBooksNotRead,
+        @JsonProperty("totalBooksRead") Integer totalBooksRead,
+        @JsonProperty("totalBooksNotRead") Integer totalBooksNotRead,
 
-                @JsonProperty("totalPagesRead") Integer totalPagesRead,
-                @JsonProperty("totalPagesNotRead") Integer totalPagesNotRead,
+        @JsonProperty("totalPagesRead") Integer totalPagesRead,
+        @JsonProperty("totalPagesNotRead") Integer totalPagesNotRead,
 
-                // In meters
-                @JsonProperty("distanceRead") BigDecimal distanceRead,
-                // In meters
-                @JsonProperty("distanceNotRead") BigDecimal distanceNotRead) {
+        // In meters
+        @JsonProperty("distanceRead") BigDecimal distanceRead,
+        // In meters
+        @JsonProperty("distanceNotRead") BigDecimal distanceNotRead,
+
+        @JsonProperty("valueRead") BigDecimal valueRead,
+        @JsonProperty("valueNotRead") BigDecimal valueNotRead) {
 }

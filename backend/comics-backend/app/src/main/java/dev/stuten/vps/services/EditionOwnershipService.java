@@ -321,14 +321,15 @@ public class EditionOwnershipService {
 
         // Retrieve owned editions
         List<OwnedEditionDTO> oeditions = dao.findOwnedByUserId(userID);
-        String bigDecimalPrecision = "0.0000";
+        String distancePrecision = "0.0000";
 
         // If no oeditions returned, exit early to simplify the following logic
         if (oeditions.size() == 0) {
             ctx.json(
                     Map.of("stats",
-                            new UserReadingStatsDTO(0, 0, 0, 0, new BigDecimal(bigDecimalPrecision),
-                                    new BigDecimal(bigDecimalPrecision))));
+                            new UserReadingStatsDTO(0, 0, 0, 0,
+                                    new BigDecimal(distancePrecision), new BigDecimal(distancePrecision),
+                                    new BigDecimal("0.00"), new BigDecimal("0.00"))));
             return;
         }
 
@@ -339,8 +340,11 @@ public class EditionOwnershipService {
         Integer totalPages = 0;
         Integer totalPagesRead = 0;
         // Distance
-        BigDecimal totalDistance = new BigDecimal(bigDecimalPrecision);
-        BigDecimal distanceRead = new BigDecimal(bigDecimalPrecision);
+        BigDecimal totalDistance = new BigDecimal(distancePrecision);
+        BigDecimal distanceRead = new BigDecimal(distancePrecision);
+        // Value read
+        BigDecimal totalValue = new BigDecimal("0.00");
+        BigDecimal valueRead = new BigDecimal("0.00");
 
         for (OwnedEditionDTO oe : oeditions) {
             Integer nPages = oe.getEdition().getNpages();
@@ -349,22 +353,27 @@ public class EditionOwnershipService {
             BigDecimal distanceCm = new BigDecimal(nPages).multiply(oe.getEdition().getDimensions().height());
             BigDecimal distanceM = distanceCm.divide(new BigDecimal(100), RoundingMode.HALF_UP);
             totalDistance = totalDistance.add(distanceM);
+
+            totalValue = totalValue.add(oe.getRetailPrice());
             if (!oe.getRead())
                 continue;
 
             totalBooksRead++;
             totalPagesRead += oe.getEdition().getNpages();
             distanceRead = distanceRead.add(distanceM);
+            valueRead = valueRead.add(oe.getRetailPrice());
         }
 
         Integer totalBooksNotRead = totalBooks - totalBooksRead;
         Integer totalPagesNotRead = totalPages - totalPagesRead;
         BigDecimal distanceNotRead = totalDistance.subtract(distanceRead);
+        BigDecimal valueNotRead = totalValue.subtract(valueRead);
 
         UserReadingStatsDTO stats = new UserReadingStatsDTO(
                 totalBooksRead, totalBooksNotRead,
                 totalPagesRead, totalPagesNotRead,
-                distanceRead, distanceNotRead);
+                distanceRead, distanceNotRead,
+                valueRead, valueNotRead);
 
         ctx.json(Map.of("stats", stats));
     }

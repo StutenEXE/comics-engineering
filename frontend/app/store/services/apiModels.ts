@@ -56,7 +56,10 @@ export interface OwnedEditionReadingStats {
     // In meters
     distanceRead: number,
     // In meters
-    distanceNotRead: number
+    distanceNotRead: number,
+
+    valueRead: number,
+    valueNotRead: number,
 }
 
 export interface OwnedEditionMonthlyReadingStats {
