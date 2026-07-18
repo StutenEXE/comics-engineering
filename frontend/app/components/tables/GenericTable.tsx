@@ -274,7 +274,7 @@ export function GenericTable<T extends Record<string, any>>({
                       key={cell.id}
                       className="w-fit max-w-50 text-sm text-white/70 group-hover:text-white/80 transition-colors py-3"
                     >
-                      <div className="w-full min-w-fit flex justify-center text-wrap">
+                      <div className="w-full min-w-fit flex justify-center text-wrap text-center">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),
