@@ -92,7 +92,6 @@ export function EditionContributionForm({
   const {
     register,
     setValue,
-    setValues,
     watch,
     handleSubmit,
     formState: { errors, isValid },
@@ -106,7 +105,7 @@ export function EditionContributionForm({
       url: edition?.url,
       imgUrl: edition?.imgUrl,
       coverType: edition?.coverType,
-      parutionDate: edition?.parutionDate,
+      // parutionDate: edition?.parutionDate,
       height: edition?.dimensions.height,
       width: edition?.dimensions.width,
       thickness: edition?.dimensions.thickness,
