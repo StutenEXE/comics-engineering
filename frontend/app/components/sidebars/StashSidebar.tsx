@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
 } from "../shadcn/ui/sidebar";
 import { NavSection } from "./NavSection";
+import { PiStackFill } from "react-icons/pi";
 
 export function CollectionSidebar({
   ...props
@@ -53,15 +54,20 @@ export function CollectionSidebar({
           label={t("stash.library")}
           items={[
             {
-              title: t("stash.bookshelf", { capitalize: true }),
-              url: "/stash/bookshelf",
-              icon: BsBookshelf,
-            },
-            {
               title: t("editions", { capitalize: true }),
               url: "/stash",
               icon: MdBook,
             },
+            {
+              title: t("stash.bookshelf", { capitalize: true }),
+              url: "/stash/bookshelf",
+              icon: BsBookshelf,
+            },
+            // {
+            //   title: t("stash.toReadPile", { capitalize: true }),
+            //   url: "/stash/toread-pile",
+            //   icon: PiStackFill,
+            // },
           ]}
         />
         <NavSection

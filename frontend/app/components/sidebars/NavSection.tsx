@@ -17,6 +17,7 @@ interface NavSection {
     title: string;
     url: string;
     icon?: IconType;
+    disabled?: boolean;
   }[];
 }
 

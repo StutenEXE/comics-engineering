@@ -373,16 +373,18 @@ export default {
   "search.noresults": "Aucun résultat",
   // Stash
   "stash.title": "Ma stash",
+  "stash.remove.title": "Retirer de la collection",
+  "stash.remove.message":
+    "Voulez-vous vraiment retirer cette édition de votre collection ?\nLes informations associées seront perdues.",
   "stash.library": "Bibliothèque",
+  // -- Bookshelf
   "stash.bookshelf": "Mon étagère",
   "stash.bookshelf.sortBySerie": "Trier par série",
   "stash.bookshelf.sortByHeight": "Trier par hauteur",
   "stash.bookshelf.sortByThickness": "Trier par épaisseur",
   "stash.statistics": "Statistiques",
-  // Stash statistics
-  "stash.remove.title": "Retirer de la collection",
-  "stash.remove.message":
-    "Voulez-vous vraiment retirer cette édition de votre collection ?\nLes informations associées seront perdues.",
+  // -- Toread Pile
+  "stash.toReadPile": "Pile à lire",
   // -- Spending
   "stash.spending": "Dépenses",
   "stash.spending.totalSpent": "Total des dépenses",

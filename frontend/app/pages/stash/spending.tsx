@@ -44,7 +44,9 @@ export default function StashBookshelfPage() {
   const stats = data?.stats;
 
   const calcSavings = (oe?: SimpleOwnedEdition) => {
-    return (oe?.retailPrice ?? 0) - (oe?.purchasePrice ?? 0) + (oe?.fees ?? 0);
+    return (
+      (oe?.retailPrice ?? 0) - ((oe?.purchasePrice ?? 0) + (oe?.fees ?? 0))
+    );
   };
   const calcReduction = (oe?: SimpleOwnedEdition) => {
     return (calcSavings(oe) / (oe?.retailPrice ?? 1)) * 100;
@@ -89,7 +91,8 @@ export default function StashBookshelfPage() {
           value={t("stash.spending.costed", {
             parameters: {
               amount: formatCurrency(
-                stats?.mostCostlyEdition?.purchasePrice ?? 0,
+                (stats?.mostCostlyEdition?.purchasePrice ?? 0) +
+                  (stats?.mostCostlyEdition?.fees ?? 0),
                 "EUR",
                 locale,
               ),
