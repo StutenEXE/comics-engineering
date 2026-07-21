@@ -18,6 +18,7 @@ import dev.stuten.vps.models.dtos.response.UserMonthlySpendingStatsDTO.SpendingP
 import dev.stuten.vps.models.dtos.response.UserReadingStatsDTO;
 import dev.stuten.vps.models.dtos.response.UserSpendingStatsDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleOwnedEditionDTO;
+import dev.stuten.vps.services.utils.PriceServiceUtils;
 import dev.stuten.vps.web.ErrorResponse;
 import dev.stuten.vps.web.middleware.AuthContext;
 import dev.stuten.vps.web.middleware.AuthMiddleware;
@@ -222,8 +223,8 @@ public class EditionOwnershipService {
             totalRetailPrice = totalRetailPrice.add(oe.getRetailPrice());
 
             // Most costly
-            BigDecimal spent = oe.getPurchasePrice().add(oe.getFees());
-            BigDecimal highestSpending = mostCostly.getPurchasePrice().add(mostCostly.getFees());
+            BigDecimal spent = PriceServiceUtils.calculateCost(oe);
+            BigDecimal highestSpending = PriceServiceUtils.calculateCost(mostCostly);
             if (highestSpending.compareTo(spent) < 0) {
                 mostCostly = oe;
             }
@@ -237,21 +238,16 @@ public class EditionOwnershipService {
                 continue;
             }
             // Best deal by price
-            BigDecimal deal = oe.getRetailPrice().subtract(spent);
-            BigDecimal bestDealPrice = bestDealByPrice.getPurchasePrice().add(bestDealByPrice.getFees());
-            BigDecimal bestDealDeal = bestDealByPrice.getRetailPrice().subtract(bestDealPrice);
-            if (bestDealDeal.compareTo(deal) < 0) {
+            BigDecimal deal = PriceServiceUtils.calculateSavings(oe);
+            BigDecimal bestDeal = PriceServiceUtils.calculateSavings(bestDealByPrice);
+            if (bestDeal.compareTo(deal) < 0) {
                 bestDealByPrice = oe;
             }
+
             // Best deal by reduction
-            BigDecimal dealRed = deal.divide(oe.getRetailPrice(), RoundingMode.HALF_UP);
-            BigDecimal bestReductionDealPrice = bestDealByReduction.getPurchasePrice()
-                    .add(bestDealByReduction.getFees());
-            // Savings in €
-            BigDecimal bestReductionDealDeal = bestDealByReduction.getRetailPrice().subtract(bestReductionDealPrice);
-            // Savings in %
-            BigDecimal bestReductionDealRed = bestReductionDealDeal.divide(oe.getRetailPrice(), RoundingMode.HALF_UP);
-            if (bestReductionDealRed.compareTo(dealRed) < 0) {
+            BigDecimal dealRed = PriceServiceUtils.calculateReduction(oe);
+            BigDecimal bestReduction = PriceServiceUtils.calculateReduction(bestDealByReduction);
+            if (bestReduction.compareTo(dealRed) < 0) {
                 bestDealByReduction = oe;
             }
         }

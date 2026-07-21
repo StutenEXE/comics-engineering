@@ -168,10 +168,16 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
       enableColumnFilter: false,
     }),
     // Read
-    col.accessor("read", {
+    col.accessor("dateRead", {
       header: t("oedition.read"),
-      cell: (info) => <BooleanCellRenderer val={info.getValue()} />,
-      meta: { filterType: "boolean" },
+      cell: (info) => (
+        <div className="flex flex-col gap-1 items-center text-xs">
+          <BooleanCellRenderer val={info.row.original.read} />
+          {info.getValue()
+            ? (info.getValue() as Date).toLocaleDateString(locale)
+            : ""}
+        </div>
+      ),
     }),
     // Actions
     col.display({
