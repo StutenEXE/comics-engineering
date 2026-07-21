@@ -63,9 +63,9 @@ export function OwnedEditionForm({
       read: ownedEdition.read,
       gift: ownedEdition.gift,
       signed: ownedEdition.signed,
-      purchasePrice: ownedEdition.purchasePrice || ownedEdition.edition?.price,
-      fees: ownedEdition.fees || 0,
-      retailPrice: ownedEdition.retailPrice || ownedEdition.edition?.price,
+      purchasePrice: ownedEdition.purchasePrice ?? ownedEdition.edition?.price,
+      fees: ownedEdition.fees ?? 0,
+      retailPrice: ownedEdition.retailPrice ?? ownedEdition.edition?.price,
       note: ownedEdition.note,
       // Date default values are defined directly in the inputs
     },
