@@ -22,7 +22,12 @@ import {
   useCollectionMonthlySpendingStatsQuery,
   useCollectionSpendingStatsQuery,
 } from "~/store/services/api";
-import { formatCurrency } from "~/utils/currency";
+import {
+  calcCost,
+  calcReduction,
+  calcSavings,
+  formatCurrency,
+} from "~/utils/currency";
 import { dateToShortMonthYearString } from "~/utils/date";
 import type { Route } from "../../+types/root";
 
@@ -42,15 +47,6 @@ export default function StashBookshelfPage() {
     { skip: !user },
   );
   const stats = data?.stats;
-
-  const calcSavings = (oe?: SimpleOwnedEdition) => {
-    return (
-      (oe?.retailPrice ?? 0) - ((oe?.purchasePrice ?? 0) + (oe?.fees ?? 0))
-    );
-  };
-  const calcReduction = (oe?: SimpleOwnedEdition) => {
-    return (calcSavings(oe) / (oe?.retailPrice ?? 1)) * 100;
-  };
 
   return (
     <SideContentTemplate title={t("stash.spending")}>
@@ -91,8 +87,7 @@ export default function StashBookshelfPage() {
           value={t("stash.spending.costed", {
             parameters: {
               amount: formatCurrency(
-                (stats?.mostCostlyEdition?.purchasePrice ?? 0) +
-                  (stats?.mostCostlyEdition?.fees ?? 0),
+                calcCost(stats?.mostCostlyEdition),
                 "EUR",
                 locale,
               ),

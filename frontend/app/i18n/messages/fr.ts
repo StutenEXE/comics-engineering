@@ -6,6 +6,8 @@ export default {
   "generic.n/a": "N/A",
   "generic.yes": "oui",
   "generic.no": "non",
+  "generic.min": "min",
+  "generic.max": "max",
   "generic.edit": "Modifier",
   "generic.cancel": "annuler",
   "generic.submit": "soumettre",
@@ -377,6 +379,11 @@ export default {
   "stash.remove.message":
     "Voulez-vous vraiment retirer cette édition de votre collection ?\nLes informations associées seront perdues.",
   "stash.library": "Bibliothèque",
+  // -- Prices
+  "stash.prices": "Prix",
+  "stash.prices.cost": "Coût",
+  "stash.prices.savings.value": "Economies",
+  "stash.prices.savings.reduction": "Réduction",
   // -- Bookshelf
   "stash.bookshelf": "Mon étagère",
   "stash.bookshelf.sortBySerie": "Trier par série",

@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
 } from "../shadcn/ui/sidebar";
 import { NavSection } from "./NavSection";
-import { PiStackFill } from "react-icons/pi";
+import { PiCurrencyEurBold, PiStackFill } from "react-icons/pi";
 
 export function CollectionSidebar({
   ...props
@@ -59,12 +59,17 @@ export function CollectionSidebar({
               icon: MdBook,
             },
             {
-              title: t("stash.bookshelf", { capitalize: true }),
+              title: t("stash.prices"),
+              url: "/stash/prices",
+              icon: PiCurrencyEurBold,
+            },
+            {
+              title: t("stash.bookshelf"),
               url: "/stash/bookshelf",
               icon: BsBookshelf,
             },
             // {
-            //   title: t("stash.toReadPile", { capitalize: true }),
+            //   title: t("stash.toReadPile"),
             //   url: "/stash/toread-pile",
             //   icon: PiStackFill,
             // },
@@ -74,12 +79,12 @@ export function CollectionSidebar({
           label={t("stash.statistics")}
           items={[
             {
-              title: t("stash.spending", { capitalize: true }),
+              title: t("stash.spending"),
               url: "/stash/spending",
               icon: FaWallet,
             },
             {
-              title: t("stash.reading", { capitalize: true }),
+              title: t("stash.reading"),
               url: "/stash/reading",
               icon: FaReadme,
             },
