@@ -430,6 +430,7 @@ export default {
   "stash.reading.proportionReadByBook": "Proportion de livres lus",
   "stash.reading.proportionReadByBook.info": "%read%/%total% lus",
   "stash.reading.proportionReadByIssue": "Proportion d'issues lues",
+  "stash.reading.proportionReadByIssue.info": "%read%/%total% lues",
   "stash.reading.proportionReadByPage": "Proportion de pages lues",
   "stash.reading.proportionReadByPage.info": "%read%/%total% lues",
   "stash.reading.readingPerMonth": "Lectures par mois",

@@ -300,7 +300,9 @@ function SpendingPerMonthChart({}: SpendingPerMonthChartProps) {
         <BarChart accessibilityLayer data={chartData}>
           <CartesianGrid vertical={false} />
           <YAxis
-            tickFormatter={(value) => formatCurrency(value, "EUR", locale)}
+            tickFormatter={(value) =>
+              mode === "money" ? formatCurrency(value, "EUR", locale) : value
+            }
           />
           <XAxis
             dataKey="month"

@@ -129,6 +129,12 @@ export default function StashBookshelfPage() {
           colSpan={1}
           title={t("stash.reading.proportionReadByIssue")}
           value={`${(((stats?.totalIssuesRead ?? 0) / totalIssues) * 100).toFixed(2)}%`}
+          additionalInfo={t("stash.reading.proportionReadByIssue.info", {
+            parameters: {
+              read: stats?.totalIssuesRead,
+              total: totalIssues,
+            },
+          })}
         />
         <NumericalStatisticCard
           colSpan={1}
@@ -256,13 +262,13 @@ function ReadingPerMonthChart({}: ReadingPerMonthChartProps) {
           <ChartTooltip content={<ChartTooltipContentWithTotal />} />
           <ChartLegend content={<ChartLegendContent />} />
           {mode === "book" && (
-            <Bar dataKey="booksRead" fill="lightblue" radius={[4, 4, 4, 4]} />
+            <Bar dataKey="booksRead" fill="blue" radius={[4, 4, 4, 4]} />
           )}
           {mode === "issue" && (
-            <Bar dataKey="issuesRead" fill="lightblue" radius={[4, 4, 4, 4]} />
+            <Bar dataKey="issuesRead" fill="blue" radius={[4, 4, 4, 4]} />
           )}
           {mode === "page" && (
-            <Bar dataKey="pagesRead" fill="lightblue" radius={[4, 4, 4, 4]} />
+            <Bar dataKey="pagesRead" fill="blue" radius={[4, 4, 4, 4]} />
           )}
         </BarChart>
       </ChartContainer>
