@@ -43,7 +43,15 @@ export interface OwnedEditionSpendingStats {
 }
 
 export interface OwnedEditionMonthlySpendingStats {
-    spendingPerMonth?: Record<string, { totalPurchasePrice: number, totalFees: number, totalSpent: number }>
+    spendingPerMonth?: Record<string, {
+        totalPurchasePrice: number,
+        totalFees: number,
+        totalSpent: number,
+
+        totalBooksBought: number,
+        totalBooksGifted: number,
+        totalBooksAdded: number
+    }>
 }
 
 export interface OwnedEditionReadingStats {

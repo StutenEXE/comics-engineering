@@ -16,6 +16,13 @@ public record UserMonthlySpendingStatsDTO(
         @JsonProperty("totalFees")
         TOTAL_FEES,
         @JsonProperty("totalSpent")
-        TOTAL_SPENT;
+        TOTAL_SPENT,
+
+        @JsonProperty("totalBooksBought")
+        TOTAL_BOOKS_BOUGHT,
+        @JsonProperty("totalBooksGifted")
+        TOTAL_BOOKS_GIFTED,
+        @JsonProperty("totalBooksAdded")
+        TOTAL_BOOKS_ADDED;
     }
 }

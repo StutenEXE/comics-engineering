@@ -131,6 +131,8 @@ export default function StashBookshelfPage() {
 
 interface ReadingPerMonthChartProps {}
 
+type ReadingPerMonthChartMode = "book" | "page";
+
 function ReadingPerMonthChart({}: ReadingPerMonthChartProps) {
   const { t, locale } = useTranslation();
   const { user } = useAppSelector((state) => state.user);
@@ -193,11 +195,11 @@ function ReadingPerMonthChart({}: ReadingPerMonthChartProps) {
     },
   } satisfies ChartConfig;
 
-  const [mode, setMode] = useState("book");
+  const [mode, setMode] = useState<ReadingPerMonthChartMode>("book");
 
   return (
     <>
-      <div className="flex my-4 gap-2 items-center">
+      <div className="flex my-2 gap-2 items-center">
         <SelectInput
           placeholder={t("stash.reading.dataToShow")}
           defaultValue="book"
@@ -205,7 +207,7 @@ function ReadingPerMonthChart({}: ReadingPerMonthChartProps) {
             { label: t("stash.reading.totalBooks"), value: "book" },
             { label: t("stash.reading.totalPages"), value: "page" },
           ]}
-          onValueChange={(v) => setMode(v)}
+          onValueChange={(v) => setMode(v as ReadingPerMonthChartMode)}
         />
         <p className="text-sm text-muted-foreground">
           {t("stash.reading.booksReadWithoutADate", {

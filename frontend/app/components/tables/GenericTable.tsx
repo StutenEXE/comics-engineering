@@ -300,9 +300,7 @@ export function GenericTable<T extends Record<string, any>>({
                               <ArrowUpDown
                                 size={16}
                                 className="cursor-pointer rounded p-0.5 hover:bg-white/10 hover:scale-105 active:scale-95 flex-shrink-0"
-                                onClick={() =>
-                                  header.column.toggleSorting(false)
-                                }
+                                onClick={() => header.column.toggleSorting()}
                               />
                             )}
                             {/* Sorted Asc */}
@@ -310,9 +308,7 @@ export function GenericTable<T extends Record<string, any>>({
                               <ArrowDown
                                 size={16}
                                 className="cursor-pointer rounded p-0.5 hover:bg-white/10 hover:scale-105 active:scale-95 flex-shrink-0"
-                                onClick={() =>
-                                  header.column.toggleSorting(true)
-                                }
+                                onClick={() => header.column.toggleSorting()}
                               />
                             )}
                             {/* Sorted Desc */}
@@ -320,9 +316,7 @@ export function GenericTable<T extends Record<string, any>>({
                               <ArrowUp
                                 size={16}
                                 className="cursor-pointer rounded p-0.5 hover:bg-white/10 hover:scale-105 active:scale-95 flex-shrink-0"
-                                onClick={() =>
-                                  header.column.toggleSorting(false)
-                                }
+                                onClick={() => header.column.toggleSorting()}
                               />
                             )}
                           </>

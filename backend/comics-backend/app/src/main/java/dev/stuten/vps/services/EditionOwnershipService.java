@@ -289,9 +289,14 @@ public class EditionOwnershipService {
                 readingPerMonth.put(yearmonth, new HashMap<SpendingPerMonthStats, BigDecimal>(
                         Map.of(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE, new BigDecimal("0.00"),
                                 SpendingPerMonthStats.TOTAL_FEES, new BigDecimal("0.00"),
-                                SpendingPerMonthStats.TOTAL_SPENT, new BigDecimal("0.00"))));
+                                SpendingPerMonthStats.TOTAL_SPENT, new BigDecimal("0.00"),
+                                SpendingPerMonthStats.TOTAL_BOOKS_BOUGHT, new BigDecimal("0"),
+                                SpendingPerMonthStats.TOTAL_BOOKS_GIFTED, new BigDecimal("0"),
+                                SpendingPerMonthStats.TOTAL_BOOKS_ADDED, new BigDecimal("0"))));
             }
             Map<SpendingPerMonthStats, BigDecimal> monthStats = readingPerMonth.get(yearmonth);
+
+            // Add price infos
             monthStats.put(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE,
                     monthStats.get(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE)
                             .add(oe.getPurchasePrice()));
@@ -299,6 +304,20 @@ public class EditionOwnershipService {
                     monthStats.get(SpendingPerMonthStats.TOTAL_FEES).add(oe.getFees()));
             monthStats.put(SpendingPerMonthStats.TOTAL_SPENT,
                     monthStats.get(SpendingPerMonthStats.TOTAL_SPENT).add(oe.getPurchasePrice().add(oe.getFees())));
+
+            // Add books infos
+            monthStats.put(SpendingPerMonthStats.TOTAL_BOOKS_ADDED,
+                    monthStats.get(SpendingPerMonthStats.TOTAL_BOOKS_ADDED)
+                            .add(new BigDecimal(1)));
+            if (oe.getGift()) {
+                monthStats.put(SpendingPerMonthStats.TOTAL_BOOKS_GIFTED,
+                        monthStats.get(SpendingPerMonthStats.TOTAL_BOOKS_GIFTED)
+                                .add(new BigDecimal(1)));
+            } else {
+                monthStats.put(SpendingPerMonthStats.TOTAL_BOOKS_BOUGHT,
+                        monthStats.get(SpendingPerMonthStats.TOTAL_BOOKS_BOUGHT)
+                                .add(new BigDecimal(1)));
+            }
         }
 
         UserMonthlySpendingStatsDTO stats = new UserMonthlySpendingStatsDTO(readingPerMonth);
