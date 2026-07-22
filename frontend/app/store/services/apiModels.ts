@@ -58,6 +58,9 @@ export interface OwnedEditionReadingStats {
     totalBooksRead: number,
     totalBooksNotRead: number,
 
+    totalIssuesRead: number,
+    totalIssuesNotRead: number,
+
     totalPagesRead: number,
     totalPagesNotRead: number,
 
@@ -71,6 +74,10 @@ export interface OwnedEditionReadingStats {
 }
 
 export interface OwnedEditionMonthlyReadingStats {
-    readingPerMonth?: Record<string, { numberOfBooksRead: number, numberOfPagesRead: number }>
+    readingPerMonth?: Record<string, {
+        numberOfBooksRead: number,
+        numberOfIssuesRead: number,
+        numberOfPagesRead: number
+    }>
     nBooksReadWithNoDate: number
 }

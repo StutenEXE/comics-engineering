@@ -287,7 +287,7 @@ function SpendingPerMonthChart({}: SpendingPerMonthChartProps) {
     <>
       <div className="my-2">
         <SelectInput
-          placeholder={t("stash.reading.dataToShow")}
+          placeholder={t("stash.reading.dataToShow")} // Reading i18n ref here
           defaultValue="money"
           options={[
             { label: t("stash.spending.money"), value: "money" },

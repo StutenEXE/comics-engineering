@@ -46,6 +46,8 @@ export default function StashBookshelfPage() {
 
   const totalBooks =
     (stats?.totalBooksRead ?? 0) + (stats?.totalBooksNotRead ?? 0);
+  const totalIssues =
+    (stats?.totalIssuesRead ?? 0) + (stats?.totalIssuesNotRead ?? 0);
   const totalPages =
     (stats?.totalPagesRead ?? 0) + (stats?.totalPagesNotRead ?? 0);
 
@@ -64,6 +66,11 @@ export default function StashBookshelfPage() {
         />
         <NumericalStatisticCard
           colSpan={1}
+          title={t("stash.reading.totalIssuesRead")}
+          value={stats?.totalIssuesRead}
+        />
+        <NumericalStatisticCard
+          colSpan={1}
           title={t("stash.reading.totalPagesRead")}
           value={stats?.totalPagesRead}
           additionalInfo={t("stash.reading.totalPagesRead.info", {
@@ -75,7 +82,7 @@ export default function StashBookshelfPage() {
         />
         {/* Readings per month */}
         <StatisticCard
-          colSpan={4}
+          colSpan={3}
           rowSpan={4}
           title={t("stash.reading.readingPerMonth")}
         >
@@ -90,6 +97,11 @@ export default function StashBookshelfPage() {
               amount: formatCurrency(stats?.valueNotRead ?? 0, "EUR", locale),
             },
           })}
+        />
+        <NumericalStatisticCard
+          colSpan={1}
+          title={t("stash.reading.totalIssuesToRead")}
+          value={stats?.totalIssuesNotRead}
         />
         <NumericalStatisticCard
           colSpan={1}
@@ -115,6 +127,11 @@ export default function StashBookshelfPage() {
         />
         <NumericalStatisticCard
           colSpan={1}
+          title={t("stash.reading.proportionReadByIssue")}
+          value={`${(((stats?.totalIssuesRead ?? 0) / totalIssues) * 100).toFixed(2)}%`}
+        />
+        <NumericalStatisticCard
+          colSpan={1}
           title={t("stash.reading.proportionReadByPage")}
           value={`${(((stats?.totalPagesRead ?? 0) / totalPages) * 100).toFixed(2)}%`}
           additionalInfo={t("stash.reading.proportionReadByPage.info", {
@@ -131,7 +148,7 @@ export default function StashBookshelfPage() {
 
 interface ReadingPerMonthChartProps {}
 
-type ReadingPerMonthChartMode = "book" | "page";
+type ReadingPerMonthChartMode = "book" | "issue" | "page";
 
 function ReadingPerMonthChart({}: ReadingPerMonthChartProps) {
   const { t, locale } = useTranslation();
@@ -147,6 +164,7 @@ function ReadingPerMonthChart({}: ReadingPerMonthChartProps) {
     .map(([month, monthStats]) => ({
       month: new Date(month),
       numberOfBooksRead: monthStats.numberOfBooksRead,
+      numberOfIssuesRead: monthStats.numberOfIssuesRead,
       numberOfPagesRead: monthStats.numberOfPagesRead,
     }))
     // Sort by date
@@ -177,6 +195,7 @@ function ReadingPerMonthChart({}: ReadingPerMonthChartProps) {
       filledData.push({
         month: dateToShortMonthYearString(locale, new Date(d)),
         booksRead: existing?.numberOfBooksRead ?? 0,
+        issuesRead: existing?.numberOfIssuesRead ?? 0,
         pagesRead: existing?.numberOfPagesRead ?? 0,
       });
     }
@@ -187,6 +206,10 @@ function ReadingPerMonthChart({}: ReadingPerMonthChartProps) {
   const chartConfig = {
     booksRead: {
       label: t("stash.reading.totalBooksRead"),
+      color: "blue",
+    },
+    issuesRead: {
+      label: t("stash.reading.totalIssuesRead"),
       color: "blue",
     },
     pagesRead: {
@@ -205,6 +228,7 @@ function ReadingPerMonthChart({}: ReadingPerMonthChartProps) {
           defaultValue="book"
           options={[
             { label: t("stash.reading.totalBooks"), value: "book" },
+            { label: t("stash.reading.totalIssues"), value: "issue" },
             { label: t("stash.reading.totalPages"), value: "page" },
           ]}
           onValueChange={(v) => setMode(v as ReadingPerMonthChartMode)}
@@ -233,6 +257,9 @@ function ReadingPerMonthChart({}: ReadingPerMonthChartProps) {
           <ChartLegend content={<ChartLegendContent />} />
           {mode === "book" && (
             <Bar dataKey="booksRead" fill="lightblue" radius={[4, 4, 4, 4]} />
+          )}
+          {mode === "issue" && (
+            <Bar dataKey="issuesRead" fill="lightblue" radius={[4, 4, 4, 4]} />
           )}
           {mode === "page" && (
             <Bar dataKey="pagesRead" fill="lightblue" radius={[4, 4, 4, 4]} />
