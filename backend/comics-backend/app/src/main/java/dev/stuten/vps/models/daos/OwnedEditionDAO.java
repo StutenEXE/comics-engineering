@@ -1,11 +1,14 @@
 package dev.stuten.vps.models.daos;
 
+import static dev.stuten.vps.jooq.tables.BooksIssues.BOOKS_ISSUES;
 import static dev.stuten.vps.jooq.tables.EditionOwnership.EDITION_OWNERSHIP;
 import static dev.stuten.vps.jooq.tables.Editions.EDITIONS;
+import static org.jooq.impl.DSL.countDistinct;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.jooq.DSLContext;
@@ -126,5 +129,34 @@ public class OwnedEditionDAO extends EditionDAO {
     public Boolean doesUserOwnEdition(Integer userId, Integer editionId) {
         return super.selectOne(EDITION_OWNERSHIP.USER_ID.eq(userId).and(EDITION_OWNERSHIP.EDITION_ID.eq(editionId)))
                 .isPresent();
+    }
+
+    @SuppressWarnings("null")
+    public Map<Integer, Integer> findAllNumberOfIssuesLinked(List<OwnedEditionDTO> oes) {
+        if (oes == null || oes.isEmpty()) {
+            return Map.of();
+        }
+
+        List<Integer> editionIds = oes.stream()
+                .map(oe -> oe.getEdition())
+                .map(ed -> ed.getId())
+                .distinct()
+                .toList();
+
+        if (editionIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return DSL()
+                .select(
+                        EDITIONS.ID,
+                        countDistinct(BOOKS_ISSUES.ISSUE_ID).as("issue_count"))
+                .from(EDITIONS)
+                .leftJoin(BOOKS_ISSUES).on(BOOKS_ISSUES.BOOK_ID.eq(EDITIONS.BOOK_ID))
+                .where(EDITIONS.ID.in(editionIds))
+                .groupBy(EDITIONS.ID)
+                .fetchMap(
+                        EDITIONS.ID,
+                        record -> record.get("issue_count", Integer.class));
     }
 }

@@ -289,9 +289,14 @@ public class EditionOwnershipService {
                 readingPerMonth.put(yearmonth, new HashMap<SpendingPerMonthStats, BigDecimal>(
                         Map.of(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE, new BigDecimal("0.00"),
                                 SpendingPerMonthStats.TOTAL_FEES, new BigDecimal("0.00"),
-                                SpendingPerMonthStats.TOTAL_SPENT, new BigDecimal("0.00"))));
+                                SpendingPerMonthStats.TOTAL_SPENT, new BigDecimal("0.00"),
+                                SpendingPerMonthStats.TOTAL_BOOKS_BOUGHT, new BigDecimal("0"),
+                                SpendingPerMonthStats.TOTAL_BOOKS_GIFTED, new BigDecimal("0"),
+                                SpendingPerMonthStats.TOTAL_BOOKS_ADDED, new BigDecimal("0"))));
             }
             Map<SpendingPerMonthStats, BigDecimal> monthStats = readingPerMonth.get(yearmonth);
+
+            // Add price infos
             monthStats.put(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE,
                     monthStats.get(SpendingPerMonthStats.TOTAL_PURCHASE_PRICE)
                             .add(oe.getPurchasePrice()));
@@ -299,6 +304,20 @@ public class EditionOwnershipService {
                     monthStats.get(SpendingPerMonthStats.TOTAL_FEES).add(oe.getFees()));
             monthStats.put(SpendingPerMonthStats.TOTAL_SPENT,
                     monthStats.get(SpendingPerMonthStats.TOTAL_SPENT).add(oe.getPurchasePrice().add(oe.getFees())));
+
+            // Add books infos
+            monthStats.put(SpendingPerMonthStats.TOTAL_BOOKS_ADDED,
+                    monthStats.get(SpendingPerMonthStats.TOTAL_BOOKS_ADDED)
+                            .add(new BigDecimal(1)));
+            if (oe.getGift()) {
+                monthStats.put(SpendingPerMonthStats.TOTAL_BOOKS_GIFTED,
+                        monthStats.get(SpendingPerMonthStats.TOTAL_BOOKS_GIFTED)
+                                .add(new BigDecimal(1)));
+            } else {
+                monthStats.put(SpendingPerMonthStats.TOTAL_BOOKS_BOUGHT,
+                        monthStats.get(SpendingPerMonthStats.TOTAL_BOOKS_BOUGHT)
+                                .add(new BigDecimal(1)));
+            }
         }
 
         UserMonthlySpendingStatsDTO stats = new UserMonthlySpendingStatsDTO(readingPerMonth);
@@ -315,15 +334,17 @@ public class EditionOwnershipService {
             return; // For compiler
         }
 
-        // Retrieve owned editions
+        // Retrieve owned editions & issue mapping
         List<OwnedEditionDTO> oeditions = dao.findOwnedByUserId(userID);
+        Map<Integer, Integer> mapEdIssues = dao.findAllNumberOfIssuesLinked(oeditions);
+
         String distancePrecision = "0.0000";
 
         // If no oeditions returned, exit early to simplify the following logic
         if (oeditions.size() == 0) {
             ctx.json(
                     Map.of("stats",
-                            new UserReadingStatsDTO(0, 0, 0, 0,
+                            new UserReadingStatsDTO(0, 0, 0, 0, 0, 0,
                                     new BigDecimal(distancePrecision), new BigDecimal(distancePrecision),
                                     new BigDecimal("0.00"), new BigDecimal("0.00"))));
             return;
@@ -335,6 +356,9 @@ public class EditionOwnershipService {
         // Pages
         Integer totalPages = 0;
         Integer totalPagesRead = 0;
+        // Issues
+        Integer totalIssues = 0;
+        Integer totalIssuesRead = 0;
         // Distance
         BigDecimal totalDistance = new BigDecimal(distancePrecision);
         BigDecimal distanceRead = new BigDecimal(distancePrecision);
@@ -343,30 +367,35 @@ public class EditionOwnershipService {
         BigDecimal valueRead = new BigDecimal("0.00");
 
         for (OwnedEditionDTO oe : oeditions) {
+            // Calculate read/not read stats
             Integer nPages = oe.getEdition().getNpages();
             totalPages += nPages;
-
+            totalIssues += mapEdIssues.get(oe.getEdition().getId());
             BigDecimal distanceCm = new BigDecimal(nPages).multiply(oe.getEdition().getDimensions().height());
             BigDecimal distanceM = distanceCm.divide(new BigDecimal(100), RoundingMode.HALF_UP);
             totalDistance = totalDistance.add(distanceM);
-
             totalValue = totalValue.add(oe.getRetailPrice());
+
             if (!oe.getRead())
                 continue;
 
+            // Calculate read stats
             totalBooksRead++;
             totalPagesRead += oe.getEdition().getNpages();
+            totalIssuesRead += mapEdIssues.get(oe.getEdition().getId());
             distanceRead = distanceRead.add(distanceM);
             valueRead = valueRead.add(oe.getRetailPrice());
         }
 
         Integer totalBooksNotRead = totalBooks - totalBooksRead;
         Integer totalPagesNotRead = totalPages - totalPagesRead;
+        Integer totalIssuesNotRead = totalIssues - totalIssuesRead;
         BigDecimal distanceNotRead = totalDistance.subtract(distanceRead);
         BigDecimal valueNotRead = totalValue.subtract(valueRead);
 
         UserReadingStatsDTO stats = new UserReadingStatsDTO(
                 totalBooksRead, totalBooksNotRead,
+                totalIssuesRead, totalIssuesNotRead,
                 totalPagesRead, totalPagesNotRead,
                 distanceRead, distanceNotRead,
                 valueRead, valueNotRead);
@@ -386,9 +415,10 @@ public class EditionOwnershipService {
 
         // Retrieve owned editions
         List<OwnedEditionDTO> oeditions = dao.findOwnedByUserId(userID);
+        Map<Integer, Integer> mapEdIssues = dao.findAllNumberOfIssuesLinked(oeditions);
 
         // Spending per month
-        Map<String, Map<ReadingPerMonthStats, BigDecimal>> readingPerMonth = new HashMap<String, Map<ReadingPerMonthStats, BigDecimal>>();
+        Map<String, Map<ReadingPerMonthStats, Integer>> readingPerMonth = new HashMap<String, Map<ReadingPerMonthStats, Integer>>();
         Integer booksReadWithNoDate = 0;
 
         for (OwnedEditionDTO oe : oeditions) {
@@ -403,16 +433,18 @@ public class EditionOwnershipService {
             String yearmonth = oe.getDateRead().format(DateTimeFormatter.ofPattern("yyyy-MM")) + "-01";
             // Create month if not created yet
             if (!readingPerMonth.containsKey(yearmonth)) {
-                readingPerMonth.put(yearmonth, new HashMap<ReadingPerMonthStats, BigDecimal>(
-                        Map.of(ReadingPerMonthStats.NUMBER_BOOKS_READ, new BigDecimal("0.00"),
-                                ReadingPerMonthStats.NUMBER_PAGES_READ, new BigDecimal("0.00"))));
+                readingPerMonth.put(yearmonth, new HashMap<ReadingPerMonthStats, Integer>(
+                        Map.of(ReadingPerMonthStats.NUMBER_BOOKS_READ, 0,
+                                ReadingPerMonthStats.NUMBER_ISSUES_READ, 0,
+                                ReadingPerMonthStats.NUMBER_PAGES_READ, 0)));
             }
-            Map<ReadingPerMonthStats, BigDecimal> monthStats = readingPerMonth.get(yearmonth);
+            Map<ReadingPerMonthStats, Integer> monthStats = readingPerMonth.get(yearmonth);
             monthStats.put(ReadingPerMonthStats.NUMBER_BOOKS_READ,
-                    monthStats.get(ReadingPerMonthStats.NUMBER_BOOKS_READ).add(new BigDecimal(1)));
+                    monthStats.get(ReadingPerMonthStats.NUMBER_BOOKS_READ) + 1);
+            monthStats.put(ReadingPerMonthStats.NUMBER_ISSUES_READ,
+                    monthStats.get(ReadingPerMonthStats.NUMBER_ISSUES_READ) + mapEdIssues.get(oe.getEdition().getId()));
             monthStats.put(ReadingPerMonthStats.NUMBER_PAGES_READ,
-                    monthStats.get(ReadingPerMonthStats.NUMBER_PAGES_READ)
-                            .add(new BigDecimal(oe.getEdition().getNpages())));
+                    monthStats.get(ReadingPerMonthStats.NUMBER_PAGES_READ) + oe.getEdition().getNpages());
         }
 
         UserMonthlyReadingStatsDTO stats = new UserMonthlyReadingStatsDTO(readingPerMonth, booksReadWithNoDate);

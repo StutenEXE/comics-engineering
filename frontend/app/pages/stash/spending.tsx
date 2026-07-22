@@ -30,6 +30,8 @@ import {
 } from "~/utils/currency";
 import { dateToShortMonthYearString } from "~/utils/date";
 import type { Route } from "../../+types/root";
+import { SelectInput } from "~/components/forms/fields/SelectInput";
+import { useState } from "react";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -200,6 +202,8 @@ function EditionStatisticCard({
 
 interface SpendingPerMonthChartProps {}
 
+type SpendingPerMonthChartMode = "money" | "book";
+
 function SpendingPerMonthChart({}: SpendingPerMonthChartProps) {
   const { t, locale } = useTranslation();
   const { user } = useAppSelector((state) => state.user);
@@ -216,6 +220,9 @@ function SpendingPerMonthChart({}: SpendingPerMonthChartProps) {
       totalPurchasePrice: monthStats.totalPurchasePrice,
       totalFees: monthStats.totalFees,
       totalSpent: monthStats.totalSpent,
+      totalBooksBought: monthStats.totalBooksBought,
+      totalBooksGifted: monthStats.totalBooksGifted,
+      totalBooksAdded: monthStats.totalBooksAdded,
     }))
     // Sort by date
     .sort((a, b) => a.month.getTime() - b.month.getTime());
@@ -246,6 +253,9 @@ function SpendingPerMonthChart({}: SpendingPerMonthChartProps) {
         purchasePrice: existing?.totalPurchasePrice ?? 0,
         fees: existing?.totalFees ?? 0,
         totalSpent: existing?.totalSpent ?? 0,
+        booksBought: existing?.totalBooksBought ?? 0,
+        booksGifted: existing?.totalBooksGifted ?? 0,
+        booksAdded: existing?.totalBooksAdded ?? 0,
       });
     }
     return filledData;
@@ -261,40 +271,83 @@ function SpendingPerMonthChart({}: SpendingPerMonthChartProps) {
       label: t("oedition.fees"),
       color: "lightblue",
     },
+    booksBought: {
+      label: t("stash.spending.booksBought"),
+      color: "blue",
+    },
+    booksGifted: {
+      label: t("stash.spending.booksGifted"),
+      color: "lightblue",
+    },
   } satisfies ChartConfig;
 
+  const [mode, setMode] = useState<SpendingPerMonthChartMode>("money");
+
   return (
-    <ChartContainer config={chartConfig}>
-      <BarChart accessibilityLayer data={chartData}>
-        <CartesianGrid vertical={false} />
-        <YAxis
-          tickFormatter={(value) => formatCurrency(value, "EUR", locale)}
+    <>
+      <div className="my-2">
+        <SelectInput
+          placeholder={t("stash.reading.dataToShow")} // Reading i18n ref here
+          defaultValue="money"
+          options={[
+            { label: t("stash.spending.money"), value: "money" },
+            { label: t("stash.spending.book"), value: "book" },
+          ]}
+          onValueChange={(v) => setMode(v as SpendingPerMonthChartMode)}
         />
-        <XAxis
-          dataKey="month"
-          tickLine={true}
-          tickMargin={10}
-          axisLine={true}
-          angle={-45}
-          textAnchor="end"
-          height={60}
-          interval={1}
-        />
-        <ChartTooltip content={<ChartTooltipContentWithTotal />} />
-        <ChartLegend content={<ChartLegendContent />} />
-        <Bar
-          dataKey="purchasePrice"
-          stackId="a"
-          fill="blue"
-          radius={[0, 0, 4, 4]}
-        />
-        <Bar
-          dataKey="fees"
-          stackId="a"
-          fill="lightblue"
-          radius={[4, 4, 0, 0]}
-        />
-      </BarChart>
-    </ChartContainer>
+      </div>
+      <ChartContainer config={chartConfig}>
+        <BarChart accessibilityLayer data={chartData}>
+          <CartesianGrid vertical={false} />
+          <YAxis
+            tickFormatter={(value) => formatCurrency(value, "EUR", locale)}
+          />
+          <XAxis
+            dataKey="month"
+            tickLine={true}
+            tickMargin={10}
+            axisLine={true}
+            angle={-45}
+            textAnchor="end"
+            height={60}
+            interval={1}
+          />
+          <ChartTooltip content={<ChartTooltipContentWithTotal />} />
+          <ChartLegend content={<ChartLegendContent />} />
+          {mode === "money" && (
+            <>
+              <Bar
+                dataKey="purchasePrice"
+                stackId="a"
+                fill="blue"
+                radius={[0, 0, 4, 4]}
+              />
+              <Bar
+                dataKey="fees"
+                stackId="a"
+                fill="lightblue"
+                radius={[4, 4, 0, 0]}
+              />
+            </>
+          )}
+          {mode === "book" && (
+            <>
+              <Bar
+                dataKey="booksBought"
+                stackId="a"
+                fill="blue"
+                radius={[0, 0, 4, 4]}
+              />
+              <Bar
+                dataKey="booksGifted"
+                stackId="a"
+                fill="lightblue"
+                radius={[4, 4, 0, 0]}
+              />
+            </>
+          )}
+        </BarChart>
+      </ChartContainer>
+    </>
   );
 }
