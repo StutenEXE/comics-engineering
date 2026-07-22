@@ -15,12 +15,18 @@ import { EditOwnedEditionModal } from "../modals/EditOwnedEditionModal";
 import { OwnedEditionModal } from "../modals/OwnedEditionModal";
 import { useToast } from "../toast/Toast";
 import { BooleanCellRenderer, GenericTable } from "./GenericTable";
+import {
+  calcCost,
+  calcReduction,
+  calcSavings,
+  formatCurrency,
+} from "~/utils/currency";
 
-interface OwnedEditionTableProps {
+interface OwnedEditionPricesTableProps {
   className?: string;
 }
 
-export function OwnedEditionTable({}: OwnedEditionTableProps) {
+export function OwnedEditionPricesTable({}: OwnedEditionPricesTableProps) {
   const confirm = useConfirm();
   const { t, locale } = useTranslation();
   const toast = useToast();
@@ -32,15 +38,10 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
   );
   const editionList = data?.ownedEditions ?? [];
   const err = createError(error);
-  const publishers = useMemo(
-    () => [...new Set(editionList.map((e) => e.edition.publisher?.name))],
-    [editionList],
-  );
   const sortedEditionList = useMemo(
     () => [...editionList].sort((a, b) => -compareDates(a.date, b.date)),
     [editionList],
   );
-
   // Handles modal open/close state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const openModal = () => {
@@ -74,7 +75,7 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
   const [oeditionToShow, setEditionToShow] = useState<OwnedEdition>();
   const [editedOwnedEdition, setEditedOwnedEdition] = useState<OwnedEdition>();
 
-  const handleSubmit = () => {
+  const handleSubmit = (oe: OwnedEdition) => {
     refetch();
   };
 
@@ -102,62 +103,6 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
           </div>
         ),
       }),
-      // Book name
-      col.accessor("edition.book.name", {
-        header: t("oedition.book.name"),
-        meta: { filterType: "text" },
-        cell: (info) => (
-          <a
-            className="hover:underline"
-            href={`/book/${info.row.original.edition.book?.id}`}
-          >
-            {info.getValue()}&nbsp;<span className="font-normal">↗</span>
-          </a>
-        ),
-      }),
-      // Serie name
-      col.accessor("edition.serie.name", {
-        header: t("oedition.serie.name"),
-        meta: { filterType: "text" },
-        cell: (info) => (
-          <a
-            className="hover:underline"
-            href={`/serie/${info.row.original.edition.serie?.id}`}
-          >
-            {info.getValue()}&nbsp;<span className="font-normal">↗</span>
-          </a>
-        ),
-      }),
-      // Volume
-      col.accessor("edition.book.number", {
-        header: t("oedition.book.volume"),
-        meta: { filterType: "text" },
-        cell: (info) => (
-          <span>
-            {info.row.original.edition?.book?.number ? (
-              // If number is present
-              <>
-                {t("generic.volume", { capitalize: true })}&nbsp;
-                {info.getValue()}
-              </>
-            ) : (
-              // If no number
-              t("generic.n/a")
-            )}
-          </span>
-        ),
-        enableColumnFilter: false,
-      }),
-      // Publisher name
-      col.accessor("edition.publisher.name", {
-        header: t("oedition.book.publisher"),
-        meta: {
-          filterType: "single",
-          options: publishers,
-          placeholder: t("oedition.publisher.select"),
-        },
-        filterFn: "arrIncludes",
-      }),
       // Add Date (use raw date accessor so range filtering works)
       col.accessor("date", {
         header: t("oedition.addDate"),
@@ -168,37 +113,50 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
             : "",
         enableColumnFilter: false,
       }),
-      // Read
-      col.accessor("read", {
-        header: t("oedition.read"),
+      // Purchase price
+      col.accessor("purchasePrice", {
+        header: t("oedition.purchasePrice"),
+        meta: { filterType: "numrange" },
+        cell: (info) => formatCurrency(info.getValue(), "EUR", locale),
+      }),
+      // Fees
+      col.accessor("fees", {
+        header: t("oedition.fees"),
+        meta: { filterType: "numrange" },
+        cell: (info) => formatCurrency(info.getValue(), "EUR", locale),
+      }),
+      // Total cost
+      col.accessor((oe) => calcCost(oe), {
+        header: t("stash.prices.cost"),
+        meta: { filterType: "numrange" },
         cell: (info) => (
-          <div className="flex flex-col gap-1 items-center text-xs">
-            <BooleanCellRenderer val={info.getValue()} />
-            {info.row.original.dateRead
-              ? (info.row.original.dateRead as Date).toLocaleDateString(locale)
-              : ""}
+          <div>
+            <p>{formatCurrency(info.getValue(), "EUR", locale)}</p>
+            <p>
+              ({formatCurrency(info.row.original.purchasePrice, "EUR", locale)}
+              &nbsp;+&nbsp;
+              {formatCurrency(info.row.original.fees, "EUR", locale)})
+            </p>
           </div>
         ),
-        sortingFn: (rowA, rowB, _columnId) => {
-          const dateA = rowA.original.dateRead as Date;
-          const dateB = rowB.original.dateRead as Date;
-          const readA = rowA.original.read ? 1 : 0;
-          const readB = rowB.original.read ? 1 : 0;
-          // Both are read & have dates
-          if (dateA && dateB) {
-            return dateA.getTime() - dateB.getTime();
-          }
-          // Only dateA has a read date
-          if (dateA) {
-            return 1;
-          }
-          // Only dateB has a read date
-          if (dateB) {
-            return -1;
-          }
-          return readA - readB;
-        },
-        meta: { filterType: "boolean" },
+      }),
+      // Retail price
+      col.accessor("retailPrice", {
+        header: t("oedition.retailPrice"),
+        meta: { filterType: "numrange" },
+        cell: (info) => formatCurrency(info.getValue(), "EUR", locale),
+      }),
+      // Savings (€)
+      col.accessor((oe) => calcSavings(oe), {
+        header: t("stash.prices.savings.value"),
+        meta: { filterType: "numrange" },
+        cell: (info) => formatCurrency(info.getValue(), "EUR", locale),
+      }),
+      // Reduction (%)
+      col.accessor((oe) => calcReduction(oe), {
+        header: t("stash.prices.savings.reduction"),
+        meta: { filterType: "numrange" },
+        cell: (info) => <p>{info.getValue().toFixed(2)}%</p>,
       }),
       // Actions
       col.display({
@@ -230,7 +188,7 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
         ),
       }),
     ],
-    [col, t, locale, publishers, confirm, removeFromCollection],
+    [col, t, locale, confirm, removeFromCollection],
   );
 
   return (

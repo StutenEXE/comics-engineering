@@ -49,12 +49,6 @@ export default function StashBookshelfPage() {
   const totalPages =
     (stats?.totalPagesRead ?? 0) + (stats?.totalPagesNotRead ?? 0);
 
-  console.log(
-    stats?.totalBooksRead,
-    totalBooks,
-    (((stats?.totalBooksRead ?? 0) / totalBooks) * 100).toFixed(2),
-  );
-
   return (
     <SideContentTemplate title={t("stash.reading")}>
       <StatisticPageTemplate>

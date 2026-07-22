@@ -6,9 +6,10 @@ import {
   getSortedRowModel,
   useReactTable,
   type ColumnDef,
+  type PaginationState,
   type SortingState,
 } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { Fragment, useState } from "react";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
@@ -29,7 +30,7 @@ import { SelectInput } from "../forms/fields/SelectInput";
 // Re-export ColumnDef so callers import from one place
 export type { ColumnDef };
 
-export type FilterType = "none" | "text" | "boolean" | "multi";
+export type FilterType = "none" | "text" | "boolean" | "single" | "numrange";
 
 interface GenericTableProps<T> {
   list?: T[];
@@ -52,11 +53,15 @@ export function GenericTable<T extends Record<string, any>>({
 }: GenericTableProps<T>) {
   const { t } = useTranslation();
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: itemsPerPage,
+  });
 
   const table = useReactTable({
     data: list ?? [],
     columns,
-    state: { sorting },
+    state: { sorting, pagination },
     // Custom filter functions available to columns via `filterFn`
     filterFns: {
       arrIncludes: (row, columnId, filterValue: unknown) => {
@@ -80,8 +85,8 @@ export function GenericTable<T extends Record<string, any>>({
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
+    onPaginationChange: setPagination,
     getSortedRowModel: getSortedRowModel(),
-    initialState: { pagination: { pageSize: itemsPerPage } },
   });
 
   if (isLoading) {
@@ -129,9 +134,11 @@ export function GenericTable<T extends Record<string, any>>({
                   {headerGroup.headers.map((header) => {
                     const meta = header.column.columnDef.meta as
                       | {
-                          filterType?: "text" | "boolean" | "single";
+                          filterType?: FilterType;
                           options?: string[];
                           placeholder?: string;
+                          placeholderMin?: string;
+                          placeholderMax?: string;
                         }
                       | undefined;
 
@@ -198,6 +205,48 @@ export function GenericTable<T extends Record<string, any>>({
                             />
                           );
 
+                        case "numrange":
+                          return (
+                            <div className="flex">
+                              <Input
+                                value={
+                                  ((filterValue as number[]) ?? ["", ""])[0]
+                                }
+                                onChange={(e) => {
+                                  table.setPageIndex(0);
+                                  header.column.setFilterValue([
+                                    e.target.value,
+                                    ((filterValue as number[]) ?? ["", ""])[1],
+                                  ]);
+                                }}
+                                placeholder={
+                                  meta.placeholderMin ||
+                                  t("generic.min", { capitalize: true })
+                                }
+                                pattern="[0-9]+" // Prevents the creation of the up/down arrows
+                                className="h-8 w-15 text-sm bg-white/5 border-white/10 text-white/70 placeholder:text-white/20"
+                              />
+                              <Input
+                                value={
+                                  ((filterValue as number[]) ?? ["", ""])[1]
+                                }
+                                onChange={(e) => {
+                                  table.setPageIndex(0);
+                                  header.column.setFilterValue([
+                                    ((filterValue as number[]) ?? ["", ""])[0],
+                                    e.target.value,
+                                  ]);
+                                }}
+                                placeholder={
+                                  meta.placeholderMax ||
+                                  t("generic.max", { capitalize: true })
+                                }
+                                pattern="[0-9]+" // Prevents the creation of the up/down arrows
+                                className="h-8 w-15 text-sm bg-white/5 border-white/10 text-white/70 placeholder:text-white/20"
+                              />
+                            </div>
+                          );
+
                         default:
                           return (
                             <Input
@@ -245,15 +294,38 @@ export function GenericTable<T extends Record<string, any>>({
                         </div>
                         {/* Sorting arrows */}
                         {header.column.getCanSort() && (
-                          <ArrowUpDown
-                            size={16}
-                            className="cursor-pointer rounded p-0.5 hover:bg-white/10 hover:scale-105 active:scale-95 flex-shrink-0"
-                            onClick={() =>
-                              header.column.toggleSorting(
-                                header.column.getIsSorted() === "asc",
-                              )
-                            }
-                          />
+                          <>
+                            {/* Not sorted */}
+                            {!header.column.getIsSorted() && (
+                              <ArrowUpDown
+                                size={16}
+                                className="cursor-pointer rounded p-0.5 hover:bg-white/10 hover:scale-105 active:scale-95 flex-shrink-0"
+                                onClick={() =>
+                                  header.column.toggleSorting(false)
+                                }
+                              />
+                            )}
+                            {/* Sorted Asc */}
+                            {header.column.getIsSorted() === "asc" && (
+                              <ArrowDown
+                                size={16}
+                                className="cursor-pointer rounded p-0.5 hover:bg-white/10 hover:scale-105 active:scale-95 flex-shrink-0"
+                                onClick={() =>
+                                  header.column.toggleSorting(true)
+                                }
+                              />
+                            )}
+                            {/* Sorted Desc */}
+                            {header.column.getIsSorted() === "desc" && (
+                              <ArrowUp
+                                size={16}
+                                className="cursor-pointer rounded p-0.5 hover:bg-white/10 hover:scale-105 active:scale-95 flex-shrink-0"
+                                onClick={() =>
+                                  header.column.toggleSorting(false)
+                                }
+                              />
+                            )}
+                          </>
                         )}
                       </div>
                     </TableHead>
