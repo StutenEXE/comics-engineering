@@ -60,14 +60,15 @@ export function OwnedEditionForm({
   } = useForm<FormData>({
     resolver: zodResolver(schema) as any,
     defaultValues: {
+      date: ownedEdition.date,
       read: ownedEdition.read,
+      dateRead: ownedEdition.dateRead,
       gift: ownedEdition.gift,
       signed: ownedEdition.signed,
       purchasePrice: ownedEdition.purchasePrice ?? ownedEdition.edition?.price,
       fees: ownedEdition.fees ?? 0,
       retailPrice: ownedEdition.retailPrice ?? ownedEdition.edition?.price,
       note: ownedEdition.note,
-      // Date default values are defined directly in the inputs
     },
   });
 
@@ -76,7 +77,7 @@ export function OwnedEditionForm({
       id: ownedEdition.id,
       date: data.date,
       read: data.read,
-      dateRead: toYYYYmmDD(data.dateRead),
+      dateRead: data.dateRead,
       gift: data.gift,
       signed: data.signed,
       purchasePrice: data.purchasePrice,
@@ -131,12 +132,7 @@ export function OwnedEditionForm({
           {/* Add Date */}
           <DateRhfInput
             label={t("oedition.addDate")}
-            registration={register("date", {
-              valueAsDate: true,
-            })}
-            inputProps={{
-              defaultValue: toHtmlInputString(ownedEdition.date || new Date()),
-            }}
+            registration={register("date")}
             error={errors.date}
             className="max-w-60"
           />
@@ -150,14 +146,7 @@ export function OwnedEditionForm({
             {/* Date Read */}
             <DateRhfInput
               label={t("oedition.dateRead")}
-              registration={register("dateRead", {
-                valueAsDate: true,
-              })}
-              inputProps={{
-                defaultValue: ownedEdition.dateRead
-                  ? toHtmlInputString(ownedEdition.dateRead)
-                  : undefined,
-              }}
+              registration={register("dateRead")}
               invisible={!watchedRead}
               error={errors.dateRead}
             />

@@ -1,14 +1,11 @@
-import { useTranslation } from "~/i18n/i18n"
 import { parseToEdition, type Edition, type EditionDTO } from "./edition"
-import type { ColumnDef } from "~/components/tables/GenericTable"
-import { createElement } from "react"
 import { parseToUser, type User } from "./user"
 
 export interface OwnedEdition {
     id: number,
-    date: Date,
+    date: string,
     read: boolean,
-    dateRead?: Date,
+    dateRead?: string,
     gift: boolean,
     signed: boolean,
     purchasePrice: number,
@@ -23,9 +20,9 @@ export interface OwnedEdition {
 export function parseToOwnedEdition(data: Record<string, any>): OwnedEdition {
     return {
         id: data.id,
-        date: new Date(data.date),
+        date: data.date,
         read: data.read,
-        dateRead: data.dateRead ? new Date(data.dateRead) : undefined,
+        dateRead: data.dateRead,
         gift: data.gift,
         signed: data.signed,
         purchasePrice: data.purchasePrice,
@@ -39,7 +36,7 @@ export function parseToOwnedEdition(data: Record<string, any>): OwnedEdition {
 
 export interface OwnedEditionDTO {
     id: number,
-    date: Date,
+    date: string,
     read: boolean,
     dateRead: string,
     gift: boolean,
@@ -54,9 +51,9 @@ export interface OwnedEditionDTO {
 
 export interface SimpleOwnedEdition {
     id: number,
-    date: Date,
+    date: string,
     read: boolean,
-    dateRead?: Date,
+    dateRead?: string,
     gift: boolean,
     signed: boolean,
     purchasePrice: number,

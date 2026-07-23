@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "~/i18n/i18n";
 import type { OwnedEdition } from "~/models/ownedEdition";
+import { formatCurrency } from "~/utils/currency";
+import { toDDmmYYYY } from "~/utils/date";
 import type { Error } from "~/utils/error";
-import { Separator } from "../shadcn/ui/separator";
-import { InfoPageFields, InfoPageSection } from "../templates/InfoPageTemplate";
-import { EditionDataDisplay } from "./EditionDataDisplay";
 import { insertLinebreaks } from "~/utils/strings";
 import { HelpBadgeTooltip } from "../badges/HelpBadge";
-import { formatCurrency } from "~/utils/currency";
+import { InfoPageFields, InfoPageSection } from "../templates/InfoPageTemplate";
+import { EditionDataDisplay } from "./EditionDataDisplay";
 
 interface OwnedEditionDataDisplayProps {
   oedition?: OwnedEdition;
@@ -43,7 +43,7 @@ export function OwnedEditionDataDisplay({
           // Date added
           {
             label: t("oedition.addDate"),
-            value: oedition?.date.toLocaleDateString(locale),
+            value: oedition?.date && toDDmmYYYY(oedition?.date, locale),
           },
           // Read & Date read
           {
@@ -55,7 +55,7 @@ export function OwnedEditionDataDisplay({
                 })}{" "}
                 {oedition?.dateRead && (
                   <span className="text-white/30">
-                    ({oedition?.dateRead.toLocaleDateString(locale)})
+                    ({toDDmmYYYY(oedition.dateRead, locale)})
                   </span>
                 )}
               </p>

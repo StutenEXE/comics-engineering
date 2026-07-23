@@ -1,4 +1,7 @@
+import dayjs from "dayjs";
+import { useState } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { SelectInput } from "~/components/forms/fields/SelectInput";
 import { ChartTooltipContentWithTotal } from "~/components/misc/ChartTooltipContentWithTotal";
 import {
   ChartContainer,
@@ -9,7 +12,6 @@ import {
 } from "~/components/shadcn/ui/chart";
 import { SideContentTemplate } from "~/components/templates/SideContentTemplate";
 import {
-  EmptyStatisticCard,
   NumericalStatisticCard,
   StatisticCard,
   StatisticPageTemplate,
@@ -21,11 +23,9 @@ import {
   useCollectionReadingStatsQuery,
 } from "~/store/services/api";
 import { formatCurrency } from "~/utils/currency";
-import { dateToShortMonthYearString } from "~/utils/date";
+import { compareDates, dateToShortMonthYearString } from "~/utils/date";
 import { convertToDistance } from "~/utils/strings";
 import type { Route } from "../../+types/root";
-import { SelectInput } from "~/components/forms/fields/SelectInput";
-import { useState } from "react";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -168,38 +168,38 @@ function ReadingPerMonthChart({}: ReadingPerMonthChartProps) {
   const readingPerMonth = Object.entries(data?.stats?.readingPerMonth ?? {})
     // Convert datestring to date
     .map(([month, monthStats]) => ({
-      month: new Date(month),
+      month: month,
       numberOfBooksRead: monthStats.numberOfBooksRead,
       numberOfIssuesRead: monthStats.numberOfIssuesRead,
       numberOfPagesRead: monthStats.numberOfPagesRead,
     }))
     // Sort by date
-    .sort((a, b) => a.month.getTime() - b.month.getTime());
+    .sort((a, b) => compareDates(a.month, b.month));
 
   // Fill in empty months between first and last month
   const chartData = (() => {
     if (readingPerMonth.length === 0) return [];
 
     const firstMonth = readingPerMonth[0].month;
-    const lastMonth = new Date();
+    const lastMonth = dayjs();
     const filledData = [];
 
     // Iterate on all the months
     for (
-      let d = new Date(firstMonth);
-      d <= lastMonth;
-      d.setMonth(d.getMonth() + 1)
+      let d = dayjs(firstMonth);
+      d.valueOf() <= lastMonth.valueOf();
+      d = d.add(1, "month")
     ) {
       // Find month data
       const existing = readingPerMonth.find(
         (item) =>
-          item.month.getFullYear() === d.getFullYear() &&
-          item.month.getMonth() === d.getMonth(),
+          dayjs(item.month).year() === dayjs(d).year() &&
+          dayjs(item.month).month() === dayjs(d).month(),
       );
 
       // If month data exists, assign foudn values. If not found, assign empty values
       filledData.push({
-        month: dateToShortMonthYearString(locale, new Date(d)),
+        month: dateToShortMonthYearString(locale, d.format()),
         booksRead: existing?.numberOfBooksRead ?? 0,
         issuesRead: existing?.numberOfIssuesRead ?? 0,
         pagesRead: existing?.numberOfPagesRead ?? 0,

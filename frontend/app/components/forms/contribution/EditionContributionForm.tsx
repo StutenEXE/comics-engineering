@@ -105,14 +105,13 @@ export function EditionContributionForm({
       url: edition?.url,
       imgUrl: edition?.imgUrl,
       coverType: edition?.coverType,
-      // parutionDate: edition?.parutionDate,
+      parutionDate: edition?.parutionDate,
       height: edition?.dimensions.height,
       width: edition?.dimensions.width,
       thickness: edition?.dimensions.thickness,
     },
   });
 
-  const watchedParutionDate = watch("parutionDate");
   // UX : show selected image preview to user
   const watchedImgUrl = watch("imgUrl");
   // UX : Copy paste isbns with dashes
@@ -227,7 +226,7 @@ export function EditionContributionForm({
         });
       }
       if (isntEmpty(scraped.publishDate)) {
-        setValue("parutionDate", new Date(scraped.publishDate), {
+        setValue("parutionDate", scraped.publishDate, {
           shouldTouch: true,
           shouldValidate: true,
         });
@@ -325,12 +324,7 @@ export function EditionContributionForm({
         {/* Parution date */}
         <DateRhfInput
           label={t("edition.parutionDate")}
-          registration={register("parutionDate", {
-            valueAsDate: true,
-          })}
-          inputProps={{
-            value: toHtmlInputString(watchedParutionDate),
-          }}
+          registration={register("parutionDate")}
           error={errors.parutionDate}
         />
       </div>

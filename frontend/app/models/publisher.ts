@@ -4,8 +4,8 @@ export interface Publisher {
     id: number,
     name: string,
     editions: SimpleEdition[],
-    createdAt: Date,
-    modifiedAt: Date
+    createdAt: string,
+    modifiedAt: string
 }
 
 // Utility function to transform the api data to an instance of Publisher
@@ -14,8 +14,8 @@ export function parseToPublisher(data: Record<string, any>): Publisher {
         id: data.id,
         name: data.name,
         editions: data.editions?.map((ed: Record<string, any>) => parseToSimpleEdition(ed)) ?? [],
-        createdAt: new Date(data.createdAt),
-        modifiedAt: new Date(data.modifiedAt)
+        createdAt: data.createdAt,
+        modifiedAt: data.modifiedAt
     }
 }
 export interface SimplePublisher {

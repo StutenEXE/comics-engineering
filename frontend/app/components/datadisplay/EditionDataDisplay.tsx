@@ -10,6 +10,7 @@ import {
 import type { ReactNode } from "react";
 import { Separator } from "../shadcn/ui/separator";
 import { formatCurrency } from "~/utils/currency";
+import { toDDmmYYYY } from "~/utils/date";
 
 interface EditionDataDisplayProps {
   edition?: Edition;
@@ -85,7 +86,9 @@ export function EditionDataDisplay({
           // Parutiondate
           {
             label: t("edition.parutionDate"),
-            value: edition?.parutionDate.toLocaleDateString(locale),
+            value:
+              edition?.parutionDate &&
+              toDDmmYYYY(edition?.parutionDate, locale),
           },
           // Npages
           {

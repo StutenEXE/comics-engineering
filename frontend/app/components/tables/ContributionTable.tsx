@@ -13,6 +13,7 @@ import { useContributionBySubmitterIdQuery } from "~/store/services/api";
 import { createError } from "~/utils/error";
 import { ContributionStatusBadge } from "../badges/ContributionStatusBadge";
 import { GenericTable } from "./GenericTable";
+import { compareDates, toDDmmYYYY } from "~/utils/date";
 
 export interface ContributionTableHandle {
   refetch: () => void;
@@ -100,7 +101,7 @@ export const ContributionTable = forwardRef<
         return name;
       },
     }),
-    col.accessor((row) => row.bundle.createdAt.toLocaleDateString(locale), {
+    col.accessor((row) => toDDmmYYYY(row.bundle.createdAt, locale), {
       header: t("contribution.date"),
       enableColumnFilter: false,
     }),
@@ -123,9 +124,8 @@ export const ContributionTable = forwardRef<
     <GenericTable
       list={
         contributions
-          ? [...contributions]?.sort(
-              (c1, c2) =>
-                c2.bundle.createdAt.getTime() - c1.bundle.createdAt.getTime(),
+          ? [...contributions]?.sort((c1, c2) =>
+              compareDates(c2.bundle.createdAt, c1.bundle.createdAt),
             )
           : []
       }

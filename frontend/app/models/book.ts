@@ -13,8 +13,8 @@ export interface Book {
 	serie: SimpleSerie | null,
 	editions: SimpleEdition[],
 	issues: SimpleIssue[],
-	createdAt: Date,
-	modifiedAt: Date,
+	createdAt: string,
+	modifiedAt: string,
 	addedBy: SimpleUser | null
 }
 
@@ -30,8 +30,8 @@ export function parseToBook(data: Record<string, any>): Book {
 		serie: data.serie ? parseToSimpleSerie(data.serie) : null,
 		editions: data.editions?.map((ed: Record<string, any>) => parseToSimpleEdition(ed)) ?? [],
 		issues: data.issues?.map((is: Record<string, any>) => parseToSimpleIssue(is)) ?? [],
-		createdAt: new Date(data.createdAt),
-		modifiedAt: new Date(data.modifiedAt),
+		createdAt: data.createdAt,
+		modifiedAt: data.modifiedAt,
 		addedBy: data.addedBy ? parseToSimpleUser(data.addedBy) : null
 	}
 }

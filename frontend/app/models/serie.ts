@@ -8,8 +8,8 @@ export interface Serie {
     oneshot: boolean,
     nvolumes: number,
     books: SimpleBook[],
-    createdAt: Date,
-    modifiedAt: Date,
+    createdAt: string,
+    modifiedAt: string,
     addedBy: SimpleUser | null
 }
 
@@ -22,8 +22,8 @@ export function parseToSerie(data: Record<string, any>): Serie {
         oneshot: data.oneshot,
         nvolumes: data.nvolumes,
         books: data.books?.map((bk: Record<string, any>) => parseToSimpleBook(bk)) ?? [],
-        createdAt: new Date(data.createdAt),
-        modifiedAt: new Date(data.modifiedAt),
+        createdAt: data.createdAt,
+        modifiedAt: data.modifiedAt,
         addedBy: data.addedBy ? parseToSimpleUser(data.addedBy) : null
     }
 }

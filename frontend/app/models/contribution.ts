@@ -7,6 +7,7 @@ import type { IssueSerie } from "./issue-serie";
 import type { Publisher } from "./publisher";
 import type { Serie } from "./serie";
 import type { SimpleUser } from "./user";
+import { toDDmmYYYY } from "~/utils/date";
 
 export enum ContributionTypeEnum {
     BOOK = "book",
@@ -115,7 +116,7 @@ export function getContributionName(c: SimpleContribution | Contribution, locale
         case ContributionTypeEnum.BOOK: return (c.proposedData as Book).name
         case ContributionTypeEnum.EDITION:
             const ed = (c.proposedData as Edition)
-            return `${`${ed.book?.name} - ` || ""}${ed.publisher?.name} (${new Date(ed.parutionDate).toLocaleDateString(locale)})`
+            return `${`${ed.book?.name} - ` || ""}${ed.publisher?.name} (${toDDmmYYYY(ed.parutionDate, locale)})`
         case ContributionTypeEnum.SERIE: return (c.proposedData as Serie)?.name
         case ContributionTypeEnum.ISSUE: return buildIssueShortName(c.proposedData as Issue)
         case ContributionTypeEnum.ISSUE_SERIE: return (c.proposedData as IssueSerie).name
