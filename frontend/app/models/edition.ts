@@ -19,13 +19,13 @@ export interface Edition {
     url: string,
     imgUrl: string,
     coverType: string,
-    parutionDate: Date,
+    parutionDate: string,
     dimensions: EditionDims
     publisher?: SimplePublisher,
     book?: SimpleBook,
     serie?: SimpleSerie,
-    createdAt: Date,
-    modifiedAt: Date,
+    createdAt: string,
+    modifiedAt: string,
     addedBy?: SimpleUser
 }
 
@@ -38,7 +38,7 @@ export interface SimpleEdition {
     url: string,
     imgUrl: string,
     coverType: string,
-    parutionDate: Date,
+    parutionDate: string,
     dimensions: EditionDims,
     publisherId?: number,
     publisherName?: string,
@@ -84,13 +84,13 @@ export function parseToEdition(data: Record<string, any>): Edition {
         url: data.url,
         imgUrl: data.imgUrl,
         coverType: data.coverType,
-        parutionDate: new Date(data.parutionDate),
+        parutionDate: data.parutionDate,
         dimensions: data.dimensions,
         publisher: data.publisher ? parseToSimplePublisher(data.publisher) : undefined,
         book: data.book ? parseToSimpleBook(data.book) : undefined,
         serie: data.serie ? parseToSimpleSerie(data.serie) : undefined,
-        createdAt: new Date(data.createdAt),
-        modifiedAt: new Date(data.modifiedAt),
+        createdAt: data.createdAt,
+        modifiedAt: data.modifiedAt,
         addedBy: data.addedBy ? parseToSimpleUser(data.addedBy) : undefined
     }
 }
@@ -105,7 +105,7 @@ export function parseToSimpleEdition(data: Record<string, any>): SimpleEdition {
         url: data.url,
         imgUrl: data.imgUrl,
         coverType: data.coverType,
-        parutionDate: new Date(data.parutionDate),
+        parutionDate: data.parutionDate,
         dimensions: data.dimensions,
         publisherId: data.publisherId,
         publisherName: data.publisherName,
@@ -145,7 +145,7 @@ export function editionToDTO(edition: Edition): EditionDTO {
         url: edition.url,
         imgUrl: edition.imgUrl,
         coverType: edition.coverType,
-        parutionDate: toYYYYmmDD(edition.parutionDate),
+        parutionDate: edition.parutionDate,
         dimensions: edition.dimensions
     }
 }

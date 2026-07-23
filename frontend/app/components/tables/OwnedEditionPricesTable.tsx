@@ -8,7 +8,7 @@ import {
   useCollectionQuery,
   useRemoveFromCollectionMutation,
 } from "~/store/services/api";
-import { compareDates } from "~/utils/date";
+import { compareDates, toDDmmYYYY } from "~/utils/date";
 import { createError } from "~/utils/error";
 import { useConfirm } from "../modals/ConfirmModalProvider";
 import { EditOwnedEditionModal } from "../modals/EditOwnedEditionModal";
@@ -107,10 +107,7 @@ export function OwnedEditionPricesTable({}: OwnedEditionPricesTableProps) {
       col.accessor("date", {
         header: t("oedition.addDate"),
         meta: { filterType: "range" },
-        cell: (info) =>
-          info.getValue()
-            ? (info.getValue() as Date).toLocaleDateString(locale)
-            : "",
+        cell: (info) => info.getValue() && toDDmmYYYY(info.getValue(), locale),
         enableColumnFilter: false,
       }),
       // Purchase price

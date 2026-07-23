@@ -6,13 +6,13 @@ export interface IssueSerie {
     id: number,
     name: string,
     desc: string,
-    startDate: Date,
-    endDate?: Date,
+    startDate: string,
+    endDate?: string,
     fandomUrl?: string,
     issues: SimpleIssue[],
     books: SimpleBook[],
-    createdAt: Date,
-    modifiedAt: Date,
+    createdAt: string,
+    modifiedAt: string,
     addedBy?: SimpleUser
 }
 
@@ -22,13 +22,13 @@ export function parseToIssueSerie(data: Record<string, any>): IssueSerie {
         id: data.id,
         name: data.name,
         desc: data.desc,
-        startDate: new Date(data.startDate),
-        endDate: data.endDate ? new Date(data.endDate) : undefined,
+        startDate: data.startDate,
+        endDate: data.endDate,
         fandomUrl: data.fandomUrl,
         issues: data.issues?.map((i: Record<string, any>) => parseToSimpleIssue(i)) ?? [],
         books: data.books?.map((b: Record<string, any>) => parseToSimpleBook(b)) ?? [],
-        createdAt: new Date(data.createdAt),
-        modifiedAt: new Date(data.modifiedAt),
+        createdAt: data.createdAt,
+        modifiedAt: data.modifiedAt,
         addedBy: data.addedBy ? parseToSimpleUser(data.addedBy) : undefined
     }
 }
@@ -37,8 +37,8 @@ export interface SimpleIssueSerie {
     id: number,
     name: string,
     desc: string,
-    startDate: Date,
-    endDate?: Date,
+    startDate: string,
+    endDate?: string,
     fandomUrl?: string,
 }
 
@@ -47,8 +47,8 @@ export function parseToSimpleIssueSerie(data: Record<string, any>): SimpleIssueS
         id: data.id,
         name: data.name,
         desc: data.desc,
-        startDate: new Date(data.startDate),
-        endDate: data.endDate ? new Date(data.endDate) : undefined,
+        startDate: data.startDate,
+        endDate: data.endDate,
         fandomUrl: data.fandomUrl
     }
 }

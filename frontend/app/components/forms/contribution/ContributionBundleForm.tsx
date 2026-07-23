@@ -33,6 +33,7 @@ import { IssueSerieContributionModal } from "../../modals/contribution/IssueSeri
 import { SerieContributionModal } from "../../modals/contribution/SerieContributionModal";
 import { TextAreaRhfInput } from "../fields/TextAreaRhfInput";
 import { GenericForm } from "../GenericForm";
+import dayjs from "dayjs";
 
 interface ContributionBundleFormProps {
   bundle?: ContributionBundle;
@@ -277,7 +278,7 @@ export function ContributionBundleForm({
       id: c.localRef!,
       name: c.proposedData.name,
       desc: "",
-      startDate: new Date(),
+      startDate: dayjs().format(),
       endDate: undefined,
     }));
 

@@ -2,6 +2,7 @@ import { MdModeEdit } from "react-icons/md";
 import { Link } from "react-router";
 import { twMerge } from "tailwind-merge";
 import { useTranslation } from "~/i18n/i18n";
+import { toDDmmYYYY } from "~/utils/date";
 
 interface PageHeaderComponentProps {
   headerTitle: string;
@@ -9,8 +10,8 @@ interface PageHeaderComponentProps {
   title: string;
   subtitle?: string;
   subtitleTo?: string; // e.g. "/serie/42"
-  createdAt?: Date;
-  modifiedAt?: Date;
+  createdAt?: string;
+  modifiedAt?: string;
   addedBy?: string;
   onEditClick?: () => void;
   isLoading?: boolean;
@@ -117,7 +118,7 @@ export function InfoPageHeaderComponent({
                 "inline-block w-17 bg-white/5 rounded border border-white/8 animate-pulse",
             )}
           >
-            {createdAt?.toLocaleDateString(locale)}&nbsp;
+            {createdAt && toDDmmYYYY(createdAt, locale)}&nbsp;
           </span>
         </p>
         <span className="text-white/10">·</span>
@@ -131,7 +132,7 @@ export function InfoPageHeaderComponent({
                 "inline-block w-17 bg-white/5 rounded border border-white/8 animate-pulse",
             )}
           >
-            {modifiedAt?.toLocaleDateString(locale)}&nbsp;
+            {modifiedAt && toDDmmYYYY(modifiedAt, locale)}&nbsp;
           </span>
         </p>
       </div>
@@ -139,12 +140,10 @@ export function InfoPageHeaderComponent({
       {/* If there is an expected behavior for edition, show edition button */}
       {!isLoading && onEditClick && (
         <div
-          onClick={onEditClick} 
+          onClick={onEditClick}
           className="group flex gap-1 text-xs text-white/25 cursor-pointer hover:underline hover:text-white/75"
         >
-          <p>
-            {t("generic.edit")}
-          </p>
+          <p>{t("generic.edit")}</p>
           <MdModeEdit size={16} />
         </div>
       )}

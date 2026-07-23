@@ -73,17 +73,13 @@ export function IssueContributionForm({
     },
   });
 
-  // Watchers are here to format the date properly in the input
-  const watchedParutionDate = watch("parutionDate");
-  const watchedCoverDate = watch("coverDate");
-
   const triggerSubmission = (data: FieldValues) => {
     const newIssue: ContributionIssue = {
       id: issue?.id,
       name: data.name,
       number: data.number,
-      coverDate: toYYYYmmDD(data.coverDate),
-      parutionDate: toYYYYmmDD(data.parutionDate),
+      coverDate: data.coverDate,
+      parutionDate: data.parutionDate,
       fandomUrl: data.fandomUrl,
       issueSerie: issueSerieLocalRef ?? {
         id: selectedIssueSerie?.id!,
@@ -142,12 +138,12 @@ export function IssueContributionForm({
         });
       }
       if (isntEmpty(scraped.parutionDate))
-        setValue("parutionDate", new Date(scraped.parutionDate), {
+        setValue("parutionDate", scraped.parutionDate, {
           shouldTouch: true,
           shouldValidate: true,
         });
       if (isntEmpty(scraped.coverDate))
-        setValue("coverDate", new Date(scraped.coverDate), {
+        setValue("coverDate", scraped.coverDate, {
           shouldTouch: true,
           shouldValidate: true,
         });
@@ -230,24 +226,14 @@ export function IssueContributionForm({
       <div className="flex items-center gap-3">
         <DateRhfInput
           label={t("issue.parutionDate")}
-          registration={register("parutionDate", {
-            valueAsDate: true,
-          })}
-          inputProps={{
-            value: toHtmlInputString(watchedParutionDate),
-          }}
+          registration={register("parutionDate")}
           error={errors.parutionDate}
           tooltip={t("issue.parutionDateExplanation")}
           className="max-w-50"
         />
         <DateRhfInput
           label={t("issue.coverDate")}
-          registration={register("coverDate", {
-            valueAsDate: true,
-          })}
-          inputProps={{
-            value: toHtmlInputString(watchedCoverDate),
-          }}
+          registration={register("coverDate")}
           error={errors.coverDate}
           tooltip={t("issue.coverDateExplanation")}
           className="max-w-50"

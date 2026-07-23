@@ -3,6 +3,8 @@ import { useTranslation } from "~/i18n/i18n";
 import type { SimpleOwnedEdition } from "~/models/ownedEdition";
 import { OwnedEditionModal } from "../modals/OwnedEditionModal";
 import { useOwnedEditionByIdQuery } from "~/store/services/api";
+import { toDDmmYYYY } from "~/utils/date";
+import dayjs from "dayjs";
 
 type OwnedEditionCardProps = {
   simpleOedition?: SimpleOwnedEdition;
@@ -40,7 +42,7 @@ export function OwnedEditionCard({
         <div className="relative overflow-hidden bg-white/5 aspect-[2/3]">
           <img
             src={oedition.edition.imgUrl}
-            alt={`${oedition.edition.publisher?.name}-${oedition.edition.parutionDate.getFullYear()}`}
+            alt={`${oedition.edition.publisher?.name}-${dayjs(oedition.edition.parutionDate).year()}`}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
           <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/60 to-transparent" />
@@ -52,7 +54,7 @@ export function OwnedEditionCard({
             {oedition.edition.publisher?.name}
           </h3>
           <p className="text-xs text-indigo-300/60">
-            {oedition.edition.parutionDate.toLocaleDateString(locale)}
+            {toDDmmYYYY(oedition.edition.parutionDate, locale)}
           </p>
         </div>
       </div>

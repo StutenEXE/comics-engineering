@@ -19,7 +19,7 @@ import {
   useIssueSerieByIdQuery,
   useSubmitContributionBundleMutation,
 } from "~/store/services/api";
-import { dateToMonthYearString } from "~/utils/date";
+import { compareDates, dateToMonthYearString } from "~/utils/date";
 import { createError } from "~/utils/error";
 import type { Route } from "../+types/root";
 
@@ -77,9 +77,7 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
   let subtitle = dateToMonthYearString(locale, issueSerie?.startDate);
   if (!issueSerie?.endDate) {
     subtitle += ` - ${t("generic.present", { capitalize: true })}`;
-  } else if (
-    issueSerie?.startDate.getTime() === issueSerie?.endDate.getTime()
-  ) {
+  } else if (compareDates(issueSerie?.startDate, issueSerie?.endDate) === 0) {
     subtitle += ` - ${t("serie.oneshot")}`;
   } else {
     subtitle += ` - ${dateToMonthYearString(locale, issueSerie?.endDate)}`;

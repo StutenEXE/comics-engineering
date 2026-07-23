@@ -17,6 +17,7 @@ import {
   useRecycleUserMutation,
   useUserListQuery,
 } from "~/store/services/api";
+import { toDDmmYYYY } from "~/utils/date";
 
 interface UserTableProps {
   showActions?: boolean;
@@ -78,7 +79,7 @@ export function UserTable({ showActions, className }: UserTableProps) {
     }),
     col.accessor("createdAt", {
       header: t("user.createdAt"),
-      cell: (info) => info.getValue().toLocaleDateString(locale),
+      cell: (info) => toDDmmYYYY(info.getValue(), locale),
       enableColumnFilter: false,
     }),
     col.accessor("isAdmin", {

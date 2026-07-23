@@ -13,6 +13,8 @@ import { AddToCollectionIconButton } from "../buttons/AddToCollectionIconButton"
 import { AddToCollectionModal } from "../modals/AddToCollectionModal";
 import type { OwnedEdition } from "~/models/ownedEdition";
 import { EditionModal } from "../modals/EditionModal";
+import { toDDmmYYYY } from "~/utils/date";
+import dayjs from "dayjs";
 
 type EditionCardProps = {
   edition?: SimpleEdition;
@@ -85,7 +87,7 @@ export function EditionCard({
         <div className="relative overflow-hidden bg-white/5 aspect-[2/3]">
           <img
             src={edition.imgUrl}
-            alt={`${edition.publisherName}-${edition.parutionDate.getFullYear()}`}
+            alt={`${edition.publisherName}-${dayjs(edition.parutionDate).year()}`}
             className={twMerge(
               "w-full h-full object-cover transition-transform duration-300",
               !disableInteractions && "group-hover:scale-105",
@@ -100,7 +102,7 @@ export function EditionCard({
             {edition.publisherName}
           </h3>
           <p className="text-xs text-indigo-300/60">
-            {edition.parutionDate.toLocaleDateString(locale)}
+            {toDDmmYYYY(edition.parutionDate, locale)}
           </p>
         </div>
       </div>

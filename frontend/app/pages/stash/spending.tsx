@@ -28,10 +28,11 @@ import {
   calcSavings,
   formatCurrency,
 } from "~/utils/currency";
-import { dateToShortMonthYearString } from "~/utils/date";
+import { compareDates, dateToShortMonthYearString } from "~/utils/date";
 import type { Route } from "../../+types/root";
 import { SelectInput } from "~/components/forms/fields/SelectInput";
 import { useState } from "react";
+import dayjs from "dayjs";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -216,7 +217,7 @@ function SpendingPerMonthChart({}: SpendingPerMonthChartProps) {
   const spendingPerMonth = Object.entries(data?.stats?.spendingPerMonth ?? {})
     // Convert datestring to date
     .map(([month, monthStats]) => ({
-      month: new Date(month),
+      month: month,
       totalPurchasePrice: monthStats.totalPurchasePrice,
       totalFees: monthStats.totalFees,
       totalSpent: monthStats.totalSpent,
@@ -225,31 +226,31 @@ function SpendingPerMonthChart({}: SpendingPerMonthChartProps) {
       totalBooksAdded: monthStats.totalBooksAdded,
     }))
     // Sort by date
-    .sort((a, b) => a.month.getTime() - b.month.getTime());
+    .sort((a, b) => compareDates(a.month, b.month));
   // Fill in empty months between first and last month
   const chartData = (() => {
     if (spendingPerMonth.length === 0) return [];
 
     const firstMonth = spendingPerMonth[0].month;
-    const lastMonth = new Date();
+    const lastMonth = dayjs();
     const filledData = [];
 
     // Iterate on all the months
     for (
-      let d = new Date(firstMonth);
-      d <= lastMonth;
-      d.setMonth(d.getMonth() + 1)
+      let d = dayjs(firstMonth);
+      d.valueOf() <= lastMonth.valueOf();
+      d = d.add(1, "month")
     ) {
       // Find month data
       const existing = spendingPerMonth.find(
         (item) =>
-          item.month.getFullYear() === d.getFullYear() &&
-          item.month.getMonth() === d.getMonth(),
+          dayjs(item.month).year() === dayjs(d).year() &&
+          dayjs(item.month).month() === dayjs(d).month(),
       );
 
       // If month data exists, assign foudn values. If not found, assign empty values
       filledData.push({
-        month: dateToShortMonthYearString(locale, new Date(d)),
+        month: dateToShortMonthYearString(locale, d.format()),
         purchasePrice: existing?.totalPurchasePrice ?? 0,
         fees: existing?.totalFees ?? 0,
         totalSpent: existing?.totalSpent ?? 0,

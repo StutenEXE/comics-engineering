@@ -1,4 +1,5 @@
 import { createColumnHelper } from "@tanstack/react-table";
+import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
 import { MdDelete, MdModeEdit } from "react-icons/md";
 import { useTranslation } from "~/i18n/i18n";
@@ -8,7 +9,7 @@ import {
   useCollectionQuery,
   useRemoveFromCollectionMutation,
 } from "~/store/services/api";
-import { compareDates } from "~/utils/date";
+import { compareDates, toDDmmYYYY } from "~/utils/date";
 import { createError } from "~/utils/error";
 import { useConfirm } from "../modals/ConfirmModalProvider";
 import { EditOwnedEditionModal } from "../modals/EditOwnedEditionModal";
@@ -162,10 +163,7 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
       col.accessor("date", {
         header: t("oedition.addDate"),
         meta: { filterType: "range" },
-        cell: (info) =>
-          info.getValue()
-            ? (info.getValue() as Date).toLocaleDateString(locale)
-            : "",
+        cell: (info) => info.getValue() && toDDmmYYYY(info.getValue(), locale),
         enableColumnFilter: false,
       }),
       // Read
@@ -174,19 +172,18 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
         cell: (info) => (
           <div className="flex flex-col gap-1 items-center text-xs">
             <BooleanCellRenderer val={info.getValue()} />
-            {info.row.original.dateRead
-              ? (info.row.original.dateRead as Date).toLocaleDateString(locale)
-              : ""}
+            {info.row.original.dateRead &&
+              toDDmmYYYY(info.row.original.dateRead, locale)}
           </div>
         ),
         sortingFn: (rowA, rowB, _columnId) => {
-          const dateA = rowA.original.dateRead as Date;
-          const dateB = rowB.original.dateRead as Date;
+          const dateA = rowA.original.dateRead;
+          const dateB = rowB.original.dateRead;
           const readA = rowA.original.read ? 1 : 0;
           const readB = rowB.original.read ? 1 : 0;
           // Both are read & have dates
           if (dateA && dateB) {
-            return dateA.getTime() - dateB.getTime();
+            return compareDates(dateA, dateB);
           }
           // Only dateA has a read date
           if (dateA) {

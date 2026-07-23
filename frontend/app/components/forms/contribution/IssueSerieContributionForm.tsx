@@ -77,17 +77,13 @@ export function IssueSerieContributionForm({
     },
   });
 
-  // Watchers are here to format the date properly in the input
-  const watchedStartDate = watch("startDate");
-  const watchedEndDate = watch("endDate");
-
   const triggerSubmission = (data: FieldValues) => {
     const newIssueSerie: ContributionIssueSerie = {
       id: issueSerie?.id,
       name: data.name,
       desc: data.desc,
-      startDate: toYYYYmmDD(data.startDate),
-      endDate: toYYYYmmDD(data.endDate),
+      startDate: data.startDate,
+      endDate: data.endDate,
       fandomUrl: data.fandomUrl,
     };
     const contrib: Partial<SimpleContribution> = {
@@ -150,17 +146,17 @@ export function IssueSerieContributionForm({
       }
 
       if (isntEmpty(scraped.startDate)) {
-        const startDate = new Date(scraped.startDate);
-        setValue("startDate", new Date(scraped.startDate), {
+        const startDate = scraped.startDate;
+        setValue("startDate", scraped.startDate, {
           shouldTouch: true,
           shouldValidate: true,
         });
         setEndDateDisabled(false);
-        setMinEndDate(toHtmlInputString(startDate));
+        setMinEndDate(startDate);
       }
 
       if (isntEmpty(scraped.endDate)) {
-        setValue("endDate", new Date(scraped.endDate), {
+        setValue("endDate", scraped.endDate, {
           shouldTouch: true,
           shouldValidate: true,
         });
@@ -208,22 +204,15 @@ export function IssueSerieContributionForm({
           label: t("issueserie.startDate"),
           registration: register("startDate", {
             onChange: onStartDateChange,
-            valueAsDate: true,
           }),
-          inputProps: {
-            value: toHtmlInputString(watchedStartDate),
-          },
           error: errors.startDate,
         }}
         endProps={{
           label: t("issueserie.endDate"),
-          registration: register("endDate", {
-            valueAsDate: true,
-          }),
+          registration: register("endDate"),
           inputProps: {
             disabled: endDateDisabled,
             min: minEndDate,
-            value: toHtmlInputString(watchedEndDate),
           },
           error: errors.endDate,
         }}

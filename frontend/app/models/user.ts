@@ -5,8 +5,8 @@ export interface User {
     email: string;
     isAdmin: boolean;
     isDeleted: boolean;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
 }
 
 // Utility function to transform the api data to an instance of User
@@ -17,8 +17,8 @@ export function parseToUser(data: Record<string, any>): User {
         email: data.email,
         isAdmin: data.isAdmin,
         isDeleted: data.isDeleted,
-        createdAt: new Date(data.createdAt),
-        updatedAt: new Date(data.updatedAt)
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt
     }
 }
 
@@ -37,12 +37,12 @@ export function parseToSimpleUser(data: Record<string, any>): SimpleUser {
 }
 
 export interface UserCredentials {
-  email: string;
-  password: string;
+    email: string;
+    password: string;
 }
 
 export interface SignupData {
-  username: string;
-  email: string;
-  password: string;
+    username: string;
+    email: string;
+    password: string;
 }

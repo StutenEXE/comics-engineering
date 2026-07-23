@@ -11,6 +11,7 @@ import { type Error } from "~/utils/error";
 import { BundleStatusBadge } from "../badges/BundleStatusBadge";
 import { useToast } from "../toast/Toast";
 import { GenericTable } from "./GenericTable";
+import { compareDates, toDDmmYYYY } from "~/utils/date";
 
 interface ContributionBundleTableProps {
   bundleList: SimpleContributionBundle[] | null | undefined;
@@ -70,7 +71,7 @@ export function ContributionBundleTable({
     col.accessor("note", {
       header: t("cbundle.note"),
     }),
-    col.accessor((row) => row.createdAt.toLocaleDateString(locale), {
+    col.accessor((row) => toDDmmYYYY(row.createdAt, locale), {
       header: t("cbundle.date"),
       enableColumnFilter: false,
     }),
@@ -146,8 +147,8 @@ export function ContributionBundleTable({
     <GenericTable
       list={
         bundleList
-          ? [...bundleList]?.sort(
-              (b1, b2) => b2.createdAt.getTime() - b1.createdAt.getTime(),
+          ? [...bundleList]?.sort((b1, b2) =>
+              compareDates(b2.createdAt, b1.createdAt),
             )
           : []
       }

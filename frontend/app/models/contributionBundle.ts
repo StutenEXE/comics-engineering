@@ -16,8 +16,8 @@ export interface ContributionBundle {
     note: string,
     nContributions: number,
     contributions: SimpleContribution[]
-    createdAt: Date,
-    modifiedAt: Date,
+    createdAt: string,
+    modifiedAt: string,
 }
 
 export interface SimpleContributionBundle {
@@ -27,8 +27,8 @@ export interface SimpleContributionBundle {
     status: ContributionBundleStatusEnum,
     note: string,
     nContributions: number,
-    createdAt: Date,
-    modifiedAt: Date,
+    createdAt: string,
+    modifiedAt: string,
 }
 
 
@@ -40,8 +40,8 @@ export function parseToBundle(data: Record<string, any>): ContributionBundle {
         note: data.note,
         nContributions: data.nContributions,
         contributions: data.contributions?.map((c: Record<string, any>) => parseToSimpleContribution(c)) ?? [],
-        createdAt: new Date(data.createdAt),
-        modifiedAt: new Date(data.modifiedAt),
+        createdAt: data.createdAt,
+        modifiedAt: data.modifiedAt,
     }
 }
 
@@ -53,8 +53,8 @@ export function parseToSimpleBundle(data: Record<string, any>): SimpleContributi
         status: data.status as ContributionBundleStatusEnum,
         note: data.note,
         nContributions: data.nContributions,
-        createdAt: new Date(data.createdAt),
-        modifiedAt: new Date(data.modifiedAt),
+        createdAt: data.createdAt,
+        modifiedAt: data.modifiedAt,
     }
 }
 

@@ -60,7 +60,6 @@ export function SerieContributionForm({
       ongoing: serie?.ongoing,
       oneshot: serie?.oneshot,
       nvolumes: serie?.nvolumes,
-      // dates set manually
     },
   });
 
