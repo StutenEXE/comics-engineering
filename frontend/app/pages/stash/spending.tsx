@@ -250,7 +250,7 @@ function SpendingPerMonthChart({}: SpendingPerMonthChartProps) {
 
       // If month data exists, assign foudn values. If not found, assign empty values
       filledData.push({
-        month: dateToShortMonthYearString(locale, d.format()),
+        month: dateToShortMonthYearString(d.format()),
         purchasePrice: existing?.totalPurchasePrice ?? 0,
         fees: existing?.totalFees ?? 0,
         totalSpent: existing?.totalSpent ?? 0,

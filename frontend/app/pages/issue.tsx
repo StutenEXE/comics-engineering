@@ -102,13 +102,13 @@ export default function IssuePage({ params }: { params: { id: number } }) {
             {
               label: t("issue.parutionDate"),
               labelTooltip: t("issue.parutionDateExplanation"),
-              value: dateToVerboseDateString(locale, issue?.parutionDate),
+              value: dateToVerboseDateString(issue?.parutionDate),
             },
             // Coverdate
             {
               label: t("issue.coverDate"),
               labelTooltip: t("issue.coverDateExplanation"),
-              value: dateToMonthYearString(locale, issue?.coverDate),
+              value: dateToMonthYearString(issue?.coverDate),
             },
             // Fandom link
             {

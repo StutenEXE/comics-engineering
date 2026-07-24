@@ -16,8 +16,8 @@ export function IssueSerieCard({ issueserie, className }: IssueSerieCardProps) {
 
   const issueserieLabel = issueserie.endDate
     ? // End date defined
-      `${dateToMonthYearString(locale, issueserie.startDate)} - ${dateToMonthYearString(locale, issueserie.endDate)}`
-    : `${dateToMonthYearString(locale, issueserie.startDate)} - ${t("generic.ongoing")}`;
+      `${dateToMonthYearString(issueserie.startDate)} - ${dateToMonthYearString(issueserie.endDate)}`
+    : `${dateToMonthYearString(issueserie.startDate)} - ${t("generic.ongoing")}`;
 
   return (
     <Link

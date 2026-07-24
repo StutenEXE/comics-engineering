@@ -138,12 +138,12 @@ export function IssueContributionForm({
         });
       }
       if (isntEmpty(scraped.parutionDate))
-        setValue("parutionDate", scraped.parutionDate, {
+        setValue("parutionDate", toHtmlInputString(scraped.parutionDate), {
           shouldTouch: true,
           shouldValidate: true,
         });
       if (isntEmpty(scraped.coverDate))
-        setValue("coverDate", scraped.coverDate, {
+        setValue("coverDate", toHtmlInputString(scraped.coverDate), {
           shouldTouch: true,
           shouldValidate: true,
         });

@@ -121,7 +121,6 @@ export function InfoPageHeaderComponent({
             {createdAt && toDDmmYYYY(createdAt, locale)}&nbsp;
           </span>
         </p>
-        <span className="text-white/10">·</span>
         <p className="text-xs text-white/25">
           {t("infoheader.modified")}&nbsp;
           {/* Loading & loaded */}

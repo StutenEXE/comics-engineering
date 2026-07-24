@@ -199,7 +199,7 @@ function ReadingPerMonthChart({}: ReadingPerMonthChartProps) {
 
       // If month data exists, assign foudn values. If not found, assign empty values
       filledData.push({
-        month: dateToShortMonthYearString(locale, d.format()),
+        month: dateToShortMonthYearString(d.format()),
         booksRead: existing?.numberOfBooksRead ?? 0,
         issuesRead: existing?.numberOfIssuesRead ?? 0,
         pagesRead: existing?.numberOfPagesRead ?? 0,

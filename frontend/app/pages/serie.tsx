@@ -17,7 +17,6 @@ import {
   useSerieByIdQuery,
   useSubmitContributionBundleMutation,
 } from "~/store/services/api";
-import { dateToMonthYearString } from "~/utils/date";
 import { createError } from "~/utils/error";
 import type { Route } from "../+types/root";
 

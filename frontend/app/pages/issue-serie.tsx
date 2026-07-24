@@ -74,13 +74,13 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
 
   const books: SimpleBook[] | undefined = issueSerie?.books;
 
-  let subtitle = dateToMonthYearString(locale, issueSerie?.startDate);
+  let subtitle = dateToMonthYearString(issueSerie?.startDate);
   if (!issueSerie?.endDate) {
     subtitle += ` - ${t("generic.present", { capitalize: true })}`;
   } else if (compareDates(issueSerie?.startDate, issueSerie?.endDate) === 0) {
     subtitle += ` - ${t("serie.oneshot")}`;
   } else {
-    subtitle += ` - ${dateToMonthYearString(locale, issueSerie?.endDate)}`;
+    subtitle += ` - ${dateToMonthYearString(issueSerie?.endDate)}`;
   }
 
   return (
