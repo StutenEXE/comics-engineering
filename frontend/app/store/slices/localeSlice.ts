@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import dayjs from "dayjs";
 
 export type Locale = "en-EN" | "fr-FR";
 
@@ -16,6 +17,7 @@ const localeSlice = createSlice({
   reducers: {
     setLocale(state, action: PayloadAction<Locale>) {
       state.value = action.payload;
+      dayjs.locale(action.payload)
     },
   },
 });

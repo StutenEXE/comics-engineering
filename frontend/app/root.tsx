@@ -6,6 +6,8 @@ import {
   ScrollRestoration,
 } from "react-router";
 
+import "dayjs/locale/fr";
+
 import type { Route } from "./+types/root";
 import "./app.css";
 import { ToastProvider } from "./components/toast/Toast";

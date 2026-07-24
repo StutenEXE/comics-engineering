@@ -67,12 +67,12 @@ export function BundleCard({ bundle, className }: BundleCardProps) {
           <div className="flex items-center gap-4 px-4 py-2 bg-white/3">
             <span className="flex items-center gap-1.5 text-xs text-white/25">
               <CiCalendar size={13} />
-              {dateToVerboseDateString(locale, bundle.createdAt)}
+              {dateToVerboseDateString(bundle.createdAt)}
             </span>
             <span className="text-white/10">·</span>
             <span className="text-xs text-white/25">
               {t("cbundle.modified")}{" "}
-              {dateToVerboseDateString(locale, bundle.modifiedAt)}
+              {dateToVerboseDateString(bundle.modifiedAt)}
             </span>
           </div>
 

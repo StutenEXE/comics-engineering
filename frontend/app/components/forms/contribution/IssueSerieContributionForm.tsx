@@ -146,8 +146,8 @@ export function IssueSerieContributionForm({
       }
 
       if (isntEmpty(scraped.startDate)) {
-        const startDate = scraped.startDate;
-        setValue("startDate", scraped.startDate, {
+        const startDate = toHtmlInputString(scraped.startDate);
+        setValue("startDate", startDate, {
           shouldTouch: true,
           shouldValidate: true,
         });
@@ -156,7 +156,7 @@ export function IssueSerieContributionForm({
       }
 
       if (isntEmpty(scraped.endDate)) {
-        setValue("endDate", scraped.endDate, {
+        setValue("endDate", toHtmlInputString(scraped.endDate), {
           shouldTouch: true,
           shouldValidate: true,
         });

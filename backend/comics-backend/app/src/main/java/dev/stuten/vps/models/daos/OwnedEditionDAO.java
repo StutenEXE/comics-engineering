@@ -76,7 +76,7 @@ public class OwnedEditionDAO extends EditionDAO {
         return DSL().insertInto(EDITION_OWNERSHIP)
                 .set(EDITION_OWNERSHIP.EDITION_ID, dto.getEdition().getId())
                 .set(EDITION_OWNERSHIP.USER_ID, dto.getUser().getId())
-                .set(EDITION_OWNERSHIP.DATE, dto.getDate() == null ? null : dto.getDate().toLocalDateTime())
+                .set(EDITION_OWNERSHIP.DATE, dto.getDate() == null ? null : dto.getDate().atStartOfDay())
                 .set(EDITION_OWNERSHIP.READ, dto.getRead())
                 .set(EDITION_OWNERSHIP.DATE_READ, dto.getDateRead())
                 .set(EDITION_OWNERSHIP.GIFT, dto.getGift())
@@ -92,7 +92,7 @@ public class OwnedEditionDAO extends EditionDAO {
 
     public Boolean update(OwnedEditionDTO dto) {
         return DSL().update(EDITION_OWNERSHIP)
-                .set(EDITION_OWNERSHIP.DATE, dto.getDate() == null ? null : dto.getDate().toLocalDateTime())
+                .set(EDITION_OWNERSHIP.DATE, dto.getDate() == null ? null : dto.getDate().atStartOfDay())
                 .set(EDITION_OWNERSHIP.READ, dto.getRead())
                 .set(EDITION_OWNERSHIP.DATE_READ, dto.getDateRead())
                 .set(EDITION_OWNERSHIP.GIFT, dto.getGift())

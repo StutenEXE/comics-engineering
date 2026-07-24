@@ -19,6 +19,7 @@ import { TextRhfInput } from "./fields/TextRhfInput";
 import { GenericForm } from "./GenericForm";
 import { useAppSelector } from "~/store/hooks";
 import { formatCurrency } from "~/utils/currency";
+import dayjs from "dayjs";
 
 interface OwnedEditionFormProps {
   ownedEdition: Partial<OwnedEdition>;
@@ -60,7 +61,7 @@ export function OwnedEditionForm({
   } = useForm<FormData>({
     resolver: zodResolver(schema) as any,
     defaultValues: {
-      date: ownedEdition.date,
+      date: ownedEdition.date ?? toHtmlInputString(dayjs().format()),
       read: ownedEdition.read,
       dateRead: ownedEdition.dateRead,
       gift: ownedEdition.gift,
