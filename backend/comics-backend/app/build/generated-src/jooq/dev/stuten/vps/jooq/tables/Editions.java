@@ -111,21 +111,6 @@ public class Editions extends TableImpl<EditionsRecord> {
     public final TableField<EditionsRecord, LocalDate> PARUTION_DATE = createField(DSL.name("parution_date"), SQLDataType.LOCALDATE, this, "");
 
     /**
-     * The column <code>public.editions.height</code>.
-     */
-    public final TableField<EditionsRecord, BigDecimal> HEIGHT = createField(DSL.name("height"), SQLDataType.NUMERIC(5, 2).defaultValue(DSL.field(DSL.raw("26.50"), SQLDataType.NUMERIC)), this, "");
-
-    /**
-     * The column <code>public.editions.width</code>.
-     */
-    public final TableField<EditionsRecord, BigDecimal> WIDTH = createField(DSL.name("width"), SQLDataType.NUMERIC(5, 2).defaultValue(DSL.field(DSL.raw("17.00"), SQLDataType.NUMERIC)), this, "");
-
-    /**
-     * The column <code>public.editions.thickness</code>.
-     */
-    public final TableField<EditionsRecord, BigDecimal> THICKNESS = createField(DSL.name("thickness"), SQLDataType.NUMERIC(5, 2).defaultValue(DSL.field(DSL.raw("1.60"), SQLDataType.NUMERIC)), this, "");
-
-    /**
      * The column <code>public.editions.added_by</code>.
      */
     public final TableField<EditionsRecord, Integer> ADDED_BY = createField(DSL.name("added_by"), SQLDataType.INTEGER, this, "");
@@ -139,6 +124,21 @@ public class Editions extends TableImpl<EditionsRecord> {
      * The column <code>public.editions.modified_at</code>.
      */
     public final TableField<EditionsRecord, LocalDateTime> MODIFIED_AT = createField(DSL.name("modified_at"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
+
+    /**
+     * The column <code>public.editions.height</code>.
+     */
+    public final TableField<EditionsRecord, BigDecimal> HEIGHT = createField(DSL.name("height"), SQLDataType.NUMERIC(5, 2).defaultValue(DSL.field(DSL.raw("26.50"), SQLDataType.NUMERIC)), this, "");
+
+    /**
+     * The column <code>public.editions.width</code>.
+     */
+    public final TableField<EditionsRecord, BigDecimal> WIDTH = createField(DSL.name("width"), SQLDataType.NUMERIC(5, 2).defaultValue(DSL.field(DSL.raw("17.00"), SQLDataType.NUMERIC)), this, "");
+
+    /**
+     * The column <code>public.editions.thickness</code>.
+     */
+    public final TableField<EditionsRecord, BigDecimal> THICKNESS = createField(DSL.name("thickness"), SQLDataType.NUMERIC(5, 2).defaultValue(DSL.field(DSL.raw("1.60"), SQLDataType.NUMERIC)), this, "");
 
     private Editions(Name alias, Table<EditionsRecord> aliased) {
         this(alias, aliased, null);
@@ -271,14 +271,14 @@ public class Editions extends TableImpl<EditionsRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row17<Integer, Integer, Integer, String, String, Integer, Float, String, String, String, LocalDate, BigDecimal, BigDecimal, BigDecimal, Integer, LocalDateTime, LocalDateTime> fieldsRow() {
+    public Row17<Integer, Integer, Integer, String, String, Integer, Float, String, String, String, LocalDate, Integer, LocalDateTime, LocalDateTime, BigDecimal, BigDecimal, BigDecimal> fieldsRow() {
         return (Row17) super.fieldsRow();
     }
 
     /**
      * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
      */
-    public <U> SelectField<U> mapping(Function17<? super Integer, ? super Integer, ? super Integer, ? super String, ? super String, ? super Integer, ? super Float, ? super String, ? super String, ? super String, ? super LocalDate, ? super BigDecimal, ? super BigDecimal, ? super BigDecimal, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Function17<? super Integer, ? super Integer, ? super Integer, ? super String, ? super String, ? super Integer, ? super Float, ? super String, ? super String, ? super String, ? super LocalDate, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? super BigDecimal, ? super BigDecimal, ? super BigDecimal, ? extends U> from) {
         return convertFrom(Records.mapping(from));
     }
 
@@ -286,7 +286,7 @@ public class Editions extends TableImpl<EditionsRecord> {
      * Convenience mapping calling {@link SelectField#convertFrom(Class,
      * Function)}.
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function17<? super Integer, ? super Integer, ? super Integer, ? super String, ? super String, ? super Integer, ? super Float, ? super String, ? super String, ? super String, ? super LocalDate, ? super BigDecimal, ? super BigDecimal, ? super BigDecimal, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Class<U> toType, Function17<? super Integer, ? super Integer, ? super Integer, ? super String, ? super String, ? super Integer, ? super Float, ? super String, ? super String, ? super String, ? super LocalDate, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? super BigDecimal, ? super BigDecimal, ? super BigDecimal, ? extends U> from) {
         return convertFrom(toType, Records.mapping(from));
     }
 }

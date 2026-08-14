@@ -81,15 +81,24 @@ public class ContributionService {
         ContributableDAO<? extends IdDTO> targetDAO = getDAOFromEntityType(contribution.getEntityType());
         // Apply proposed changes to target entity and get resolved entity ID (in case
         // of creation)
-        Optional<Integer> result = targetDAO.applyContribution(
-                contribution.getAction(),
-                contribution.getProposedData(),
-                localRefs,
-                bundle.get().getSubmitter());
+        Optional<Integer> result;
+        try {
+            result = targetDAO.applyContribution(
+                    contribution.getAction(),
+                    contribution.getProposedData(),
+                    localRefs,
+                    bundle.get().getSubmitter());
+        } catch (OperationNotSupportedException e) {
+            e.printStackTrace();
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error",
+                    "Failed to apply contribution changes to target entity: %s".formatted(e.getMessage()));
+            return;
+        }
 
         if (result.isEmpty()) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error",
                     "Failed to apply contribution changes to target entity");
+            return;
         }
         // Applying changes to target entity was successful, update contribution with
         // resolved entity ID if it was a creation

@@ -80,11 +80,6 @@ public class Issues extends TableImpl<IssuesRecord> {
     public final TableField<IssuesRecord, LocalDate> PARUTION_DATE = createField(DSL.name("parution_date"), SQLDataType.LOCALDATE, this, "");
 
     /**
-     * The column <code>public.issues.fandom_url</code>.
-     */
-    public final TableField<IssuesRecord, String> FANDOM_URL = createField(DSL.name("fandom_url"), SQLDataType.CLOB, this, "");
-
-    /**
      * The column <code>public.issues.series_id</code>.
      */
     public final TableField<IssuesRecord, Integer> SERIES_ID = createField(DSL.name("series_id"), SQLDataType.INTEGER, this, "");
@@ -103,6 +98,11 @@ public class Issues extends TableImpl<IssuesRecord> {
      * The column <code>public.issues.modified_at</code>.
      */
     public final TableField<IssuesRecord, LocalDateTime> MODIFIED_AT = createField(DSL.name("modified_at"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
+
+    /**
+     * The column <code>public.issues.fandom_url</code>.
+     */
+    public final TableField<IssuesRecord, String> FANDOM_URL = createField(DSL.name("fandom_url"), SQLDataType.CLOB, this, "");
 
     private Issues(Name alias, Table<IssuesRecord> aliased) {
         this(alias, aliased, null);
@@ -224,14 +224,14 @@ public class Issues extends TableImpl<IssuesRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row10<Integer, String, Integer, LocalDate, LocalDate, String, Integer, Integer, LocalDateTime, LocalDateTime> fieldsRow() {
+    public Row10<Integer, String, Integer, LocalDate, LocalDate, Integer, Integer, LocalDateTime, LocalDateTime, String> fieldsRow() {
         return (Row10) super.fieldsRow();
     }
 
     /**
      * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
      */
-    public <U> SelectField<U> mapping(Function10<? super Integer, ? super String, ? super Integer, ? super LocalDate, ? super LocalDate, ? super String, ? super Integer, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Function10<? super Integer, ? super String, ? super Integer, ? super LocalDate, ? super LocalDate, ? super Integer, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? super String, ? extends U> from) {
         return convertFrom(Records.mapping(from));
     }
 
@@ -239,7 +239,7 @@ public class Issues extends TableImpl<IssuesRecord> {
      * Convenience mapping calling {@link SelectField#convertFrom(Class,
      * Function)}.
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function10<? super Integer, ? super String, ? super Integer, ? super LocalDate, ? super LocalDate, ? super String, ? super Integer, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? extends U> from) {
+    public <U> SelectField<U> mapping(Class<U> toType, Function10<? super Integer, ? super String, ? super Integer, ? super LocalDate, ? super LocalDate, ? super Integer, ? super Integer, ? super LocalDateTime, ? super LocalDateTime, ? super String, ? extends U> from) {
         return convertFrom(toType, Records.mapping(from));
     }
 }
