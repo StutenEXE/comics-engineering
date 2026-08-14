@@ -65,6 +65,7 @@ public class ContributionService {
 
     private static void approveContribution(ContributionDTO<? extends IdDTO> contribution)
             throws OperationNotSupportedException {
+        System.out.println("Approving contribution with id %d".formatted(contribution.getId()));
         // Get all local refs of the contribution bundle to check for dependencies
         // between contributions in the same bundle
         Optional<ContributionBundleDTO> bundle = contributionBundleDAO.findById(contribution.getBundle().getId());
@@ -88,12 +89,14 @@ public class ContributionService {
                     contribution.getProposedData(),
                     localRefs,
                     bundle.get().getSubmitter());
-        } catch (OperationNotSupportedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error",
                     "Failed to apply contribution changes to target entity: %s".formatted(e.getMessage()));
             return;
         }
+        System.out.println("Contribution changes applied successfully to target entity for contribution id %d"
+                .formatted(contribution.getId()));
 
         if (result.isEmpty()) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error",
@@ -105,6 +108,8 @@ public class ContributionService {
         if (contribution.getAction() == ContributionActionEnum.create) {
             contributionDAO.updateResolvedEntityId(contribution.getId(), result.get());
         }
+        System.out.println("Contribution resolved entity ID updated successfully for contribution id %d"
+                .formatted(contribution.getId()));
     }
 
     public static void create(Context ctx) {
@@ -198,15 +203,23 @@ public class ContributionService {
         if (!updated) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", "Failed to update contribution status");
         }
+        System.out.println("Contribution status updated successfully for contribution id %d"
+                .formatted(updateDTO.contributionId()));
 
-        ContributionDTO<?> updatedContrib = contributionDAO.findById(updateDTO.contributionId()).get();
+        Optional<ContributionDTO<?>> updatedContrib = contributionDAO.findById(updateDTO.contributionId());
+
+        if (updatedContrib.isEmpty()) {
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error",
+                    "Cannot find the updated contribution after status update");
+        }
 
         // Special handling for approval - if contribution is approved, we need to apply
         // the proposed changes to the target entity
-        if (updatedContrib.getStatus() == ContributionStatusEnum.approved) {
+        if (updatedContrib.get().getStatus() == ContributionStatusEnum.approved) {
             try {
-                approveContribution(updatedContrib);
+                approveContribution(updatedContrib.get());
             } catch (Exception e) {
+                // Undo previous status update if applying the contribution failed
                 contributionDAO.updateStatus(updateDTO.contributionId(), previousStatus);
                 ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", e.getMessage());
             }
