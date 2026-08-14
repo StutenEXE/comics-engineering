@@ -49,7 +49,7 @@ public class App {
             }
         });
 
-        app.exception(NoSuchElementException.class, (e, ctx) -> {
+        app.exception(Exception.class, (e, ctx) -> {
             e.printStackTrace();
             ctx.status(500).json(Map.of(
                     "title", "Error",
