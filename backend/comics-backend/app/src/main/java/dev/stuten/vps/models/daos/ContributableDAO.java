@@ -31,7 +31,7 @@ public abstract class ContributableDAO<T extends IdDTO> extends DAO {
 
     protected abstract void replaceLocalRefs(T proposal, Map<Integer, Integer> localRefs)
             throws OperationNotSupportedException;
-    
+
     protected abstract void insertUser(T proposal, SimpleUserDTO user);
 
     public abstract Optional<Integer> create(T dto);

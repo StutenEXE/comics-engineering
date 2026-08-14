@@ -4,7 +4,6 @@
 package dev.stuten.vps;
 
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
