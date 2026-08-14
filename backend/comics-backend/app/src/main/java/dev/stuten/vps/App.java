@@ -3,6 +3,9 @@
  */
 package dev.stuten.vps;
 
+import java.util.Map;
+import java.util.NoSuchElementException;
+
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
@@ -44,6 +47,14 @@ public class App {
                 ctx.status(200);
                 ctx.skipRemainingHandlers();
             }
+        });
+
+        app.exception(NoSuchElementException.class, (e, ctx) -> {
+            e.printStackTrace();
+            ctx.status(500).json(Map.of(
+                    "title", "Error",
+                    "status", 500,
+                    "details", Map.of("message", e.getMessage(), "error", e.getClass().getSimpleName())));
         });
 
         Routes.register(app);
