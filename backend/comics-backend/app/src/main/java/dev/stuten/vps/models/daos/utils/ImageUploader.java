@@ -7,7 +7,7 @@ public class ImageUploader {
     static ImageStorageService imageStorageService = new ImageStorageService();
 
     public static String uploadImage(String imgUrl) {
-        return imageStorageService.uploadFromUrl(imgUrl).get();
+        return imageStorageService.uploadFromUrl(imgUrl);
     }
 
     public static Boolean deleteImage(String imgUrl) {
@@ -22,7 +22,7 @@ public class ImageUploader {
             if (currentUrl != null) {
                 imageStorageService.deleteFromUrl(currentUrl);
             }
-            return imageStorageService.uploadFromUrl(newUrl).get();
+            return imageStorageService.uploadFromUrl(newUrl);
         }
         return currentUrl;
     }

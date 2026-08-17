@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -36,7 +35,7 @@ public class ImageStorageService {
                 .build();
     }
 
-    public Optional<String> uploadFromUrl(String imageUrl) {
+    public String uploadFromUrl(String imageUrl) {
         // Validate URL
         if (!isValidImageUrl(imageUrl)) {
             throw new RuntimeException("Invalid image URL");
@@ -80,7 +79,8 @@ public class ImageStorageService {
         }
 
         // Return the public URL
-        return Optional.of(publicUrl + "/" + key);
+        System.out.println("Image uploaded successfully to S3: " + publicUrl + "/" + key);
+        return publicUrl + "/" + key;
     }
 
     private boolean isValidImageUrl(String url) {

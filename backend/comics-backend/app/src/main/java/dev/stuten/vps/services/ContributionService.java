@@ -65,7 +65,6 @@ public class ContributionService {
 
     private static void approveContribution(ContributionDTO<? extends IdDTO> contribution)
             throws OperationNotSupportedException {
-        System.out.println("Approving contribution with id %d".formatted(contribution.getId()));
         // Get all local refs of the contribution bundle to check for dependencies
         // between contributions in the same bundle
         Optional<ContributionBundleDTO> bundle = contributionBundleDAO.findById(contribution.getBundle().getId());
@@ -95,8 +94,6 @@ public class ContributionService {
                     "Failed to apply contribution changes to target entity: %s".formatted(e.getMessage()));
             return;
         }
-        System.out.println("Contribution changes applied successfully to target entity for contribution id %d"
-                .formatted(contribution.getId()));
 
         if (result.isEmpty()) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error",
@@ -108,8 +105,6 @@ public class ContributionService {
         if (contribution.getAction() == ContributionActionEnum.create) {
             contributionDAO.updateResolvedEntityId(contribution.getId(), result.get());
         }
-        System.out.println("Contribution resolved entity ID updated successfully for contribution id %d"
-                .formatted(contribution.getId()));
     }
 
     public static void create(Context ctx) {
@@ -203,8 +198,6 @@ public class ContributionService {
         if (!updated) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", "Failed to update contribution status");
         }
-        System.out.println("Contribution status updated successfully for contribution id %d"
-                .formatted(updateDTO.contributionId()));
 
         Optional<ContributionDTO<?>> updatedContrib = contributionDAO.findById(updateDTO.contributionId());
 
