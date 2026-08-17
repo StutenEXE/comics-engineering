@@ -123,7 +123,8 @@ public class ImageStorageService {
 
             return true;
         } catch (Exception e) {
-            return false;
+            e.printStackTrace();
+            throw new RuntimeException("Failed to delete image from S3", e);
         }
     }
 }
