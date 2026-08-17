@@ -39,7 +39,7 @@ public class ImageStorageService {
     public Optional<String> uploadFromUrl(String imageUrl) {
         // Validate URL
         if (!isValidImageUrl(imageUrl)) {
-            return Optional.empty();
+            throw new RuntimeException("Invalid image URL");
         }
 
         // Download image
@@ -53,14 +53,15 @@ public class ImageStorageService {
 
             contentType = conn.getContentType();
             if (contentType == null || !contentType.startsWith("image/")) {
-                return Optional.empty();
+                throw new RuntimeException("Invalid image content type");
             }
 
             try (InputStream is = conn.getInputStream()) {
                 imageBytes = is.readAllBytes();
             }
         } catch (IOException e) {
-            return Optional.empty();
+            e.printStackTrace();
+            throw new RuntimeException("Failed to download image from URL", e);
         }
 
         // Upload to S3
