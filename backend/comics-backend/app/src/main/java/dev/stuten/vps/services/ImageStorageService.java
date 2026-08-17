@@ -64,8 +64,8 @@ public class ImageStorageService {
         }
 
         // Upload to S3
+        String key = "uploads/" + UUID.randomUUID() + extensionFromContentType(contentType);
         try {
-            String key = "uploads/" + UUID.randomUUID() + extensionFromContentType(contentType);
             s3Client.putObject(
                     PutObjectRequest.builder()
                             .bucket(bucket)
