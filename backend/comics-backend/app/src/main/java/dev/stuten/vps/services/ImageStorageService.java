@@ -64,14 +64,19 @@ public class ImageStorageService {
         }
 
         // Upload to S3
-        String key = "uploads/" + UUID.randomUUID() + extensionFromContentType(contentType);
-        s3Client.putObject(
-                PutObjectRequest.builder()
-                        .bucket(bucket)
-                        .key(key)
-                        .contentType(contentType)
-                        .build(),
-                RequestBody.fromBytes(imageBytes));
+        try {
+            String key = "uploads/" + UUID.randomUUID() + extensionFromContentType(contentType);
+            s3Client.putObject(
+                    PutObjectRequest.builder()
+                            .bucket(bucket)
+                            .key(key)
+                            .contentType(contentType)
+                            .build(),
+                    RequestBody.fromBytes(imageBytes));
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to upload image to S3", e);
+        }
 
         // Return the public URL
         return Optional.of(publicUrl + "/" + key);
