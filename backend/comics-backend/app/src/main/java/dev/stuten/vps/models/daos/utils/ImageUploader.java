@@ -18,7 +18,7 @@ public class ImageUploader {
     }
 
     public static String deleteAndCreateImage(String currentUrl, String newUrl) {
-        if (!currentUrl.equals(newUrl)) {
+        if (!newUrl.equals(currentUrl)) {
             if (currentUrl != null) {
                 imageStorageService.deleteFromUrl(currentUrl);
             }
