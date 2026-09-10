@@ -22,6 +22,7 @@ import {
 import { dateToMonthYearString, dateToVerboseDateString } from "~/utils/date";
 import { createError } from "~/utils/error";
 import type { Route } from "../+types/root";
+import { getHostFromFandomUrl, getImgUrlFromFandomUrl } from "~/utils/fandoms";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -70,9 +71,19 @@ export default function IssuePage({ params }: { params: { id: number } }) {
   const openModal = () => setIsEditModalOpen(true);
   const closeModal = () => setIsEditModalOpen(false);
 
+  const [imgUrl, setImgUrl] = useState("");
+  if (issue?.fandomUrl) {
+    getImgUrlFromFandomUrl(issue.fandomUrl).then((url) => setImgUrl(url));
+  }
+
   return (
     <>
-      <InfoPageTemplate isLoading={isFetching} error={err}>
+      <InfoPageTemplate
+        hasImg={imgUrl !== ""}
+        imgUrl={imgUrl}
+        isLoading={isFetching}
+        error={err}
+      >
         <InfoPageHeaderComponent
           headerTitle={t("page.issue.header")}
           title={issue?.name || ""}
@@ -113,8 +124,7 @@ export default function IssuePage({ params }: { params: { id: number } }) {
             // Fandom link
             {
               label: t("issue.fandomUrl"),
-              // https://[xxx.fandom.com]/wiki/xxxxxxx
-              value: issue?.fandomUrl?.split("/")[2],
+              value: getHostFromFandomUrl(issue?.fandomUrl ?? ""),
               href: issue?.fandomUrl,
             },
           ]}
