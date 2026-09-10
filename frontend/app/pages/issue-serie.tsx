@@ -22,6 +22,7 @@ import {
 import { compareDates, dateToMonthYearString } from "~/utils/date";
 import { createError } from "~/utils/error";
 import type { Route } from "../+types/root";
+import { getImgUrlFromFandomUrl } from "~/utils/fandoms";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -83,9 +84,19 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
     subtitle += ` - ${dateToMonthYearString(issueSerie?.endDate)}`;
   }
 
+  const [imgUrl, setImgUrl] = useState("");
+  if (issueSerie?.fandomUrl) {
+    getImgUrlFromFandomUrl(issueSerie.fandomUrl).then((url) => setImgUrl(url));
+  }
+
   return (
     <>
-      <InfoPageTemplate hasImg={false} isLoading={isFetching} error={err}>
+      <InfoPageTemplate
+        hasImg={imgUrl !== ""}
+        imgUrl={imgUrl}
+        isLoading={isFetching}
+        error={err}
+      >
         <InfoPageHeaderComponent
           headerTitle={t("page.issueserie.header")}
           title={issueSerie?.name || ""}
