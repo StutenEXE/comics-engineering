@@ -59,4 +59,20 @@ public class IssueService {
         ctx.json(Map.of("issues", issues));
     }
 
+    public static void getBySerieId(Context ctx) {
+        // Retreive serie ID from request
+        Integer serieID;
+        try {
+            serieID = Integer.parseInt(ctx.queryParam("id"));
+        } catch (NumberFormatException e) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            return; // For compiler
+        }
+
+        // Retreive issues
+        List<IssueDTO> issues = dao.findBySerieId(serieID);
+
+        ctx.json(Map.of("issues", issues));
+    }
+
 }

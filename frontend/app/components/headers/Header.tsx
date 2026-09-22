@@ -60,6 +60,7 @@ export function Header() {
               { to: "/", label: t("header.home") },
               { to: "/search", label: t("header.search") },
               { to: "/contribute", label: t("header.contribute") },
+              { to: "/compare", label: t("header.compare") },
             ].map(({ to, label }) => (
               <Link
                 key={to}

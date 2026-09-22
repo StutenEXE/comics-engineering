@@ -10,7 +10,7 @@ public class IssueRouter implements Router {
     public void register(Javalin app) {
         app.get(APIPathBuilder.buildPublicPath("/issues"), IssueService::getById);
         app.get(APIPathBuilder.buildPublicPath("/issues/book"), IssueService::getByBookId);
+        app.get(APIPathBuilder.buildPublicPath("/issues/serie"), IssueService::getBySerieId);
     }
-    
-    
+
 }

@@ -143,4 +143,12 @@ public class IssueDAO extends ContributableDAO<IssueDTO> {
                                                 .where(BOOKS_ISSUES.BOOK_ID.eq(bookID))));
         }
 
+        public List<IssueDTO> findBySerieId(Integer bookSerieId) {
+                return super.selectMany(ISSUES.ID.in(
+                                select(BOOKS_ISSUES.ISSUE_ID)
+                                                .from(BOOKS_ISSUES)
+                                                .join(BOOKS).on(BOOKS.ID.eq(BOOKS_ISSUES.BOOK_ID))
+                                                .where(BOOKS.SERIES_ID.eq(bookSerieId))));
+        }
+
 }
