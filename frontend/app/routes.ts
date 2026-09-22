@@ -3,6 +3,7 @@ import { type RouteConfig, index, route } from "@react-router/dev/routes";
 export default [
   index("pages/landing.tsx"),
   route("search", "pages/search.tsx"),
+  route("compare", "pages/compare.tsx"),
 
   route("book/:id", "pages/book.tsx"),
   route("issueserie/:id", "pages/issue-serie.tsx"),

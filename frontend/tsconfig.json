@@ -6,16 +6,15 @@
     ".react-router/types/**/*"
   ],
   "compilerOptions": {
-    "ignoreDeprecations": "6.0", // TODO : Remove
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "types": ["node", "vite/client"],
     "target": "ES2022",
-    "module": "ES2022",
-    "moduleResolution": "node",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "jsx": "react-jsx",
     "rootDirs": [".", "./.react-router/types"],
-    "baseUrl": ".",
     "paths": {
+      "*": ["./*"],
       "~/*": ["./app/*"]
     },
     "esModuleInterop": true,

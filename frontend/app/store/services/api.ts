@@ -1,17 +1,52 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { parseToBook, parseToSimpleBook, type Book, type SimpleBook } from "~/models/book";
-import { ContributionStatusEnum, parseToContribution, parseToSimpleContribution, type Contribution, type SimpleContribution } from "~/models/contribution";
-import { ContributionBundleStatusEnum, parseToBundle, parseToSimpleBundle, type ContributionBundle, type SimpleContributionBundle } from "~/models/contributionBundle";
+import {
+  parseToBook,
+  parseToSimpleBook,
+  type Book,
+  type SimpleBook,
+} from "~/models/book";
+import {
+  ContributionStatusEnum,
+  parseToContribution,
+  parseToSimpleContribution,
+  type Contribution,
+  type SimpleContribution,
+} from "~/models/contribution";
+import {
+  ContributionBundleStatusEnum,
+  parseToBundle,
+  parseToSimpleBundle,
+  type ContributionBundle,
+  type SimpleContributionBundle,
+} from "~/models/contributionBundle";
 import { parseToEdition, type Edition } from "~/models/edition";
 import { parseToIssue, type Issue } from "~/models/issue";
 import { parseToIssueSerie, type IssueSerie } from "~/models/issue-serie";
-import { parseToOwnedEdition, type OwnedEdition, type OwnedEditionDTO } from "~/models/ownedEdition";
+import {
+  parseToOwnedEdition,
+  type OwnedEdition,
+  type OwnedEditionDTO,
+} from "~/models/ownedEdition";
 import { parseToPublisher, type Publisher } from "~/models/publisher";
 import { parseToSerie, type Serie } from "~/models/serie";
-import { parseToUser, type SignupData, type User, type UserCredentials } from "~/models/user";
-import type { ContributionsStats, OwnedEditionMonthlyReadingStats, OwnedEditionMonthlySpendingStats, OwnedEditionReadingStats, OwnedEditionSpendingStats, Pagination } from "./apiModels";
+import {
+  parseToUser,
+  type SignupData,
+  type User,
+  type UserCredentials,
+} from "~/models/user";
+import type {
+  ContributionsStats,
+  OwnedEditionMonthlyReadingStats,
+  OwnedEditionMonthlySpendingStats,
+  OwnedEditionReadingStats,
+  OwnedEditionSpendingStats,
+  Pagination,
+} from "./apiModels";
 
-const API_HOST = (import.meta.env.VITE_API_HOST as string | undefined) ?? "http://localhost:8080";
+const API_HOST =
+  (import.meta.env.VITE_API_HOST as string | undefined) ??
+  "http://localhost:8080";
 
 ////////////////////////////////////
 //////////// PUBLIC API ////////////
@@ -20,24 +55,31 @@ export const API_PUB_BASE_URL = `${API_HOST}/api/comics/pub`;
 
 // RTK Query service for public API endpoints
 export const publicApi = createApi({
-  reducerPath: 'publicApi',
-  baseQuery: fetchBaseQuery({ baseUrl: API_PUB_BASE_URL, credentials: 'include' }),
+  reducerPath: "publicApi",
+  baseQuery: fetchBaseQuery({
+    baseUrl: API_PUB_BASE_URL,
+    credentials: "include",
+  }),
   endpoints: (build) => ({
     // Login API endpoint
     login: build.mutation<{ user: User }, UserCredentials>({
-      query: (credentials) => ({ url: '/login', method: 'POST', body: credentials }),
+      query: (credentials) => ({
+        url: "/login",
+        method: "POST",
+        body: credentials,
+      }),
     }),
     // Signup API endpoint
     signup: build.mutation<{ user: User }, SignupData>({
-      query: (data) => ({ url: '/signup', method: 'POST', body: data }),
+      query: (data) => ({ url: "/signup", method: "POST", body: data }),
     }),
     // Disconnect
     disconnect: build.query({
-      query: () => ({ url: '/disconnect', method: 'GET' })
+      query: () => ({ url: "/disconnect", method: "GET" }),
     }),
-    // Refresh 
+    // Refresh
     refresh: build.query({
-      query: () => ({ url: '/refresh', method: 'GET' }),
+      query: () => ({ url: "/refresh", method: "GET" }),
     }),
 
     /****************
@@ -45,21 +87,32 @@ export const publicApi = createApi({
      ****************/
     // Get book by id
     bookById: build.query<{ book: Book }, { id: number }>({
-      query: (params) => ({ url: "/books", method: 'GET', params: params }),
+      query: (params) => ({ url: "/books", method: "GET", params: params }),
       transformResponse: (resp: { book: Book }) => ({
         book: parseToBook(resp.book),
       }),
     }),
     // Get book by serie id
     bookBySerieId: build.query<{ books: Book[] }, { id: number }>({
-      query: (params) => ({ url: "/books/serie", method: 'GET', params: params }),
+      query: (params) => ({
+        url: "/books/serie",
+        method: "GET",
+        params: params,
+      }),
       transformResponse: (resp: { books: Book[] }) => ({
         books: resp.books.map((book) => parseToBook(book)),
       }),
     }),
     // Latest books endpoint (reuse parseDateLikeFields)
-    latestBooks: build.query<{ books: SimpleBook[] }, { from: number, limit: number }>({
-      query: (params) => ({ url: "/books/latest", method: 'GET', params: params }),
+    latestBooks: build.query<
+      { books: SimpleBook[] },
+      { from: number; limit: number }
+    >({
+      query: (params) => ({
+        url: "/books/latest",
+        method: "GET",
+        params: params,
+      }),
       transformResponse: (resp: { books: SimpleBook[] }) => ({
         books: resp.books.map((book) => parseToSimpleBook(book)),
       }),
@@ -70,20 +123,31 @@ export const publicApi = createApi({
      ****************/
     // Get edition by id
     editionById: build.query<{ edition: Edition }, { id: number }>({
-      query: (params) => ({ url: "/editions", method: 'GET', params: params }),
+      query: (params) => ({ url: "/editions", method: "GET", params: params }),
       transformResponse: (resp: { edition: Edition }) => {
-        return ({
+        return {
           edition: parseToEdition(resp.edition),
-        })
+        };
       },
     }),
     // Get edition by id
-    editionRelationToUser: build.query<{ relation: { userId: number, editionId: number, inCollection: boolean } }, { userId: number, editionId: number }>({
-      query: (params) => ({ url: "/editions/relation/toUser", method: 'GET', params: params }),
-      transformResponse: (resp: { relation: { userId: number, editionId: number, inCollection: boolean } }) => {
-        return ({
+    editionRelationToUser: build.query<
+      {
+        relation: { userId: number; editionId: number; inCollection: boolean };
+      },
+      { userId: number; editionId: number }
+    >({
+      query: (params) => ({
+        url: "/editions/relation/toUser",
+        method: "GET",
+        params: params,
+      }),
+      transformResponse: (resp: {
+        relation: { userId: number; editionId: number; inCollection: boolean };
+      }) => {
+        return {
           relation: resp.relation,
-        })
+        };
       },
     }),
 
@@ -92,7 +156,11 @@ export const publicApi = createApi({
      ****************/
     // Get issue serie by id
     issueSerieById: build.query<{ issueSerie: IssueSerie }, { id: number }>({
-      query: (params) => ({ url: "/issueseries", method: 'GET', params: params }),
+      query: (params) => ({
+        url: "/issueseries",
+        method: "GET",
+        params: params,
+      }),
       transformResponse: (resp: { issueSerie: IssueSerie }) => ({
         issueSerie: parseToIssueSerie(resp.issueSerie),
       }),
@@ -103,14 +171,29 @@ export const publicApi = createApi({
      ****************/
     // Get issue by id
     issueById: build.query<{ issue: Issue }, { id: number }>({
-      query: (params) => ({ url: "/issues", method: 'GET', params: params }),
+      query: (params) => ({ url: "/issues", method: "GET", params: params }),
       transformResponse: (resp: { issue: Issue }) => ({
         issue: parseToIssue(resp.issue),
       }),
     }),
     // Get issue by book id
     issueByBookId: build.query<{ issues: Issue[] }, { id: number }>({
-      query: (params) => ({ url: "/issues/book", method: 'GET', params: params }),
+      query: (params) => ({
+        url: "/issues/book",
+        method: "GET",
+        params: params,
+      }),
+      transformResponse: (resp: { issues: Issue[] }) => ({
+        issues: resp.issues.map((issue) => parseToIssue(issue)),
+      }),
+    }),
+    // Get issue by serie id
+    issueBySerieId: build.query<{ issues: Issue[] }, { id: number }>({
+      query: (params) => ({
+        url: "/issues/serie",
+        method: "GET",
+        params: params,
+      }),
       transformResponse: (resp: { issues: Issue[] }) => ({
         issues: resp.issues.map((issue) => parseToIssue(issue)),
       }),
@@ -121,7 +204,11 @@ export const publicApi = createApi({
      ****************/
     // Get publisher by id
     publisherById: build.query<{ publisher: Publisher }, { id: number }>({
-      query: (params) => ({ url: "/publishers", method: 'GET', params: params }),
+      query: (params) => ({
+        url: "/publishers",
+        method: "GET",
+        params: params,
+      }),
       transformResponse: (resp: { publisher: Publisher }) => ({
         publisher: parseToPublisher(resp.publisher),
       }),
@@ -132,7 +219,7 @@ export const publicApi = createApi({
      ****************/
     // Get serie by id
     serieById: build.query<{ serie: Serie }, { id: number }>({
-      query: (params) => ({ url: "/series", method: 'GET', params: params }),
+      query: (params) => ({ url: "/series", method: "GET", params: params }),
       transformResponse: (resp: { serie: Serie }) => ({
         serie: parseToSerie(resp.serie),
       }),
@@ -143,36 +230,75 @@ export const publicApi = createApi({
      ****************/
     // Search books
     searchBooksByName: build.query<{ books: Book[] }, { query: string }>({
-      query: ({ query }) => ({ url: "/search/books", method: 'GET', params: { query: query.trim().toLowerCase() } }),
+      query: ({ query }) => ({
+        url: "/search/books",
+        method: "GET",
+        params: { query: query.trim().toLowerCase() },
+      }),
       transformResponse: (resp: { books: Book[] }) => ({
         books: resp.books.map(parseToBook),
       }),
     }),
     // Search series
     searchSeriesByName: build.query<{ series: Serie[] }, { query: string }>({
-      query: ({ query }) => ({ url: "/search/series", method: 'GET', params: { query: query.trim().toLowerCase() } }),
+      query: ({ query }) => ({
+        url: "/search/series",
+        method: "GET",
+        params: { query: query.trim().toLowerCase() },
+      }),
       transformResponse: (resp: { series: Serie[] }) => ({
         series: resp.series.map(parseToSerie),
       }),
     }),
     // Search publishers
-    searchPublishersByName: build.query<{ publishers: Publisher[] }, { query: string }>({
-      query: ({ query }) => ({ url: "/search/publishers", method: 'GET', params: { query: query.trim().toLowerCase() } }),
+    searchPublishersByName: build.query<
+      { publishers: Publisher[] },
+      { query: string }
+    >({
+      query: ({ query }) => ({
+        url: "/search/publishers",
+        method: "GET",
+        params: { query: query.trim().toLowerCase() },
+      }),
       transformResponse: (resp: { publishers: Publisher[] }) => ({
         publishers: resp.publishers.map(parseToPublisher),
       }),
     }),
     // Search issue series
-    searchIssueSeriesByName: build.query<{ issueSeries: IssueSerie[] }, { query: string }>({
-      query: ({ query }) => ({ url: "/search/issueseries", method: 'GET', params: { query: query.trim().toLowerCase() } }),
+    searchIssueSeriesByName: build.query<
+      { issueSeries: IssueSerie[] },
+      { query: string }
+    >({
+      query: ({ query }) => ({
+        url: "/search/issueseries",
+        method: "GET",
+        params: { query: query.trim().toLowerCase() },
+      }),
       transformResponse: (resp: { issueSeries: IssueSerie[] }) => ({
         issueSeries: resp.issueSeries.map(parseToIssueSerie),
       }),
     }),
     // Search books and series
-    searchBooksSeriesIssuesIssueseriesByName: build.query<{ books: Book[], series: Serie[], issues: Issue[], issueseries: IssueSerie[] }, { query: string }>({
-      query: ({ query }) => ({ url: "/search/books_series_issues_issueseries", method: 'GET', params: { query: query.trim().toLowerCase() } }),
-      transformResponse: (resp: { books: Book[], series: Serie[], issues: Issue[], issueseries: IssueSerie[] }) => ({
+    searchBooksSeriesIssuesIssueseriesByName: build.query<
+      {
+        books: Book[];
+        series: Serie[];
+        issues: Issue[];
+        issueseries: IssueSerie[];
+      },
+      { query: string }
+    >({
+      query: ({ query }) => ({
+        url: "/search/books_series_issues_issueseries",
+        method: "GET",
+        params: { query: query.trim().toLowerCase() },
+      }),
+      transformResponse: (resp: {
+        books: Book[];
+        series: Serie[];
+        issues: Issue[];
+        issueseries: IssueSerie[];
+      }) => ({
         books: resp.books.map(parseToBook),
         series: resp.series.map(parseToSerie),
         issues: resp.issues.map(parseToIssue),
@@ -181,32 +307,58 @@ export const publicApi = createApi({
     }),
 
     /****************
-   * CONTRIBUTIONS
-   ****************/
+     * CONTRIBUTIONS
+     ****************/
     // Get stats for contributions
     contributionStats: build.query<{ stats: ContributionsStats }, {}>({
-      query: (params) => ({ url: "/contributions/stats", method: 'GET', params: params }),
+      query: (params) => ({
+        url: "/contributions/stats",
+        method: "GET",
+        params: params,
+      }),
     }),
     // Get contribution by id
-    contributionBySubmitterId: build.query<{ contributions: Contribution[] }, { id: number }>({
-      query: (params) => ({ url: "/contributions/submitter", method: 'GET', params: params }),
+    contributionBySubmitterId: build.query<
+      { contributions: Contribution[] },
+      { id: number }
+    >({
+      query: (params) => ({
+        url: "/contributions/submitter",
+        method: "GET",
+        params: params,
+      }),
       transformResponse: (resp: { contributions: Contribution[] }) => ({
         contributions: resp.contributions.map(parseToContribution),
       }),
     }),
     // Get stats for contributions by submitter id
-    contributionStatsBySubmitterId: build.query<{ stats: ContributionsStats }, { id: number }>({
-      query: (params) => ({ url: "/contributions/submitter/stats", method: 'GET', params: params }),
+    contributionStatsBySubmitterId: build.query<
+      { stats: ContributionsStats },
+      { id: number }
+    >({
+      query: (params) => ({
+        url: "/contributions/submitter/stats",
+        method: "GET",
+        params: params,
+      }),
     }),
   }),
 });
 
 export const {
-  useLoginMutation, useSignupMutation, useLazyDisconnectQuery, useRefreshQuery,
-  useBookByIdQuery, useBookBySerieIdQuery, useLatestBooksQuery,
-  useEditionByIdQuery, useEditionRelationToUserQuery,
+  useLoginMutation,
+  useSignupMutation,
+  useLazyDisconnectQuery,
+  useRefreshQuery,
+  useBookByIdQuery,
+  useBookBySerieIdQuery,
+  useLatestBooksQuery,
+  useEditionByIdQuery,
+  useEditionRelationToUserQuery,
   useIssueSerieByIdQuery,
-  useIssueByIdQuery, useIssueByBookIdQuery,
+  useIssueByIdQuery,
+  useIssueByBookIdQuery,
+  useLazyIssueBySerieIdQuery,
   usePublisherByIdQuery,
   useSerieByIdQuery,
   useLazySearchBooksByNameQuery,
@@ -216,9 +368,8 @@ export const {
   useLazySearchBooksSeriesIssuesIssueseriesByNameQuery,
   useContributionStatsQuery,
   useContributionBySubmitterIdQuery,
-  useContributionStatsBySubmitterIdQuery
+  useContributionStatsBySubmitterIdQuery,
 } = publicApi;
-
 
 ////////////////////////////////////
 //////////// PRIVATE API ///////////
@@ -228,59 +379,121 @@ export const API_PVT_BASE_URL = `${API_HOST}/api/comics/prv`;
 
 // RTK Query service for private API endpoints
 export const privateApi = createApi({
-  reducerPath: 'privateApi',
-  baseQuery: fetchBaseQuery({ baseUrl: API_PVT_BASE_URL, credentials: 'include' }),
+  reducerPath: "privateApi",
+  baseQuery: fetchBaseQuery({
+    baseUrl: API_PVT_BASE_URL,
+    credentials: "include",
+  }),
   endpoints: (build) => ({
     /****************
      * USER COLLECTION
      ****************/
     collection: build.query<{ ownedEditions: OwnedEdition[] }, { id: number }>({
-      query: (params) => ({ url: "/collection", method: 'GET', params: params }),
+      query: (params) => ({
+        url: "/collection",
+        method: "GET",
+        params: params,
+      }),
       transformResponse: (resp: { ownedEditions: OwnedEdition[] }) => ({
         ownedEditions: resp.ownedEditions.map(parseToOwnedEdition),
       }),
     }),
-    ownedEditionById: build.query<{ ownedEdition: OwnedEdition }, { id: number }>({
-      query: (params) => ({ url: "/collection/get", method: 'GET', params: params }),
+    ownedEditionById: build.query<
+      { ownedEdition: OwnedEdition },
+      { id: number }
+    >({
+      query: (params) => ({
+        url: "/collection/get",
+        method: "GET",
+        params: params,
+      }),
       transformResponse: (resp: { ownedEdition: OwnedEdition }) => ({
         ownedEdition: parseToOwnedEdition(resp.ownedEdition),
       }),
     }),
-    addToCollection: build.mutation<{ ownedEdition: OwnedEdition }, Partial<OwnedEditionDTO>>({
-      query: (data) => ({ url: "/collection/add", method: 'POST', body: data }),
+    addToCollection: build.mutation<
+      { ownedEdition: OwnedEdition },
+      Partial<OwnedEditionDTO>
+    >({
+      query: (data) => ({ url: "/collection/add", method: "POST", body: data }),
       transformResponse: (resp: { ownedEdition: OwnedEdition }) => ({
-        ownedEdition: parseToOwnedEdition(resp.ownedEdition)
-      })
+        ownedEdition: parseToOwnedEdition(resp.ownedEdition),
+      }),
     }),
-    updateOwnedEdition: build.mutation<{ ownedEdition: OwnedEdition }, Partial<OwnedEditionDTO>>({
-      query: (data) => ({ url: "/collection/update", method: 'POST', body: data }),
+    updateOwnedEdition: build.mutation<
+      { ownedEdition: OwnedEdition },
+      Partial<OwnedEditionDTO>
+    >({
+      query: (data) => ({
+        url: "/collection/update",
+        method: "POST",
+        body: data,
+      }),
       transformResponse: (resp: { ownedEdition: OwnedEdition }) => ({
-        ownedEdition: parseToOwnedEdition(resp.ownedEdition)
-      })
+        ownedEdition: parseToOwnedEdition(resp.ownedEdition),
+      }),
     }),
     removeFromCollection: build.mutation<{ id: number }, {}>({
-      query: (params) => ({ url: "/collection/remove", method: 'DELETE', params: params }),
+      query: (params) => ({
+        url: "/collection/remove",
+        method: "DELETE",
+        params: params,
+      }),
     }),
-    collectionSpendingStats: build.query<{ stats: OwnedEditionSpendingStats }, { id: number }>({
-      query: (params) => ({ url: "/collection/stats/spending", method: 'GET', params: params }),
+    collectionSpendingStats: build.query<
+      { stats: OwnedEditionSpendingStats },
+      { id: number }
+    >({
+      query: (params) => ({
+        url: "/collection/stats/spending",
+        method: "GET",
+        params: params,
+      }),
     }),
-    collectionMonthlySpendingStats: build.query<{ stats: OwnedEditionMonthlySpendingStats }, { id: number }>({
-      query: (params) => ({ url: "/collection/stats/spending/monthly", method: 'GET', params: params }),
+    collectionMonthlySpendingStats: build.query<
+      { stats: OwnedEditionMonthlySpendingStats },
+      { id: number }
+    >({
+      query: (params) => ({
+        url: "/collection/stats/spending/monthly",
+        method: "GET",
+        params: params,
+      }),
     }),
-    collectionReadingStats: build.query<{ stats: OwnedEditionReadingStats }, { id: number }>({
-      query: (params) => ({ url: "/collection/stats/reading", method: 'GET', params: params }),
+    collectionReadingStats: build.query<
+      { stats: OwnedEditionReadingStats },
+      { id: number }
+    >({
+      query: (params) => ({
+        url: "/collection/stats/reading",
+        method: "GET",
+        params: params,
+      }),
     }),
-    collectionMonthlyReadingStats: build.query<{ stats: OwnedEditionMonthlyReadingStats }, { id: number }>({
-      query: (params) => ({ url: "/collection/stats/reading/monthly", method: 'GET', params: params }),
+    collectionMonthlyReadingStats: build.query<
+      { stats: OwnedEditionMonthlyReadingStats },
+      { id: number }
+    >({
+      query: (params) => ({
+        url: "/collection/stats/reading/monthly",
+        method: "GET",
+        params: params,
+      }),
     }),
     /****************
      * CONTRIBUTIONS
      ****************/
-    submitContributionBundle: build.mutation<{ bundleId: number }, Partial<ContributionBundle>>({
-      query: (data) => ({ url: "/contribute", method: 'POST', body: data }),
+    submitContributionBundle: build.mutation<
+      { bundleId: number },
+      Partial<ContributionBundle>
+    >({
+      query: (data) => ({ url: "/contribute", method: "POST", body: data }),
     }),
-    updateContributionBundle: build.mutation<{ bundle: ContributionBundle }, Partial<ContributionBundle>>({
-      query: (data) => ({ url: "/bundles/update", method: 'POST', body: data }),
+    updateContributionBundle: build.mutation<
+      { bundle: ContributionBundle },
+      Partial<ContributionBundle>
+    >({
+      query: (data) => ({ url: "/bundles/update", method: "POST", body: data }),
     }),
   }),
 });
@@ -296,9 +509,8 @@ export const {
   useCollectionReadingStatsQuery,
   useCollectionMonthlyReadingStatsQuery,
   useSubmitContributionBundleMutation,
-  useUpdateContributionBundleMutation
+  useUpdateContributionBundleMutation,
 } = privateApi;
-
 
 ////////////////////////////////////
 ///////////// ADMIN API ////////////
@@ -308,59 +520,109 @@ export const API_ADM_BASE_URL = `${API_HOST}/api/comics/adm`;
 
 // RTK Query service for private API endpoints
 export const adminApi = createApi({
-  reducerPath: 'adminApi',
-  baseQuery: fetchBaseQuery({ baseUrl: API_ADM_BASE_URL, credentials: 'include' }),
+  reducerPath: "adminApi",
+  baseQuery: fetchBaseQuery({
+    baseUrl: API_ADM_BASE_URL,
+    credentials: "include",
+  }),
   endpoints: (build) => ({
     // Get list of users
-    userList: build.query<{ users: User[] }, { from: number, limit: number }>({
-      query: (params) => ({ url: "/users/list", method: 'GET', params: params }),
+    userList: build.query<{ users: User[] }, { from: number; limit: number }>({
+      query: (params) => ({
+        url: "/users/list",
+        method: "GET",
+        params: params,
+      }),
       transformResponse: (resp: { users: User[] }) => ({
         users: resp.users.map((usr) => parseToUser(usr)),
       }),
     }),
     // Delete user
     deleteUser: build.mutation<{ id: number }, {}>({
-      query: (params) => ({ url: "/users/delete", method: 'DELETE', params: params }),
+      query: (params) => ({
+        url: "/users/delete",
+        method: "DELETE",
+        params: params,
+      }),
     }),
     // Recycle a user
     recycleUser: build.mutation<{ id: number }, {}>({
-      query: (params) => ({ url: "/users/recycle", method: 'GET', params: params }),
+      query: (params) => ({
+        url: "/users/recycle",
+        method: "GET",
+        params: params,
+      }),
     }),
     // Get list of contribution bundles
-    bundleList: build.query<{ bundles: SimpleContributionBundle[] }, { from: number, limit: number }>({
-      query: (params) => ({ url: "/bundles/all", method: 'GET', params: params }),
+    bundleList: build.query<
+      { bundles: SimpleContributionBundle[] },
+      { from: number; limit: number }
+    >({
+      query: (params) => ({
+        url: "/bundles/all",
+        method: "GET",
+        params: params,
+      }),
       transformResponse: (resp: { bundles: SimpleContributionBundle[] }) => ({
         bundles: resp.bundles.map((b) => parseToSimpleBundle(b)),
       }),
     }),
     // Get a bundle by id
     bundleById: build.query<{ bundle: ContributionBundle }, { id: number }>({
-      query: (params) => ({ url: "/bundles", method: 'GET', params: params }),
+      query: (params) => ({ url: "/bundles", method: "GET", params: params }),
       transformResponse: (resp: { bundle: ContributionBundle }) => ({
         bundle: parseToBundle(resp.bundle),
       }),
     }),
     // Create a contribution
-    createContribution: build.mutation<{ contribution: Contribution }, Partial<SimpleContribution>>({
-      query: (data) => ({ url: "/contributions/create", method: 'POST', body: data }),
+    createContribution: build.mutation<
+      { contribution: Contribution },
+      Partial<SimpleContribution>
+    >({
+      query: (data) => ({
+        url: "/contributions/create",
+        method: "POST",
+        body: data,
+      }),
       transformResponse: (resp: { contribution: Contribution }) => ({
         contribution: parseToContribution(resp.contribution),
       }),
     }),
     // Update a contribution
-    updateContribution: build.mutation<{ contribution: SimpleContribution }, Partial<SimpleContribution>>({
-      query: (data) => ({ url: "/contributions/update", method: 'POST', body: data }),
+    updateContribution: build.mutation<
+      { contribution: SimpleContribution },
+      Partial<SimpleContribution>
+    >({
+      query: (data) => ({
+        url: "/contributions/update",
+        method: "POST",
+        body: data,
+      }),
       transformResponse: (resp: { contribution: SimpleContribution }) => ({
         contribution: parseToSimpleContribution(resp.contribution),
       }),
     }),
     // Update the status of a contribution
-    updateContributionStatus: build.mutation<{}, { contributionId: number, newStatus: ContributionStatusEnum }>({
-      query: ({ contributionId, newStatus }) => ({ url: "/contributions/update-status", method: 'POST', body: { contributionId, newStatus } }),
+    updateContributionStatus: build.mutation<
+      {},
+      { contributionId: number; newStatus: ContributionStatusEnum }
+    >({
+      query: ({ contributionId, newStatus }) => ({
+        url: "/contributions/update-status",
+        method: "POST",
+        body: { contributionId, newStatus },
+      }),
     }),
     // Update the status of a contribution bundle
-    updateBundleStatus: build.mutation<{}, { bundleId: number, newStatus: ContributionBundleStatusEnum }>({
-      query: ({ bundleId, newStatus }) => ({ url: "/bundles/update-status", method: 'POST', body: { bundleId, newStatus } }),
+    updateBundleStatus: build.mutation<
+      {},
+      { bundleId: number; newStatus: ContributionBundleStatusEnum }
+    >({
+      query: ({ bundleId, newStatus }) => ({
+        url: "/bundles/update-status",
+        method: "POST",
+        body: { bundleId, newStatus },
+      }),
     }),
   }),
 });
@@ -374,5 +636,5 @@ export const {
   useCreateContributionMutation,
   useUpdateContributionMutation,
   useUpdateContributionStatusMutation,
-  useUpdateBundleStatusMutation
+  useUpdateBundleStatusMutation,
 } = adminApi;
