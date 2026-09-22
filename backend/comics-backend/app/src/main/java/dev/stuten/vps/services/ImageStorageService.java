@@ -67,7 +67,7 @@ public class ImageStorageService {
         String key = "uploads/" + UUID.randomUUID() + extensionFromContentType(contentType);
         try {
             s3Client.putObject(
-                    PutObjectRequest.builder()
+                    (PutObjectRequest) PutObjectRequest.builder()
                             .bucket(bucket)
                             .key(key)
                             .contentType(contentType)
@@ -116,7 +116,7 @@ public class ImageStorageService {
             String bucketName = parts[0]; // kys-test-media
             String key = parts[1]; // uploads/uuid.jpg
 
-            s3Client.deleteObject(DeleteObjectRequest.builder()
+            s3Client.deleteObject((DeleteObjectRequest) DeleteObjectRequest.builder()
                     .bucket(bucketName)
                     .key(key)
                     .build());

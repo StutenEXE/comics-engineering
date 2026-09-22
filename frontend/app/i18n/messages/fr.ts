@@ -56,7 +56,8 @@ export default {
   // == MODELS
   // ============================
   // Book
-  "books": "Livres",
+  book: "Livre",
+  books: "Livres",
   "book.nonefound": "Aucun livre trouvé",
   "book.name": "Nom",
   "book.serie": "Serie",
@@ -90,7 +91,7 @@ export default {
   "book.form.isbnautofill": "Pré-remplir à partir d'un ISBN",
   "book.form.noIssuesInSerie": "Aucune issue trouvée pour cette série",
   // Contribution
-  "contributions": "Contributions",
+  contributions: "Contributions",
   "contribution.nonefound": "Aucune contribution trouvée",
   "contribution.id": "ID",
   "contribution.action": "Action",
@@ -170,7 +171,8 @@ export default {
   "cbundle.form.addIssueSerie": "Série d'issue",
   "cbundle.form.newContributions": "Nouvelles contributions",
   "cbundle.form.remove.title": "Retirer la contribution",
-  "cbundle.form.remove.message": "Voulez-vous retirer cette contribution ?\nLes informations renseignées seront perdues.",
+  "cbundle.form.remove.message":
+    "Voulez-vous retirer cette contribution ?\nLes informations renseignées seront perdues.",
   "cbundle.action.seeContributions": "Voir les contributions",
   "cbundle.toast.updateSuccess": "Lot de contributions mis à jour avec succès",
   "cbundle.toast.updateError":
@@ -182,7 +184,8 @@ export default {
     "Êtes-vous sûr de vouloir annuler cette soumission ?\nToutes les données seront perdues.",
   "cbundle.status.select": "Choisir un statut",
   // Edition
-  "editions": "Editions",
+  edition: "Édition",
+  editions: "Éditions",
   "edition.nonefound": "Aucune édition trouvée",
   "edition.book": "Livre",
   "edition.ean": "EAN",
@@ -216,7 +219,7 @@ export default {
   "edition.form.price.gte0": "Le prix ne peut pas être négatif",
   "edition.form.localRefPresent": "Livre crée localement",
   // Issue series
-  "issueseries": "Séries d'issues",
+  issueseries: "Séries d'issues",
   "issueserie.nonefound": "Aucun série d'issue trouvée",
   "issueserie.name": "Nom",
   "issueserie.startDate": "Date de début",
@@ -279,7 +282,8 @@ export default {
   "oedition.publisher.select": "Choisir un éditeur",
   "oedition.spending": "Dépenses",
   // Serie
-  "series": "Séries",
+  serie: "Série",
+  series: "Séries",
   "serie.nonefound": "Aucune série trouvée",
   "serie.header": "Série",
   "serie.name": "Nom",
@@ -321,6 +325,7 @@ export default {
   "header.home": "Accueil",
   "header.search": "Rechercher",
   "header.contribute": "Contribuer",
+  "header.compare": "Comparateur",
   "header.stash": "Ma Stash",
   "header.profile": "Mon Profil",
   "header.users": "Utilisateurs",
@@ -362,6 +367,9 @@ export default {
   // ============================
   // == PAGES
   // ============================
+  // Compare
+  "compare.missingA": "Item A absent",
+  "compare.missingB": "Item B absent",
   // Landing
   "landing.title": "Bienvenue sur Know Your Stash",
   "landing.subtitle": "Bibliothèque de comics collaborative et gratuite !",
@@ -434,7 +442,8 @@ export default {
   "stash.reading.proportionReadByPage": "Proportion de pages lues",
   "stash.reading.proportionReadByPage.info": "%read%/%total% lues",
   "stash.reading.readingPerMonth": "Lectures par mois",
-  "stash.reading.booksReadWithoutADate": "Nombre de livres lus sans date de lecture: %nbooks%",
+  "stash.reading.booksReadWithoutADate":
+    "Nombre de livres lus sans date de lecture: %nbooks%",
   "stash.reading.dataToShow": "Données à afficher",
   // Contribute
   "contribute.loginRequired": "Veuillez vous connecter",
@@ -461,5 +470,5 @@ export default {
   "page.issue.header": "Issue",
   "page.issue.books": "Livres associés",
   // Serie
-  "page.serie.serieOfXVolumes": "Série de %x% tomes"
+  "page.serie.serieOfXVolumes": "Série de %x% tomes",
 };
