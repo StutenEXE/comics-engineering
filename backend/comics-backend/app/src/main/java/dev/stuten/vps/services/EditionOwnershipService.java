@@ -194,7 +194,6 @@ public class EditionOwnershipService {
 
         // Retrieve owned editions
         List<SimpleOwnedEditionDTO> oeditions = dao.findSimpleOwnedByUserId(userID);
-
         // If no oeditions returned, exit early to simplify the following logic
         if (oeditions.size() == 0) {
             ctx.json(
@@ -211,10 +210,10 @@ public class EditionOwnershipService {
         BigDecimal totalFees = new BigDecimal("0.00");
         BigDecimal totalRetailPrice = new BigDecimal("0.00");
         // Most/best of something variables
-        SimpleOwnedEditionDTO mostCostly = oeditions.get(0),
-                bestDealByPrice = oeditions.get(0),
-                bestDealByReduction = oeditions.get(0),
-                mostValuable = oeditions.get(0);
+        SimpleOwnedEditionDTO mostCostly = null,
+                bestDealByPrice = null,
+                bestDealByReduction = null,
+                mostValuable = null;
 
         for (SimpleOwnedEditionDTO oe : oeditions) {
             // Prices
@@ -223,13 +222,18 @@ public class EditionOwnershipService {
             totalRetailPrice = totalRetailPrice.add(oe.getRetailPrice());
 
             // Most costly
-            BigDecimal spent = PriceServiceUtils.calculateCost(oe);
-            BigDecimal highestSpending = PriceServiceUtils.calculateCost(mostCostly);
-            if (highestSpending.compareTo(spent) < 0) {
+            if (mostCostly != null) {
+                BigDecimal spent = PriceServiceUtils.calculateCost(oe);
+                BigDecimal highestSpending = PriceServiceUtils.calculateCost(mostCostly);
+                if (highestSpending.compareTo(spent) < 0) {
+                    mostCostly = oe;
+                }
+            } else {
                 mostCostly = oe;
             }
+
             // Most valuable
-            if (mostValuable.getRetailPrice().compareTo(oe.getRetailPrice()) < 0) {
+            if (mostValuable == null || mostValuable.getRetailPrice().compareTo(oe.getRetailPrice()) < 0) {
                 mostValuable = oe;
             }
 
@@ -238,16 +242,24 @@ public class EditionOwnershipService {
                 continue;
             }
             // Best deal by price
-            BigDecimal deal = PriceServiceUtils.calculateSavings(oe);
-            BigDecimal bestDeal = PriceServiceUtils.calculateSavings(bestDealByPrice);
-            if (bestDeal.compareTo(deal) < 0) {
+            if (bestDealByPrice != null) {
+                BigDecimal deal = PriceServiceUtils.calculateSavings(oe);
+                BigDecimal bestDeal = PriceServiceUtils.calculateSavings(bestDealByPrice);
+                if (bestDeal.compareTo(deal) < 0) {
+                    bestDealByPrice = oe;
+                }
+            } else {
                 bestDealByPrice = oe;
             }
 
             // Best deal by reduction
-            BigDecimal dealRed = PriceServiceUtils.calculateReduction(oe);
-            BigDecimal bestReduction = PriceServiceUtils.calculateReduction(bestDealByReduction);
-            if (bestReduction.compareTo(dealRed) < 0) {
+            if (bestDealByReduction != null) {
+                BigDecimal dealRed = PriceServiceUtils.calculateReduction(oe);
+                BigDecimal bestReduction = PriceServiceUtils.calculateReduction(bestDealByReduction);
+                if (bestReduction.compareTo(dealRed) < 0) {
+                    bestDealByReduction = oe;
+                }
+            } else {
                 bestDealByReduction = oe;
             }
         }
