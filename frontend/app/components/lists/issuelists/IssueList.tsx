@@ -1,3 +1,4 @@
+import { useTranslation } from "~/i18n/i18n";
 import {
   isSimpleIssue,
   issueToSimpleIssue,
@@ -5,10 +6,9 @@ import {
   type SimpleIssue,
 } from "~/models/issue";
 import { compareDates } from "~/utils/date";
+import type { Error } from "~/utils/error";
 import { IssueCard } from "../../cards/IssueCard";
 import { GenericList } from "../GenericList";
-import type { Error } from "~/utils/error";
-import { useTranslation } from "~/i18n/i18n";
 
 interface IssueListProps {
   issueList: Issue[] | SimpleIssue[] | null | undefined;

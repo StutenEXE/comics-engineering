@@ -19,14 +19,14 @@ export function IssueCard({ issue, className }: IssueCardProps) {
       to={`/issue/${issue.id}`}
       className={twMerge("group block w-300", className)}
     >
-      <div className="flex items-center justify-between gap-4 px-1 py-2 rounded-md border border-white/8 bg-white/3 hover:border-indigo-500/30 hover:bg-white/5 transition-all">
-        <p className="w-[45%] text-sm text-white/70 group-hover:text-white/90 transition-colors truncate">
+      <div className="flex items-center justify-between py-2 rounded-md border border-white/8 bg-white/3 hover:border-indigo-500/30 hover:bg-white/5 transition-all">
+        <p className="w-[50%] pl-1 pr-2 text-xs text-white/70 group-hover:text-white/90 transition-colors truncate">
           {buildIssueShortName(issue)}
         </p>
-        <p className="w-[45%] text-sm text-white/30 shrink-0 truncate">
+        <p className="w-[40%] px-2 text-xs text-white/30 shrink-0 truncate">
           {issue.name}
         </p>
-        <p className="w-[10%] text-xs text-white/30 shrink-0">
+        <p className="w-[14%] pr-3 pl-2 text-xs text-white/30 shrink-0">
           {toDDmmYYYY(issue.parutionDate, locale)}
         </p>
       </div>

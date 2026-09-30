@@ -1,12 +1,12 @@
+import { useTranslation } from "~/i18n/i18n";
 import type { Book } from "~/models/book";
 import type { Issue } from "~/models/issue";
 import type { IssueSerie } from "~/models/issue-serie";
 import type { Serie } from "~/models/serie";
 import { BookList } from "./booklists/BookList";
 import { IssueList } from "./issuelists/IssueList";
-import { SerieList } from "./serielists/SerieList";
-import { useTranslation } from "~/i18n/i18n";
 import { IssueserieList } from "./issueserielists/IssueserieList";
+import { SerieList } from "./serielists/SerieList";
 
 interface BookSerieIssueIssueserieListProps {
   data: {
@@ -23,7 +23,7 @@ export function BookSerieIssueIssueserieList({
 }: BookSerieIssueIssueserieListProps) {
   const { t } = useTranslation();
   return (
-    <div className="flex flex-col gap-2">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <div className="py-2 border-b border-white/30">
         <p className="text-md text-white/50 font-medium uppercase spacing tracking-wide">
           {t("books")}

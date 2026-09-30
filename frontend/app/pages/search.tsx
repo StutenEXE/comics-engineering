@@ -75,7 +75,7 @@ export default function SearchPage({ params }: { params: { id: number } }) {
 
         {/* Valid query */}
         {!isLT3 && data && (
-          <div className="w-full max-w-xl flex flex-col gap-3">
+          <div className="w-full flex flex-col gap-3">
             {/* Results */}
             {!noData && (
               <BookSerieIssueIssueserieList
