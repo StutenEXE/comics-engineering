@@ -116,6 +116,7 @@ export function EditionContributionForm({
   const watchedImgUrl = watch("imgUrl");
   // UX : Copy paste isbns with dashes
   const [isbnDisplay, setIsbnDisplay] = useState<string>(edition?.isbn || "");
+  const [eanDisplay, setEanDisplay] = useState<string>(edition?.ean || "");
 
   const triggerSubmission = (data: FieldValues) => {
     const newEdition: ContributionEdition = {
@@ -189,6 +190,11 @@ export function EditionContributionForm({
       // Fill form fields from scraped data
       if (isntEmpty(scraped.isbn13)) {
         setValue("isbn", scraped.isbn13, {
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+        // Until the difference between EAN and ISBN is understood
+        setValue("ean", scraped.isbn13, {
           shouldTouch: true,
           shouldValidate: true,
         });
@@ -314,8 +320,15 @@ export function EditionContributionForm({
         {/* EAN */}
         <TextRhfInput
           label={t("edition.ean")}
-          registration={register("ean")}
+          registration={register("ean", {
+            // Until the specific rule of EANs displays isn't understood, we use the same logic as for ISBNs
+            onChange: (e) => {
+              const raw = e.target.value.replace(/\D/g, ""); // Replace anything that is not a digit
+              setEanDisplay(raw);
+            },
+          })}
           inputProps={{
+            value: eanDisplay,
             inputMode: "numeric",
           }}
           error={errors.ean}

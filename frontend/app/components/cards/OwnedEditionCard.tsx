@@ -39,7 +39,7 @@ export function OwnedEditionCard({
         transition-all overflow-hidden hover:border-indigo-500/30 hover:bg-white/5 cursor-pointer"
       >
         {/* Cover */}
-        <div className="relative overflow-hidden bg-white/5 aspect-[2/3]">
+        <div className="h-full relative overflow-hidden bg-white/5 aspect-[2/3]">
           <img
             src={oedition.edition.imgUrl}
             alt={`${oedition.edition.publisher?.name}-${dayjs(oedition.edition.parutionDate).year()}`}

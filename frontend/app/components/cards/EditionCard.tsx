@@ -84,7 +84,7 @@ export function EditionCard({
           />
         )}
         {/* Cover */}
-        <div className="relative overflow-hidden bg-white/5 aspect-[2/3]">
+        <div className="h-full relative overflow-hidden bg-white/5 aspect-[2/3]">
           <img
             src={edition.imgUrl}
             alt={`${edition.publisherName}-${dayjs(edition.parutionDate).year()}`}
