@@ -1,12 +1,16 @@
 import { MdSearch } from "react-icons/md";
 import { GenericPageTemplate } from "~/components/templates/GenericPageTemplate";
 import { useTranslation } from "~/i18n/i18n";
-import { useLazySearchBooksSeriesIssuesIssueseriesByNameQuery } from "~/store/services/api";
+import { useLazySearchAllByNameQuery } from "~/store/services/api";
 import type { Route } from "../+types/root";
 import { useEffect, useState } from "react";
-import { BookSerieIssueIssueserieList } from "~/components/lists/BookSerieIssueIssueserieList";
+import {
+  AllItemsList,
+  type AllItemsType,
+} from "~/components/lists/AllItemsList";
 import { useSearchParams } from "react-router";
 import { SearchInput } from "~/components/inputs/SearchInput";
+import { SearchAllInput } from "app/components/inputs/SearchAllInput";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -19,27 +23,38 @@ export default function SearchPage({ params }: { params: { id: number } }) {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const q = searchParams.get("q");
+  const types = searchParams.get("types")?.split(",") ?? [
+    "books",
+    "series",
+    "issues",
+    "issueseries",
+  ];
 
   const [isLT3, setIsLT3] = useState(false);
 
-  const [search, { data, isFetching, error }] =
-    useLazySearchBooksSeriesIssuesIssueseriesByNameQuery();
+  const [search, { data, isFetching, error }] = useLazySearchAllByNameQuery();
+
+  const onFilterChange = (filters: string[]) => {
+    console.log("onFilterChange", filters);
+    setSearchParams({ q: q ?? "", types: filters.join(",") });
+  };
 
   const triggerSearch = (query: string) => {
     query = query.trim();
-    setSearchParams({ q: query });
+    setSearchParams({ q: query, types: types.join(",") });
     // We want the query to be longer before executing it
     setIsLT3(query.length < 3);
     if (isLT3) {
       return;
     }
-    search({ query });
+    // TODO add types
+    search({ query, types });
   };
 
   // On load
   useEffect(() => {
     if (q) {
-      search({ query: q });
+      search({ query: q, types });
     }
   }, []);
 
@@ -70,7 +85,12 @@ export default function SearchPage({ params }: { params: { id: number } }) {
       <div className="flex flex-col items-center gap-6 relative">
         {/* Search bar */}
         <div className="w-full max-w-xl flex flex-col gap-2 p-2 bg-black/80 backdrop-blur-md border border-neutral-800 rounded sticky top-25 z-20 ">
-          <SearchInput defaultValue={q ?? ""} triggerSearch={triggerSearch} />
+          <SearchAllInput
+            defaultValue={q ?? ""}
+            defaultFilters={types}
+            onFilterChange={onFilterChange}
+            triggerSearch={triggerSearch}
+          />
         </div>
 
         {/* Valid query */}
@@ -78,8 +98,9 @@ export default function SearchPage({ params }: { params: { id: number } }) {
           <div className="w-full flex flex-col gap-3">
             {/* Results */}
             {!noData && (
-              <BookSerieIssueIssueserieList
+              <AllItemsList
                 data={sortedData}
+                types={types as AllItemsType[]}
                 isLoading={isFetching}
               />
             )}

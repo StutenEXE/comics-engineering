@@ -39,11 +39,16 @@ public class SearchService {
     private static IssueSerieDAO issueSeriesDao = new IssueSerieDAO(
             JooqProvider.get());
 
-    public static void searchBooksSeriesIssuesIssueSeries(Context ctx) {
+    public static void searchAll(Context ctx) {
         // Retreive query from request
         String query = "";
+        List<String> types = Arrays.asList();
         try {
             query = ctx.queryParam("query");
+            String typesParam = ctx.queryParam("types");
+            if (typesParam != null) {
+                types = Arrays.asList(typesParam.split(","));
+            }
         } catch (NumberFormatException e) {
             ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing query");
             return; // For compiler
@@ -66,12 +71,21 @@ public class SearchService {
         }
 
         // Retreive books
-        books = bookDao.searchByName(query);
-        series = serieDao.searchByName(query);
-        issues = issueDao.searchByName(query);
-        issueseries = issueSeriesDao.searchByName(query);
+        if (types.contains("books")) {
+            books = bookDao.searchByName(query);
+        }
+        if (types.contains("series")) {
+            series = serieDao.searchByName(query);
+        }
+        if (types.contains("issues")) {
+            issues = issueDao.searchByName(query);
+        }
+        if (types.contains("issueseries")) {
+            issueseries = issueSeriesDao.searchByName(query);
+        }
 
         ctx.json(Map.of(
+                "editions", Arrays.asList(),
                 "books", books,
                 "series", series,
                 "issues", issues,
