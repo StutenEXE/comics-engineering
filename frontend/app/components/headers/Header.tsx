@@ -48,7 +48,7 @@ export function Header() {
                 <span className="text-yellow-400">S</span>tash
               </span>
               <div>
-                <AppVersionBadge version="Version 0.0" />
+                <AppVersionBadge version="Version 1.0.0" />
               </div>
             </div>
           </Link>
