@@ -7,6 +7,10 @@ dev-down:
 prod-up:
 	docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod up -d --build
 
+# Applies the migrations without touching the running API : if they fail, the API keeps running
+prod-migrate:
+	docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod run --rm migrate
+
 prod-down:
 	docker compose -f docker-compose.yml -f docker-compose.prod.yml  --env-file .env.prod down
 

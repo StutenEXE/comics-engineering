@@ -68,5 +68,8 @@ jobs:
             # Backup the database before migrations run (deploy stops if it fails)
             make prod-backup
 
-            # Apply schema migrations, then rebuild and restart the Java backend container
+            # Apply schema migrations first : if they fail, the deploy stops and the API keeps running
+            make prod-migrate
+
+            # Rebuild and restart the containers
             make prod-up
