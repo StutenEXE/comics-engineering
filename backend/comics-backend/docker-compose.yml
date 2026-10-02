@@ -74,7 +74,8 @@ services:
       # mark them as V1 without executing it
       FLYWAY_BASELINE_ON_MIGRATE: "true"
       FLYWAY_BASELINE_VERSION: "1"
-      FLYWAY_CONNECT_RETRIES: "10"
+      # Fail fast (~7s) : postgres is already healthy, a connection error is a config error
+      FLYWAY_CONNECT_RETRIES: "3"
     volumes:
       - ./postgres/migrations:/flyway/sql:ro
     networks:
