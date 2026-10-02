@@ -5,15 +5,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.naming.OperationNotSupportedException;
-
 import dev.stuten.vps.db.JooqProvider;
+import dev.stuten.vps.db.Transactions;
+import dev.stuten.vps.db.Transactions.TransactionContext;
 import dev.stuten.vps.jooq.enums.ContributionActionEnum;
 import dev.stuten.vps.jooq.enums.ContributionStatusEnum;
 import dev.stuten.vps.jooq.enums.ContributionTypeEnum;
+import dev.stuten.vps.models.daos.BookDAO;
 import dev.stuten.vps.models.daos.ContributableDAO;
 import dev.stuten.vps.models.daos.ContributionBundleDAO;
 import dev.stuten.vps.models.daos.ContributionDAO;
+import dev.stuten.vps.models.daos.EditionDAO;
+import dev.stuten.vps.models.daos.IssueDAO;
+import dev.stuten.vps.models.daos.IssueSerieDAO;
+import dev.stuten.vps.models.daos.PublisherDAO;
+import dev.stuten.vps.models.daos.SerieDAO;
 import dev.stuten.vps.models.dtos.full.ContributionBundleDTO;
 import dev.stuten.vps.models.dtos.full.ContributionDTO;
 import dev.stuten.vps.models.dtos.request.UpdateContributionStatusDTO;
@@ -34,24 +40,25 @@ public class ContributionService {
     }
 
     private static ContributionDAO contributionDAO = new ContributionDAO(JooqProvider.get());
-    private static ContributionBundleDAO contributionBundleDAO = new ContributionBundleDAO(JooqProvider.get());
 
-    private static ContributableDAO<? extends IdDTO> getDAOFromEntityType(ContributionTypeEnum type) {
+    private static ContributableDAO<? extends IdDTO> getDAOFromEntityType(ContributionTypeEnum type,
+            TransactionContext tx) {
         return switch (type) {
-            case ContributionTypeEnum.book -> BookService.getDAO();
-            case ContributionTypeEnum.serie -> SerieService.getDAO();
-            case ContributionTypeEnum.edition -> EditionService.getDAO();
-            case ContributionTypeEnum.issue -> IssueService.getDAO();
-            case ContributionTypeEnum.issueserie -> IssueSerieService.getDAO();
-            case ContributionTypeEnum.publisher -> PublisherService.getDAO();
+            case ContributionTypeEnum.book -> new BookDAO(tx.dsl(), tx.images());
+            case ContributionTypeEnum.serie -> new SerieDAO(tx.dsl());
+            case ContributionTypeEnum.edition -> new EditionDAO(tx.dsl(), tx.images());
+            case ContributionTypeEnum.issue -> new IssueDAO(tx.dsl());
+            case ContributionTypeEnum.issueserie -> new IssueSerieDAO(tx.dsl());
+            case ContributionTypeEnum.publisher -> new PublisherDAO(tx.dsl());
         };
     }
 
-    protected static <T extends IdDTO> Optional<Integer> createContribution(SimpleContributionDTO<T> contrib) {
+    protected static <T extends IdDTO> Optional<Integer> createContribution(SimpleContributionDTO<T> contrib,
+            TransactionContext tx) {
         contrib.setStatus(ContributionStatusEnum.pending);
         // If we are updating or deleting save previous entity state
         if (contrib.getAction() != ContributionActionEnum.create) {
-            ContributableDAO<? extends IdDTO> targetDAO = getDAOFromEntityType(contrib.getEntityType());
+            ContributableDAO<? extends IdDTO> targetDAO = getDAOFromEntityType(contrib.getEntityType(), tx);
             Optional<T> entity = (Optional<T>) targetDAO.findById(contrib.getEntityId());
             if (entity.isEmpty()) {
                 throw new RuntimeException("Cannot find entity of type %s and of id %d"
@@ -60,15 +67,19 @@ public class ContributionService {
             contrib.setEntitySnapshot(entity.get());
         }
         // Create
-        Optional<Integer> result = contributionDAO.create(contrib);
+        Optional<Integer> result = new ContributionDAO(tx.dsl()).create(contrib);
         return result;
     }
 
-    private static void approveContribution(ContributionDTO<? extends IdDTO> contribution)
-            throws OperationNotSupportedException {
+    /**
+     * Applies the proposed changes to the target entity. Must run inside the same
+     * transaction as the status update, any error thrown rolls both back.
+     */
+    private static void approveContribution(ContributionDTO<? extends IdDTO> contribution, TransactionContext tx) {
         // Get all local refs of the contribution bundle to check for dependencies
         // between contributions in the same bundle
-        Optional<ContributionBundleDTO> bundle = contributionBundleDAO.findById(contribution.getBundle().getId());
+        Optional<ContributionBundleDTO> bundle = new ContributionBundleDAO(tx.dsl())
+                .findById(contribution.getBundle().getId());
         if (bundle.isEmpty()) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.CONTRIBUTION_NOT_APPLIED,
                     "Contribution bundle not found for contribution");
@@ -79,7 +90,7 @@ public class ContributionService {
                 .filter(c -> c.getLocalRef() != null)
                 .forEach(c -> localRefs.put(c.getLocalRef(), c.getResolvedEntityId()));
         // Get target DAO based on contribution entity type
-        ContributableDAO<? extends IdDTO> targetDAO = getDAOFromEntityType(contribution.getEntityType());
+        ContributableDAO<? extends IdDTO> targetDAO = getDAOFromEntityType(contribution.getEntityType(), tx);
         // Apply proposed changes to target entity and get resolved entity ID (in case
         // of creation)
         Optional<Integer> result;
@@ -104,7 +115,7 @@ public class ContributionService {
         // Applying changes to target entity was successful, update contribution with
         // resolved entity ID if it was a creation
         if (contribution.getAction() == ContributionActionEnum.create) {
-            contributionDAO.updateResolvedEntityId(contribution.getId(), result.get());
+            new ContributionDAO(tx.dsl()).updateResolvedEntityId(contribution.getId(), result.get());
         }
     }
 
@@ -121,7 +132,8 @@ public class ContributionService {
             ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_REQUEST, "Invalid JSON body");
             return;
         }
-        Optional<Integer> contributionId = createContribution(contribution);
+        SimpleContributionDTO<? extends IdDTO> newContribution = contribution;
+        Optional<Integer> contributionId = Transactions.run(tx -> createContribution(newContribution, tx));
 
         ContributionDTO<? extends IdDTO> createdContribution = contributionDAO.findById(contributionId.get()).get();
 
@@ -194,30 +206,31 @@ public class ContributionService {
             String message = "Cannot change status of contribution with already accepted or rejected status";
             ErrorResponse.send(HttpStatus.METHOD_NOT_ALLOWED, ErrorCode.CONTRIBUTION_ALREADY_CLOSED, message);
         }
-        // Update status
-        Boolean updated = contributionDAO.updateStatus(updateDTO.contributionId(), updateDTO.newStatus());
-        if (!updated) {
-            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.CONTRIBUTION_NOT_UPDATED, "Failed to update contribution status");
-        }
+        // Status update and application of the changes are done in a single
+        // transaction : if applying the contribution fails, the status is not changed
+        Transactions.run(tx -> {
+            ContributionDAO txContributionDAO = new ContributionDAO(tx.dsl());
 
-        Optional<ContributionDTO<?>> updatedContrib = contributionDAO.findById(updateDTO.contributionId());
-
-        if (updatedContrib.isEmpty()) {
-            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.CONTRIBUTION_NOT_UPDATED,
-                    "Cannot find the updated contribution after status update");
-        }
-
-        // Special handling for approval - if contribution is approved, we need to apply
-        // the proposed changes to the target entity
-        if (updatedContrib.get().getStatus() == ContributionStatusEnum.approved) {
-            try {
-                approveContribution(updatedContrib.get());
-            } catch (Exception e) {
-                // Undo previous status update if applying the contribution failed
-                contributionDAO.updateStatus(updateDTO.contributionId(), previousStatus);
-                ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.CONTRIBUTION_NOT_APPLIED, e.getMessage());
+            // Update status
+            Boolean updated = txContributionDAO.updateStatus(updateDTO.contributionId(), updateDTO.newStatus());
+            if (!updated) {
+                ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.CONTRIBUTION_NOT_UPDATED,
+                        "Failed to update contribution status");
             }
-        }
+
+            Optional<ContributionDTO<?>> updatedContrib = txContributionDAO.findById(updateDTO.contributionId());
+            if (updatedContrib.isEmpty()) {
+                ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.CONTRIBUTION_NOT_UPDATED,
+                        "Cannot find the updated contribution after status update");
+            }
+
+            // Special handling for approval - if contribution is approved, we need to apply
+            // the proposed changes to the target entity
+            if (updatedContrib.get().getStatus() == ContributionStatusEnum.approved) {
+                approveContribution(updatedContrib.get(), tx);
+            }
+            return null;
+        });
 
         ctx.status(HttpStatus.OK);
     }

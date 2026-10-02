@@ -33,6 +33,10 @@ public class EditionDAO extends ContributableDAO<EditionDTO> {
         super(dsl);
     }
 
+    public EditionDAO(DSLContext dsl, ImageUploader images) {
+        super(dsl, images);
+    }
+
     @Override
     protected RecordMapper<? super Record, ?> getDefaultMapper() {
         return EditionMapper::mapToDTO;
@@ -99,7 +103,7 @@ public class EditionDAO extends ContributableDAO<EditionDTO> {
 
     @Override
     public Optional<Integer> create(EditionDTO dto) {
-        String imgUrl = ImageUploader.uploadImage(dto.getImgUrl());
+        String imgUrl = images().uploadImage(dto.getImgUrl());
         return DSL().insertInto(EDITIONS)
                 .set(EDITIONS.ISBN, dto.getIsbn())
                 .set(EDITIONS.EAN, dto.getEan())
@@ -125,7 +129,7 @@ public class EditionDAO extends ContributableDAO<EditionDTO> {
         // Generate new image url if needed
         String currentImgUrl = DSL().select(EDITIONS.IMG_URL).from(EDITIONS).where(EDITIONS.ID.eq(dto.getId()))
                 .fetchSingle((Record r) -> r.get(EDITIONS.IMG_URL));
-        String newImgUrl = ImageUploader.deleteAndCreateImage(currentImgUrl, dto.getImgUrl());
+        String newImgUrl = images().deleteAndCreateImage(currentImgUrl, dto.getImgUrl());
         return DSL().update(EDITIONS)
                 .set(EDITIONS.ISBN, dto.getIsbn())
                 .set(EDITIONS.EAN, dto.getEan())
@@ -147,7 +151,7 @@ public class EditionDAO extends ContributableDAO<EditionDTO> {
 
     @Override
     public boolean delete(EditionDTO dto) {
-        ImageUploader.deleteImage(dto.getImgUrl());
+        images().deleteImage(dto.getImgUrl());
         return DSL().delete(EDITIONS)
                 .where(EDITIONS.ID.eq(dto.getId()))
                 .execute() > 0;

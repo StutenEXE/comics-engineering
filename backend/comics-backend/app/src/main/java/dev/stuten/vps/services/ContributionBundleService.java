@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import dev.stuten.vps.db.JooqProvider;
+import dev.stuten.vps.db.Transactions;
 import dev.stuten.vps.models.daos.ContributionBundleDAO;
 import dev.stuten.vps.models.dtos.full.ContributionBundleDTO;
 import dev.stuten.vps.models.dtos.request.UpdateContributionBundleStatusDTO;
@@ -62,25 +63,29 @@ public class ContributionBundleService {
             }
         }
 
-        // Create contribution bundle
-        Optional<Integer> bundleId = dao.create(bundle);
-        if (bundleId.isEmpty()) {
-            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.BUNDLE_NOT_CREATED, "");
-            return;
-        }
-        // Create contributions
-        for (SimpleContributionDTO<? extends IdDTO> contrib : bundle.getContributions()) {
-            try {
-                contrib.setBundleId(bundleId.get());
-                ContributionService.createContribution(contrib);
-            } catch (Exception e) {
-                dao.delete(bundleId.get());
-                ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.BUNDLE_NOT_CREATED, e.getMessage());
-                return;
+        // Create the bundle and its contributions in a single transaction : if one
+        // contribution fails, nothing is created
+        ContributionBundleDTO newBundleData = bundle;
+        Integer bundleId = Transactions.run(tx -> {
+            // Create contribution bundle
+            Optional<Integer> createdId = new ContributionBundleDAO(tx.dsl()).create(newBundleData);
+            if (createdId.isEmpty()) {
+                ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.BUNDLE_NOT_CREATED, "");
             }
-        }
+            // Create contributions
+            for (SimpleContributionDTO<? extends IdDTO> contrib : newBundleData.getContributions()) {
+                contrib.setBundleId(createdId.get());
+                try {
+                    ContributionService.createContribution(contrib, tx);
+                } catch (Exception e) {
+                    ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.BUNDLE_NOT_CREATED,
+                            e.getMessage());
+                }
+            }
+            return createdId.get();
+        });
 
-        ContributionBundleDTO newBundle = dao.findById(bundleId.get()).get();
+        ContributionBundleDTO newBundle = dao.findById(bundleId).get();
 
         ctx.status(HttpStatus.CREATED).json(Map.of("bundle", newBundle));
     }
