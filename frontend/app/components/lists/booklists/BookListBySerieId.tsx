@@ -23,12 +23,7 @@ export function BookListBySerieId({
     return (
       <BookList
         bookList={[]}
-        error={{
-          status: 0,
-          details: {
-            error: t("loader.serie.nodata"),
-          },
-        }}
+        emptyMsg={t("loader.serie.nodata")}
         className={className}
       />
     );

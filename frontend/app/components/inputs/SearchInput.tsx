@@ -46,7 +46,6 @@ export function SearchInput({
           size={18}
         />
       </div>
-
       {/* Hint */}
       {isLT3 && (
         <p className="text-xs text-white/25 italic">{t("search.gte3chars")}</p>

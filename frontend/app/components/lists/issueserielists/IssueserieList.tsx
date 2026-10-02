@@ -1,4 +1,4 @@
-import { SerieCard } from "~/components/cards/SerieCard";
+import { IssueSerieCard } from "~/components/cards/IssueSerieCard";
 import { useTranslation } from "~/i18n/i18n";
 import {
   isIssueSerie,
@@ -6,10 +6,8 @@ import {
   type IssueSerie,
   type SimpleIssueSerie,
 } from "~/models/issue-serie";
-import { type SimpleSerie } from "~/models/serie";
 import type { Error } from "~/utils/error";
 import { GenericList } from "../GenericList";
-import { IssueSerieCard } from "~/components/cards/IssueSerieCard";
 
 interface IssueserieListProps {
   issueserieList?: IssueSerie[] | SimpleIssueSerie[];

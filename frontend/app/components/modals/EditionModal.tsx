@@ -10,7 +10,7 @@ import {
   useEditionRelationToUserQuery,
   useSubmitContributionBundleMutation,
 } from "~/store/services/api";
-import { createError } from "~/utils/error";
+import { createError, translateApiError } from "~/utils/error";
 import { GenericButton } from "../buttons/GenericButton";
 import { EditionDataDisplay } from "../datadisplay/EditionDataDisplay";
 import { useToast } from "../toast/Toast";
@@ -51,11 +51,12 @@ export function EditionModal({
   const relation = relationData?.relation || undefined;
 
   // Submit a contribution bundle
-  const [submitBundle, { isError, isSuccess }] =
+  const [submitBundle, { isError, isSuccess, error: submitError }] =
     useSubmitContributionBundleMutation();
   // If error or success occurs during contribution submission
   useEffect(() => {
-    if (isError) toast.error(t("contribute.fail"));
+    if (isError)
+      toast.error(translateApiError(submitError, t, "contribute.fail"));
   }, [isError]);
   useEffect(() => {
     if (isSuccess) {

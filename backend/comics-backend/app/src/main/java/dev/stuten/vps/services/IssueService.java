@@ -7,6 +7,7 @@ import java.util.Optional;
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.IssueDAO;
 import dev.stuten.vps.models.dtos.full.IssueDTO;
+import dev.stuten.vps.web.ErrorCode;
 import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -29,7 +30,7 @@ public class IssueService {
         try {
             id = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
             return; // For compiler
         }
 
@@ -37,7 +38,7 @@ public class IssueService {
         Optional<IssueDTO> issue = dao.findById(id);
         if (issue.isEmpty()) {
             String message = String.format("Issue of id %s not found", id);
-            ErrorResponse.send(HttpStatus.NOT_FOUND, "Issue not found", message);
+            ErrorResponse.send(HttpStatus.NOT_FOUND, ErrorCode.ISSUE_NOT_FOUND, message);
         }
 
         ctx.json(Map.of("issue", issue));
@@ -49,7 +50,7 @@ public class IssueService {
         try {
             bookID = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
             return; // For compiler
         }
 
@@ -65,7 +66,7 @@ public class IssueService {
         try {
             serieID = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
             return; // For compiler
         }
 

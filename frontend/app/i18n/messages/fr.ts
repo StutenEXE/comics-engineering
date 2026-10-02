@@ -234,6 +234,7 @@ export default {
   "issueserie.form.endDate.afterStart":
     "La date de fin ne peut pas être antérieur à la date de début",
   // Issue
+  issues: "Issues",
   "issue.nonefound": "Aucune issue trouvée",
   "issue.name": "Nom (histoire)",
   "issue.serie": "Série d'issues",
@@ -471,4 +472,76 @@ export default {
   "page.issue.books": "Livres associés",
   // Serie
   "page.serie.serieOfXVolumes": "Série de %x% tomes",
+  // Profile
+  "profile.header": "Profil",
+  "profile.memberSince": "Membre depuis le",
+  "profile.contributions": "Contributions",
+  "profile.latestAdditions": "Derniers ajouts à la collection",
+  "profile.latestAdditions.empty": "Aucune édition dans la collection",
+  "profile.latestAdditions.notconnected":
+    "Connectez-vous pour voir la collection",
+  "profile.form.header": "Modifier mon profil",
+  "profile.form.newPassword": "Nouveau mot de passe",
+  "profile.form.newPassword.placeholder": "Laisser vide pour ne pas changer",
+  "profile.form.currentPassword": "Mot de passe actuel",
+  "profile.form.currentPassword.required":
+    "Veuillez rentrer votre mot de passe actuel",
+  "profile.form.success": "Profil mis à jour",
+  "profile.form.error": "Echec de la mise à jour du profil",
+  // ============================
+  // == API errors (keys are "apierror.<code>", codes are sent by the backend)
+  // ============================
+  "apierror.unknown": "Une erreur inattendue est survenue",
+  "apierror.network": "Impossible de joindre le serveur",
+  "apierror.generic.invalid_request": "Requête invalide",
+  "apierror.generic.not_found": "Ressource introuvable",
+  "apierror.generic.missing_id": "Identifiant manquant ou invalide",
+  "apierror.generic.missing_query": "Recherche vide",
+  "apierror.generic.invalid_pagination": "Pagination invalide",
+  "apierror.generic.internal": "Erreur interne du serveur",
+  "apierror.auth.not_authenticated": "Vous devez être connecté",
+  "apierror.auth.invalid_session":
+    "Votre session a expiré, veuillez vous reconnecter",
+  "apierror.auth.invalid_credentials": "Email ou mot de passe erroné",
+  "apierror.auth.user_deleted": "Ce compte a été supprimé",
+  "apierror.auth.forbidden":
+    "Vous n'avez pas les droits pour effectuer cette action",
+  "apierror.user.not_found": "Utilisateur introuvable",
+  "apierror.user.not_created": "Le compte n'a pas pu être créé",
+  "apierror.user.not_updated": "Le profil n'a pas pu être mis à jour",
+  "apierror.user.not_deleted": "L'utilisateur n'a pas pu être supprimé",
+  "apierror.user.not_recycled": "L'utilisateur n'a pas pu être recyclé",
+  "apierror.user.username_required": "Le nom d'utilisateur est obligatoire",
+  "apierror.user.email_required": "L'email est obligatoire",
+  "apierror.user.email_taken": "Cet email est déjà utilisé",
+  "apierror.user.password_too_short":
+    "Le mot de passe doit faire au moins 8 caractères",
+  "apierror.user.wrong_password": "Mot de passe incorrect",
+  "apierror.book.not_found": "Livre introuvable",
+  "apierror.edition.not_found": "Edition introuvable",
+  "apierror.issue.not_found": "Issue introuvable",
+  "apierror.issueserie.not_found": "Issue serie introuvable",
+  "apierror.publisher.not_found": "Editeur introuvable",
+  "apierror.serie.not_found": "Série introuvable",
+  "apierror.oedition.not_found": "Edition introuvable dans la collection",
+  "apierror.oedition.not_created":
+    "L'édition n'a pas pu être ajoutée à la collection",
+  "apierror.oedition.not_updated": "L'édition n'a pas pu être mise à jour",
+  "apierror.oedition.not_removed":
+    "L'édition n'a pas pu être retirée de la collection",
+  "apierror.contribution.not_found": "Contribution introuvable",
+  "apierror.contribution.not_updated":
+    "La contribution n'a pas pu être mise à jour",
+  "apierror.contribution.not_applied":
+    "La contribution n'a pas pu être appliquée",
+  "apierror.contribution.same_status": "La contribution a déjà ce statut",
+  "apierror.contribution.already_closed":
+    "La contribution a déjà été approuvée ou rejetée",
+  "apierror.bundle.not_found": "Lot de contributions introuvable",
+  "apierror.bundle.empty": "Le lot doit contenir au moins une contribution",
+  "apierror.bundle.not_created": "Le lot de contributions n'a pas pu être créé",
+  "apierror.bundle.not_updated":
+    "Le lot de contributions n'a pas pu être mis à jour",
+  "apierror.bundle.status_not_updated":
+    "Le statut du lot n'a pas pu être mis à jour",
 };

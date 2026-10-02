@@ -15,6 +15,7 @@ import dev.stuten.vps.models.dtos.full.IssueDTO;
 import dev.stuten.vps.models.dtos.full.IssueSerieDTO;
 import dev.stuten.vps.models.dtos.full.PublisherDTO;
 import dev.stuten.vps.models.dtos.full.SerieDTO;
+import dev.stuten.vps.web.ErrorCode;
 import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -39,13 +40,18 @@ public class SearchService {
     private static IssueSerieDAO issueSeriesDao = new IssueSerieDAO(
             JooqProvider.get());
 
-    public static void searchBooksSeriesIssuesIssueSeries(Context ctx) {
+    public static void searchAll(Context ctx) {
         // Retreive query from request
         String query = "";
+        List<String> types = Arrays.asList();
         try {
             query = ctx.queryParam("query");
+            String typesParam = ctx.queryParam("types");
+            if (typesParam != null) {
+                types = Arrays.asList(typesParam.split(","));
+            }
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing query");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_QUERY, "Missing query");
             return; // For compiler
         }
 
@@ -66,12 +72,21 @@ public class SearchService {
         }
 
         // Retreive books
-        books = bookDao.searchByName(query);
-        series = serieDao.searchByName(query);
-        issues = issueDao.searchByName(query);
-        issueseries = issueSeriesDao.searchByName(query);
+        if (types.contains("books")) {
+            books = bookDao.searchByName(query);
+        }
+        if (types.contains("series")) {
+            series = serieDao.searchByName(query);
+        }
+        if (types.contains("issues")) {
+            issues = issueDao.searchByName(query);
+        }
+        if (types.contains("issueseries")) {
+            issueseries = issueSeriesDao.searchByName(query);
+        }
 
         ctx.json(Map.of(
+                "editions", Arrays.asList(),
                 "books", books,
                 "series", series,
                 "issues", issues,
@@ -84,7 +99,7 @@ public class SearchService {
         try {
             query = ctx.queryParam("query");
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing query");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_QUERY, "Missing query");
             return; // For compiler
         }
 
@@ -109,7 +124,7 @@ public class SearchService {
         try {
             query = ctx.queryParam("query");
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing query");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_QUERY, "Missing query");
             return; // For compiler
         }
 
@@ -134,7 +149,7 @@ public class SearchService {
         try {
             query = ctx.queryParam("query");
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing query");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_QUERY, "Missing query");
             return; // For compiler
         }
 
@@ -150,7 +165,7 @@ public class SearchService {
         try {
             query = ctx.queryParam("query");
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing query");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_QUERY, "Missing query");
             return; // For compiler
         }
 

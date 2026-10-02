@@ -8,6 +8,7 @@ import dev.stuten.vps.models.daos.EditionDAO;
 import dev.stuten.vps.models.daos.OwnedEditionDAO;
 import dev.stuten.vps.models.dtos.full.EditionDTO;
 import dev.stuten.vps.models.dtos.response.EditionRelationToUserDTO;
+import dev.stuten.vps.web.ErrorCode;
 import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -31,7 +32,7 @@ public class EditionService {
         try {
             id = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
             return; // For compiler
         }
 
@@ -39,7 +40,7 @@ public class EditionService {
         Optional<EditionDTO> edition = dao.findById(id);
         if (edition.isEmpty()) {
             String message = String.format("Edition of id %s not found", id);
-            ErrorResponse.send(HttpStatus.NOT_FOUND, "Edition not found", message);
+            ErrorResponse.send(HttpStatus.NOT_FOUND, ErrorCode.EDITION_NOT_FOUND, message);
         }
 
         ctx.json(Map.of("edition", edition));
@@ -52,7 +53,7 @@ public class EditionService {
             userId = Integer.parseInt(ctx.queryParam("userId"));
             editionId = Integer.parseInt(ctx.queryParam("editionId"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
             return; // For compiler
         }
 

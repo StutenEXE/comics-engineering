@@ -46,3 +46,27 @@ export interface SignupData {
     email: string;
     password: string;
 }
+
+// Publicly visible user information (profile)
+export interface PublicUser {
+    id: number;
+    username: string;
+    isAdmin: boolean;
+    createdAt: string;
+}
+
+export function parseToPublicUser(data: Record<string, any>): PublicUser {
+    return {
+        id: data.id,
+        username: data.username,
+        isAdmin: data.isAdmin,
+        createdAt: data.createdAt
+    }
+}
+
+export interface UpdateUserData {
+    username: string;
+    email: string;
+    currentPassword: string;
+    newPassword?: string;
+}

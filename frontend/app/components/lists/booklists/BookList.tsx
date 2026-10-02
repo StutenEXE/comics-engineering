@@ -6,7 +6,7 @@ import {
   type SimpleBook,
 } from "~/models/book";
 import { GenericList } from "../GenericList";
-import type { Error } from "~/utils/error";
+import { translateApiError, type Error } from "~/utils/error";
 import { useTranslation } from "~/i18n/i18n";
 
 interface BookListProps {
@@ -14,6 +14,8 @@ interface BookListProps {
   descOrder?: boolean;
   isLoading?: boolean;
   error?: Error;
+  // Message shown when the list is empty (defaults to "no book found")
+  emptyMsg?: string;
   className?: string;
 }
 
@@ -21,6 +23,7 @@ export function BookList({
   bookList,
   isLoading,
   error,
+  emptyMsg,
   className,
 }: BookListProps) {
   const { t } = useTranslation();
@@ -48,8 +51,8 @@ export function BookList({
           isLoading
             ? t("loader.loading")
             : error
-              ? error.details.error
-              : t("book.nonefound")
+              ? translateApiError(error, t)
+              : (emptyMsg ?? t("book.nonefound"))
         }
         elemGenerator={mapper}
         isLoading={isLoading}
