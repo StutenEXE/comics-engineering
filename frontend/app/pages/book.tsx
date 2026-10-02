@@ -19,7 +19,7 @@ import {
   useBookByIdQuery,
   useSubmitContributionBundleMutation,
 } from "~/store/services/api";
-import { createError } from "~/utils/error";
+import { createError, translateApiError } from "~/utils/error";
 import { insertLinebreaks } from "~/utils/strings";
 import type { Route } from "../+types/root";
 
@@ -40,11 +40,12 @@ export default function BookPage({ params }: { params: { id: number } }) {
   const err = createError(error);
 
   // Submit a contribution bundle
-  const [submitBundle, { isError, isSuccess }] =
+  const [submitBundle, { isError, isSuccess, error: submitError }] =
     useSubmitContributionBundleMutation();
   // If error or success occurs during contribution submission
   useEffect(() => {
-    if (isError) toast.error(t("contribute.fail"));
+    if (isError)
+      toast.error(translateApiError(submitError, t, "contribute.fail"));
   }, [isError]);
   useEffect(() => {
     if (isSuccess) {

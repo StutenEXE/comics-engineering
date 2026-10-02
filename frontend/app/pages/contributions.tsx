@@ -1,3 +1,4 @@
+import { translateApiError } from "~/utils/error";
 import { useEffect, useState } from "react";
 import { ContributionBundleModal } from "~/components/modals/contribution/ContributionBundleModal";
 import { AdminProtectedRoute } from "~/components/security/AdminProtectedRoute";
@@ -75,15 +76,17 @@ export default function ContributePage() {
     updateBundle(bundle)
       .then((res) => {
         if ("error" in res) {
-          toast.error(t("cbundle.toast.updateError"));
+          toast.error(
+            translateApiError(res.error, t, "cbundle.toast.updateError"),
+          );
           resetFormAndClose();
           return;
         }
         toast.success(t("cbundle.toast.updateSuccess"));
         resetFormAndClose();
       })
-      .catch(() => {
-        toast.error(t("cbundle.toast.updateError"));
+      .catch((error) => {
+        toast.error(translateApiError(error, t, "cbundle.toast.updateError"));
       });
   };
 

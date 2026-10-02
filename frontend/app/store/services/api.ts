@@ -30,8 +30,11 @@ import {
 import { parseToPublisher, type Publisher } from "~/models/publisher";
 import { parseToSerie, type Serie } from "~/models/serie";
 import {
+  parseToPublicUser,
   parseToUser,
+  type PublicUser,
   type SignupData,
+  type UpdateUserData,
   type User,
   type UserCredentials,
 } from "~/models/user";
@@ -80,6 +83,17 @@ export const publicApi = createApi({
     // Refresh
     refresh: build.query({
       query: () => ({ url: "/refresh", method: "GET" }),
+    }),
+
+    /****************
+     * USERS
+     ****************/
+    // Get public profile of a user by id
+    publicUserById: build.query<{ user: PublicUser }, { id: number }>({
+      query: (params) => ({ url: "/users", method: "GET", params: params }),
+      transformResponse: (resp: { user: PublicUser }) => ({
+        user: parseToPublicUser(resp.user),
+      }),
     }),
 
     /****************
@@ -353,6 +367,7 @@ export const {
   useSignupMutation,
   useLazyDisconnectQuery,
   useRefreshQuery,
+  usePublicUserByIdQuery,
   useBookByIdQuery,
   useBookBySerieIdQuery,
   useLatestBooksQuery,
@@ -388,6 +403,17 @@ export const privateApi = createApi({
     credentials: "include",
   }),
   endpoints: (build) => ({
+    /****************
+     * USER
+     ****************/
+    // Update the profile of the logged user
+    updateProfile: build.mutation<{ user: User }, UpdateUserData>({
+      query: (data) => ({ url: "/users/update", method: "POST", body: data }),
+      transformResponse: (resp: { user: User }) => ({
+        user: parseToUser(resp.user),
+      }),
+    }),
+
     /****************
      * USER COLLECTION
      ****************/
@@ -502,6 +528,7 @@ export const privateApi = createApi({
 });
 
 export const {
+  useUpdateProfileMutation,
   useCollectionQuery,
   useOwnedEditionByIdQuery,
   useAddToCollectionMutation,

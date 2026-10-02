@@ -6,6 +6,7 @@ import java.util.Optional;
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.PublisherDAO;
 import dev.stuten.vps.models.dtos.full.PublisherDTO;
+import dev.stuten.vps.web.ErrorCode;
 import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -27,7 +28,7 @@ public class PublisherService {
         try {
             id = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
             return; // For compiler
         }
 
@@ -35,7 +36,7 @@ public class PublisherService {
         Optional<PublisherDTO> publisher = dao.findById(id);
         if (publisher.isEmpty()) {
             String message = String.format("Publisher of id %s not found", id);
-            ErrorResponse.send(HttpStatus.NOT_FOUND, "Publisher not found", message);
+            ErrorResponse.send(HttpStatus.NOT_FOUND, ErrorCode.PUBLISHER_NOT_FOUND, message);
         }
 
         ctx.json(Map.of("publisher", publisher));

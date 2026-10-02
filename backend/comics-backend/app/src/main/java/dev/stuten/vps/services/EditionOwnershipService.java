@@ -19,6 +19,7 @@ import dev.stuten.vps.models.dtos.response.UserReadingStatsDTO;
 import dev.stuten.vps.models.dtos.response.UserSpendingStatsDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleOwnedEditionDTO;
 import dev.stuten.vps.services.utils.PriceServiceUtils;
+import dev.stuten.vps.web.ErrorCode;
 import dev.stuten.vps.web.ErrorResponse;
 import dev.stuten.vps.web.middleware.AuthContext;
 import dev.stuten.vps.web.middleware.AuthMiddleware;
@@ -40,11 +41,11 @@ public class EditionOwnershipService {
         // Validate that the person creating the owned edition is the owner or an admin
         AuthContext auth = AuthMiddleware.getCurrentSession(ctx);
         if (auth == null) {
-            ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid session", "No valid session found");
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.NOT_AUTHENTICATED, "No valid session found");
             return;
         }
         if (!auth.userId().equals(dto.getUser().getId().toString()) && !auth.role().equals(Role.ADMIN)) {
-            ErrorResponse.send(HttpStatus.FORBIDDEN, "Forbidden", "You can only create owned editions for yourself");
+            ErrorResponse.send(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "You can only create owned editions for yourself");
             return;
         }
 
@@ -53,7 +54,7 @@ public class EditionOwnershipService {
 
         // If owned edition was not created
         if (ownedEditionId.isEmpty()) {
-            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Owned edition not created", "");
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.OEDITION_NOT_CREATED, "");
         }
         OwnedEditionDTO newOwnedEdition = dao.findOwnedById(ownedEditionId.get()).get();
 
@@ -67,11 +68,11 @@ public class EditionOwnershipService {
         // Validate that the person updating the owned edition is the owner or an admin
         AuthContext auth = AuthMiddleware.getCurrentSession(ctx);
         if (auth == null) {
-            ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid session", "No valid session found");
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.NOT_AUTHENTICATED, "No valid session found");
             return;
         }
         if (!auth.userId().equals(dto.getUser().getId().toString()) && !auth.role().equals(Role.ADMIN)) {
-            ErrorResponse.send(HttpStatus.FORBIDDEN, "Forbidden", "You can only update owned editions for yourself");
+            ErrorResponse.send(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "You can only update owned editions for yourself");
             return;
         }
 
@@ -79,7 +80,7 @@ public class EditionOwnershipService {
         Boolean updated = dao.update(dto);
 
         if (!updated) {
-            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", "Failed to update owned edition");
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.OEDITION_NOT_UPDATED, "Failed to update owned edition");
             return;
         }
 
@@ -95,13 +96,13 @@ public class EditionOwnershipService {
         try {
             ownershipID = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
             return; // For compiler
         }
 
         Optional<OwnedEditionDTO> optOe = dao.findOwnedById(ownershipID);
         if (optOe.isEmpty()) {
-            ErrorResponse.send(HttpStatus.NOT_FOUND, "Ownership not found",
+            ErrorResponse.send(HttpStatus.NOT_FOUND, ErrorCode.OEDITION_NOT_FOUND,
                     "This ownerhip relation has not been found");
             return;
         }
@@ -110,11 +111,11 @@ public class EditionOwnershipService {
         // Validate that the person deleting the owned edition is the owner or an admin
         AuthContext auth = AuthMiddleware.getCurrentSession(ctx);
         if (auth == null) {
-            ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Invalid session", "No valid session found");
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.NOT_AUTHENTICATED, "No valid session found");
             return;
         }
         if (!auth.userId().equals(oe.getUser().getId().toString()) && !auth.role().equals(Role.ADMIN)) {
-            ErrorResponse.send(HttpStatus.FORBIDDEN, "Forbidden", "You can only remove owned editions for yourself");
+            ErrorResponse.send(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "You can only remove owned editions for yourself");
             return;
         }
 
@@ -122,7 +123,7 @@ public class EditionOwnershipService {
         Boolean removed = dao.delete(oe);
 
         if (!removed) {
-            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", "Failed to remove owned edition");
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.OEDITION_NOT_REMOVED, "Failed to remove owned edition");
             return;
         }
 
@@ -135,7 +136,7 @@ public class EditionOwnershipService {
         try {
             id = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
             return; // For compiler
         }
 
@@ -143,7 +144,7 @@ public class EditionOwnershipService {
         Optional<OwnedEditionDTO> ownedEdition = dao.findOwnedById(id);
         if (ownedEdition.isEmpty()) {
             String message = String.format("Owned edition of id %s not found", id);
-            ErrorResponse.send(HttpStatus.NOT_FOUND, "Owned edition not found", message);
+            ErrorResponse.send(HttpStatus.NOT_FOUND, ErrorCode.OEDITION_NOT_FOUND, message);
             return;
         }
 
@@ -156,7 +157,7 @@ public class EditionOwnershipService {
         try {
             userID = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
             return;
         }
 
@@ -188,7 +189,7 @@ public class EditionOwnershipService {
         try {
             userID = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
             return; // For compiler
         }
 
@@ -283,7 +284,7 @@ public class EditionOwnershipService {
         try {
             userID = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
             return; // For compiler
         }
 
@@ -342,7 +343,7 @@ public class EditionOwnershipService {
         try {
             userID = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
             return; // For compiler
         }
 
@@ -421,7 +422,7 @@ public class EditionOwnershipService {
         try {
             userID = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
             return; // For compiler
         }
 

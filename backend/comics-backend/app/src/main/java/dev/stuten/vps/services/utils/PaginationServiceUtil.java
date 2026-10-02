@@ -1,6 +1,7 @@
 package dev.stuten.vps.services.utils;
 
 import dev.stuten.vps.models.dtos.request.search.PaginationDTO;
+import dev.stuten.vps.web.ErrorCode;
 import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -27,14 +28,14 @@ public class PaginationServiceUtil {
         try {
             pagination.setPage(Integer.parseInt(ctx.queryParam("page")));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing page or NaN page (pagination)");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_PAGINATION, "Missing page or NaN page (pagination)");
             return null;
         }
 
         try {
             pagination.setSize(Integer.parseInt(ctx.queryParam("size")));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing size or NaN size (pagination)");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_PAGINATION, "Missing size or NaN size (pagination)");
             return null;
         }
 

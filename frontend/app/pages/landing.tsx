@@ -1,3 +1,4 @@
+import { translateApiError } from "~/utils/error";
 import { useEffect, useState } from "react";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { GenericButton } from "~/components/buttons/GenericButton";
@@ -32,7 +33,7 @@ export default function LandingPage() {
   const toast = useToast();
   useEffect(() => {
     if (!error) return;
-    toast.error(t("generic.errorOccured"));
+    toast.error(translateApiError(error, t, "generic.errorOccured"));
   }, [error]);
 
   return (

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "~/i18n/i18n";
-import type { SimpleOwnedEdition } from "~/models/ownedEdition";
+import type { OwnedEdition, SimpleOwnedEdition } from "~/models/ownedEdition";
 import { OwnedEditionModal } from "../modals/OwnedEditionModal";
 import { useOwnedEditionByIdQuery } from "~/store/services/api";
 import { toDDmmYYYY } from "~/utils/date";
@@ -8,20 +8,23 @@ import dayjs from "dayjs";
 
 type OwnedEditionCardProps = {
   simpleOedition?: SimpleOwnedEdition;
+  // If the full owned edition is already loaded, no fetch is made
+  oedition?: OwnedEdition;
   className?: string;
 };
 
 export function OwnedEditionCard({
   simpleOedition,
+  oedition: loadedOedition,
   className,
 }: OwnedEditionCardProps) {
   const { locale } = useTranslation();
 
   const { data, isFetching } = useOwnedEditionByIdQuery(
     { id: simpleOedition?.id || 0 },
-    { skip: !simpleOedition?.id },
+    { skip: !!loadedOedition || !simpleOedition?.id },
   );
-  const oedition = data?.ownedEdition;
+  const oedition = loadedOedition ?? data?.ownedEdition;
 
   // Owned edition modal
   const [isOeditionModalOpen, setIsOeditionModalOpen] = useState(false);
@@ -29,7 +32,7 @@ export function OwnedEditionCard({
   const closeOeditionModal = () => setIsOeditionModalOpen(false);
 
   // If no edition provided, return null (can happen when edition is deleted but still in cache somewhere)
-  if (!simpleOedition || !oedition) return null;
+  if (!oedition) return null;
 
   return (
     <>

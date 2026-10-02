@@ -1,33 +1,35 @@
-import { useTranslation } from "~/i18n/i18n";
 import type { Book } from "~/models/book";
 import { useIssueByBookIdQuery } from "~/store/services/api";
 import { createError } from "~/utils/error";
 import { IssueList } from "./IssueList";
 
 interface IssueListByBooksIdProps {
-    bookId: number | null | undefined
-    toIgnore?: Book | null | undefined
-    descOrder?: boolean
-    className?: string
+  bookId: number | null | undefined;
+  toIgnore?: Book | null | undefined;
+  descOrder?: boolean;
+  className?: string;
 }
 
-export function IssueListByBookId({ bookId, toIgnore, descOrder, className }: IssueListByBooksIdProps) {
-    const { t } = useTranslation()
+export function IssueListByBookId({
+  bookId,
+  toIgnore,
+  descOrder,
+  className,
+}: IssueListByBooksIdProps) {
+  if (!bookId) {
+    return <IssueList issueList={[]} className={className} />;
+  }
 
-    if (!bookId) {
-        return(<IssueList issueList={[]} error={{
-            status: 0,
-            details: {
-                error: t("book.nonefound")
-            }
-        }} className={className}/>)
-    }
+  const { data, isLoading, error } = useIssueByBookIdQuery({ id: bookId });
+  const issues = data?.issues ?? null;
+  const err = createError(error);
 
-    const { data, isLoading, error } = useIssueByBookIdQuery({ id: bookId });
-    const issues = data?.issues ?? null;
-    const err = createError(error)
-
-    return(
-        <IssueList issueList={issues?.filter(is => !toIgnore || is.id !== toIgnore.id)} isLoading={isLoading} error={err} className={className}/>
-    )
+  return (
+    <IssueList
+      issueList={issues?.filter((is) => !toIgnore || is.id !== toIgnore.id)}
+      isLoading={isLoading}
+      error={err}
+      className={className}
+    />
+  );
 }

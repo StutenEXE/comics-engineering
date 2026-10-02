@@ -22,7 +22,7 @@ import {
   type SimpleContribution,
 } from "~/models/contribution";
 import { useUpdateContributionStatusMutation } from "~/store/services/api";
-import { type Error } from "~/utils/error";
+import { translateApiError, type Error } from "~/utils/error";
 import { GenericList } from "../GenericList";
 import {
   isSimpleIssue,
@@ -483,7 +483,13 @@ export function IndentedContributionList({
       onConfirm: async () => {
         const result = await updateStatus({ contributionId: c.id, newStatus });
         if ("error" in result) {
-          toast.error(t("contribution.status.updateerror"));
+          toast.error(
+            translateApiError(
+              result.error,
+              t,
+              "contribution.status.updateerror",
+            ),
+          );
           return;
         }
         toast.success(t("contribution.status.updated"));

@@ -1,5 +1,5 @@
-import type { SignupData } from "~/models/user";
-import { useSignupMutation } from "~/store/services/api";
+import type { UpdateUserData, User } from "~/models/user";
+import { useUpdateProfileMutation } from "~/store/services/api";
 import { setUser } from "~/store/slices/userSlice";
 import { store } from "~/store/store";
 import { useToast } from "../toast/Toast";
@@ -12,25 +12,31 @@ import { TextRhfInput } from "./fields/TextRhfInput";
 import { PasswordRhfInput } from "./fields/PasswordRhfInput";
 import { showApiFormError } from "~/utils/error";
 
-type SignupFormProps = {
+type ProfileFormProps = {
+  user: User;
   onDone?: () => void;
   onCancel?: () => void;
 };
 
-export function SignupForm({ onDone, onCancel }: SignupFormProps) {
+export function ProfileForm({ user, onDone, onCancel }: ProfileFormProps) {
   const { t } = useTranslation();
   const toast = useToast();
 
   // Validation schema
   const schema = z.object({
-    username: z.string().min(1, t("signup.username.required")),
+    username: z.string().trim().min(1, t("signup.username.required")),
     email: z
       .email(t("signup.email.invalidFormat"))
       .min(1, t("signup.email.required")),
-    password: z
+    // Optional, the password is unchanged if left empty
+    newPassword: z
       .string()
-      .min(1, t("signup.password.required"))
-      .min(8, t("signup.password.gte8chars")),
+      .refine((pwd) => pwd.length === 0 || pwd.length >= 8, {
+        message: t("signup.password.gte8chars"),
+      }),
+    currentPassword: z
+      .string()
+      .min(1, t("profile.form.currentPassword.required")),
   });
 
   type FormData = z.infer<typeof schema>;
@@ -39,26 +45,32 @@ export function SignupForm({ onDone, onCancel }: SignupFormProps) {
     register,
     handleSubmit,
     setError,
-    formState: { errors, isValid },
-  } = useForm<FormData>({ resolver: zodResolver(schema) as any });
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(schema) as any,
+    defaultValues: {
+      username: user.username,
+      email: user.email,
+      newPassword: "",
+      currentPassword: "",
+    },
+  });
 
-  const [signup] = useSignupMutation();
+  const [updateProfile, { isLoading }] = useUpdateProfileMutation();
 
   const triggerSubmission = (data: FieldValues) => {
-    const username = data.username;
-    const email = data.email;
-    const password = data.password;
+    const payload: UpdateUserData = {
+      username: data.username,
+      email: data.email,
+      currentPassword: data.currentPassword,
+      newPassword: data.newPassword || undefined,
+    };
 
-    const payload: SignupData = { username, email, password };
-
-    if (!payload.username || !payload.email || !payload.password) return;
-
-    // Perform login mutation
-    signup(payload)
+    updateProfile(payload)
       .unwrap()
       .then((response) => {
         store.dispatch(setUser(response.user));
-        toast.success(t("signup.success"));
+        toast.success(t("profile.form.success"));
         // Execute onDone callback if provided
         onDone?.();
       })
@@ -67,9 +79,9 @@ export function SignupForm({ onDone, onCancel }: SignupFormProps) {
           error,
           t,
           setError,
-          ["username", "email", "password"],
+          ["username", "email", "newPassword", "currentPassword"],
           toast.error,
-          "signup.error",
+          "profile.form.error",
         );
       });
   };
@@ -81,10 +93,11 @@ export function SignupForm({ onDone, onCancel }: SignupFormProps) {
 
   return (
     <GenericForm
-      title={t("signup.header")}
+      title={t("profile.form.header")}
       onCancel={handleCancel}
-      submitLabel={t("signup.submit")}
       onSubmit={handleSubmit(triggerSubmission)}
+      isLoading={isLoading}
+      disabled={isLoading}
     >
       <TextRhfInput
         label={t("signup.username")}
@@ -101,10 +114,16 @@ export function SignupForm({ onDone, onCancel }: SignupFormProps) {
       />
 
       <PasswordRhfInput
-        label={t("signup.password")}
-        registration={register("password")}
-        inputProps={{ placeholder: t("signup.password.placeholder") }}
-        error={errors.password}
+        label={t("profile.form.newPassword")}
+        registration={register("newPassword")}
+        inputProps={{ placeholder: t("profile.form.newPassword.placeholder") }}
+        error={errors.newPassword}
+      />
+
+      <PasswordRhfInput
+        label={t("profile.form.currentPassword")}
+        registration={register("currentPassword")}
+        error={errors.currentPassword}
       />
     </GenericForm>
   );

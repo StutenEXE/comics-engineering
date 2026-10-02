@@ -1,24 +1,24 @@
 package dev.stuten.vps.web.middleware;
 
 import io.javalin.http.Context;
-import io.javalin.http.HttpResponseException;
+import dev.stuten.vps.web.ErrorCode;
+import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.HttpStatus;
 
-import java.util.HashMap;
 
 public final class AuthMiddleware {
 
     public static void authenticate(Context ctx) {
         String sessionKey = ctx.cookie(SessionStore.COOKIE_SESSION_KEY);
         if (sessionKey == null || sessionKey.isEmpty()) {
-            throw new HttpResponseException(HttpStatus.UNAUTHORIZED, "Missing token", new HashMap<String, String>());
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.NOT_AUTHENTICATED, "Missing token");
         }
         ;
 
         // Redis lookup
         Session session = SessionStore.find(sessionKey);
         if (session == null) {
-            throw new HttpResponseException(HttpStatus.UNAUTHORIZED, "Invalid session", new HashMap<String, String>());
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_SESSION, "Session not found");
         }
 
         // Sliding expiration

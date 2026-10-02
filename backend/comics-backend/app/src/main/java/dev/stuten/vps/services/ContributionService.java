@@ -21,6 +21,7 @@ import dev.stuten.vps.models.dtos.response.ContributionsStatsDTO;
 import dev.stuten.vps.models.dtos.response.ContributionsStatsDTO.ContributionStatusStatsDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionDTO;
 import dev.stuten.vps.models.dtos.template.IdDTO;
+import dev.stuten.vps.web.ErrorCode;
 import dev.stuten.vps.web.ErrorResponse;
 import dev.stuten.vps.web.middleware.AuthMiddleware;
 import dev.stuten.vps.web.middleware.Role;
@@ -69,7 +70,7 @@ public class ContributionService {
         // between contributions in the same bundle
         Optional<ContributionBundleDTO> bundle = contributionBundleDAO.findById(contribution.getBundle().getId());
         if (bundle.isEmpty()) {
-            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error",
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.CONTRIBUTION_NOT_APPLIED,
                     "Contribution bundle not found for contribution");
             return;
         }
@@ -90,13 +91,13 @@ public class ContributionService {
                     bundle.get().getSubmitter());
         } catch (Exception e) {
             e.printStackTrace();
-            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error",
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.CONTRIBUTION_NOT_APPLIED,
                     "Failed to apply contribution changes to target entity: %s".formatted(e.getMessage()));
             return;
         }
 
         if (result.isEmpty()) {
-            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error",
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.CONTRIBUTION_NOT_APPLIED,
                     "Failed to apply contribution changes to target entity");
             return;
         }
@@ -109,7 +110,7 @@ public class ContributionService {
 
     public static void create(Context ctx) {
         if (!AuthMiddleware.isAuthenticated(ctx)) {
-            ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Unauthorized", "User must be logged in");
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.NOT_AUTHENTICATED, "User must be logged in");
             return;
         }
 
@@ -117,7 +118,7 @@ public class ContributionService {
         try {
             contribution = ctx.bodyAsClass(SimpleContributionDTO.class);
         } catch (Exception e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Invalid JSON body");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_REQUEST, "Invalid JSON body");
             return;
         }
         Optional<Integer> contributionId = createContribution(contribution);
@@ -129,7 +130,7 @@ public class ContributionService {
 
     public static void update(Context ctx) {
         if (!AuthMiddleware.isAuthenticated(ctx)) {
-            ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Unauthorized", "User must be logged in");
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.NOT_AUTHENTICATED, "User must be logged in");
             return;
         }
 
@@ -138,20 +139,20 @@ public class ContributionService {
             contribution = ctx.bodyAsClass(SimpleContributionDTO.class);
         } catch (Exception e) {
             e.printStackTrace();
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Invalid JSON body");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_REQUEST, "Invalid JSON body");
             return;
         }
 
         if (contribution.getStatus() == ContributionStatusEnum.approved
                 || contribution.getStatus() == ContributionStatusEnum.rejected) {
             String message = "Cannot update contribution with already accepted or rejected status";
-            ErrorResponse.send(HttpStatus.METHOD_NOT_ALLOWED, "Invalid contribution update", message);
+            ErrorResponse.send(HttpStatus.METHOD_NOT_ALLOWED, ErrorCode.CONTRIBUTION_ALREADY_CLOSED, message);
             return;
         }
 
         boolean updated = contributionDAO.update(contribution);
         if (!updated) {
-            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", "Failed to update contribution");
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.CONTRIBUTION_NOT_UPDATED, "Failed to update contribution");
             return;
         }
 
@@ -160,11 +161,11 @@ public class ContributionService {
 
     public static void updateStatus(Context ctx) {
         if (!AuthMiddleware.isAuthenticated(ctx)) {
-            ErrorResponse.send(HttpStatus.UNAUTHORIZED, "Unauthorized", "User must be logged in");
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.NOT_AUTHENTICATED, "User must be logged in");
             return;
         }
         if (!AuthMiddleware.hasRole(ctx, Role.ADMIN)) {
-            ErrorResponse.send(HttpStatus.FORBIDDEN, "Forbidden", "Only admins can update contributions");
+            ErrorResponse.send(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "Only admins can update contributions");
             return;
         }
 
@@ -172,37 +173,37 @@ public class ContributionService {
         try {
             updateDTO = ctx.bodyAsClass(UpdateContributionStatusDTO.class);
         } catch (Exception e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Invalid JSON body");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_REQUEST, "Invalid JSON body");
             return;
         }
 
         Optional<ContributionDTO<? extends IdDTO>> contribution = contributionDAO.findById(updateDTO.contributionId());
         if (contribution.isEmpty()) {
             String message = String.format("Contribution of id %s not found", updateDTO.contributionId());
-            ErrorResponse.send(HttpStatus.NOT_FOUND, "Contribution not found", message);
+            ErrorResponse.send(HttpStatus.NOT_FOUND, ErrorCode.CONTRIBUTION_NOT_FOUND, message);
         }
         // If the new status changes nothing
         ContributionStatusEnum previousStatus = contribution.get().getStatus();
         if (previousStatus == updateDTO.newStatus()) {
             String message = "Contribution already has this status : %s".formatted(previousStatus);
-            ErrorResponse.send(HttpStatus.METHOD_NOT_ALLOWED, "Contribution already has this status", message);
+            ErrorResponse.send(HttpStatus.METHOD_NOT_ALLOWED, ErrorCode.CONTRIBUTION_SAME_STATUS, message);
         }
         // If the contribution bundle is already accepted or rejected, we don't allow
         // status change of individual contributions
         if (previousStatus == ContributionStatusEnum.approved || previousStatus == ContributionStatusEnum.rejected) {
             String message = "Cannot change status of contribution with already accepted or rejected status";
-            ErrorResponse.send(HttpStatus.METHOD_NOT_ALLOWED, "Invalid contribution status change", message);
+            ErrorResponse.send(HttpStatus.METHOD_NOT_ALLOWED, ErrorCode.CONTRIBUTION_ALREADY_CLOSED, message);
         }
         // Update status
         Boolean updated = contributionDAO.updateStatus(updateDTO.contributionId(), updateDTO.newStatus());
         if (!updated) {
-            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", "Failed to update contribution status");
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.CONTRIBUTION_NOT_UPDATED, "Failed to update contribution status");
         }
 
         Optional<ContributionDTO<?>> updatedContrib = contributionDAO.findById(updateDTO.contributionId());
 
         if (updatedContrib.isEmpty()) {
-            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error",
+            ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.CONTRIBUTION_NOT_UPDATED,
                     "Cannot find the updated contribution after status update");
         }
 
@@ -214,7 +215,7 @@ public class ContributionService {
             } catch (Exception e) {
                 // Undo previous status update if applying the contribution failed
                 contributionDAO.updateStatus(updateDTO.contributionId(), previousStatus);
-                ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, "Error", e.getMessage());
+                ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.CONTRIBUTION_NOT_APPLIED, e.getMessage());
             }
         }
 
@@ -257,7 +258,7 @@ public class ContributionService {
         try {
             submitterId = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
             return; // For compiler
         }
 
@@ -273,7 +274,7 @@ public class ContributionService {
         try {
             submitterId = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
             return; // For compiler
         }
 

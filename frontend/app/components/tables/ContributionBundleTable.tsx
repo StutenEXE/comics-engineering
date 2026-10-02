@@ -7,7 +7,7 @@ import {
 } from "~/models/contributionBundle";
 import { useAppSelector } from "~/store/hooks";
 import { useUpdateBundleStatusMutation } from "~/store/services/api";
-import { type Error } from "~/utils/error";
+import { translateApiError, type Error } from "~/utils/error";
 import { BundleStatusBadge } from "../badges/BundleStatusBadge";
 import { useToast } from "../toast/Toast";
 import { GenericTable } from "./GenericTable";
@@ -46,7 +46,9 @@ export function ContributionBundleTable({
   ) => {
     updateStatus({ bundleId: b.id, newStatus }).then((res) => {
       if ("error" in res) {
-        toast.error(t("cbundle.toast.statusupdateerror"));
+        toast.error(
+          translateApiError(res.error, t, "cbundle.toast.statusupdateerror"),
+        );
         return;
       }
       toast.success(t("cbundle.toast.statusupdated"));

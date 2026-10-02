@@ -1,3 +1,4 @@
+import { translateApiError } from "~/utils/error";
 import { useTranslation } from "~/i18n/i18n";
 import type { OwnedEdition, OwnedEditionDTO } from "~/models/ownedEdition";
 import { useUpdateOwnedEditionMutation } from "~/store/services/api";
@@ -26,7 +27,7 @@ export function EditOwnedEditionModal({
   const handleSubmit = async (oe: Partial<OwnedEditionDTO>) => {
     await updateOwnedEdition(oe).then((res) => {
       if ("error" in res) {
-        toast.error(t("toast.error"));
+        toast.error(translateApiError(res.error, t, "toast.error"));
         return false;
       }
       toast.success(t("toast.addToCollection.success"));

@@ -15,7 +15,7 @@ export function UserCard({ user, showActions, className }: UserCardProps) {
   if (!user) return null;
 
   return (
-    <Link to={`/user/${user.id}`} className={`group block ${className}`}>
+    <Link to={`/profile/${user.id}`} className={`group block ${className}`}>
       <div className="flex items-center justify-between gap-4 px-3 py-2 rounded-md border border-white/8 bg-white/3 hover:border-indigo-500/30 hover:bg-white/5 transition-all">
         {/* Identity */}
         <div className="flex items-center gap-3 min-w-0">
