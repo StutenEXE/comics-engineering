@@ -8,12 +8,32 @@ import javax.naming.OperationNotSupportedException;
 import org.jooq.DSLContext;
 
 import dev.stuten.vps.jooq.enums.ContributionActionEnum;
+import dev.stuten.vps.models.daos.utils.ImageUploader;
 import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 import dev.stuten.vps.models.dtos.template.IdDTO;
 
 public abstract class ContributableDAO<T extends IdDTO> extends DAO {
+    private final ImageUploader images;
+
     public ContributableDAO(DSLContext dsl) {
+        this(dsl, null);
+    }
+
+    /**
+     * @param dsl    The transaction's DSL
+     * @param images The transaction's image tracker, needed to create, update or
+     *               delete entities holding an image (see Transactions.run)
+     */
+    public ContributableDAO(DSLContext dsl, ImageUploader images) {
         super(dsl);
+        this.images = images;
+    }
+
+    protected ImageUploader images() {
+        if (images == null) {
+            throw new IllegalStateException("Image changes must be made inside Transactions.run");
+        }
+        return images;
     }
 
     protected void replaceLocalRef(IdDTO dto, Map<Integer, Integer> localRefs)

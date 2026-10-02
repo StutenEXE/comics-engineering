@@ -18,10 +18,6 @@ public class IssueSerieService {
     private static IssueSerieDAO dao = new IssueSerieDAO(
             JooqProvider.get());
 
-    protected static IssueSerieDAO getDAO() {
-        return dao;
-    }
-
     public static void getByID(Context ctx) {
         // Retreive ID from request
         Integer id;

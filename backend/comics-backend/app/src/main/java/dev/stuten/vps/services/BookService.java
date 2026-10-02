@@ -20,10 +20,6 @@ public class BookService {
     private static BookDAO dao = new BookDAO(
             JooqProvider.get());
 
-    protected static BookDAO getDAO() {
-        return dao;
-    }
-
     public static void getByID(Context ctx) {
         // Retreive ID from request
         Integer id;

@@ -20,10 +20,6 @@ public class IssueService {
     private static IssueDAO dao = new IssueDAO(
             JooqProvider.get());
 
-    protected static IssueDAO getDAO() {
-        return dao;
-    }
-
     public static void getById(Context ctx) {
         // Retreive ID from request
         Integer id;

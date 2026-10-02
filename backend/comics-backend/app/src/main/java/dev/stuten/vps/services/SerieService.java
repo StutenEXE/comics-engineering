@@ -16,10 +16,6 @@ public class SerieService {
     private static SerieDAO dao = new SerieDAO(
             JooqProvider.get());
     
-    protected static SerieDAO getDAO() {
-        return dao;
-    }
-
     public static void getByID(Context ctx) {
         // Retreive ID from request
         Integer id;

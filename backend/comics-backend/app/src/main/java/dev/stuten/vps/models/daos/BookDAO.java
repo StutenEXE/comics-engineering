@@ -38,6 +38,10 @@ public class BookDAO extends ContributableDAO<BookDTO> {
                 super(dsl);
         }
 
+        public BookDAO(DSLContext dsl, ImageUploader images) {
+                super(dsl, images);
+        }
+
         @Override
         protected RecordMapper<? super Record, BookDTO> getDefaultMapper() {
                 return BookMapper::mapToDTO;
@@ -130,7 +134,7 @@ public class BookDAO extends ContributableDAO<BookDTO> {
 
         @Override
         public Optional<Integer> create(BookDTO dto) {
-                String imgUrl = ImageUploader.uploadImage(dto.getImgUrl());
+                String imgUrl = images().uploadImage(dto.getImgUrl());
                 Optional<Integer> result = DSL().insertInto(BOOKS)
                                 .set(BOOKS.NAME, dto.getName())
                                 .set(BOOKS.DESC, dto.getDesc())
@@ -157,7 +161,7 @@ public class BookDAO extends ContributableDAO<BookDTO> {
                 // Generate new image url if needed
                 String currentImgUrl = DSL().select(BOOKS.IMG_URL).from(BOOKS).where(BOOKS.ID.eq(dto.getId()))
                                 .fetchSingle((Record r) -> r.get(BOOKS.IMG_URL));
-                String newImgUrl = ImageUploader.deleteAndCreateImage(currentImgUrl, dto.getImgUrl());
+                String newImgUrl = images().deleteAndCreateImage(currentImgUrl, dto.getImgUrl());
                 linkToIssues(dto.getId(), dto.getIssues());
                 return DSL().update(BOOKS)
                                 .set(BOOKS.NAME, dto.getName())
@@ -173,7 +177,7 @@ public class BookDAO extends ContributableDAO<BookDTO> {
 
         @Override
         public boolean delete(BookDTO dto) {
-                ImageUploader.deleteImage(dto.getImgUrl());
+                images().deleteImage(dto.getImgUrl());
                 return DSL().delete(BOOKS)
                                 .where(BOOKS.ID.eq(dto.getId()))
                                 .execute() > 0;
