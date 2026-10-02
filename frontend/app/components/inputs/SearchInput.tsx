@@ -1,26 +1,11 @@
 import { useState } from "react";
 import { MdSearch } from "react-icons/md";
 import { useTranslation } from "~/i18n/i18n.js";
-import { Badge } from "../shadcn/ui/badge";
-import {
-  IoAddCircleOutline,
-  IoCloseCircleOutline,
-  IoCheckmarkCircleOutline,
-} from "react-icons/io5";
 
 interface SearchInputProps {
   defaultValue?: string;
   triggerSearch: (query: string) => void;
 }
-
-const badgeClassNames = {
-  neutral:
-    "text-xs px-1.5 py-0.5 rounded border text-neutral-400/70 border-neutral-400/20 bg-neutral-400/5 cursor-pointer hover:bg-neutral-400/20 transition-all",
-  selected:
-    "text-xs px-1.5 py-0.5 rounded border text-blue-400/70 border-blue-400/20 bg-blue-400/5",
-  toDelete:
-    "text-xs px-1.5 py-0.5 rounded border text-red-400/70 border-red-400/20 bg-red-400/5",
-};
 
 export function SearchInput({
   defaultValue = "",

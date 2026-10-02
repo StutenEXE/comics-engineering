@@ -12,7 +12,7 @@ import type { Edition } from "~/models/edition.js";
 import type { IssueSerie } from "~/models/issue-serie.js";
 import type { Issue } from "~/models/issue.js";
 import type { Serie } from "~/models/serie.js";
-import { useLazySearchBooksSeriesIssuesIssueseriesByNameQuery } from "~/store/services/api.js";
+import { useLazySearchAllByNameQuery } from "~/store/services/api.js";
 import { toDDmmYYYY } from "~/utils/date.js";
 import type { Route } from "./+types/compare";
 
@@ -29,10 +29,10 @@ export default function ComparePage() {
   const itB = searchParams.get("itemB");
 
   const [search, { data, isFetching, error }] =
-    useLazySearchBooksSeriesIssuesIssueseriesByNameQuery();
+    useLazySearchAllByNameQuery();
 
   const triggerSearch = (query: string) => {
-    search({ query });
+    search({ query, types: ["books", "series", "issues", "issueseries"] });
   };
 
   const noData =
