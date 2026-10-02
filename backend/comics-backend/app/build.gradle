@@ -103,6 +103,7 @@ jooq {
                     database {
                         name = 'org.jooq.meta.postgres.PostgresDatabase'  // Change based on DB
                         inputSchema = 'public'
+                        excludes = 'flyway_schema_history' // Managed by Flyway, not used by the app
                     }
                     generate {
                         records = true // Table records

@@ -53,6 +53,34 @@ services:
       retries: 5
 
   # ─────────────────────────────────────────
+  # Schema migrations (Flyway) - runs once, then exits
+  # Applies new files of postgres/migrations/ before the API starts.
+  # Runs as the superuser (tables owner) so the API user keeps CRUD rights only.
+  # ─────────────────────────────────────────
+  migrate:
+    image: flyway/flyway:13.9.0-alpine
+    container_name: kys_migrate
+    restart: "no"
+    command: migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres:5432/${KYS_POSTGRES_DB}
+      FLYWAY_USER: ${POSTGRES_SUPERUSER}
+      FLYWAY_PASSWORD: ${POSTGRES_SUPERPASSWORD}
+      FLYWAY_LOCATIONS: filesystem:/flyway/sql
+      # Existing databases created before Flyway already have the V1 schema :
+      # mark them as V1 without executing it
+      FLYWAY_BASELINE_ON_MIGRATE: "true"
+      FLYWAY_BASELINE_VERSION: "1"
+      FLYWAY_CONNECT_RETRIES: "10"
+    volumes:
+      - ./postgres/migrations:/flyway/sql:ro
+    networks:
+      - kys-backend
+
+  # ─────────────────────────────────────────
   # Java REST API  (Javalin + jOOQ)
   # ─────────────────────────────────────────
   api:
@@ -66,6 +94,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      # The API only starts on an up to date schema
+      migrate:
+        condition: service_completed_successfully
     environment:
       # Postgres
       PG_HOST: postgres
@@ -89,7 +120,7 @@ services:
       # App
       APP_PORT: 8080
       CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN}
-      
+
     ports:
       - "8080:8080"
     networks:
