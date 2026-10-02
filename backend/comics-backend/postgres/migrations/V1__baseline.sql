@@ -1,3 +1,7 @@
+-- V1 : Baseline schema, as it existed in production before Flyway was introduced.
+-- Production is baselined at this version (never executed there), it only runs on new databases.
+-- NEVER EDIT THIS FILE (or any applied migration) : add a new V<n>__<description>.sql instead.
+
 -- Schema generated from db/mcd.puml (and manually edited)
 
 -- Users

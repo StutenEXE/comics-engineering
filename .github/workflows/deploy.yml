@@ -65,5 +65,8 @@ jobs:
             ${{ secrets.ENV_FILE }}
             ENDSECRETS
 
-            # Rebuild and restart the Java backend container
+            # Backup the database before migrations run (deploy stops if it fails)
+            make prod-backup
+
+            # Apply schema migrations, then rebuild and restart the Java backend container
             make prod-up

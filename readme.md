@@ -77,11 +77,18 @@ A github action automatically deploys when code is pushed on main.
 
 ## Schema changes
 
-Whenever `postgres/init/` is changes, regenerate jOOQ classes against a local throwaway DB then commit the changes.
+The schema is managed by [Flyway](https://documentation.red-gate.com/fd) migrations in `backend/comics-backend/postgres/migrations/`. The `migrate` container applies the new ones before the API starts, both with `make dev-up` and on every deployment (production is backed up with `make prod-backup` first, the last 7 dumps are kept in `~/backups/kys`).
+
+**To change the schema**, add a new file `V<next number>__<description>.sql` (e.g. `V3__add_wishlist_date.sql`):
+
+- Never modify, rename or delete an existing migration, Flyway refuses to run if an applied file changed.
+- Migrations must not destroy data (`DROP TABLE/COLUMN`, `TRUNCATE`, `DELETE`, `UPDATE`, column type changes...). The PR check blocks them unless the PR has the `allow-destructive-migration` label.
+- Each migration runs in a transaction : it is applied entirely or not at all.
+- The PR check also applies every migration on throwaway databases (a new one and a production-like one).
+
+Then regenerate the jOOQ classes against your local database (`make dev-up` applies the migration) and commit them, the Docker build uses the committed classes.
 
 ```bash
 git add app/build/generated-src/jooq/
 git commit -m "chore: regenerate jOOQ classes"
 ```
-
-In production, the jOOQ classes are regenerated automatically. So if you are pushing changes to the DB, you have to report them on the actual DB before pushing to main.

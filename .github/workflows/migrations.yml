@@ -1,0 +1,113 @@
+name: Check database migrations
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "backend/comics-backend/postgres/**"
+      - ".github/workflows/migrations.yml"
+
+env:
+  MIGRATIONS_DIR: backend/comics-backend/postgres/migrations
+  FLYWAY_IMAGE: flyway/flyway:13.9.0-alpine
+
+jobs:
+  # Production data must never be destroyed by a migration :
+  # - applied migrations are immutable (only new files are allowed)
+  # - new migrations cannot contain data-destructive statements
+  # A destructive change can still be forced with the "allow-destructive-migration" PR label.
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Only new migration files
+        run: |
+          changed=$(git diff --name-only --diff-filter=MDR "origin/${{ github.base_ref }}...HEAD" -- "$MIGRATIONS_DIR")
+          if [ -n "$changed" ]; then
+            echo "::error::Existing migrations cannot be modified, deleted or renamed. Add a new V<n>__<description>.sql instead:"
+            echo "$changed"
+            exit 1
+          fi
+
+      - name: No destructive statements
+        if: ${{ !contains(github.event.pull_request.labels.*.name, 'allow-destructive-migration') }}
+        run: |
+          added=$(git diff --name-only --diff-filter=A "origin/${{ github.base_ref }}...HEAD" -- "$MIGRATIONS_DIR/*.sql")
+          if [ -z "$added" ]; then
+            echo "No new migration"
+            exit 0
+          fi
+          patterns='DROP[[:space:]]+(TABLE|SCHEMA|DATABASE|COLUMN|TYPE)|TRUNCATE|DELETE[[:space:]]+FROM|^[[:space:]]*UPDATE[[:space:]]|ALTER[[:space:]]+COLUMN[[:space:]]+[^[:space:]]+[[:space:]]+(SET[[:space:]]+DATA[[:space:]]+)?TYPE'
+          failed=0
+          for file in $added; do
+            # Comments are ignored
+            matches=$(sed 's/--.*$//' "$file" | grep -inE "$patterns" || true)
+            if [ -n "$matches" ]; then
+              echo "::error file=$file::Data-destructive statement found (add the 'allow-destructive-migration' label if this is intended):"
+              echo "$matches"
+              failed=1
+            fi
+          done
+          exit $failed
+
+  # Applies the migrations on throwaway databases, in both situations production can be in
+  dry-run:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # psql / pg_dump from the same major version as the server
+      - name: Postgres client tools
+        run: |
+          cat > pg.sh << 'EOF'
+          pg() { docker run --rm -i --network host -e PGHOST=localhost -e PGUSER=postgres -e PGPASSWORD=postgres postgres:18 "$@"; }
+          EOF
+
+      - name: Create databases
+        run: |
+          . ./pg.sh
+          pg psql -d postgres -c "CREATE DATABASE fresh"
+          pg psql -d postgres -c "CREATE DATABASE existing"
+          # "existing" mimics production : schema created by the old init script, no Flyway history
+          pg psql -d existing -v ON_ERROR_STOP=1 < "$MIGRATIONS_DIR/V1__baseline.sql"
+
+      - name: Migrate a new database (all migrations run)
+        run: |
+          for i in 1 2; do # The second run must be a no-op
+            docker run --rm --network host -v "$PWD/$MIGRATIONS_DIR:/flyway/sql:ro" "$FLYWAY_IMAGE" \
+              -url=jdbc:postgresql://localhost:5432/fresh -user=postgres -password=postgres \
+              -locations=filesystem:/flyway/sql -baselineOnMigrate=true -baselineVersion=1 \
+              migrate
+          done
+
+      - name: Migrate an existing database (baselined at V1, later migrations run)
+        run: |
+          docker run --rm --network host -v "$PWD/$MIGRATIONS_DIR:/flyway/sql:ro" "$FLYWAY_IMAGE" \
+            -url=jdbc:postgresql://localhost:5432/existing -user=postgres -password=postgres \
+            -locations=filesystem:/flyway/sql -baselineOnMigrate=true -baselineVersion=1 \
+            migrate
+
+      - name: Both databases end up with the same schema
+        run: |
+          . ./pg.sh
+          dump() { pg pg_dump -d "$1" --schema-only --no-owner --exclude-table=flyway_schema_history | grep -vE '^[\\](un)?restrict '; }
+          diff <(dump fresh) <(dump existing)
