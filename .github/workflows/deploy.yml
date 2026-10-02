@@ -56,9 +56,8 @@ jobs:
             cd /home/debian/comics-engineering
 
             # Pull latest code
-            git stash
-            git pull origin main --force
-            git stash clear
+            git fetch origin main
+            git reset --hard origin/main
             
             # Write secrets from GitHub to .env file
             cd backend/comics-backend
