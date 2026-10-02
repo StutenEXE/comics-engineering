@@ -15,6 +15,7 @@ import dev.stuten.vps.models.dtos.full.IssueDTO;
 import dev.stuten.vps.models.dtos.full.IssueSerieDTO;
 import dev.stuten.vps.models.dtos.full.PublisherDTO;
 import dev.stuten.vps.models.dtos.full.SerieDTO;
+import dev.stuten.vps.web.ErrorCode;
 import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -50,7 +51,7 @@ public class SearchService {
                 types = Arrays.asList(typesParam.split(","));
             }
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing query");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_QUERY, "Missing query");
             return; // For compiler
         }
 
@@ -98,7 +99,7 @@ public class SearchService {
         try {
             query = ctx.queryParam("query");
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing query");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_QUERY, "Missing query");
             return; // For compiler
         }
 
@@ -123,7 +124,7 @@ public class SearchService {
         try {
             query = ctx.queryParam("query");
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing query");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_QUERY, "Missing query");
             return; // For compiler
         }
 
@@ -148,7 +149,7 @@ public class SearchService {
         try {
             query = ctx.queryParam("query");
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing query");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_QUERY, "Missing query");
             return; // For compiler
         }
 
@@ -164,7 +165,7 @@ public class SearchService {
         try {
             query = ctx.queryParam("query");
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing query");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_QUERY, "Missing query");
             return; // For compiler
         }
 

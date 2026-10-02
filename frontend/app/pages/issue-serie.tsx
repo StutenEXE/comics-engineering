@@ -20,7 +20,7 @@ import {
   useSubmitContributionBundleMutation,
 } from "~/store/services/api";
 import { compareDates, dateToMonthYearString } from "~/utils/date";
-import { createError } from "~/utils/error";
+import { createError, translateApiError } from "~/utils/error";
 import type { Route } from "../+types/root";
 import { getImgUrlFromFandomUrl } from "~/utils/fandoms";
 
@@ -41,12 +41,13 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
   const err = createError(error);
 
   // Submit a contribution bundle
-  const [submitBundle, { isError, isSuccess }] =
+  const [submitBundle, { isError, isSuccess, error: submitError }] =
     useSubmitContributionBundleMutation();
 
   // If error or success occurs during contribution submission
   useEffect(() => {
-    if (isError) toast.error(t("contribute.fail"));
+    if (isError)
+      toast.error(translateApiError(submitError, t, "contribute.fail"));
   }, [isError]);
   useEffect(() => {
     if (isSuccess) {

@@ -1,7 +1,7 @@
 import { type Issue } from "~/models/issue";
 import type { User } from "~/models/user";
 import { compareDates } from "~/utils/date";
-import type { Error } from "~/utils/error";
+import { translateApiError, type Error } from "~/utils/error";
 import { UserCard } from "../../cards/UserCard";
 import { GenericList } from "../GenericList";
 import { useTranslation } from "~/i18n/i18n";
@@ -28,7 +28,7 @@ export function UserList({ userList, isLoading, error, showActions, className }:
             <GenericList 
                 list={userList} 
                 emptyMsg={isLoading ?  t("loader.user.loading") : 
-                    error ? error.details.error :  
+                    error ? translateApiError(error, t) :
                     t("loader.user.nodata")}
                 elemGenerator={mapper}
                 vertical

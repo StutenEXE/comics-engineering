@@ -2,10 +2,10 @@ package dev.stuten.vps.web.middleware;
 
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
-import io.javalin.http.HttpResponseException;
+import dev.stuten.vps.web.ErrorCode;
+import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.HttpStatus;
 
-import java.util.HashMap;
 
 public final class RoleMiddleware {
 
@@ -23,18 +23,18 @@ public final class RoleMiddleware {
     private static void check(Context ctx, Role required) {
         AuthContext auth = ctx.attribute("auth");
         if (auth == null) {
-            throw new HttpResponseException(HttpStatus.UNAUTHORIZED, "Not authenticated",  new HashMap<String,String>());
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.NOT_AUTHENTICATED, "Not authenticated");
         }
 
         if (!hasRole(auth.role(), required)) {
-            throw new HttpResponseException(HttpStatus.FORBIDDEN, "Forbidden",  new HashMap<String,String>());
+            ErrorResponse.send(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "Insufficient role");
         }
     }
 
     private static void checkAny(Context ctx, Role... roles) {
         AuthContext auth = ctx.attribute("auth");
         if (auth == null) {
-            throw new HttpResponseException(HttpStatus.UNAUTHORIZED, "Not authenticated",  new HashMap<String,String>());
+            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.NOT_AUTHENTICATED, "Not authenticated");
         }
 
         for (Role role : roles) {
@@ -43,7 +43,7 @@ public final class RoleMiddleware {
             }
         }
 
-        throw new HttpResponseException(HttpStatus.FORBIDDEN, "Forbidden",  new HashMap<String,String>());
+        ErrorResponse.send(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "Insufficient role");
     }
 
     private static boolean hasRole(Role userRole, Role required) {

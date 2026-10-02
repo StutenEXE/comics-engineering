@@ -1,3 +1,4 @@
+import { translateApiError } from "~/utils/error";
 import type { SimpleEdition } from "~/models/edition";
 import type { OwnedEdition, OwnedEditionDTO } from "~/models/ownedEdition";
 import { GenericModal } from "./GenericModal";
@@ -30,7 +31,7 @@ export function AddToCollectionModal({
   const handleSubmit = async (oe: Partial<OwnedEditionDTO>) => {
     await addToCollection(oe).then((res) => {
       if ("error" in res) {
-        toast.error(t("toast.error"));
+        toast.error(translateApiError(res.error, t, "toast.error"));
         return false;
       }
 
@@ -41,10 +42,10 @@ export function AddToCollectionModal({
     });
   };
 
-  const { data, isError } = useEditionByIdQuery({ id: editionId });
+  const { data, isError, error } = useEditionByIdQuery({ id: editionId });
 
   if (isError) {
-    toast.error(t("toast.error"));
+    toast.error(translateApiError(error, t, "toast.error"));
     onClose();
   }
 

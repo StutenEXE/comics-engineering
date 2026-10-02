@@ -10,6 +10,7 @@ import { useForm, type FieldValues } from "react-hook-form";
 import { GenericForm } from "./GenericForm";
 import { TextRhfInput } from "./fields/TextRhfInput";
 import { PasswordRhfInput } from "./fields/PasswordRhfInput";
+import { translateApiError } from "~/utils/error";
 
 type LoginFormProps = {
   onDone?: () => void;
@@ -25,9 +26,7 @@ export function LoginForm({ onDone, onCancel }: LoginFormProps) {
     email: z
       .email(t("login.email.invalidFormat"))
       .min(1, t("login.email.required")),
-    password: z
-      .string()
-      .min(1, t("login.password.required")),
+    password: z.string().min(1, t("login.password.required")),
   });
 
   type FormData = z.infer<typeof schema>;
@@ -61,8 +60,7 @@ export function LoginForm({ onDone, onCancel }: LoginFormProps) {
         onDone?.();
       })
       .catch((error) => {
-        const msg = error.data?.error || t("login.error");
-        toast.error(String(msg));
+        toast.error(translateApiError(error, t, "login.error"));
       });
   };
 

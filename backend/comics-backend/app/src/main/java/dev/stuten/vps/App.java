@@ -8,8 +8,11 @@ import java.util.Map;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import dev.stuten.vps.web.ErrorCode;
+import dev.stuten.vps.web.ErrorResponse;
 import dev.stuten.vps.web.Routes;
 import io.javalin.Javalin;
+import io.javalin.http.HttpResponseException;
 import io.javalin.json.JavalinJackson;
 
 public class App {
@@ -53,7 +56,20 @@ public class App {
             ctx.status(500).json(Map.of(
                     "title", "Error",
                     "status", 500,
-                    "details", Map.of("message", e.getMessage(), "error", e.getClass().getSimpleName())));
+                    "details", ErrorResponse.buildDetails(ErrorCode.INTERNAL,
+                            "%s: %s".formatted(e.getClass().getSimpleName(), e.getMessage()), null)));
+        });
+
+        // Ensures every HTTP error has an error code, including the ones thrown by
+        // Javalin itself (invalid body, unknown route...)
+        app.exception(HttpResponseException.class, (e, ctx) -> {
+            Map<String, String> details = e.getDetails().containsKey("code")
+                    ? e.getDetails()
+                    : ErrorResponse.buildDetails(ErrorResponse.codeFromStatus(e.getStatus()), e.getMessage(), null);
+            ctx.status(e.getStatus()).json(Map.of(
+                    "title", e.getMessage(),
+                    "status", e.getStatus(),
+                    "details", details));
         });
 
         Routes.register(app);

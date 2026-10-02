@@ -9,7 +9,7 @@ import {
   useRemoveFromCollectionMutation,
 } from "~/store/services/api";
 import { compareDates, toDDmmYYYY } from "~/utils/date";
-import { createError } from "~/utils/error";
+import { createError, translateApiError } from "~/utils/error";
 import { useConfirm } from "../modals/ConfirmModalProvider";
 import { EditOwnedEditionModal } from "../modals/EditOwnedEditionModal";
 import { OwnedEditionModal } from "../modals/OwnedEditionModal";
@@ -61,14 +61,14 @@ export function OwnedEditionPricesTable({}: OwnedEditionPricesTableProps) {
   };
 
   // Query to remove from a lib
-  const [removeFromCollection, { isSuccess, isError }] =
+  const [removeFromCollection, { isSuccess, isError, error: removeError }] =
     useRemoveFromCollectionMutation();
   useEffect(() => {
     if (isSuccess) {
       toast.success(t("toast.removeFromCollection.success"));
       refetch();
     } else if (isError) {
-      toast.success(t("toast.error"));
+      toast.error(translateApiError(removeError, t, "toast.error"));
     }
   }, [isSuccess, isError]);
 

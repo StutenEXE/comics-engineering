@@ -1,6 +1,6 @@
 import { type User } from "~/models/user";
 import { BooleanCellRenderer, GenericTable } from "./GenericTable";
-import { createError, type Error } from "~/utils/error";
+import { createError, translateApiError, type Error } from "~/utils/error";
 import {
   MdDelete,
   MdModeEdit,
@@ -55,8 +55,8 @@ export function UserTable({ showActions, className }: UserTableProps) {
             refetch();
             toast.success(successMsg);
           })
-          .catch(() => {
-            toast.success(t("toast.error"));
+          .catch((error) => {
+            toast.error(translateApiError(error, t, "toast.error"));
           });
       },
     });
@@ -102,7 +102,7 @@ export function UserTable({ showActions, className }: UserTableProps) {
         }
         return (
           <div className="w-min flex gap-2 justify-center items-center">
-            <Link to={`/user/${row.original?.id}`}>
+            <Link to={`/profile/${row.original?.id}`}>
               <MdRemoveRedEye size={20} className="hover:text-green-500" />
             </Link>
             <MdModeEdit

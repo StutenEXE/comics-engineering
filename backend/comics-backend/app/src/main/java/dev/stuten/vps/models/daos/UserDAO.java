@@ -2,6 +2,7 @@ package dev.stuten.vps.models.daos;
 
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -11,8 +12,10 @@ import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
+import org.jooq.UpdateSetMoreStep;
 import org.mindrot.jbcrypt.BCrypt;
 
+import dev.stuten.vps.jooq.tables.records.UsersRecord;
 import dev.stuten.vps.models.dtos.full.UserDTO;
 import dev.stuten.vps.models.dtos.full.UserWithPasswordDTO;
 import dev.stuten.vps.models.mappers.UserMapper;
@@ -104,6 +107,23 @@ public class UserDAO extends DAO {
 
     public Optional<UserWithPasswordDTO> findByEmailWithPassword(String email) {
         return selectOne(USERS.EMAIL.eq(email), UserMapper::mapToPasswordDTO);
+    }
+
+    public Optional<UserWithPasswordDTO> findByIdWithPassword(Integer id) {
+        return selectOne(USERS.ID.eq(id), UserMapper::mapToPasswordDTO);
+    }
+
+    public Boolean update(Integer id, String username, String email, String newPassword) {
+        UpdateSetMoreStep<UsersRecord> query = DSL().update(USERS)
+                .set(USERS.USERNAME, username)
+                .set(USERS.EMAIL, email)
+                .set(USERS.MODIFIED_AT, LocalDateTime.now());
+        // Only change the password if a new one is provided
+        if (newPassword != null && !newPassword.isBlank()) {
+            // 12 log rounds for security and performance
+            query = query.set(USERS.PASSWORD, BCrypt.hashpw(newPassword, BCrypt.gensalt(12)));
+        }
+        return query.where(USERS.ID.eq(id)).execute() > 0;
     }
 
     public List<UserDTO> getUsers(Integer from, Integer limit) {

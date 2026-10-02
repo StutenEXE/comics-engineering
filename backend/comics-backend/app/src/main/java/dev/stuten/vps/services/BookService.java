@@ -8,6 +8,7 @@ import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.BookDAO;
 import dev.stuten.vps.models.dtos.full.BookDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
+import dev.stuten.vps.web.ErrorCode;
 import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -29,7 +30,7 @@ public class BookService {
         try {
             id = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
             return; // For compiler
         }
 
@@ -37,7 +38,7 @@ public class BookService {
         Optional<BookDTO> book = dao.findById(id);
         if (book.isEmpty()) {
             String message = String.format("Book of id %s not found", id);
-            ErrorResponse.send(HttpStatus.NOT_FOUND, "Book not found", message);
+            ErrorResponse.send(HttpStatus.NOT_FOUND, ErrorCode.BOOK_NOT_FOUND, message);
         }
 
         ctx.json(Map.of("book", book));
@@ -49,7 +50,7 @@ public class BookService {
         try {
             serieID = Integer.parseInt(ctx.queryParam("id"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing ID or NaN ID");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
             return; // For compiler
         }
 
@@ -65,12 +66,12 @@ public class BookService {
             from = Integer.parseInt(ctx.queryParam("from"));
             limit = Integer.parseInt(ctx.queryParam("limit"));
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "Invalid request", "Missing 'from' or 'limit' or NaN 'from' or 'limit'");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_PAGINATION, "Missing 'from' or 'limit' or NaN 'from' or 'limit'");
             return; // For compiler
         }
 
         if (from < 0 || limit <= 0) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, "", "'from' < 0 or 'limit' <= 0");
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_PAGINATION, "'from' < 0 or 'limit' <= 0");
         }
 
         // Retreive books

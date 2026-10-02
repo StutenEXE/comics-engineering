@@ -20,6 +20,9 @@ export default [
     route("reading", "pages/stash/reading.tsx"),
   ]),
 
+  route("profile", "pages/profile.tsx", { id: "own-profile" }),
+  route("profile/:id", "pages/profile.tsx"),
+
   route("users", "pages/users.tsx"),
   route("contributions", "pages/contributions.tsx"),
 ] satisfies RouteConfig;

@@ -1,3 +1,4 @@
+import { translateApiError } from "~/utils/error";
 import { useEffect, useRef, useState } from "react";
 import { GenericButton } from "~/components/buttons/GenericButton";
 import { ContributionBundleModal } from "~/components/modals/contribution/ContributionBundleModal";
@@ -30,12 +31,13 @@ export default function ContributePage() {
   const { isAuthenticated, user } = useAppSelector((state) => state.user);
 
   // Submit a contribution bundle
-  const [submitBundle, { isError, isSuccess }] =
+  const [submitBundle, { isError, isSuccess, error: submitError }] =
     useSubmitContributionBundleMutation();
 
   // If error or success occurs during contribution submission
   useEffect(() => {
-    if (isError) toast.error(t("contribute.fail"));
+    if (isError)
+      toast.error(translateApiError(submitError, t, "contribute.fail"));
   }, [isError]);
   useEffect(() => {
     if (isSuccess) {

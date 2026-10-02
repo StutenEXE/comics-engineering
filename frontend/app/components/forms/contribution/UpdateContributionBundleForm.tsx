@@ -1,3 +1,4 @@
+import { translateApiError } from "~/utils/error";
 import { useToast } from "~/components/toast/Toast";
 import { useTranslation } from "~/i18n/i18n";
 import {
@@ -37,7 +38,9 @@ export function UpdateContributionBundleForm({
   const triggerCreation = (contribution: Partial<SimpleContribution>) => {
     return createContribution(contribution).then((result) => {
       if ("error" in result) {
-        toast.error(t("contribution.create.error"));
+        toast.error(
+          translateApiError(result.error, t, "contribution.create.error"),
+        );
         return false;
       }
       toast.success(t("contribution.create.success"));
@@ -48,7 +51,9 @@ export function UpdateContributionBundleForm({
   const triggerUpdate = (contribution: Partial<SimpleContribution>) => {
     return updateContribution(contribution).then((result) => {
       if ("error" in result) {
-        toast.error(t("contribution.update.error"));
+        toast.error(
+          translateApiError(result.error, t, "contribution.update.error"),
+        );
         return false;
       }
       toast.success(t("contribution.update.success"));
