@@ -6,37 +6,55 @@ import {
   type SimpleContributionBundle,
 } from "~/models/contributionBundle";
 import { useAppSelector } from "~/store/hooks";
-import { useUpdateBundleStatusMutation } from "~/store/services/api";
-import { translateApiError, type Error } from "~/utils/error";
+import {
+  useBundleListQuery,
+  useUpdateBundleStatusMutation,
+} from "~/store/services/api";
+import type { BundleSortField } from "~/store/services/apiModels";
+import { createError, translateApiError } from "~/utils/error";
 import { BundleStatusBadge } from "../badges/BundleStatusBadge";
 import { useToast } from "../toast/Toast";
 import { GenericTable } from "./GenericTable";
-import { compareDates, toDDmmYYYY } from "~/utils/date";
+import { useServerTable } from "./useServerTable";
+import { toDDmmYYYY } from "~/utils/date";
 
 interface ContributionBundleTableProps {
-  bundleList: SimpleContributionBundle[] | null | undefined;
   addActions: boolean;
   onContributionClick?: (b: SimpleContributionBundle) => void;
-  onPageChange?: (page: number) => void;
   onSuccesfulStatusUpdate?: (
     b: SimpleContributionBundle,
     newStatus: ContributionBundleStatusEnum,
   ) => void;
-  isLoading?: boolean;
-  error?: Error;
   className?: string;
 }
 
 export function ContributionBundleTable({
-  bundleList,
   onContributionClick,
   onSuccesfulStatusUpdate,
-  isLoading,
-  error,
+  className,
 }: ContributionBundleTableProps) {
   const { t, locale } = useTranslation();
   const toast = useToast();
   const { user } = useAppSelector((state) => state.user);
+
+  // Pagination, sorting and filtering are done by the API, newest bundles first
+  const { control, request, filters } = useServerTable<BundleSortField>({
+    initialSorting: [{ id: "createdAt", desc: true }],
+  });
+
+  // Fetch bundles for current page
+  const { data, error, isLoading, isFetching, refetch } = useBundleListQuery(
+    {
+      ...request,
+      // Only a full number is a valid ID filter
+      id: /^\d+$/.test(filters.id ?? "") ? Number(filters.id) : undefined,
+      submitter: filters.submitter,
+      note: filters.note,
+      status: filters.status,
+    },
+    { refetchOnMountOrArgChange: true },
+  );
+  const bundles = data?.items ?? [];
 
   const [updateStatus] = useUpdateBundleStatusMutation();
 
@@ -52,6 +70,7 @@ export function ContributionBundleTable({
         return;
       }
       toast.success(t("cbundle.toast.statusupdated"));
+      refetch();
       onSuccesfulStatusUpdate?.(b, newStatus);
     });
   };
@@ -62,7 +81,9 @@ export function ContributionBundleTable({
     col.accessor("id", {
       header: t("cbundle.id"),
     }),
+    // Column IDs are the API sort fields and filter names
     col.accessor("submitterUsername", {
+      id: "submitter",
       header: t("cbundle.submitter"),
       cell: (info) => (
         <span className="hover:underline cursor-pointer">
@@ -74,17 +95,20 @@ export function ContributionBundleTable({
       header: t("cbundle.note"),
     }),
     col.accessor((row) => toDDmmYYYY(row.createdAt, locale), {
+      id: "createdAt",
       header: t("cbundle.date"),
       enableColumnFilter: false,
     }),
-    col.accessor((row) => t(`cbundle.enum.status.${row.status}`), {
+    col.accessor("status", {
+      id: "status",
       header: t("cbundle.status"),
       cell: ({ row }) => <BundleStatusBadge status={row.original.status} />,
       meta: {
         filterType: "single",
-        options: Object.values(ContributionBundleStatusEnum).map((status) =>
-          t(`cbundle.enum.status.${status}`),
-        ),
+        options: Object.values(ContributionBundleStatusEnum).map((status) => ({
+          label: t(`cbundle.enum.status.${status}`),
+          value: status,
+        })),
         placeholder: t("cbundle.status.select"),
       },
     }),
@@ -92,6 +116,7 @@ export function ContributionBundleTable({
       (row) =>
         `${t("cbundle.action.seeContributions")} (${row.nContributions})`,
       {
+        id: "nContributions",
         header: t("cbundle.contributions"),
         cell: (info) => (
           <span
@@ -147,17 +172,14 @@ export function ContributionBundleTable({
 
   return (
     <GenericTable
-      list={
-        bundleList
-          ? [...bundleList]?.sort((b1, b2) =>
-              compareDates(b2.createdAt, b1.createdAt),
-            )
-          : []
-      }
+      list={bundles}
       columns={columns}
       isLoading={isLoading}
+      isFetching={isFetching}
       emptyMessage={t("cbundle.nonefound")}
-      error={error}
+      error={createError(error)}
+      className={className}
+      server={{ ...control, rowCount: data?.total ?? 0 }}
     />
   );
 }

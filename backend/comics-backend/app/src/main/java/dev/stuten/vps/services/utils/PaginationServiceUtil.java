@@ -12,37 +12,42 @@ public class PaginationServiceUtil {
     }
 
     /**
-     * Reads the mandatory "from" and "limit" query parameters.
+     * Reads the "offset" (number of elements to skip) and "limit" (maximum
+     * number of elements returned) query parameters. A missing parameter takes
+     * its default value (see PaginationDTO).
      *
-     * @return the pagination, 400 if a parameter is missing, NaN, or out of
-     *         bounds ('from' < 0 or 'limit' <= 0)
+     * @return the pagination, 400 if a parameter is NaN or out of bounds
+     *         ('offset' < 0, 'limit' <= 0 or 'limit' > PaginationDTO.MAX_LIMIT)
      */
     public static PaginationDTO getFromContext(Context ctx) {
-        PaginationDTO pagination;
+        PaginationDTO pagination = new PaginationDTO();
         try {
-            pagination = new PaginationDTO(
-                    Integer.parseInt(ctx.queryParam("from")),
-                    Integer.parseInt(ctx.queryParam("limit")));
+            if (ctx.queryParam("offset") != null) {
+                pagination.setOffset(Integer.parseInt(ctx.queryParam("offset")));
+            }
+            if (ctx.queryParam("limit") != null) {
+                pagination.setLimit(Integer.parseInt(ctx.queryParam("limit")));
+            }
         } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_PAGINATION,
-                    "Missing 'from' or 'limit' or NaN 'from' or 'limit'");
-            return null; // For compiler
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_PAGINATION, "NaN 'offset' or 'limit'");
         }
 
-        if (pagination.getFrom() < 0 || pagination.getLimit() <= 0) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_PAGINATION, "'from' < 0 or 'limit' <= 0");
+        if (pagination.getOffset() < 0 || pagination.getLimit() <= 0
+                || pagination.getLimit() > PaginationDTO.MAX_LIMIT) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_PAGINATION,
+                    "'offset' < 0 or 'limit' not in [1, %d]".formatted(PaginationDTO.MAX_LIMIT));
         }
 
         return pagination;
     }
 
     /**
-     * Same as getFromContext, but pagination is optional : if neither "from" nor
-     * "limit" is given, returns null (meaning "no pagination", see
+     * Same as getFromContext, but pagination is optional : if neither "offset"
+     * nor "limit" is given, returns null (meaning "no pagination", see
      * DAO.selectPage).
      */
     public static PaginationDTO getOptionalFromContext(Context ctx) {
-        if (ctx.queryParam("from") == null && ctx.queryParam("limit") == null) {
+        if (ctx.queryParam("offset") == null && ctx.queryParam("limit") == null) {
             return null;
         }
         return getFromContext(ctx);

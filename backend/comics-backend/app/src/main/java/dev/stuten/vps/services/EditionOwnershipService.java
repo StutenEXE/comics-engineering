@@ -3,6 +3,7 @@ package dev.stuten.vps.services;
 import static dev.stuten.vps.services.utils.RequestServiceUtil.requireBody;
 import static dev.stuten.vps.services.utils.RequestServiceUtil.requireFound;
 import static dev.stuten.vps.services.utils.RequestServiceUtil.requireId;
+import static dev.stuten.vps.services.utils.RequestServiceUtil.requireIntParam;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -23,8 +24,14 @@ import dev.stuten.vps.models.dtos.response.UserMonthlySpendingStatsDTO.SpendingP
 import dev.stuten.vps.models.dtos.response.UserReadingStatsDTO;
 import dev.stuten.vps.models.dtos.response.UserSpendingStatsDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleOwnedEditionDTO;
+import dev.stuten.vps.models.dtos.request.search.OwnedEditionFilterDTO;
+import dev.stuten.vps.models.dtos.request.search.OwnedEditionSortingFields;
+import dev.stuten.vps.models.dtos.response.PageDTO;
 import dev.stuten.vps.services.utils.AuthServiceUtil;
+import dev.stuten.vps.services.utils.FilteringServiceUtil;
+import dev.stuten.vps.services.utils.PaginationServiceUtil;
 import dev.stuten.vps.services.utils.PriceServiceUtils;
+import dev.stuten.vps.services.utils.SortingServiceUtil;
 import dev.stuten.vps.web.ErrorCode;
 import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.Context;
@@ -107,27 +114,24 @@ public class EditionOwnershipService {
         ctx.json(Map.of("ownedEdition", ownedEdition));
     }
 
+    /**
+     * One page of a user's collection, filtered and sorted
+     */
     public static void getByUserID(Context ctx) {
-        Integer userID = requireId(ctx);
+        PageDTO<OwnedEditionDTO> ownedEditions = dao.findOwnedByUserId(
+                requireIntParam(ctx, "userId"),
+                FilteringServiceUtil.getFromContext(ctx, OwnedEditionFilterDTO.class),
+                SortingServiceUtil.getFromContext(ctx, OwnedEditionSortingFields.class),
+                PaginationServiceUtil.getFromContext(ctx));
 
-        /*
-         * // Pagination
-         * PaginationDTO pagination = PaginationServiceUtil.getFromContext(ctx);
-         * if (pagination == null) {
-         * return;
-         * }
-         * // Filtering
-         * OwnedEditionFilterDTO filter = FilteringServiceUtil.getFromContext(ctx,
-         * OwnedEditionFilterDTO.class);
-         * // Sorting
-         * 
-         * @SuppressWarnings({ "nullness", "null" })
-         * SortingDTO<OwnedEditionSortingFields> sorting =
-         * SortingServiceUtil.getFromContext(ctx,
-         * OwnedEditionSortingFields.class);
-         */
-        // Retrieve owned editions
-        List<OwnedEditionDTO> ownedEditions = dao.findOwnedByUserId(userID);
+        ctx.json(ownedEditions);
+    }
+
+    /**
+     * A user's whole collection, for views that need every owned edition at once
+     */
+    public static void getAllByUserID(Context ctx) {
+        List<OwnedEditionDTO> ownedEditions = dao.findOwnedByUserId(requireIntParam(ctx, "userId"));
 
         ctx.json(Map.of("ownedEditions", ownedEditions));
     }

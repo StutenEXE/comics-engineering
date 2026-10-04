@@ -4,7 +4,6 @@ import static dev.stuten.vps.services.utils.RequestServiceUtil.requireBody;
 import static dev.stuten.vps.services.utils.RequestServiceUtil.requireFound;
 import static dev.stuten.vps.services.utils.RequestServiceUtil.requireId;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -14,8 +13,13 @@ import dev.stuten.vps.models.dtos.full.UserDTO;
 import dev.stuten.vps.models.dtos.full.UserWithPasswordDTO;
 import dev.stuten.vps.models.dtos.request.UpdateUserDTO;
 import dev.stuten.vps.models.dtos.response.PublicUserDTO;
+import dev.stuten.vps.models.dtos.request.search.UserFilterDTO;
+import dev.stuten.vps.models.dtos.request.search.UserSortingFields;
+import dev.stuten.vps.models.dtos.response.PageDTO;
 import dev.stuten.vps.services.utils.AuthServiceUtil;
+import dev.stuten.vps.services.utils.FilteringServiceUtil;
 import dev.stuten.vps.services.utils.PaginationServiceUtil;
+import dev.stuten.vps.services.utils.SortingServiceUtil;
 import dev.stuten.vps.web.ErrorCode;
 import dev.stuten.vps.web.ErrorResponse;
 import dev.stuten.vps.web.middleware.Role;
@@ -194,9 +198,12 @@ public class UserService {
     }
 
     public static void getList(Context ctx) {
-        List<UserDTO> users = dao.getUsers(PaginationServiceUtil.getFromContext(ctx));
+        PageDTO<UserDTO> users = dao.getUsers(
+                FilteringServiceUtil.getFromContext(ctx, UserFilterDTO.class),
+                SortingServiceUtil.getFromContext(ctx, UserSortingFields.class),
+                PaginationServiceUtil.getFromContext(ctx));
 
-        ctx.json(Map.of("users", users));
+        ctx.json(users);
     }
 
     public static void delete(Context ctx) {

@@ -9,14 +9,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
+import org.jooq.impl.DSL;
 
 import dev.stuten.vps.jooq.enums.ContributionBundleStatusEnum;
+import dev.stuten.vps.models.dtos.request.search.ContributionBundleFilterDTO;
+import dev.stuten.vps.models.dtos.request.search.ContributionBundleSortingFields;
 import dev.stuten.vps.models.dtos.request.search.PaginationDTO;
+import dev.stuten.vps.models.dtos.request.search.SortingDTO;
+import dev.stuten.vps.models.dtos.response.PageDTO;
 import dev.stuten.vps.models.dtos.full.ContributionBundleDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionBundleDTO;
 import dev.stuten.vps.models.mappers.ContributionBundleMapper;
@@ -129,10 +135,25 @@ public class ContributionBundleDAO extends DAO {
                 return super.selectMany(CONTRIBUTION_BUNDLES.SUBMITTER_ID.eq(submitterId));
         }
 
-        public List<SimpleContributionBundleDTO> getSimpleBundles(PaginationDTO pagination) {
-                return selectPage(
-                                getSimpleFromClause().orderBy(CONTRIBUTION_BUNDLES.ID.asc()),
-                                pagination,
-                                ContributionBundleMapper::mapToSimpleDTO);
+        public PageDTO<SimpleContributionBundleDTO> getSimpleBundles(ContributionBundleFilterDTO filter,
+                        SortingDTO<ContributionBundleSortingFields> sorting, PaginationDTO pagination) {
+                Condition where = DSL.noCondition();
+                if (filter.getId() != null) {
+                        where = where.and(CONTRIBUTION_BUNDLES.ID.eq(filter.getId()));
+                }
+                if (filter.getSubmitter() != null) {
+                        where = where.and(USERS.USERNAME.containsIgnoreCase(filter.getSubmitter()));
+                }
+                if (filter.getNote() != null) {
+                        where = where.and(CONTRIBUTION_BUNDLES.NOTE.containsIgnoreCase(filter.getNote()));
+                }
+                if (filter.getStatus() != null) {
+                        where = where.and(CONTRIBUTION_BUNDLES.STATUS.eq(filter.getStatus()));
+                }
+
+                // Newest bundles first by default
+                return fetchPage(this::getSimpleFromClause, where,
+                                toOrderBy(sorting, CONTRIBUTION_BUNDLES.CREATED_AT.desc(), CONTRIBUTION_BUNDLES.ID),
+                                pagination, ContributionBundleMapper::mapToSimpleDTO);
         }
 }

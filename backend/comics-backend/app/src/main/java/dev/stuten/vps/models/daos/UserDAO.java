@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
@@ -18,6 +19,10 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import dev.stuten.vps.jooq.tables.records.UsersRecord;
 import dev.stuten.vps.models.dtos.request.search.PaginationDTO;
+import dev.stuten.vps.models.dtos.request.search.SortingDTO;
+import dev.stuten.vps.models.dtos.request.search.UserFilterDTO;
+import dev.stuten.vps.models.dtos.request.search.UserSortingFields;
+import dev.stuten.vps.models.dtos.response.PageDTO;
 import dev.stuten.vps.models.dtos.full.UserDTO;
 import dev.stuten.vps.models.dtos.full.UserWithPasswordDTO;
 import dev.stuten.vps.models.mappers.UserMapper;
@@ -128,8 +133,27 @@ public class UserDAO extends DAO {
         return query.where(USERS.ID.eq(id)).execute() > 0;
     }
 
-    public List<UserDTO> getUsers(PaginationDTO pagination) {
-        return selectMany(DSL.noCondition(), pagination, USERS.ID.asc());
+    public PageDTO<UserDTO> getUsers(UserFilterDTO filter, SortingDTO<UserSortingFields> sorting,
+            PaginationDTO pagination) {
+        Condition where = DSL.noCondition();
+        if (filter.getId() != null) {
+            where = where.and(USERS.ID.eq(filter.getId()));
+        }
+        if (filter.getUsername() != null) {
+            where = where.and(USERS.USERNAME.containsIgnoreCase(filter.getUsername()));
+        }
+        if (filter.getEmail() != null) {
+            where = where.and(USERS.EMAIL.containsIgnoreCase(filter.getEmail()));
+        }
+        if (filter.getIsAdmin() != null) {
+            where = where.and(USERS.IS_ADMIN.eq(filter.getIsAdmin()));
+        }
+        if (filter.getIsDeleted() != null) {
+            where = where.and(USERS.IS_DELETED.eq(filter.getIsDeleted()));
+        }
+
+        return fetchPage(this::getFullFromClause, where, toOrderBy(sorting, USERS.ID.asc(), USERS.ID),
+                pagination, getDefaultMapper());
     }
 
 }

@@ -22,10 +22,12 @@ import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
+import org.jooq.impl.DSL;
 
 import dev.stuten.vps.jooq.tables.records.BooksIssuesRecord;
 import dev.stuten.vps.models.daos.utils.ImageUploader;
 import dev.stuten.vps.models.dtos.request.search.PaginationDTO;
+import dev.stuten.vps.models.dtos.response.PageDTO;
 import dev.stuten.vps.models.dtos.full.BookDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleIssueDTO;
@@ -193,11 +195,10 @@ public class BookDAO extends ContributableDAO<BookDTO> {
                 return super.selectMany(BOOKS.SERIES_ID.eq(serieID));
         }
 
-        public List<SimpleBookDTO> findLatest(PaginationDTO pagination) {
-                return selectPage(
-                                getSimpleFromClause().orderBy(BOOKS.CREATED_AT.desc(), BOOKS.ID.desc()),
-                                pagination,
-                                BookMapper::mapToSimpleDTO);
+        public PageDTO<SimpleBookDTO> findLatest(PaginationDTO pagination) {
+                return fetchPage(this::getSimpleFromClause, DSL.noCondition(),
+                                List.of(BOOKS.CREATED_AT.desc(), BOOKS.ID.desc()),
+                                pagination, BookMapper::mapToSimpleDTO);
         }
 
         public List<BookDTO> searchByName(String query, PaginationDTO pagination) {

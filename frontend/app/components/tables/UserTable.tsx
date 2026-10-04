@@ -18,6 +18,8 @@ import {
   useUserListQuery,
 } from "~/store/services/api";
 import { toDDmmYYYY } from "~/utils/date";
+import type { UserSortField } from "~/store/services/apiModels";
+import { useServerTable } from "./useServerTable";
 
 interface UserTableProps {
   showActions?: boolean;
@@ -29,12 +31,25 @@ export function UserTable({ showActions, className }: UserTableProps) {
   const confirm = useConfirm();
   const toast = useToast();
 
+  // Pagination, sorting and filtering are done by the API
+  const { control, request, filters } = useServerTable<UserSortField>();
+  const toBoolean = (value?: string) =>
+    value === undefined ? undefined : value === "true";
+
   // Fetch users for current page
-  const { data, error, isFetching, refetch } = useUserListQuery(
-    { from: 0, limit: 10 },
+  const { data, error, isLoading, isFetching, refetch } = useUserListQuery(
+    {
+      ...request,
+      // Only a full number is a valid ID filter
+      id: /^\d+$/.test(filters.id ?? "") ? Number(filters.id) : undefined,
+      username: filters.username,
+      email: filters.email,
+      isAdmin: toBoolean(filters.isAdmin),
+      isDeleted: toBoolean(filters.isDeleted),
+    },
     { refetchOnMountOrArgChange: true },
   );
-  const users = data?.users ?? [];
+  const users = data?.items ?? [];
   const err = createError(error);
 
   const [deleteUser] = useDeleteUserMutation();
@@ -151,9 +166,11 @@ export function UserTable({ showActions, className }: UserTableProps) {
     <GenericTable
       list={users}
       columns={columns}
-      isLoading={isFetching}
+      isLoading={isLoading}
+      isFetching={isFetching}
       error={err}
       className={className}
+      server={{ ...control, rowCount: data?.total ?? 0 }}
     />
   );
 }

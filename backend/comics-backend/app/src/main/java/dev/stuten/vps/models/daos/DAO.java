@@ -3,9 +3,11 @@ package dev.stuten.vps.models.daos;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Field;
 import org.jooq.OrderField;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
@@ -14,6 +16,10 @@ import org.jooq.SelectJoinStep;
 import org.jooq.SelectLimitStep;
 
 import dev.stuten.vps.models.dtos.request.search.PaginationDTO;
+import dev.stuten.vps.models.dtos.request.search.SortableField;
+import dev.stuten.vps.models.dtos.request.search.SortingDTO;
+import dev.stuten.vps.models.dtos.request.search.SortingDTO.SortDirection;
+import dev.stuten.vps.models.dtos.response.PageDTO;
 
 public abstract class DAO {
     private final DSLContext dsl;
@@ -96,9 +102,41 @@ public abstract class DAO {
             return select.fetch(mapper);
         }
         return select
-            .offset(pagination.getFrom())
+            .offset(pagination.getOffset())
             .limit(pagination.getLimit())
             .fetch(mapper);
+    }
+
+    /**
+     * Fetches one page of a select, along with the total number of matching elements.
+     * @param from Supplies the "select from join" statement, called once for the count and once for the page
+     * @param where The filtering condition
+     * @param orderBy The ordering, should be deterministic for pagination to be stable (see toOrderBy)
+     * @return The page
+     */
+    protected <T> PageDTO<T> fetchPage(Supplier<SelectJoinStep<? extends Record>> from, Condition where,
+            List<OrderField<?>> orderBy, PaginationDTO pagination, RecordMapper<? super Record, T> mapper) {
+        int total = DSL().fetchCount(from.get().where(where));
+        List<T> items = selectPage(from.get().where(where).orderBy(orderBy), pagination, mapper);
+        return new PageDTO<>(items, total, pagination.getOffset(), pagination.getLimit());
+    }
+
+    /**
+     * Converts a requested sorting to an ordering.
+     * @param sorting The requested sorting, its field may be null
+     * @param defaultOrder The ordering used when no sorting field is requested
+     * @param tiebreaker A unique field (usually the ID), always last so the ordering is deterministic
+     * @return The ordering
+     */
+    protected <F extends Enum<F> & SortableField> List<OrderField<?>> toOrderBy(SortingDTO<F> sorting,
+            OrderField<?> defaultOrder, Field<?> tiebreaker) {
+        if (sorting == null || sorting.getField() == null) {
+            return List.of(defaultOrder, tiebreaker.asc());
+        }
+        Field<?> field = sorting.getField().getTableField();
+        return sorting.getOrder() == SortDirection.DESCENDING
+            ? List.of(field.desc(), tiebreaker.desc())
+            : List.of(field.asc(), tiebreaker.asc());
     }
 
     protected String toSearchPattern(String query) {

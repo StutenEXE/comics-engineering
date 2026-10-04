@@ -20,7 +20,7 @@ import io.javalin.http.HttpStatus;
 
 /**
  * Search endpoints. Every endpoint takes a "query" parameter, and optional
- * "from" and "limit" parameters for pagination (no pagination if omitted).
+ * "offset" and "limit" parameters for pagination (no pagination if omitted).
  */
 public class SearchService {
 
