@@ -4,16 +4,43 @@ on:
   push:
     branches:
       - main
+  # Manual run : redeploys both parts
+  workflow_dispatch:
 
 jobs:
-  deploy:
+  # Detects which parts of the app changed in the pushed commits
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.frontend == 'true' }}
+      backend: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.backend == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Filter changed paths
+        id: filter
+        if: github.event_name == 'push'
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - "frontend/**"
+              - ".github/workflows/deploy.yml"
+            backend:
+              - "backend/**"
+              - ".github/workflows/deploy.yml"
+
+  frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Frontend: Build with Vite
+      # Build with Vite
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -32,7 +59,6 @@ jobs:
           VITE_API_HOST: ${{ secrets.API_HOST }}
           VITE_SCRAPER_HOST: ${{ secrets.SCRAPER_HOST }}
 
-      # Deploy to VPS
       - name: Copy built frontend to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -44,6 +70,12 @@ jobs:
           target: "/home/debian/comics-engineering/frontend/build/client/"
           strip_components: 3   # removes "frontend/build/client" prefix
 
+  backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
       - name: SSH Deploy - pull, write secrets, restart backend
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -58,7 +90,7 @@ jobs:
             # Pull latest code
             git fetch origin main
             git reset --hard origin/main
-            
+
             # Write secrets from GitHub to .env file
             cd backend/comics-backend
             cat > .env.prod << 'ENDSECRETS'
