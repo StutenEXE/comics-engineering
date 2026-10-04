@@ -1,7 +1,12 @@
 package dev.stuten.vps.services;
 
+import static dev.stuten.vps.services.utils.RequestServiceUtil.requireBody;
+import static dev.stuten.vps.services.utils.RequestServiceUtil.requireFound;
+import static dev.stuten.vps.services.utils.RequestServiceUtil.requireId;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -18,12 +23,10 @@ import dev.stuten.vps.models.dtos.response.UserMonthlySpendingStatsDTO.SpendingP
 import dev.stuten.vps.models.dtos.response.UserReadingStatsDTO;
 import dev.stuten.vps.models.dtos.response.UserSpendingStatsDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleOwnedEditionDTO;
+import dev.stuten.vps.services.utils.AuthServiceUtil;
 import dev.stuten.vps.services.utils.PriceServiceUtils;
 import dev.stuten.vps.web.ErrorCode;
 import dev.stuten.vps.web.ErrorResponse;
-import dev.stuten.vps.web.middleware.AuthContext;
-import dev.stuten.vps.web.middleware.AuthMiddleware;
-import dev.stuten.vps.web.middleware.Role;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 
@@ -35,19 +38,14 @@ public class EditionOwnershipService {
     private static OwnedEditionDAO dao = new OwnedEditionDAO(
             JooqProvider.get());
 
+    private static final DateTimeFormatter MONTH_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM");
+
     public static void create(Context ctx) {
-        OwnedEditionDTO dto = ctx.bodyAsClass(OwnedEditionDTO.class);
+        OwnedEditionDTO dto = requireBody(ctx, OwnedEditionDTO.class);
 
         // Validate that the person creating the owned edition is the owner or an admin
-        AuthContext auth = AuthMiddleware.getCurrentSession(ctx);
-        if (auth == null) {
-            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.NOT_AUTHENTICATED, "No valid session found");
-            return;
-        }
-        if (!auth.userId().equals(dto.getUser().getId().toString()) && !auth.role().equals(Role.ADMIN)) {
-            ErrorResponse.send(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "You can only create owned editions for yourself");
-            return;
-        }
+        AuthServiceUtil.requireSelfOrAdmin(ctx, dto.getUser().getId(),
+                "You can only create owned editions for yourself");
 
         // Create owned edition
         Optional<Integer> ownedEditionId = dao.create(dto);
@@ -63,25 +61,17 @@ public class EditionOwnershipService {
     }
 
     public static void update(Context ctx) {
-        OwnedEditionDTO dto = ctx.bodyAsClass(OwnedEditionDTO.class);
+        OwnedEditionDTO dto = requireBody(ctx, OwnedEditionDTO.class);
 
         // Validate that the person updating the owned edition is the owner or an admin
-        AuthContext auth = AuthMiddleware.getCurrentSession(ctx);
-        if (auth == null) {
-            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.NOT_AUTHENTICATED, "No valid session found");
-            return;
-        }
-        if (!auth.userId().equals(dto.getUser().getId().toString()) && !auth.role().equals(Role.ADMIN)) {
-            ErrorResponse.send(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "You can only update owned editions for yourself");
-            return;
-        }
+        AuthServiceUtil.requireSelfOrAdmin(ctx, dto.getUser().getId(),
+                "You can only update owned editions for yourself");
 
         // Update owned edition
         Boolean updated = dao.update(dto);
 
         if (!updated) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.OEDITION_NOT_UPDATED, "Failed to update owned edition");
-            return;
         }
 
         // Retreive new ownership in db
@@ -91,75 +81,34 @@ public class EditionOwnershipService {
     }
 
     public static void remove(Context ctx) {
-        // Retreive ownership ID from request
-        Integer ownershipID;
-        try {
-            ownershipID = Integer.parseInt(ctx.queryParam("id"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
-            return; // For compiler
-        }
-
-        Optional<OwnedEditionDTO> optOe = dao.findOwnedById(ownershipID);
-        if (optOe.isEmpty()) {
-            ErrorResponse.send(HttpStatus.NOT_FOUND, ErrorCode.OEDITION_NOT_FOUND,
-                    "This ownerhip relation has not been found");
-            return;
-        }
-        OwnedEditionDTO oe = optOe.get();
+        Integer ownershipID = requireId(ctx);
+        OwnedEditionDTO oe = requireFound(dao.findOwnedById(ownershipID), ErrorCode.OEDITION_NOT_FOUND,
+                "Owned edition", ownershipID);
 
         // Validate that the person deleting the owned edition is the owner or an admin
-        AuthContext auth = AuthMiddleware.getCurrentSession(ctx);
-        if (auth == null) {
-            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.NOT_AUTHENTICATED, "No valid session found");
-            return;
-        }
-        if (!auth.userId().equals(oe.getUser().getId().toString()) && !auth.role().equals(Role.ADMIN)) {
-            ErrorResponse.send(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "You can only remove owned editions for yourself");
-            return;
-        }
+        AuthServiceUtil.requireSelfOrAdmin(ctx, oe.getUser().getId(),
+                "You can only remove owned editions for yourself");
 
         // Delete owned edition (remove from collection)
         Boolean removed = dao.delete(oe);
 
         if (!removed) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.OEDITION_NOT_REMOVED, "Failed to remove owned edition");
-            return;
         }
 
         ctx.status(HttpStatus.OK);
     }
 
     public static void getById(Context ctx) {
-        // Retreive user ID from request
-        Integer id;
-        try {
-            id = Integer.parseInt(ctx.queryParam("id"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
-            return; // For compiler
-        }
-
-        // Retreive owned editions
-        Optional<OwnedEditionDTO> ownedEdition = dao.findOwnedById(id);
-        if (ownedEdition.isEmpty()) {
-            String message = String.format("Owned edition of id %s not found", id);
-            ErrorResponse.send(HttpStatus.NOT_FOUND, ErrorCode.OEDITION_NOT_FOUND, message);
-            return;
-        }
+        Integer id = requireId(ctx);
+        OwnedEditionDTO ownedEdition = requireFound(dao.findOwnedById(id), ErrorCode.OEDITION_NOT_FOUND,
+                "Owned edition", id);
 
         ctx.json(Map.of("ownedEdition", ownedEdition));
     }
 
     public static void getByUserID(Context ctx) {
-        // Retreive user ID from request
-        Integer userID;
-        try {
-            userID = Integer.parseInt(ctx.queryParam("id"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
-            return;
-        }
+        Integer userID = requireId(ctx);
 
         /*
          * // Pagination
@@ -184,14 +133,7 @@ public class EditionOwnershipService {
     }
 
     public static void getUserSpendingStats(Context ctx) {
-        // Retreive user ID from request
-        Integer userID;
-        try {
-            userID = Integer.parseInt(ctx.queryParam("id"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
-            return; // For compiler
-        }
+        Integer userID = requireId(ctx);
 
         // Retrieve owned editions
         List<SimpleOwnedEditionDTO> oeditions = dao.findSimpleOwnedByUserId(userID);
@@ -279,14 +221,7 @@ public class EditionOwnershipService {
     }
 
     public static void getUserMonthlySpendingStats(Context ctx) {
-        // Retreive user ID from request
-        Integer userID;
-        try {
-            userID = Integer.parseInt(ctx.queryParam("id"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
-            return; // For compiler
-        }
+        Integer userID = requireId(ctx);
 
         // Retrieve owned editions
         List<SimpleOwnedEditionDTO> oeditions = dao.findSimpleOwnedByUserId(userID);
@@ -295,8 +230,7 @@ public class EditionOwnershipService {
         Map<String, Map<SpendingPerMonthStats, BigDecimal>> readingPerMonth = new HashMap<String, Map<SpendingPerMonthStats, BigDecimal>>();
 
         for (SimpleOwnedEditionDTO oe : oeditions) {
-            // Update the month to month spending (yyyy-MM-01)
-            String yearmonth = oe.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM")) + "-01";
+            String yearmonth = toMonthKey(oe.getDate());
             // Create month if not created yet
             if (!readingPerMonth.containsKey(yearmonth)) {
                 readingPerMonth.put(yearmonth, new HashMap<SpendingPerMonthStats, BigDecimal>(
@@ -338,14 +272,7 @@ public class EditionOwnershipService {
     }
 
     public static void getUserReadingStats(Context ctx) {
-        // Retreive user ID from request
-        Integer userID;
-        try {
-            userID = Integer.parseInt(ctx.queryParam("id"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
-            return; // For compiler
-        }
+        Integer userID = requireId(ctx);
 
         // Retrieve owned editions & issue mapping
         List<OwnedEditionDTO> oeditions = dao.findOwnedByUserId(userID);
@@ -417,14 +344,7 @@ public class EditionOwnershipService {
     }
 
     public static void getUserMonthlyReadingStats(Context ctx) {
-        // Retreive user ID from request
-        Integer userID;
-        try {
-            userID = Integer.parseInt(ctx.queryParam("id"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
-            return; // For compiler
-        }
+        Integer userID = requireId(ctx);
 
         // Retrieve owned editions
         List<OwnedEditionDTO> oeditions = dao.findOwnedByUserId(userID);
@@ -442,8 +362,7 @@ public class EditionOwnershipService {
                 booksReadWithNoDate++;
                 continue;
             }
-            // Update the month to month spending (yyyy-MM-01)
-            String yearmonth = oe.getDateRead().format(DateTimeFormatter.ofPattern("yyyy-MM")) + "-01";
+            String yearmonth = toMonthKey(oe.getDateRead());
             // Create month if not created yet
             if (!readingPerMonth.containsKey(yearmonth)) {
                 readingPerMonth.put(yearmonth, new HashMap<ReadingPerMonthStats, Integer>(
@@ -462,5 +381,12 @@ public class EditionOwnershipService {
 
         UserMonthlyReadingStatsDTO stats = new UserMonthlyReadingStatsDTO(readingPerMonth, booksReadWithNoDate);
         ctx.json(Map.of("stats", stats));
+    }
+
+    /**
+     * @return the key of the month of the date for monthly stats (yyyy-MM-01)
+     */
+    private static String toMonthKey(LocalDate date) {
+        return date.format(MONTH_FORMATTER) + "-01";
     }
 }

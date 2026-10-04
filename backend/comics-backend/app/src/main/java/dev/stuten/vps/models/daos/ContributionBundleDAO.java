@@ -16,6 +16,7 @@ import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.jooq.enums.ContributionBundleStatusEnum;
+import dev.stuten.vps.models.dtos.request.search.PaginationDTO;
 import dev.stuten.vps.models.dtos.full.ContributionBundleDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionBundleDTO;
 import dev.stuten.vps.models.mappers.ContributionBundleMapper;
@@ -128,10 +129,10 @@ public class ContributionBundleDAO extends DAO {
                 return super.selectMany(CONTRIBUTION_BUNDLES.SUBMITTER_ID.eq(submitterId));
         }
 
-        public List<SimpleContributionBundleDTO> getSimpleBundles(Integer from, Integer limit) {
-                return getSimpleFromClause()
-                                .offset(from)
-                                .limit(limit)
-                                .fetch(ContributionBundleMapper::mapToSimpleDTO);
+        public List<SimpleContributionBundleDTO> getSimpleBundles(PaginationDTO pagination) {
+                return selectPage(
+                                getSimpleFromClause().orderBy(CONTRIBUTION_BUNDLES.ID.asc()),
+                                pagination,
+                                ContributionBundleMapper::mapToSimpleDTO);
         }
 }

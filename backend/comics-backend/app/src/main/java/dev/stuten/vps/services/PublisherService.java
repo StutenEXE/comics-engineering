@@ -1,15 +1,15 @@
 package dev.stuten.vps.services;
 
+import static dev.stuten.vps.services.utils.RequestServiceUtil.requireFound;
+import static dev.stuten.vps.services.utils.RequestServiceUtil.requireId;
+
 import java.util.Map;
-import java.util.Optional;
 
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.PublisherDAO;
 import dev.stuten.vps.models.dtos.full.PublisherDTO;
 import dev.stuten.vps.web.ErrorCode;
-import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.Context;
-import io.javalin.http.HttpStatus;
 
 public class PublisherService {
 
@@ -19,21 +19,8 @@ public class PublisherService {
             JooqProvider.get());
 
     public static void getByID(Context ctx) {
-        // Retreive ID from request
-        Integer id;
-        try {
-            id = Integer.parseInt(ctx.queryParam("id"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
-            return; // For compiler
-        }
-
-        // Get publisher by id
-        Optional<PublisherDTO> publisher = dao.findById(id);
-        if (publisher.isEmpty()) {
-            String message = String.format("Publisher of id %s not found", id);
-            ErrorResponse.send(HttpStatus.NOT_FOUND, ErrorCode.PUBLISHER_NOT_FOUND, message);
-        }
+        Integer id = requireId(ctx);
+        PublisherDTO publisher = requireFound(dao.findById(id), ErrorCode.PUBLISHER_NOT_FOUND, "Publisher", id);
 
         ctx.json(Map.of("publisher", publisher));
     }

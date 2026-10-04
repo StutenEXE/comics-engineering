@@ -22,6 +22,7 @@ import org.jooq.RecordMapper;
 import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
 
+import dev.stuten.vps.models.dtos.request.search.PaginationDTO;
 import dev.stuten.vps.models.dtos.full.IssueDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleIssueSerieDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
@@ -131,9 +132,10 @@ public class IssueDAO extends ContributableDAO<IssueDTO> {
                 return super.selectOne(ISSUES.ID.eq(id));
         }
 
-        public List<IssueDTO> searchByName(String query) {
+        public List<IssueDTO> searchByName(String query, PaginationDTO pagination) {
                 String searchPattern = toSearchPattern(query);
-                return super.selectMany(ISSUES.NAME.likeIgnoreCase(searchPattern));
+                return super.selectMany(ISSUES.NAME.likeIgnoreCase(searchPattern), pagination,
+                                ISSUES.NAME.asc(), ISSUES.ID.asc());
         }
 
         public List<IssueDTO> findByBookId(Integer bookID) {

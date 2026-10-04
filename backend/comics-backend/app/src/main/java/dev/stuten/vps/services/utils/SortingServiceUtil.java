@@ -4,7 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.stuten.vps.models.dtos.request.search.SortingDTO;
+import dev.stuten.vps.web.ErrorCode;
+import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.Context;
+import io.javalin.http.HttpStatus;
 
 public class SortingServiceUtil {
 
@@ -34,8 +37,9 @@ public class SortingServiceUtil {
         try {
             return objectMapper.readValue("\"" + value + "\"", enumClass);
         } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException(
-                    "Invalid value '" + value + "' for " + enumClass.getSimpleName(), e);
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_REQUEST,
+                    "Invalid value '" + value + "' for " + enumClass.getSimpleName());
+            return null; // For compiler
         }
     }
 }

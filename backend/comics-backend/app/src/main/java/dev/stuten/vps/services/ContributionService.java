@@ -1,5 +1,10 @@
 package dev.stuten.vps.services;
 
+import static dev.stuten.vps.services.utils.RequestServiceUtil.requireBody;
+import static dev.stuten.vps.services.utils.RequestServiceUtil.requireFound;
+import static dev.stuten.vps.services.utils.RequestServiceUtil.requireId;
+
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,10 +32,9 @@ import dev.stuten.vps.models.dtos.response.ContributionsStatsDTO;
 import dev.stuten.vps.models.dtos.response.ContributionsStatsDTO.ContributionStatusStatsDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionDTO;
 import dev.stuten.vps.models.dtos.template.IdDTO;
+import dev.stuten.vps.services.utils.AuthServiceUtil;
 import dev.stuten.vps.web.ErrorCode;
 import dev.stuten.vps.web.ErrorResponse;
-import dev.stuten.vps.web.middleware.AuthMiddleware;
-import dev.stuten.vps.web.middleware.Role;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 
@@ -120,20 +124,10 @@ public class ContributionService {
     }
 
     public static void create(Context ctx) {
-        if (!AuthMiddleware.isAuthenticated(ctx)) {
-            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.NOT_AUTHENTICATED, "User must be logged in");
-            return;
-        }
+        AuthServiceUtil.requireSession(ctx);
+        SimpleContributionDTO<? extends IdDTO> contribution = requireBody(ctx, SimpleContributionDTO.class);
 
-        SimpleContributionDTO<? extends IdDTO> contribution;
-        try {
-            contribution = ctx.bodyAsClass(SimpleContributionDTO.class);
-        } catch (Exception e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_REQUEST, "Invalid JSON body");
-            return;
-        }
-        SimpleContributionDTO<? extends IdDTO> newContribution = contribution;
-        Optional<Integer> contributionId = Transactions.run(tx -> createContribution(newContribution, tx));
+        Optional<Integer> contributionId = Transactions.run(tx -> createContribution(contribution, tx));
 
         ContributionDTO<? extends IdDTO> createdContribution = contributionDAO.findById(contributionId.get()).get();
 
@@ -141,61 +135,32 @@ public class ContributionService {
     }
 
     public static void update(Context ctx) {
-        if (!AuthMiddleware.isAuthenticated(ctx)) {
-            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.NOT_AUTHENTICATED, "User must be logged in");
-            return;
-        }
-
-        SimpleContributionDTO<? extends IdDTO> contribution;
-        try {
-            contribution = ctx.bodyAsClass(SimpleContributionDTO.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_REQUEST, "Invalid JSON body");
-            return;
-        }
+        AuthServiceUtil.requireSession(ctx);
+        SimpleContributionDTO<? extends IdDTO> contribution = requireBody(ctx, SimpleContributionDTO.class);
 
         if (contribution.getStatus() == ContributionStatusEnum.approved
                 || contribution.getStatus() == ContributionStatusEnum.rejected) {
             String message = "Cannot update contribution with already accepted or rejected status";
             ErrorResponse.send(HttpStatus.METHOD_NOT_ALLOWED, ErrorCode.CONTRIBUTION_ALREADY_CLOSED, message);
-            return;
         }
 
         boolean updated = contributionDAO.update(contribution);
         if (!updated) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.CONTRIBUTION_NOT_UPDATED, "Failed to update contribution");
-            return;
         }
 
         ctx.status(HttpStatus.CREATED).json(Map.of("contribution", contribution));
     }
 
     public static void updateStatus(Context ctx) {
-        if (!AuthMiddleware.isAuthenticated(ctx)) {
-            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.NOT_AUTHENTICATED, "User must be logged in");
-            return;
-        }
-        if (!AuthMiddleware.hasRole(ctx, Role.ADMIN)) {
-            ErrorResponse.send(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "Only admins can update contributions");
-            return;
-        }
+        AuthServiceUtil.requireAdmin(ctx, "Only admins can update contributions");
+        UpdateContributionStatusDTO updateDTO = requireBody(ctx, UpdateContributionStatusDTO.class);
 
-        UpdateContributionStatusDTO updateDTO;
-        try {
-            updateDTO = ctx.bodyAsClass(UpdateContributionStatusDTO.class);
-        } catch (Exception e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_REQUEST, "Invalid JSON body");
-            return;
-        }
-
-        Optional<ContributionDTO<? extends IdDTO>> contribution = contributionDAO.findById(updateDTO.contributionId());
-        if (contribution.isEmpty()) {
-            String message = String.format("Contribution of id %s not found", updateDTO.contributionId());
-            ErrorResponse.send(HttpStatus.NOT_FOUND, ErrorCode.CONTRIBUTION_NOT_FOUND, message);
-        }
+        ContributionDTO<? extends IdDTO> contribution = requireFound(
+                contributionDAO.findById(updateDTO.contributionId()),
+                ErrorCode.CONTRIBUTION_NOT_FOUND, "Contribution", updateDTO.contributionId());
         // If the new status changes nothing
-        ContributionStatusEnum previousStatus = contribution.get().getStatus();
+        ContributionStatusEnum previousStatus = contribution.getStatus();
         if (previousStatus == updateDTO.newStatus()) {
             String message = "Contribution already has this status : %s".formatted(previousStatus);
             ErrorResponse.send(HttpStatus.METHOD_NOT_ALLOWED, ErrorCode.CONTRIBUTION_SAME_STATUS, message);
@@ -236,67 +201,34 @@ public class ContributionService {
     }
 
     public static void getStats(Context ctx) {
-        // Counts the total number of contributions
-        Integer total = 0;
-        // For each status of contribution, get all stats
-        Map<ContributionStatusEnum, ContributionStatusStatsDTO> statusStats = new HashMap<ContributionStatusEnum, ContributionStatusStatsDTO>();
+        // Get all contributions
+        List<ContributionDTO<? extends IdDTO>> contributions = Arrays.stream(ContributionStatusEnum.values())
+                .flatMap(status -> contributionDAO.findByStatus(status).stream())
+                .toList();
 
-        // For each possible status, calculate stats
-        for (ContributionStatusEnum status : ContributionStatusEnum.values()) {
-            // For each possible contribution type, calculate stats
-            Map<ContributionTypeEnum, Integer> typeStats = new HashMap<ContributionTypeEnum, Integer>();
-            // Init for all types
-            for (ContributionTypeEnum type : ContributionTypeEnum.values()) {
-                typeStats.put(type, 0);
-            }
-            // Group count of contributions by type
-            List<ContributionDTO<? extends IdDTO>> contributions = contributionDAO.findByStatus(status);
-            contributions.forEach(c -> {
-                Integer currentCount = typeStats.get(c.getEntityType());
-                typeStats.put(c.getEntityType(), currentCount + 1);
-            });
-            // Calculate the total number of contributions for this status
-            Integer totalStatus = contributions.size();
-            statusStats.put(status, new ContributionStatusStatsDTO(totalStatus, typeStats));
-            // Add number of contrib for this status to the total count
-            total += totalStatus;
-        }
-
-        ctx.json(Map.of("stats", new ContributionsStatsDTO(total, statusStats)));
+        ctx.json(Map.of("stats", buildStats(contributions)));
     }
 
     public static void getBySubmitterId(Context ctx) {
-        // Retreive submitter ID from request
-        Integer submitterId;
-        try {
-            submitterId = Integer.parseInt(ctx.queryParam("id"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
-            return; // For compiler
-        }
-
-        // Retreive contributions
-        List<ContributionDTO<? extends IdDTO>> contributions = contributionDAO.findBySubmitterId(submitterId);
+        List<ContributionDTO<? extends IdDTO>> contributions = contributionDAO.findBySubmitterId(requireId(ctx));
 
         ctx.json(Map.of("contributions", contributions));
     }
 
     public static void getStatsBySubmitterId(Context ctx) {
-        // Retreive submitter ID from request
-        Integer submitterId;
-        try {
-            submitterId = Integer.parseInt(ctx.queryParam("id"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
-            return; // For compiler
-        }
+        List<ContributionDTO<? extends IdDTO>> contributions = contributionDAO.findBySubmitterId(requireId(ctx));
 
+        ctx.json(Map.of("stats", buildStats(contributions)));
+    }
+
+    /**
+     * Counts the given contributions by status, and by type for each status
+     */
+    private static ContributionsStatsDTO buildStats(List<ContributionDTO<? extends IdDTO>> contributions) {
         // Counts the total number of contributions
         Integer total = 0;
         // For each status of contribution, get all stats
         Map<ContributionStatusEnum, ContributionStatusStatsDTO> statusStats = new HashMap<ContributionStatusEnum, ContributionStatusStatsDTO>();
-        // Get all contributions
-        List<ContributionDTO<? extends IdDTO>> contributions = contributionDAO.findBySubmitterId(submitterId);
 
         // For each possible status, calculate stats
         for (ContributionStatusEnum status : ContributionStatusEnum.values()) {
@@ -322,6 +254,6 @@ public class ContributionService {
             total += totalStatus;
         }
 
-        ctx.json(Map.of("stats", new ContributionsStatsDTO(total, statusStats)));
+        return new ContributionsStatsDTO(total, statusStats);
     }
 }

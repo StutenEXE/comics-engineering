@@ -1,5 +1,9 @@
 package dev.stuten.vps.services;
 
+import static dev.stuten.vps.services.utils.RequestServiceUtil.requireBody;
+import static dev.stuten.vps.services.utils.RequestServiceUtil.requireFound;
+import static dev.stuten.vps.services.utils.RequestServiceUtil.requireId;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,11 +16,10 @@ import dev.stuten.vps.models.dtos.request.UpdateContributionBundleStatusDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionBundleDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionDTO;
 import dev.stuten.vps.models.dtos.template.IdDTO;
+import dev.stuten.vps.services.utils.AuthServiceUtil;
+import dev.stuten.vps.services.utils.PaginationServiceUtil;
 import dev.stuten.vps.web.ErrorCode;
 import dev.stuten.vps.web.ErrorResponse;
-import dev.stuten.vps.web.middleware.AuthContext;
-import dev.stuten.vps.web.middleware.AuthMiddleware;
-import dev.stuten.vps.web.middleware.Role;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 
@@ -28,30 +31,14 @@ public class ContributionBundleService {
     private static ContributionBundleDAO dao = new ContributionBundleDAO(JooqProvider.get());
 
     public static void submit(Context ctx) {
-        AuthContext auth = AuthMiddleware.getCurrentSession(ctx);
-        if (auth == null) {
-            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.NOT_AUTHENTICATED, "User must be logged in");
-            return;
-        }
-
-        ContributionBundleDTO bundle;
-        try {
-            bundle = ctx.bodyAsClass(ContributionBundleDTO.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_REQUEST, "Invalid JSON body");
-            return;
-        }
+        AuthServiceUtil.requireSession(ctx);
+        ContributionBundleDTO bundle = requireBody(ctx, ContributionBundleDTO.class);
 
         // Validate bundle
-        if (bundle.getSubmitter().getId() != Integer.parseInt(auth.userId())
-                && !AuthMiddleware.hasRole(ctx, Role.ADMIN)) {
-            ErrorResponse.send(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "You can only submit contributions for yourself");
-            return;
-        }
+        AuthServiceUtil.requireSelfOrAdmin(ctx, bundle.getSubmitter().getId(),
+                "You can only submit contributions for yourself");
         if (bundle.getContributions() == null || bundle.getContributions().isEmpty()) {
             ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.BUNDLE_EMPTY, "Contributions cannot be empty");
-            return;
         }
 
         // Validate contributions
@@ -59,21 +46,19 @@ public class ContributionBundleService {
             if (contrib.getEntityType() == null || contrib.getAction() == null) {
                 ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_REQUEST,
                         "Each contribution must have entityType and action");
-                return;
             }
         }
 
         // Create the bundle and its contributions in a single transaction : if one
         // contribution fails, nothing is created
-        ContributionBundleDTO newBundleData = bundle;
         Integer bundleId = Transactions.run(tx -> {
             // Create contribution bundle
-            Optional<Integer> createdId = new ContributionBundleDAO(tx.dsl()).create(newBundleData);
+            Optional<Integer> createdId = new ContributionBundleDAO(tx.dsl()).create(bundle);
             if (createdId.isEmpty()) {
                 ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.BUNDLE_NOT_CREATED, "");
             }
             // Create contributions
-            for (SimpleContributionDTO<? extends IdDTO> contrib : newBundleData.getContributions()) {
+            for (SimpleContributionDTO<? extends IdDTO> contrib : bundle.getContributions()) {
                 contrib.setBundleId(createdId.get());
                 try {
                     ContributionService.createContribution(contrib, tx);
@@ -91,118 +76,50 @@ public class ContributionBundleService {
     }
 
     public static void update(Context ctx) {
-        AuthContext auth = AuthMiddleware.getCurrentSession(ctx);
-        if (auth == null) {
-            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.NOT_AUTHENTICATED, "User must be logged in");
-            return;
-        }
-
-        ContributionBundleDTO bundle;
-        try {
-            bundle = ctx.bodyAsClass(ContributionBundleDTO.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_REQUEST, "Invalid JSON body");
-            return;
-        }
+        AuthServiceUtil.requireSession(ctx);
+        ContributionBundleDTO bundle = requireBody(ctx, ContributionBundleDTO.class);
 
         // Validate bundle
-        if (bundle.getSubmitter().getId() != Integer.parseInt(auth.userId())
-                && !AuthMiddleware.hasRole(ctx, Role.ADMIN)) {
-            ErrorResponse.send(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "You can only update contributions for yourself");
-            return;
-        }
+        AuthServiceUtil.requireSelfOrAdmin(ctx, bundle.getSubmitter().getId(),
+                "You can only update contributions for yourself");
 
         // Update contribution bundle
         Boolean updated = dao.update(bundle);
         if (!updated) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.BUNDLE_NOT_UPDATED, "");
-            return;
         }
 
         ctx.status(HttpStatus.CREATED).json(Map.of("bundle", bundle));
     }
 
     public static void updateStatus(Context ctx) {
-        if (!AuthMiddleware.isAuthenticated(ctx)) {
-            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.NOT_AUTHENTICATED, "User must be logged in");
-            return;
-        }
-        if (!AuthMiddleware.hasRole(ctx, Role.ADMIN)) {
-            ErrorResponse.send(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "Only admins can update bundle status");
-            return;
-        }
-
-        UpdateContributionBundleStatusDTO statusDTO;
-        try {
-            statusDTO = ctx.bodyAsClass(UpdateContributionBundleStatusDTO.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_REQUEST, "Invalid JSON body");
-            return;
-        }
+        AuthServiceUtil.requireAdmin(ctx, "Only admins can update bundle status");
+        UpdateContributionBundleStatusDTO statusDTO = requireBody(ctx, UpdateContributionBundleStatusDTO.class);
 
         boolean updated = dao.updateStatus(statusDTO.bundleId(), statusDTO.newStatus());
         if (!updated) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.BUNDLE_STATUS_NOT_UPDATED, "");
-            return;
         }
 
         ctx.status(HttpStatus.OK);
     }
 
     public static void getById(Context ctx) {
-        // Retrieve ID from request
-        Integer id;
-        try {
-            id = Integer.parseInt(ctx.queryParam("id"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
-            return; // For compiler
-        }
-
-        // Retrieve bundle
-        Optional<ContributionBundleDTO> bundle = dao.findById(id);
-        if (bundle.isEmpty()) {
-            String message = String.format("Contribution bundle of id %s not found", id);
-            ErrorResponse.send(HttpStatus.NOT_FOUND, ErrorCode.BUNDLE_NOT_FOUND, message);
-        }
+        Integer id = requireId(ctx);
+        ContributionBundleDTO bundle = requireFound(dao.findById(id), ErrorCode.BUNDLE_NOT_FOUND,
+                "Contribution bundle", id);
 
         ctx.json(Map.of("bundle", bundle));
     }
 
     public static void getBySubmitterId(Context ctx) {
-        // Retreive submitter ID from request
-        Integer submitterId;
-        try {
-            submitterId = Integer.parseInt(ctx.queryParam("id"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
-            return; // For compiler
-        }
-
-        // Retrieve bundles
-        List<ContributionBundleDTO> bundles = dao.findBySubmitterId(submitterId);
+        List<ContributionBundleDTO> bundles = dao.findBySubmitterId(requireId(ctx));
 
         ctx.json(Map.of("bundles", bundles));
     }
 
     public static void getAll(Context ctx) {
-        Integer from, limit;
-        try {
-            from = Integer.parseInt(ctx.queryParam("from"));
-            limit = Integer.parseInt(ctx.queryParam("limit"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_PAGINATION,
-                    "Missing 'from' or 'limit' or NaN 'from' or 'limit'");
-            return; // For compiler
-        }
-        if (from < 0 || limit <= 0) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_PAGINATION, "'from' < 0 or 'limit' <= 0");
-        }
-
-        // Retreive users
-        List<SimpleContributionBundleDTO> bundles = dao.getSimpleBundles(from, limit);
+        List<SimpleContributionBundleDTO> bundles = dao.getSimpleBundles(PaginationServiceUtil.getFromContext(ctx));
 
         ctx.json(Map.of("bundles", bundles));
     }

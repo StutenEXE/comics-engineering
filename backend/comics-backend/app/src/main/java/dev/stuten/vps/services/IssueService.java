@@ -1,16 +1,16 @@
 package dev.stuten.vps.services;
 
+import static dev.stuten.vps.services.utils.RequestServiceUtil.requireFound;
+import static dev.stuten.vps.services.utils.RequestServiceUtil.requireId;
+
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.IssueDAO;
 import dev.stuten.vps.models.dtos.full.IssueDTO;
 import dev.stuten.vps.web.ErrorCode;
-import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.Context;
-import io.javalin.http.HttpStatus;
 
 public class IssueService {
 
@@ -21,53 +21,20 @@ public class IssueService {
             JooqProvider.get());
 
     public static void getById(Context ctx) {
-        // Retreive ID from request
-        Integer id;
-        try {
-            id = Integer.parseInt(ctx.queryParam("id"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
-            return; // For compiler
-        }
-
-        // Get issue by id
-        Optional<IssueDTO> issue = dao.findById(id);
-        if (issue.isEmpty()) {
-            String message = String.format("Issue of id %s not found", id);
-            ErrorResponse.send(HttpStatus.NOT_FOUND, ErrorCode.ISSUE_NOT_FOUND, message);
-        }
+        Integer id = requireId(ctx);
+        IssueDTO issue = requireFound(dao.findById(id), ErrorCode.ISSUE_NOT_FOUND, "Issue", id);
 
         ctx.json(Map.of("issue", issue));
     }
 
     public static void getByBookId(Context ctx) {
-        // Retreive book ID from request
-        Integer bookID;
-        try {
-            bookID = Integer.parseInt(ctx.queryParam("id"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
-            return; // For compiler
-        }
-
-        // Retreive issues
-        List<IssueDTO> issues = dao.findByBookId(bookID);
+        List<IssueDTO> issues = dao.findByBookId(requireId(ctx));
 
         ctx.json(Map.of("issues", issues));
     }
 
     public static void getBySerieId(Context ctx) {
-        // Retreive serie ID from request
-        Integer serieID;
-        try {
-            serieID = Integer.parseInt(ctx.queryParam("id"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
-            return; // For compiler
-        }
-
-        // Retreive issues
-        List<IssueDTO> issues = dao.findBySerieId(serieID);
+        List<IssueDTO> issues = dao.findBySerieId(requireId(ctx));
 
         ctx.json(Map.of("issues", issues));
     }
