@@ -6,10 +6,14 @@ import java.util.Optional;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.OrderField;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
+import org.jooq.SelectLimitStep;
+
+import dev.stuten.vps.models.dtos.request.search.PaginationDTO;
 
 public abstract class DAO {
     private final DSLContext dsl;
@@ -65,6 +69,36 @@ public abstract class DAO {
 
     protected <T> List<T> selectMany(Condition where) {
         return selectMany(where, getDefaultMapper());
+    }
+
+    /**
+     * Same as selectMany, with ordering and pagination.
+     * @param pagination The pagination, null to fetch every result
+     * @param orderBy The ordering, should be deterministic for pagination to be stable
+     */
+    protected <T> List<T> selectMany(Condition where, PaginationDTO pagination, OrderField<?>... orderBy) {
+        return selectPage(
+            getFullFromClause()
+                .where(where)
+                .orderBy(orderBy),
+            pagination,
+            getDefaultMapper());
+    }
+
+    /**
+     * Fetches one page of the given select.
+     * @param pagination The pagination, null to fetch every result
+     * @return The elements of the page
+     */
+    protected <T> List<T> selectPage(SelectLimitStep<? extends Record> select, PaginationDTO pagination,
+            RecordMapper<? super Record, T> mapper) {
+        if (pagination == null) {
+            return select.fetch(mapper);
+        }
+        return select
+            .offset(pagination.getFrom())
+            .limit(pagination.getLimit())
+            .fetch(mapper);
     }
 
     protected String toSearchPattern(String query) {

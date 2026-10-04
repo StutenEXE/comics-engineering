@@ -1,6 +1,7 @@
 package dev.stuten.vps.services;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,19 +11,31 @@ import dev.stuten.vps.models.daos.IssueDAO;
 import dev.stuten.vps.models.daos.IssueSerieDAO;
 import dev.stuten.vps.models.daos.PublisherDAO;
 import dev.stuten.vps.models.daos.SerieDAO;
-import dev.stuten.vps.models.dtos.full.BookDTO;
-import dev.stuten.vps.models.dtos.full.IssueDTO;
-import dev.stuten.vps.models.dtos.full.IssueSerieDTO;
-import dev.stuten.vps.models.dtos.full.PublisherDTO;
-import dev.stuten.vps.models.dtos.full.SerieDTO;
+import dev.stuten.vps.models.dtos.request.search.PaginationDTO;
+import dev.stuten.vps.services.utils.PaginationServiceUtil;
 import dev.stuten.vps.web.ErrorCode;
 import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 
+/**
+ * Search endpoints. Every endpoint takes a "query" parameter, and optional
+ * "from" and "limit" parameters for pagination (no pagination if omitted).
+ */
 public class SearchService {
 
     private SearchService() {
+    }
+
+    // Too broad queries (shorter than this) return no results
+    private static final int MIN_QUERY_LENGTH = 3;
+
+    /**
+     * A search on one type of entity
+     */
+    @FunctionalInterface
+    private interface Searcher {
+        List<?> search(String query, PaginationDTO pagination);
     }
 
     private static BookDAO bookDao = new BookDAO(
@@ -40,147 +53,68 @@ public class SearchService {
     private static IssueSerieDAO issueSeriesDao = new IssueSerieDAO(
             JooqProvider.get());
 
+    // Entities that can be searched with searchAll, by type name
+    private static final Map<String, Searcher> SEARCHABLE_TYPES = Map.of(
+            "books", bookDao::searchByName,
+            "series", serieDao::searchByName,
+            "issues", issueDao::searchByName,
+            "issueseries", issueSeriesDao::searchByName);
+
     public static void searchAll(Context ctx) {
-        // Retreive query from request
-        String query = "";
-        List<String> types = Arrays.asList();
-        try {
-            query = ctx.queryParam("query");
-            String typesParam = ctx.queryParam("types");
-            if (typesParam != null) {
-                types = Arrays.asList(typesParam.split(","));
-            }
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_QUERY, "Missing query");
-            return; // For compiler
-        }
+        String query = getQuery(ctx);
+        PaginationDTO pagination = PaginationServiceUtil.getOptionalFromContext(ctx);
+        String typesParam = ctx.queryParam("types");
+        List<String> types = typesParam == null ? List.of() : Arrays.asList(typesParam.split(","));
 
-        // Lists of elements to retreive
-        List<BookDTO> books = Arrays.asList();
-        List<SerieDTO> series = Arrays.asList();
-        List<IssueDTO> issues = Arrays.asList();
-        List<IssueSerieDTO> issueseries = Arrays.asList();
+        // Every type is always in the response, empty if not requested
+        Map<String, Object> results = new HashMap<>();
+        results.put("editions", List.of());
+        SEARCHABLE_TYPES.forEach((type, searcher) -> results.put(type,
+                types.contains(type) ? search(searcher, query, MIN_QUERY_LENGTH, pagination) : List.of()));
 
-        // To broad queries are not handled
-        if (query.length() < 3) {
-            ctx.json(Map.of(
-                    "books", books,
-                    "series", series,
-                    "issues", issues,
-                    "issueseries", issueseries));
-            return;
-        }
-
-        // Retreive books
-        if (types.contains("books")) {
-            books = bookDao.searchByName(query);
-        }
-        if (types.contains("series")) {
-            series = serieDao.searchByName(query);
-        }
-        if (types.contains("issues")) {
-            issues = issueDao.searchByName(query);
-        }
-        if (types.contains("issueseries")) {
-            issueseries = issueSeriesDao.searchByName(query);
-        }
-
-        ctx.json(Map.of(
-                "editions", Arrays.asList(),
-                "books", books,
-                "series", series,
-                "issues", issues,
-                "issueseries", issueseries));
+        ctx.json(results);
     }
 
     public static void searchBooks(Context ctx) {
-        // Retreive query from request
-        String query = "";
-        try {
-            query = ctx.queryParam("query");
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_QUERY, "Missing query");
-            return; // For compiler
-        }
-
-        // Lists of elements to retreive
-        List<BookDTO> books = Arrays.asList();
-
-        // To broad queries are not handled
-        if (query.length() < 3) {
-            ctx.json(Map.of("books", books));
-            return;
-        }
-
-        // Retreive books
-        books = bookDao.searchByName(query);
-
-        ctx.json(Map.of("books", books));
+        respond(ctx, "books", bookDao::searchByName, MIN_QUERY_LENGTH);
     }
 
     public static void searchSeries(Context ctx) {
-        // Retreive query from request
-        String query = "";
-        try {
-            query = ctx.queryParam("query");
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_QUERY, "Missing query");
-            return; // For compiler
-        }
-
-        // Lists of elements to retreive
-        List<SerieDTO> series = Arrays.asList();
-
-        // To broad queries are not handled
-        if (query.length() < 3) {
-            ctx.json(Map.of("series", series));
-            return;
-        }
-
-        // Retreive series
-        series = serieDao.searchByName(query);
-
-        ctx.json(Map.of("series", series));
+        respond(ctx, "series", serieDao::searchByName, MIN_QUERY_LENGTH);
     }
 
     public static void searchPublishers(Context ctx) {
-        // Retreive query from request
-        String query = "";
-        try {
-            query = ctx.queryParam("query");
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_QUERY, "Missing query");
-            return; // For compiler
-        }
-
-        // Retreive series - Here broad queries are handled
-        List<PublisherDTO> publishers = publisherDao.searchByName(query);
-
-        ctx.json(Map.of("publishers", publishers));
+        // Here broad queries are handled
+        respond(ctx, "publishers", publisherDao::searchByName, 0);
     }
 
     public static void searchIssueSeries(Context ctx) {
-        // Retreive query from request
-        String query = "";
-        try {
-            query = ctx.queryParam("query");
-        } catch (NumberFormatException e) {
+        respond(ctx, "issueSeries", issueSeriesDao::searchByName, MIN_QUERY_LENGTH);
+    }
+
+    /**
+     * Reads the query and pagination from the request, runs the search and sends
+     * the results under the given key
+     */
+    private static void respond(Context ctx, String key, Searcher searcher, int minQueryLength) {
+        String query = getQuery(ctx);
+        PaginationDTO pagination = PaginationServiceUtil.getOptionalFromContext(ctx);
+
+        ctx.json(Map.of(key, search(searcher, query, minQueryLength, pagination)));
+    }
+
+    private static List<?> search(Searcher searcher, String query, int minQueryLength, PaginationDTO pagination) {
+        if (query.length() < minQueryLength) {
+            return List.of();
+        }
+        return searcher.search(query, pagination);
+    }
+
+    private static String getQuery(Context ctx) {
+        String query = ctx.queryParam("query");
+        if (query == null) {
             ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_QUERY, "Missing query");
-            return; // For compiler
         }
-
-        // Lists of elements to retreive
-        List<IssueSerieDTO> issueSeries = Arrays.asList();
-
-        // To broad queries are not handled
-        if (query.length() < 3) {
-            ctx.json(Map.of("issueSeries", issueSeries));
-            return;
-        }
-
-        // Retreive series - Here broad queries are handled
-        issueSeries = issueSeriesDao.searchByName(query);
-
-        ctx.json(Map.of("issueSeries", issueSeries));
+        return query;
     }
 }

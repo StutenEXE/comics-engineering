@@ -18,6 +18,7 @@ import org.jooq.RecordMapper;
 import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
 
+import dev.stuten.vps.models.dtos.request.search.PaginationDTO;
 import dev.stuten.vps.models.dtos.full.PublisherDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 import dev.stuten.vps.models.mappers.PublisherMapper;
@@ -96,8 +97,9 @@ public class PublisherDAO extends ContributableDAO<PublisherDTO> {
         return super.selectOne(PUBLISHERS.ID.eq(id));
     }
 
-    public List<PublisherDTO> searchByName(String query) {
+    public List<PublisherDTO> searchByName(String query, PaginationDTO pagination) {
         String searchPattern = toSearchPattern(query);
-        return super.selectMany(PUBLISHERS.NAME.likeIgnoreCase(searchPattern));
+        return super.selectMany(PUBLISHERS.NAME.likeIgnoreCase(searchPattern), pagination,
+                PUBLISHERS.NAME.asc(), PUBLISHERS.ID.asc());
     }
 }

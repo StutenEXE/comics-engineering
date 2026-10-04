@@ -25,6 +25,7 @@ import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.jooq.tables.records.BooksIssuesRecord;
 import dev.stuten.vps.models.daos.utils.ImageUploader;
+import dev.stuten.vps.models.dtos.request.search.PaginationDTO;
 import dev.stuten.vps.models.dtos.full.BookDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleIssueDTO;
@@ -192,16 +193,16 @@ public class BookDAO extends ContributableDAO<BookDTO> {
                 return super.selectMany(BOOKS.SERIES_ID.eq(serieID));
         }
 
-        public List<SimpleBookDTO> findLatest(Integer from, Integer limit) {
-                return getSimpleFromClause()
-                                .orderBy(BOOKS.CREATED_AT.desc())
-                                .offset(from)
-                                .limit(limit)
-                                .fetch(BookMapper::mapToSimpleDTO);
+        public List<SimpleBookDTO> findLatest(PaginationDTO pagination) {
+                return selectPage(
+                                getSimpleFromClause().orderBy(BOOKS.CREATED_AT.desc(), BOOKS.ID.desc()),
+                                pagination,
+                                BookMapper::mapToSimpleDTO);
         }
 
-        public List<BookDTO> searchByName(String query) {
+        public List<BookDTO> searchByName(String query, PaginationDTO pagination) {
                 String searchPattern = toSearchPattern(query);
-                return super.selectMany(BOOKS.NAME.likeIgnoreCase(searchPattern));
+                return super.selectMany(BOOKS.NAME.likeIgnoreCase(searchPattern), pagination,
+                                BOOKS.NAME.asc(), BOOKS.ID.asc());
         }
 }

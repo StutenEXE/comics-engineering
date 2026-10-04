@@ -1,5 +1,9 @@
 package dev.stuten.vps.services;
 
+import static dev.stuten.vps.services.utils.RequestServiceUtil.requireBody;
+import static dev.stuten.vps.services.utils.RequestServiceUtil.requireFound;
+import static dev.stuten.vps.services.utils.RequestServiceUtil.requireId;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -10,10 +14,10 @@ import dev.stuten.vps.models.dtos.full.UserDTO;
 import dev.stuten.vps.models.dtos.full.UserWithPasswordDTO;
 import dev.stuten.vps.models.dtos.request.UpdateUserDTO;
 import dev.stuten.vps.models.dtos.response.PublicUserDTO;
+import dev.stuten.vps.services.utils.AuthServiceUtil;
+import dev.stuten.vps.services.utils.PaginationServiceUtil;
 import dev.stuten.vps.web.ErrorCode;
 import dev.stuten.vps.web.ErrorResponse;
-import dev.stuten.vps.web.middleware.AuthContext;
-import dev.stuten.vps.web.middleware.AuthMiddleware;
 import dev.stuten.vps.web.middleware.Role;
 import dev.stuten.vps.web.middleware.Session;
 import dev.stuten.vps.web.middleware.SessionStore;
@@ -49,10 +53,7 @@ public class UserService {
         }
         UserDTO newUser = dao.findById(userId.get()).get();
 
-        // Log in user
-        String sessionKey = SessionStore.createSessionKey();
-        SessionStore.save(sessionKey, newUser.getId(), newUser.getIsAdmin() ? Role.ADMIN : Role.USER);
-        ctx.cookie(SessionStore.COOKIE_SESSION_KEY, sessionKey, COOKIE_TTL_SECONDS);
+        logIn(ctx, newUser);
 
         // Send back account info to the client
         ctx.json(Map.of("user", newUser));
@@ -82,13 +83,19 @@ public class UserService {
         // Remove password for safety
         UserDTO user = UserDAO.removePassword(userPwd);
 
-        // Log in user
-        String sessionKey = SessionStore.createSessionKey();
-        SessionStore.save(sessionKey, user.getId(), user.getIsAdmin() ? Role.ADMIN : Role.USER);
-        ctx.cookie(SessionStore.COOKIE_SESSION_KEY, sessionKey, COOKIE_TTL_SECONDS);
+        logIn(ctx, user);
 
         // Send back account info to the client
         ctx.json(Map.of("user", user));
+    }
+
+    /**
+     * Creates a session for the user and sets the session cookie
+     */
+    private static void logIn(Context ctx, UserDTO user) {
+        String sessionKey = SessionStore.createSessionKey();
+        SessionStore.save(sessionKey, user.getId(), user.getIsAdmin() ? Role.ADMIN : Role.USER);
+        ctx.cookie(SessionStore.COOKIE_SESSION_KEY, sessionKey, COOKIE_TTL_SECONDS);
     }
 
     public static void disconnect(Context ctx) {
@@ -126,23 +133,11 @@ public class UserService {
     }
 
     public static void getPublicProfile(Context ctx) {
-        // Retreive user ID from request
-        Integer userId;
-        try {
-            userId = Integer.parseInt(ctx.queryParam("id"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
-            return; // For compiler
-        }
+        Integer userId = requireId(ctx);
 
         // Retreive user, deleted users are not visible
-        Optional<UserDTO> optUser = dao.findById(userId);
-        if (optUser.isEmpty() || optUser.get().getIsDeleted()) {
-            String message = String.format("User of id %s not found", userId);
-            ErrorResponse.send(HttpStatus.NOT_FOUND, ErrorCode.USER_NOT_FOUND, message);
-            return; // For compiler
-        }
-        UserDTO user = optUser.get();
+        Optional<UserDTO> optUser = dao.findById(userId).filter(u -> !u.getIsDeleted());
+        UserDTO user = requireFound(optUser, ErrorCode.USER_NOT_FOUND, "User", userId);
 
         // Only send publicly visible information (no email)
         PublicUserDTO publicUser = PublicUserDTO.builder()
@@ -156,21 +151,10 @@ public class UserService {
     }
 
     public static void update(Context ctx) {
-        UpdateUserDTO dto;
-        try {
-            dto = ctx.bodyAsClass(UpdateUserDTO.class);
-        } catch (Exception e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_REQUEST, "Invalid JSON body");
-            return; // For compiler
-        }
+        UpdateUserDTO dto = requireBody(ctx, UpdateUserDTO.class);
 
         // A user can only update their own profile, ID is taken from the session
-        AuthContext auth = AuthMiddleware.getCurrentSession(ctx);
-        if (auth == null) {
-            ErrorResponse.send(HttpStatus.UNAUTHORIZED, ErrorCode.NOT_AUTHENTICATED, "No valid session found");
-            return; // For compiler
-        }
-        Integer userId = Integer.parseInt(auth.userId());
+        Integer userId = AuthServiceUtil.requireUserId(ctx);
 
         // Validate fields
         if (dto.username() == null || dto.username().isBlank()) {
@@ -210,61 +194,26 @@ public class UserService {
     }
 
     public static void getList(Context ctx) {
-        Integer from, limit;
-        try {
-            from = Integer.parseInt(ctx.queryParam("from"));
-            limit = Integer.parseInt(ctx.queryParam("limit"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_PAGINATION,
-                    "Missing 'from' or 'limit' or NaN 'from' or 'limit'");
-            return; // For compiler
-        }
-
-        if (from < 0 || limit <= 0) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_PAGINATION, "'from' < 0 or 'limit' <= 0");
-        }
-
-        // Retreive users
-        List<UserDTO> users = dao.getUsers(from, limit);
+        List<UserDTO> users = dao.getUsers(PaginationServiceUtil.getFromContext(ctx));
 
         ctx.json(Map.of("users", users));
     }
 
     public static void delete(Context ctx) {
-        // Retreive user ID from request
-        Integer userId;
-        try {
-            userId = Integer.parseInt(ctx.queryParam("id"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
-            return; // For compiler
-        }
-
-        Boolean deleted = dao.delete(userId);
+        Boolean deleted = dao.delete(requireId(ctx));
 
         if (!deleted) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.USER_NOT_DELETED, "Failed to delete user");
-            return;
         }
 
         ctx.status(HttpStatus.OK);
     }
 
     public static void recycle(Context ctx) {
-        // Retreive user ID from request
-        Integer userId;
-        try {
-            userId = Integer.parseInt(ctx.queryParam("id"));
-        } catch (NumberFormatException e) {
-            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_ID, "Missing ID or NaN ID");
-            return; // For compiler
-        }
+        Boolean recycled = dao.recycle(requireId(ctx));
 
-        Boolean deleted = dao.recycle(userId);
-
-        if (!deleted) {
+        if (!recycled) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.USER_NOT_RECYCLED, "Failed to recycle user");
-            return;
         }
 
         ctx.status(HttpStatus.OK);

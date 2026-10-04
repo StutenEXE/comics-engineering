@@ -13,9 +13,11 @@ import org.jooq.RecordMapper;
 import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
 import org.jooq.UpdateSetMoreStep;
+import org.jooq.impl.DSL;
 import org.mindrot.jbcrypt.BCrypt;
 
 import dev.stuten.vps.jooq.tables.records.UsersRecord;
+import dev.stuten.vps.models.dtos.request.search.PaginationDTO;
 import dev.stuten.vps.models.dtos.full.UserDTO;
 import dev.stuten.vps.models.dtos.full.UserWithPasswordDTO;
 import dev.stuten.vps.models.mappers.UserMapper;
@@ -126,11 +128,8 @@ public class UserDAO extends DAO {
         return query.where(USERS.ID.eq(id)).execute() > 0;
     }
 
-    public List<UserDTO> getUsers(Integer from, Integer limit) {
-        return getFullFromClause()
-                .offset(from)
-                .limit(limit)
-                .fetch(getDefaultMapper());
+    public List<UserDTO> getUsers(PaginationDTO pagination) {
+        return selectMany(DSL.noCondition(), pagination, USERS.ID.asc());
     }
 
 }
