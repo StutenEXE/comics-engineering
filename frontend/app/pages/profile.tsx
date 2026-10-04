@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { OwnedEditionCard } from "~/components/cards/OwnedEditionCard";
 import { ProfileHeader } from "~/components/headers/ProfileHeader";
 import { GenericList } from "~/components/lists/GenericList";
@@ -66,18 +66,19 @@ function Profile({ userId }: { userId: number }) {
   const { data: statsData, isFetching: isStatsFetching } =
     useContributionStatsBySubmitterIdQuery({ id: userId });
 
-  // Collection (only accessible when logged in)
+  // Latest additions to the collection, highest ids were added last (only accessible when logged in)
   const { data: collectionData, isFetching: isCollectionFetching } =
-    useCollectionQuery({ id: userId }, { skip: !isAuthenticated });
-
-  // Latest additions to the collection (highest ids were added last)
-  const latestAdditions = useMemo(
-    () =>
-      [...(collectionData?.ownedEditions ?? [])]
-        .sort((a, b) => b.id - a.id)
-        .slice(0, LATEST_ADDITIONS_COUNT),
-    [collectionData],
-  );
+    useCollectionQuery(
+      {
+        userId,
+        offset: 0,
+        limit: LATEST_ADDITIONS_COUNT,
+        sortField: "id",
+        sortDirection: "desc",
+      },
+      { skip: !isAuthenticated },
+    );
+  const latestAdditions = collectionData?.items ?? [];
 
   // Edit modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);

@@ -9,6 +9,7 @@ import java.util.Map;
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.BookDAO;
 import dev.stuten.vps.models.dtos.full.BookDTO;
+import dev.stuten.vps.models.dtos.response.PageDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
 import dev.stuten.vps.services.utils.PaginationServiceUtil;
 import dev.stuten.vps.web.ErrorCode;
@@ -35,8 +36,8 @@ public class BookService {
     }
 
     public static void getLatest(Context ctx) {
-        List<SimpleBookDTO> books = dao.findLatest(PaginationServiceUtil.getFromContext(ctx));
+        PageDTO<SimpleBookDTO> books = dao.findLatest(PaginationServiceUtil.getFromContext(ctx));
 
-        ctx.json(Map.of("books", books));
+        ctx.json(books);
     }
 }

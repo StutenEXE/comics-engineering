@@ -1,8 +1,11 @@
 package dev.stuten.vps.models.daos;
 
+import static dev.stuten.vps.jooq.tables.Books.BOOKS;
 import static dev.stuten.vps.jooq.tables.BooksIssues.BOOKS_ISSUES;
 import static dev.stuten.vps.jooq.tables.EditionOwnership.EDITION_OWNERSHIP;
 import static dev.stuten.vps.jooq.tables.Editions.EDITIONS;
+import static dev.stuten.vps.jooq.tables.Publishers.PUBLISHERS;
+import static dev.stuten.vps.jooq.tables.Series.SERIES;
 import static org.jooq.impl.DSL.countDistinct;
 
 import java.util.ArrayList;
@@ -11,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
@@ -18,6 +22,11 @@ import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.models.dtos.full.OwnedEditionDTO;
+import dev.stuten.vps.models.dtos.request.search.OwnedEditionFilterDTO;
+import dev.stuten.vps.models.dtos.request.search.OwnedEditionSortingFields;
+import dev.stuten.vps.models.dtos.request.search.PaginationDTO;
+import dev.stuten.vps.models.dtos.request.search.SortingDTO;
+import dev.stuten.vps.models.dtos.response.PageDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleOwnedEditionDTO;
 import dev.stuten.vps.models.mappers.OwnedEditionMapper;
 
@@ -117,6 +126,32 @@ public class OwnedEditionDAO extends EditionDAO {
 
     public List<OwnedEditionDTO> findOwnedByUserId(Integer userId) {
         return super.selectMany(EDITION_OWNERSHIP.USER_ID.eq(userId));
+    }
+
+    @SuppressWarnings("unchecked")
+    public PageDTO<OwnedEditionDTO> findOwnedByUserId(Integer userId, OwnedEditionFilterDTO filter,
+            SortingDTO<OwnedEditionSortingFields> sorting, PaginationDTO pagination) {
+        Condition where = EDITION_OWNERSHIP.USER_ID.eq(userId);
+        if (filter.getBookName() != null) {
+            where = where.and(BOOKS.NAME.containsIgnoreCase(filter.getBookName()));
+        }
+        if (filter.getSerieName() != null) {
+            where = where.and(SERIES.NAME.containsIgnoreCase(filter.getSerieName()));
+        }
+        if (filter.getPublisherId() != null) {
+            where = where.and(EDITIONS.PUBLISHER_ID.eq(filter.getPublisherId()));
+        }
+        if (filter.getPublisherName() != null) {
+            where = where.and(PUBLISHERS.NAME.containsIgnoreCase(filter.getPublisherName()));
+        }
+        if (filter.getRead() != null) {
+            where = where.and(EDITION_OWNERSHIP.READ.eq(filter.getRead()));
+        }
+
+        // Latest added editions first by default
+        return fetchPage(this::getFullFromClause, where,
+                toOrderBy(sorting, EDITION_OWNERSHIP.DATE.desc(), EDITION_OWNERSHIP.ID),
+                pagination, (RecordMapper<? super Record, OwnedEditionDTO>) getDefaultMapper());
     }
 
     public List<SimpleOwnedEditionDTO> findSimpleOwnedByUserId(Integer userId) {

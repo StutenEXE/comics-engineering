@@ -5,7 +5,7 @@ import { useTranslation } from "~/i18n/i18n";
 import { type OwnedEdition } from "~/models/ownedEdition";
 import { useAppSelector } from "~/store/hooks";
 import {
-  useCollectionQuery,
+  useFullCollectionQuery,
   useRemoveFromCollectionMutation,
 } from "~/store/services/api";
 import { compareDates, toDDmmYYYY } from "~/utils/date";
@@ -32,8 +32,9 @@ export function OwnedEditionPricesTable({}: OwnedEditionPricesTableProps) {
   const toast = useToast();
   const { user } = useAppSelector((state) => state.user);
 
-  const { data, isFetching, error, refetch } = useCollectionQuery(
-    { id: user ? user.id : 0 },
+  // The prices table filters on computed values (cost, savings...), it needs the whole collection
+  const { data, isFetching, error, refetch } = useFullCollectionQuery(
+    { userId: user ? user.id : 0 },
     { skip: !user },
   );
   const editionList = data?.ownedEditions ?? [];

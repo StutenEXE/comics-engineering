@@ -26,30 +26,42 @@ import {
 import { useTranslation } from "~/i18n/i18n";
 import { type Error } from "~/utils/error";
 import { SelectInput } from "../forms/fields/SelectInput";
+import type { ServerTableControl } from "./useServerTable";
 
 // Re-export ColumnDef so callers import from one place
 export type { ColumnDef };
 
 export type FilterType = "none" | "text" | "boolean" | "single" | "numrange";
 
+// Option of a "single" filter, a string is used as both label and value
+export type FilterOption = string | { label: string; value: string };
+
 interface GenericTableProps<T> {
   list?: T[];
   columns: ColumnDef<T, any>[];
+  // Shows a skeleton instead of the table
   isLoading?: boolean;
+  // Dims the rows while a new page is being fetched
+  isFetching?: boolean;
   emptyMessage?: string;
   error?: Error;
   className?: string;
   itemsPerPage?: number;
+  // When set, pagination, sorting and filtering are done by the API (see useServerTable) :
+  // `list` is the current page and `rowCount` the total number of rows
+  server?: ServerTableControl & { rowCount: number };
 }
 
 export function GenericTable<T extends Record<string, any>>({
   list,
   columns,
   isLoading,
+  isFetching,
   emptyMessage,
   error,
   className,
   itemsPerPage = 10,
+  server,
 }: GenericTableProps<T>) {
   const { t } = useTranslation();
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -61,7 +73,22 @@ export function GenericTable<T extends Record<string, any>>({
   const table = useReactTable({
     data: list ?? [],
     columns,
-    state: { sorting, pagination },
+    ...(server
+      ? {
+          state: server.state,
+          manualPagination: true,
+          manualSorting: true,
+          manualFiltering: true,
+          rowCount: server.rowCount,
+          onPaginationChange: server.onPaginationChange,
+          onSortingChange: server.onSortingChange,
+          onColumnFiltersChange: server.onColumnFiltersChange,
+        }
+      : {
+          state: { sorting, pagination },
+          onSortingChange: setSorting,
+          onPaginationChange: setPagination,
+        }),
     // Custom filter functions available to columns via `filterFn`
     filterFns: {
       arrIncludes: (row, columnId, filterValue: unknown) => {
@@ -84,10 +111,14 @@ export function GenericTable<T extends Record<string, any>>({
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
-    onPaginationChange: setPagination,
     getSortedRowModel: getSortedRowModel(),
   });
+
+  // Total number of rows (all pages) and size of a page
+  const rowCount = server
+    ? server.rowCount
+    : table.getFilteredRowModel().rows.length;
+  const { pageIndex, pageSize } = table.getState().pagination;
 
   if (isLoading) {
     return (
@@ -135,7 +166,7 @@ export function GenericTable<T extends Record<string, any>>({
                     const meta = header.column.columnDef.meta as
                       | {
                           filterType?: FilterType;
-                          options?: string[];
+                          options?: FilterOption[];
                           placeholder?: string;
                           placeholderMin?: string;
                           placeholderMax?: string;
@@ -189,9 +220,11 @@ export function GenericTable<T extends Record<string, any>>({
                           return (
                             <SelectInput
                               options={
-                                meta.options?.map((o: string) => {
-                                  return { label: o, value: o };
-                                }) || []
+                                meta.options?.map((o: FilterOption) =>
+                                  typeof o === "string"
+                                    ? { label: o, value: o }
+                                    : o,
+                                ) || []
                               }
                               value={(filterValue as string) ?? ""}
                               selectAll
@@ -328,7 +361,9 @@ export function GenericTable<T extends Record<string, any>>({
               </Fragment>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody
+            className={`transition-opacity ${isFetching ? "opacity-40" : ""}`}
+          >
             {table.getRowModel().rows.length > 0 ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
@@ -365,20 +400,17 @@ export function GenericTable<T extends Record<string, any>>({
       </div>
 
       {/* Pagination */}
-      {table.getFilteredRowModel().rows.length > 0 && (
+      {rowCount > 0 && (
         <div className="px-4 py-3 flex justify-between items-center border-t border-white/8">
           <span className="text-xs text-white/25 tabular-nums">
             {t("generic.pagination", {
               parameters: {
                 items: t("generic.items", { capitalize: true }),
-                current: table.getState().pagination.pageIndex + 1,
+                current: pageIndex + 1,
                 total: table.getPageCount(),
-                from: table.getState().pagination.pageIndex * itemsPerPage + 1,
-                to: Math.min(
-                  (table.getState().pagination.pageIndex + 1) * itemsPerPage,
-                  table.getFilteredRowModel().rows.length,
-                ),
-                count: table.getFilteredRowModel().rows.length,
+                from: pageIndex * pageSize + 1,
+                to: Math.min((pageIndex + 1) * pageSize, rowCount),
+                count: rowCount,
               },
             })}
           </span>

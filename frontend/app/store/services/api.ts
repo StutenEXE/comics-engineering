@@ -39,12 +39,20 @@ import {
   type UserCredentials,
 } from "~/models/user";
 import type {
+  BundleListFilters,
+  BundleSortField,
+  CollectionFilters,
+  CollectionSortField,
   ContributionsStats,
   OwnedEditionMonthlyReadingStats,
   OwnedEditionMonthlySpendingStats,
   OwnedEditionReadingStats,
   OwnedEditionSpendingStats,
-  Pagination,
+  Page,
+  PageRequest,
+  SortRequest,
+  UserListFilters,
+  UserSortField,
 } from "./apiModels";
 
 const API_HOST =
@@ -118,17 +126,15 @@ export const publicApi = createApi({
       }),
     }),
     // Latest books endpoint (reuse parseDateLikeFields)
-    latestBooks: build.query<
-      { books: SimpleBook[] },
-      { from: number; limit: number }
-    >({
+    latestBooks: build.query<Page<SimpleBook>, PageRequest>({
       query: (params) => ({
         url: "/books/latest",
         method: "GET",
         params: params,
       }),
-      transformResponse: (resp: { books: SimpleBook[] }) => ({
-        books: resp.books.map((book) => parseToSimpleBook(book)),
+      transformResponse: (resp: Page<SimpleBook>) => ({
+        ...resp,
+        items: resp.items.map((book) => parseToSimpleBook(book)),
       }),
     }),
 
@@ -417,9 +423,30 @@ export const privateApi = createApi({
     /****************
      * USER COLLECTION
      ****************/
-    collection: build.query<{ ownedEditions: OwnedEdition[] }, { id: number }>({
+    // One page of a user's collection
+    collection: build.query<
+      Page<OwnedEdition>,
+      { userId: number } & PageRequest &
+        SortRequest<CollectionSortField> &
+        CollectionFilters
+    >({
       query: (params) => ({
         url: "/collection",
+        method: "GET",
+        params: params,
+      }),
+      transformResponse: (resp: Page<OwnedEdition>) => ({
+        ...resp,
+        items: resp.items.map(parseToOwnedEdition),
+      }),
+    }),
+    // A user's whole collection, for views needing every owned edition at once
+    fullCollection: build.query<
+      { ownedEditions: OwnedEdition[] },
+      { userId: number }
+    >({
+      query: (params) => ({
+        url: "/collection/all",
         method: "GET",
         params: params,
       }),
@@ -530,6 +557,7 @@ export const privateApi = createApi({
 export const {
   useUpdateProfileMutation,
   useCollectionQuery,
+  useFullCollectionQuery,
   useOwnedEditionByIdQuery,
   useAddToCollectionMutation,
   useUpdateOwnedEditionMutation,
@@ -557,14 +585,18 @@ export const adminApi = createApi({
   }),
   endpoints: (build) => ({
     // Get list of users
-    userList: build.query<{ users: User[] }, { from: number; limit: number }>({
+    userList: build.query<
+      Page<User>,
+      PageRequest & SortRequest<UserSortField> & UserListFilters
+    >({
       query: (params) => ({
         url: "/users/list",
         method: "GET",
         params: params,
       }),
-      transformResponse: (resp: { users: User[] }) => ({
-        users: resp.users.map((usr) => parseToUser(usr)),
+      transformResponse: (resp: Page<User>) => ({
+        ...resp,
+        items: resp.items.map((usr) => parseToUser(usr)),
       }),
     }),
     // Delete user
@@ -585,16 +617,17 @@ export const adminApi = createApi({
     }),
     // Get list of contribution bundles
     bundleList: build.query<
-      { bundles: SimpleContributionBundle[] },
-      { from: number; limit: number }
+      Page<SimpleContributionBundle>,
+      PageRequest & SortRequest<BundleSortField> & BundleListFilters
     >({
       query: (params) => ({
         url: "/bundles/all",
         method: "GET",
         params: params,
       }),
-      transformResponse: (resp: { bundles: SimpleContributionBundle[] }) => ({
-        bundles: resp.bundles.map((b) => parseToSimpleBundle(b)),
+      transformResponse: (resp: Page<SimpleContributionBundle>) => ({
+        ...resp,
+        items: resp.items.map((b) => parseToSimpleBundle(b)),
       }),
     }),
     // Get a bundle by id
@@ -661,6 +694,7 @@ export const {
   useUserListQuery,
   useDeleteUserMutation,
   useRecycleUserMutation,
+  useBundleListQuery,
   useLazyBundleListQuery,
   useLazyBundleByIdQuery,
   useCreateContributionMutation,

@@ -10,7 +10,10 @@ import org.jooq.TableField;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public enum OwnedEditionSortingFields {
+public enum OwnedEditionSortingFields implements SortableField {
+    // Ownership ID, highest IDs were added last
+    @JsonProperty("id")
+    ID(EDITION_OWNERSHIP.ID),
     @JsonProperty("bookName")
     BOOK_NAME(BOOKS.NAME),
     @JsonProperty("serieName")
@@ -30,6 +33,7 @@ public enum OwnedEditionSortingFields {
         this.field = field;
     }
 
+    @Override
     public TableField<? extends Record, ?> getTableField() {
         return this.field;
     }

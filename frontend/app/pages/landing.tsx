@@ -22,13 +22,14 @@ export default function LandingPage() {
   const { t } = useTranslation();
 
   const [page, setPage] = useState(0);
-  const from = page * BOOKS_PER_PAGE;
+  const offset = page * BOOKS_PER_PAGE;
 
   const { data, error, isFetching } = useLatestBooksQuery({
-    from,
+    offset,
     limit: BOOKS_PER_PAGE,
   });
-  const books = data?.books ?? [];
+  const books = data?.items ?? [];
+  const pageCount = Math.max(1, Math.ceil((data?.total ?? 0) / BOOKS_PER_PAGE));
 
   const toast = useToast();
   useEffect(() => {
@@ -54,7 +55,7 @@ export default function LandingPage() {
               {t("landing.latestBooks")}
             </span>
             <span className="text-xs text-white/25">
-              {t("landing.page")} {page + 1}
+              {t("landing.page")} {page + 1} / {pageCount}
             </span>
           </div>
 
@@ -99,12 +100,12 @@ export default function LandingPage() {
             </GenericButton>
 
             <span className="text-xs text-white/30 tabular-nums min-w-16 text-center">
-              {t("landing.page")} {page + 1}
+              {t("landing.page")} {page + 1} / {pageCount}
             </span>
 
             <GenericButton
               onClick={() => setPage((p) => p + 1)}
-              disabled={books.length < BOOKS_PER_PAGE}
+              disabled={page + 1 >= pageCount}
               className="bg-white/5 border border-white/10 text-white/50 hover:bg-white/10 hover:text-white/80 disabled:opacity-20 disabled:cursor-not-allowed px-4 py-2 rounded-md transition-all"
             >
               <BsArrowRight size={16} />

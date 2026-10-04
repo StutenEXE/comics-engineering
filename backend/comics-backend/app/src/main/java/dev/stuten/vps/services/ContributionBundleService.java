@@ -16,8 +16,13 @@ import dev.stuten.vps.models.dtos.request.UpdateContributionBundleStatusDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionBundleDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionDTO;
 import dev.stuten.vps.models.dtos.template.IdDTO;
+import dev.stuten.vps.models.dtos.request.search.ContributionBundleFilterDTO;
+import dev.stuten.vps.models.dtos.request.search.ContributionBundleSortingFields;
+import dev.stuten.vps.models.dtos.response.PageDTO;
 import dev.stuten.vps.services.utils.AuthServiceUtil;
+import dev.stuten.vps.services.utils.FilteringServiceUtil;
 import dev.stuten.vps.services.utils.PaginationServiceUtil;
+import dev.stuten.vps.services.utils.SortingServiceUtil;
 import dev.stuten.vps.web.ErrorCode;
 import dev.stuten.vps.web.ErrorResponse;
 import io.javalin.http.Context;
@@ -119,9 +124,12 @@ public class ContributionBundleService {
     }
 
     public static void getAll(Context ctx) {
-        List<SimpleContributionBundleDTO> bundles = dao.getSimpleBundles(PaginationServiceUtil.getFromContext(ctx));
+        PageDTO<SimpleContributionBundleDTO> bundles = dao.getSimpleBundles(
+                FilteringServiceUtil.getFromContext(ctx, ContributionBundleFilterDTO.class),
+                SortingServiceUtil.getFromContext(ctx, ContributionBundleSortingFields.class),
+                PaginationServiceUtil.getFromContext(ctx));
 
-        ctx.json(Map.of("bundles", bundles));
+        ctx.json(bundles);
     }
 
 }

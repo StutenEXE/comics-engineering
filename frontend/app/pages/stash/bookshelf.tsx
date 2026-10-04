@@ -5,7 +5,7 @@ import { SideContentTemplate } from "~/components/templates/SideContentTemplate"
 import { useTranslation } from "~/i18n/i18n";
 import type { OwnedEdition } from "~/models/ownedEdition";
 import { useAppSelector } from "~/store/hooks";
-import { useCollectionQuery } from "~/store/services/api";
+import { useFullCollectionQuery } from "~/store/services/api";
 import type { Route } from "../../+types/root";
 
 export function meta({}: Route.MetaArgs) {
@@ -19,8 +19,9 @@ export default function StashBookshelfPage() {
   const { t } = useTranslation();
   const { user } = useAppSelector((state) => state.user);
 
-  const { data, isFetching } = useCollectionQuery(
-    user ? { id: user.id } : { id: 0 },
+  // The bookshelf shows the whole collection
+  const { data, isFetching } = useFullCollectionQuery(
+    { userId: user ? user.id : 0 },
     { skip: !user },
   );
   const oeditions = data?.ownedEditions;

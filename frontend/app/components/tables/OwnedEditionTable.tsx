@@ -9,13 +9,15 @@ import {
   useCollectionQuery,
   useRemoveFromCollectionMutation,
 } from "~/store/services/api";
-import { compareDates, toDDmmYYYY } from "~/utils/date";
+import type { CollectionSortField } from "~/store/services/apiModels";
+import { toDDmmYYYY } from "~/utils/date";
 import { createError, translateApiError } from "~/utils/error";
 import { useConfirm } from "../modals/ConfirmModalProvider";
 import { EditOwnedEditionModal } from "../modals/EditOwnedEditionModal";
 import { OwnedEditionModal } from "../modals/OwnedEditionModal";
 import { useToast } from "../toast/Toast";
 import { BooleanCellRenderer, GenericTable } from "./GenericTable";
+import { useServerTable } from "./useServerTable";
 
 interface OwnedEditionTableProps {
   className?: string;
@@ -27,20 +29,25 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
   const toast = useToast();
   const { user } = useAppSelector((state) => state.user);
 
-  const { data, isFetching, error, refetch } = useCollectionQuery(
-    { id: user ? user.id : 0 },
+  // Pagination, sorting and filtering are done by the API, latest additions first
+  const { control, request, filters } = useServerTable<CollectionSortField>({
+    initialSorting: [{ id: "addDate", desc: true }],
+  });
+
+  // Fetch owned editions for current page
+  const { data, isLoading, isFetching, error, refetch } = useCollectionQuery(
+    {
+      ...request,
+      userId: user ? user.id : 0,
+      bookName: filters.bookName,
+      serieName: filters.serieName,
+      publisherName: filters.publisherName,
+      read: filters.read === undefined ? undefined : filters.read === "true",
+    },
     { skip: !user },
   );
-  const editionList = data?.ownedEditions ?? [];
+  const editionList = data?.items ?? [];
   const err = createError(error);
-  const publishers = useMemo(
-    () => [...new Set(editionList.map((e) => e.edition.publisher?.name))],
-    [editionList],
-  );
-  const sortedEditionList = useMemo(
-    () => [...editionList].sort((a, b) => -compareDates(a.date, b.date)),
-    [editionList],
-  );
 
   // Handles modal open/close state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -103,8 +110,10 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
           </div>
         ),
       }),
+      // Column IDs are the API sort fields and filter names
       // Book name
       col.accessor("edition.book.name", {
+        id: "bookName",
         header: t("oedition.book.name"),
         meta: { filterType: "text" },
         cell: (info) => (
@@ -118,6 +127,7 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
       }),
       // Serie name
       col.accessor("edition.serie.name", {
+        id: "serieName",
         header: t("oedition.serie.name"),
         meta: { filterType: "text" },
         cell: (info) => (
@@ -131,6 +141,7 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
       }),
       // Volume
       col.accessor("edition.book.number", {
+        id: "volume",
         header: t("oedition.book.volume"),
         meta: { filterType: "text" },
         cell: (info) => (
@@ -151,16 +162,13 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
       }),
       // Publisher name
       col.accessor("edition.publisher.name", {
+        id: "publisherName",
         header: t("oedition.book.publisher"),
-        meta: {
-          filterType: "single",
-          options: publishers,
-          placeholder: t("oedition.publisher.select"),
-        },
-        filterFn: "arrIncludes",
+        meta: { filterType: "text" },
       }),
-      // Add Date (use raw date accessor so range filtering works)
+      // Add Date
       col.accessor("date", {
+        id: "addDate",
         header: t("oedition.addDate"),
         meta: { filterType: "range" },
         cell: (info) => info.getValue() && toDDmmYYYY(info.getValue(), locale),
@@ -168,6 +176,7 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
       }),
       // Read
       col.accessor("read", {
+        id: "read",
         header: t("oedition.read"),
         cell: (info) => (
           <div className="flex flex-col gap-1 items-center text-xs">
@@ -176,25 +185,6 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
               toDDmmYYYY(info.row.original.dateRead, locale)}
           </div>
         ),
-        sortingFn: (rowA, rowB, _columnId) => {
-          const dateA = rowA.original.dateRead;
-          const dateB = rowB.original.dateRead;
-          const readA = rowA.original.read ? 1 : 0;
-          const readB = rowB.original.read ? 1 : 0;
-          // Both are read & have dates
-          if (dateA && dateB) {
-            return compareDates(dateA, dateB);
-          }
-          // Only dateA has a read date
-          if (dateA) {
-            return 1;
-          }
-          // Only dateB has a read date
-          if (dateB) {
-            return -1;
-          }
-          return readA - readB;
-        },
         meta: { filterType: "boolean" },
       }),
       // Actions
@@ -227,16 +217,18 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
         ),
       }),
     ],
-    [col, t, locale, publishers, confirm, removeFromCollection],
+    [col, t, locale, confirm, removeFromCollection],
   );
 
   return (
     <>
       <GenericTable
-        list={sortedEditionList}
+        list={editionList}
         columns={columns}
-        isLoading={isFetching}
+        isLoading={isLoading}
+        isFetching={isFetching}
         error={err}
+        server={{ ...control, rowCount: data?.total ?? 0 }}
       />
       <EditOwnedEditionModal
         ownedEdition={editedOwnedEdition!}

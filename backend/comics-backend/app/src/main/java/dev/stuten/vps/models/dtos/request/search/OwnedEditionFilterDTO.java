@@ -28,6 +28,10 @@ public class OwnedEditionFilterDTO {
     @JsonProperty("publisherId")
     private Integer publisherId;
 
+    // Publisher name containing this text (case insensitive)
+    @JsonProperty("publisherName")
+    private String publisherName;
+
     @JsonProperty("read")
     private Boolean read;
 }

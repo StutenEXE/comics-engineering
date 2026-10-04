@@ -19,12 +19,15 @@ import lombok.ToString;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PaginationDTO {
 
-    // Number of elements to skip
-    @JsonProperty("from")
-    private Integer from = 0;
+    public static final int DEFAULT_LIMIT = 20;
+    public static final int MAX_LIMIT = 100;
 
-    // Maximum number of elements to return
+    // Number of elements to skip before the first returned element
+    @JsonProperty("offset")
+    private Integer offset = 0;
+
+    // Maximum number of elements to return (size of the page)
     @JsonProperty("limit")
-    private Integer limit = 10;
+    private Integer limit = DEFAULT_LIMIT;
 
 }

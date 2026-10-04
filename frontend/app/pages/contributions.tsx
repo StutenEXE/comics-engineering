@@ -1,5 +1,5 @@
 import { translateApiError } from "~/utils/error";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ContributionBundleModal } from "~/components/modals/contribution/ContributionBundleModal";
 import { AdminProtectedRoute } from "~/components/security/AdminProtectedRoute";
 import { ContributionBundleTable } from "~/components/tables/ContributionBundleTable";
@@ -10,10 +10,7 @@ import {
   type ContributionBundle,
   type SimpleContributionBundle,
 } from "~/models/contributionBundle";
-import {
-  useLazyBundleListQuery,
-  useUpdateContributionBundleMutation,
-} from "~/store/services/api";
+import { useUpdateContributionBundleMutation } from "~/store/services/api";
 import type { Route } from "../+types/root";
 import { ContributionBundleModalWithFetch } from "~/components/modals/contribution/ContributionBundleModalWithFetch";
 
@@ -27,7 +24,6 @@ export function meta({}: Route.MetaArgs) {
 export default function ContributePage() {
   const { t } = useTranslation();
   const toast = useToast();
-  const itemsPerPage = 500;
 
   // If a bundle is to be edited
   const [bundleToEdit, setBundleToEdit] = useState<SimpleContributionBundle>();
@@ -43,21 +39,6 @@ export default function ContributePage() {
   const closeContributionModal = () => {
     setisContributionModalOpen(false);
   };
-
-  // List bundles
-  const [getBundles, { data, isFetching }] = useLazyBundleListQuery();
-  const bundles = data?.bundles;
-
-  const triggerGetBundles = () => {
-    const from = 0;
-    const limit = itemsPerPage;
-    getBundles({ from, limit });
-  };
-
-  // On load, fetch first page of bundles
-  useEffect(() => {
-    if (!bundles) triggerGetBundles();
-  }, []);
 
   const [updateBundle] = useUpdateContributionBundleMutation();
 
@@ -97,12 +78,8 @@ export default function ContributePage() {
           {t("contributions.title")}
         </h1>
         <ContributionBundleTable
-          bundleList={bundles || []}
           addActions
           onContributionClick={openContributionModal}
-          // onPageChange={setCurrPage}
-          onSuccesfulStatusUpdate={triggerGetBundles}
-          isLoading={isFetching}
         />
         <ContributionBundleModalWithFetch
           id={bundleToEdit?.id}
