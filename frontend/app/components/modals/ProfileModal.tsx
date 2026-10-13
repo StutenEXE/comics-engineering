@@ -17,7 +17,7 @@ export function ProfileModal({
 }: ProfileModalProps) {
   return (
     <GenericModal isOpen={isOpen} onClose={onCancel}>
-      <div className="border border-gray-300 rounded-lg shadow-md bg-black">
+      <div>
         <ProfileForm user={user} onDone={onDone} onCancel={onCancel} />
       </div>
     </GenericModal>

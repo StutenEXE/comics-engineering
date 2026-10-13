@@ -14,6 +14,7 @@ interface TextRhfInputWithActionProps {
     error?: FieldError;
     tooltip?: string;
     isLoading?: boolean;
+    required?: boolean;
     className?: string;
 }
 
@@ -26,6 +27,7 @@ export function TextRhfInputWithAction({
     error,
     tooltip,
     isLoading = false,
+    required,
     className
 }: TextRhfInputWithActionProps) {
 
@@ -55,6 +57,7 @@ export function TextRhfInputWithAction({
             }}
             error={error}
             tooltip={tooltip}
+            required={required}
             className={className}
             endAdornment={
                 <GenericButton onClick={handleClick} disabled={isLoading} className={secondaryButtonClass}>

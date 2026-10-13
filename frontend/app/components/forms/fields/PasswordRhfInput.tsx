@@ -1,20 +1,17 @@
 import { useState } from "react";
-import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
+import type { FieldError as RhfFieldError, UseFormRegisterReturn } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { Input } from "~/components/shadcn/ui/input";
-import {
-  fieldErrorClass,
-  fieldInputClass,
-  fieldLabelClass,
-  fieldWrapperClass,
-} from "./fieldStyles";
+import { FieldError, FieldLabel, inputA11yProps, useFieldIds } from "./FieldParts";
+import { fieldInputClass, fieldWrapperClass } from "./fieldStyles";
 
 interface PasswordRhfInputProps {
   label: string;
   registration?: UseFormRegisterReturn;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
-  error?: FieldError;
+  error?: RhfFieldError;
+  required?: boolean;
   className?: string;
 }
 
@@ -23,26 +20,29 @@ export function PasswordRhfInput({
   registration,
   inputProps,
   error,
+  required,
   className,
 }: PasswordRhfInputProps) {
   const [visible, setVisible] = useState(false);
+  const { inputId, errorId } = useFieldIds(inputProps?.id);
 
   return (
     <div className={twMerge(fieldWrapperClass, className)}>
-      <label className={fieldLabelClass}>{label}</label>
+      <FieldLabel htmlFor={inputId} label={label} required={required} />
       <div className="relative">
         <Input
           type={visible ? "text" : "password"}
           autoComplete="off"
-          aria-invalid={error ? true : undefined}
+          {...inputA11yProps(errorId, !!error, required)}
           {...registration}
           {...inputProps}
+          id={inputId}
           className={twMerge(fieldInputClass, "pr-10")}
         />
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          className="absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500 hover:text-zinc-300 transition-colors"
+          className="absolute inset-y-0 right-0 flex items-center px-3 text-zinc-400 hover:text-zinc-200 transition-colors"
           aria-label={visible ? "Hide password" : "Show password"}
         >
           {visible ? (
@@ -54,7 +54,7 @@ export function PasswordRhfInput({
           )}
         </button>
       </div>
-      {error && <p className={fieldErrorClass}>{error.message}</p>}
+      <FieldError id={errorId} message={error?.message} />
     </div>
   );
 }

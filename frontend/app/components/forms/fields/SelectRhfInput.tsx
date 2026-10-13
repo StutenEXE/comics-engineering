@@ -11,11 +11,8 @@ import {
   SelectValue,
 } from "~/components/shadcn/ui/select";
 import { useTranslation } from "~/i18n/i18n";
-import {
-  fieldInputClass,
-  fieldLabelClass,
-  fieldWrapperClass,
-} from "./fieldStyles";
+import { FieldLabel, useFieldIds } from "./FieldParts";
+import { fieldInputClass, fieldWrapperClass } from "./fieldStyles";
 
 interface SelectRhfInputProps {
   label?: string;
@@ -23,6 +20,7 @@ interface SelectRhfInputProps {
   options: { label: string; value: string | number }[];
   registration: UseFormRegisterReturn;
   placeholder?: string;
+  required?: boolean;
 }
 
 export function SelectRhfInput({
@@ -31,8 +29,10 @@ export function SelectRhfInput({
   options,
   registration,
   placeholder,
+  required,
 }: SelectRhfInputProps) {
   const { t } = useTranslation();
+  const { inputId } = useFieldIds();
 
   const [selectedValue, setSelectedValue] = useState(defaultVal);
 
@@ -48,9 +48,13 @@ export function SelectRhfInput({
 
   return (
     <div className={fieldWrapperClass}>
-      {label && <label className={fieldLabelClass}>{label}</label>}
+      {label && (
+        <FieldLabel htmlFor={inputId} label={label} required={required} />
+      )}
       <Select value={selectedValue} onValueChange={handleValueChange}>
         <SelectTrigger
+          id={inputId}
+          aria-required={required || undefined}
           className={twMerge(fieldInputClass, "cursor-pointer")}
         >
           <SelectValue
@@ -59,9 +63,13 @@ export function SelectRhfInput({
             }
           />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="rounded-md border border-zinc-700 bg-zinc-900 shadow-none ring-0 dark:ring-0">
           {options.map((opt) => (
-            <SelectItem key={String(opt.value)} value={String(opt.value)}>
+            <SelectItem
+              key={String(opt.value)}
+              value={String(opt.value)}
+              className="rounded-sm text-zinc-200 focus:bg-zinc-800 focus:text-zinc-100"
+            >
               {opt.label}
             </SelectItem>
           ))}

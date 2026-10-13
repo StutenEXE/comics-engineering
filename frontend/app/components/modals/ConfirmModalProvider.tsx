@@ -1,13 +1,15 @@
 'use client'
 
 import { createContext, type ReactNode, useCallback, useContext, useState } from 'react'
-import { ConfirmModal } from './ConfirmModal'
+import { ConfirmModal, type ConfirmVariant } from './ConfirmModal'
 
 type ConfirmPayload = {
     title: string
     message: string
     onConfirm: () => void
     onClose?: () => void
+    // "danger" (default) : red confirm button, for destructive actions
+    variant?: ConfirmVariant
 }
 
 type ConfirmContextValue = {
@@ -44,6 +46,7 @@ export function ConfirmModalProvider({ children }: { children: ReactNode }) {
                 isOpen={isOpen}
                 title={payload?.title ?? ''}
                 message={payload?.message ?? ''}
+                variant={payload?.variant}
                 onConfirm={handleConfirm}
                 onClose={handleClose}
             />

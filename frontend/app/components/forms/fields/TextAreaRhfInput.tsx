@@ -1,17 +1,14 @@
-import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
+import type { FieldError as RhfFieldError, UseFormRegisterReturn } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
-import {
-  fieldErrorClass,
-  fieldInputClass,
-  fieldLabelClass,
-  fieldWrapperClass,
-} from "./fieldStyles";
+import { FieldError, FieldLabel, inputA11yProps, useFieldIds } from "./FieldParts";
+import { fieldInputClass, fieldWrapperClass } from "./fieldStyles";
 
 interface TextAreaRhfInputProps {
   label: string;
   registration?: UseFormRegisterReturn;
   inputProps?: React.TextareaHTMLAttributes<HTMLTextAreaElement>;
-  error?: FieldError;
+  error?: RhfFieldError;
+  required?: boolean;
   className?: string;
 }
 
@@ -20,20 +17,24 @@ export function TextAreaRhfInput({
   registration,
   inputProps,
   error,
+  required,
   className
 }: TextAreaRhfInputProps) {
+  const { inputId, errorId } = useFieldIds(inputProps?.id);
+
   return (
     <div className={twMerge(fieldWrapperClass, className)}>
-      <label className={fieldLabelClass}>{label}</label>
+      <FieldLabel htmlFor={inputId} label={label} required={required} />
       <textarea
         autoComplete="off"
         rows={3}
-        aria-invalid={error ? true : undefined}
+        {...inputA11yProps(errorId, !!error, required)}
         {...registration}
         {...inputProps}
+        id={inputId}
         className={twMerge(fieldInputClass, "h-auto min-h-20 resize-y")}
       />
-      {error && <p className={fieldErrorClass}>{error.message}</p>}
+      <FieldError id={errorId} message={error?.message} />
     </div>
   );
 }

@@ -25,7 +25,7 @@ export function CheckboxRhfInput({
           {...inputProps}
           className="peer sr-only"
         />
-        <div className="w-4 h-4 rounded border border-zinc-600 bg-zinc-900 peer-checked:bg-indigo-500 peer-checked:border-indigo-500 peer-focus-visible:border-indigo-400 transition-colors group-hover:border-zinc-400" />
+        <div className="w-4 h-4 rounded border border-zinc-600 bg-zinc-900 peer-checked:bg-indigo-500 peer-checked:border-indigo-500 peer-focus-visible:border-indigo-400 peer-focus-visible:ring-1 peer-focus-visible:ring-indigo-400 transition-colors group-hover:border-zinc-400" />
         <svg
           className="absolute inset-0 m-auto w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none"
           viewBox="0 0 10 10"

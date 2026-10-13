@@ -3,6 +3,7 @@ import { useTranslation } from "~/i18n/i18n";
 import { GenericButton } from "../buttons/GenericButton";
 import { noPropagationEvt } from "~/utils/events";
 import LoadingBadge from "../badges/LoadingBadge";
+import { ModalTitle } from "../modals/GenericModal";
 
 // Fixed widths so that forms don't resize while the user types / selects,
 // capped by the viewport on small screens
@@ -21,6 +22,8 @@ interface GenericFormProps {
   disabled?: boolean;
   isLoading?: boolean;
   size?: keyof typeof formWidths;
+  // Explains the "*" marker of required fields
+  showRequiredHint?: boolean;
   children?: React.ReactNode;
 }
 
@@ -33,6 +36,7 @@ export function GenericForm({
   disabled,
   isLoading = false,
   size = "md",
+  showRequiredHint = false,
   children,
 }: GenericFormProps) {
   const { t } = useTranslation();
@@ -43,11 +47,18 @@ export function GenericForm({
       className={twMerge("flex flex-col", formWidths[size])}
     >
       {/* Title */}
-      <h2 className="px-6 pt-5 pb-4 text-lg font-semibold text-zinc-100 border-b border-zinc-800">
+      <ModalTitle className="px-6 pt-5 pb-4 text-lg font-semibold text-zinc-100 border-b border-zinc-800">
         {title}
-      </h2>
+      </ModalTitle>
 
-      <div className="flex flex-col gap-6 px-6 py-5">{children}</div>
+      <div className="flex flex-col gap-6 px-6 py-5">
+        {showRequiredHint && (
+          <p className="-mb-2 text-xs text-zinc-400">
+            {t("form.requiredHint")}
+          </p>
+        )}
+        {children}
+      </div>
 
       {/* Actions : stay visible while scrolling long forms */}
       <div className="sticky bottom-0 flex justify-end gap-2 px-6 py-3 border-t border-zinc-800 bg-zinc-950">

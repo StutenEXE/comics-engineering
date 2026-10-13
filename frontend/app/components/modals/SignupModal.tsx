@@ -10,7 +10,7 @@ type SignupModalProps = {
 export function SignupModal({ isOpen, onDone, onCancel }: SignupModalProps) {
   return (
     <GenericModal isOpen={isOpen} onClose={onCancel}>
-      <div className="border border-gray-300 rounded-lg shadow-md bg-black">
+      <div>
         <SignupForm onDone={onDone} onCancel={onCancel} />
       </div>
     </GenericModal>

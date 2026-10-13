@@ -1,17 +1,12 @@
 // Component made by AI (Claude Sonnet 4.6) from a code snippet I gave him
 
 import { useState } from "react";
-import type { FieldError } from "react-hook-form";
 import { MdDelete } from "react-icons/md";
 import { Input } from "~/components/shadcn/ui/input";
 import { twMerge } from "tailwind-merge";
 import { useTranslation } from "~/i18n/i18n";
-import {
-  fieldErrorClass,
-  fieldInputClass,
-  fieldLabelClass,
-  fieldWrapperClass,
-} from "./fieldStyles";
+import { FieldError, FieldLabel, inputA11yProps, useFieldIds } from "./FieldParts";
+import { fieldInputClass, fieldWrapperClass } from "./fieldStyles";
 
 export interface SearchSelectItem {
   id: number;
@@ -68,6 +63,9 @@ export interface SearchSelectInputProps<T extends SearchSelectItem> {
    * Optional error coming from the form
    */
   error?: string;
+
+  /** Shows the required marker */
+  required?: boolean;
 }
 
 export function SearchSelectInput<T extends SearchSelectItem>({
@@ -84,8 +82,10 @@ export function SearchSelectInput<T extends SearchSelectItem>({
   renderResult,
   renderSelected,
   error,
+  required,
 }: SearchSelectInputProps<T>) {
   const { t } = useTranslation();
+  const { inputId, errorId } = useFieldIds();
 
   const [inputValue, setInputValue] = useState("");
 
@@ -113,9 +113,7 @@ export function SearchSelectInput<T extends SearchSelectItem>({
   return (
     <div className={twMerge(fieldWrapperClass, "w-full")}>
       {/* Label */}
-      <label htmlFor="search-select-input" className={fieldLabelClass}>
-        {label}
-      </label>
+      <FieldLabel htmlFor={inputId} label={label} required={required} />
 
       {isSelected ? (
         /* Selected / local-ref badge */
@@ -150,7 +148,7 @@ export function SearchSelectInput<T extends SearchSelectItem>({
                   <span className="text-zinc-100 font-medium truncate">
                     {selectedItem.name}
                   </span>
-                  <span className="text-zinc-500 font-mono text-xs">
+                  <span className="text-zinc-400 font-mono text-xs">
                     #{selectedItem.id}
                   </span>
                 </>
@@ -164,7 +162,7 @@ export function SearchSelectInput<T extends SearchSelectItem>({
               <button
                 type="button"
                 onClick={handleClear}
-                className="text-zinc-500 hover:text-rose-400 transition-colors cursor-pointer"
+                className="text-zinc-400 hover:text-rose-400 transition-colors cursor-pointer"
                 aria-label="Clear selection"
               >
                 <MdDelete size={15} />
@@ -177,13 +175,12 @@ export function SearchSelectInput<T extends SearchSelectItem>({
           <Input
             type="text"
             autoComplete="off"
-            id="search-select-input"
-            name="search-select-input"
+            id={inputId}
             value={inputValue}
             disabled={isLocalRef}
             placeholder={placeholder}
             onChange={handleChange}
-            aria-invalid={error ? true : undefined}
+            {...inputA11yProps(errorId, !!error, required)}
             className={fieldInputClass}
           />
           <div className="relative">
@@ -192,10 +189,16 @@ export function SearchSelectInput<T extends SearchSelectItem>({
                 {results.map((item) => (
                   <li
                     key={item.id}
-                    onClick={() => handleSelect(item)}
-                    className="px-3 py-2 text-sm text-zinc-200 border-b border-zinc-800 last:border-none hover:bg-zinc-800 transition-colors cursor-pointer"
+                    className="border-b border-zinc-800 last:border-none"
                   >
-                    {renderResult ? renderResult(item) : item.name}
+                    {/* Button : results can be reached and picked with the keyboard */}
+                    <button
+                      type="button"
+                      onClick={() => handleSelect(item)}
+                      className="w-full px-3 py-2 text-left text-sm text-zinc-200 hover:bg-zinc-800 focus-visible:bg-zinc-800 focus-visible:outline-none transition-colors cursor-pointer"
+                    >
+                      {renderResult ? renderResult(item) : item.name}
+                    </button>
                   </li>
                 ))}
               </ol>
@@ -203,7 +206,7 @@ export function SearchSelectInput<T extends SearchSelectItem>({
           </div>
         </>
       )}
-      {error && <p className={fieldErrorClass}>{error}</p>}
+      <FieldError id={errorId} message={error} />
     </div>
   );
 }

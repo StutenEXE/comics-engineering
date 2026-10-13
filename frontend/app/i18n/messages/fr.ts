@@ -558,4 +558,15 @@ export default {
     "Le lot de contributions n'a pas pu être mis à jour",
   "apierror.bundle.status_not_updated":
     "Le statut du lot n'a pas pu être mis à jour",
+  // Contribution list
+  "generic.expand": "Déplier",
+  "generic.collapse": "Replier",
+  "generic.andMore": "+%n% autres",
+  "contribution.review.approve": "Approuver",
+  "contribution.review.reject": "Rejeter",
+  "contribution.review.revise": "Demander une révision",
+  "contribution.review.skip": "Ignorer",
+  "contribution.list.hiddenChildren": "%n% contribution(s) masquée(s)",
+  "cbundle.form.addNextIssue": "Issue suivante",
+  "form.requiredHint": "Les champs marqués d'un * sont obligatoires",
 };

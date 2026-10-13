@@ -1,21 +1,17 @@
-import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
+import type { FieldError as RhfFieldError, UseFormRegisterReturn } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
-import { HelpBadgeTooltip } from "~/components/badges/HelpBadge";
 import { Input } from "~/components/shadcn/ui/input";
-import {
-  fieldErrorClass,
-  fieldInputClass,
-  fieldLabelClass,
-  fieldWrapperClass,
-} from "./fieldStyles";
+import { FieldError, FieldLabel, inputA11yProps, useFieldIds } from "./FieldParts";
+import { fieldInputClass, fieldWrapperClass } from "./fieldStyles";
 
 export interface DateRhfInputProps {
   label: string;
   registration?: UseFormRegisterReturn;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   invisible?: boolean;
-  error?: FieldError;
+  error?: RhfFieldError;
   tooltip?: string;
+  required?: boolean;
   className?: string;
 }
 
@@ -26,8 +22,11 @@ export function DateRhfInput({
   invisible,
   error,
   tooltip,
+  required,
   className,
 }: DateRhfInputProps) {
+  const { inputId, errorId } = useFieldIds(inputProps?.id);
+
   return (
     <div
       className={twMerge(
@@ -36,18 +35,22 @@ export function DateRhfInput({
         className,
       )}
     >
-      <label className={fieldLabelClass}>
-        {label} {tooltip && <HelpBadgeTooltip tooltipContent={tooltip} />}
-      </label>
+      <FieldLabel
+        htmlFor={inputId}
+        label={label}
+        required={required}
+        tooltip={tooltip}
+      />
       <Input
         type="date"
         autoComplete="off"
-        aria-invalid={error ? true : undefined}
+        {...inputA11yProps(errorId, !!error, required)}
         {...registration}
         {...inputProps}
+        id={inputId}
         className={twMerge(fieldInputClass, "[color-scheme:dark]")}
       />
-      {error && <p className={fieldErrorClass}>{error.message}</p>}
+      <FieldError id={errorId} message={error?.message} />
     </div>
   );
 }

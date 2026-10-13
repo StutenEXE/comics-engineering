@@ -5,12 +5,20 @@ import {
   BiSolidLike,
 } from "react-icons/bi";
 import { useEffect, useMemo, useState } from "react";
-import { MdAdd, MdDelete, MdModeEdit } from "react-icons/md";
-import { PiArrowElbowDownRightBold } from "react-icons/pi";
+import {
+  MdAdd,
+  MdDelete,
+  MdExpandMore,
+  MdLink,
+  MdModeEdit,
+  MdWarningAmber,
+} from "react-icons/md";
+import { twMerge } from "tailwind-merge";
+import { Tooltip } from "~/components/misc/Tooltip";
 import { ContributionStatusBadge } from "~/components/badges/ContributionStatusBadge";
 import { useConfirm } from "~/components/modals/ConfirmModalProvider";
 import { useToast } from "~/components/toast/Toast";
-import { useTranslation } from "~/i18n/i18n";
+import { useTranslation, type TranslationKeys } from "~/i18n/i18n";
 import {
   ContributionStatusEnum,
   contributionToSimpleContribution,
@@ -29,7 +37,6 @@ import {
   type ContributionIssue,
   type SimpleIssue,
 } from "~/models/issue";
-import { BsArrowsExpand, BsArrowsCollapse } from "react-icons/bs";
 
 interface LinkedIssue {
   id?: number;
@@ -202,9 +209,50 @@ function parseContributionList(
   }));
 }
 
+// Label of the "add" button : what will be created from this contribution
+// (see ContributionBundleForm.addContributionFrom)
+const addChildLabelKeys: Partial<Record<ContributionTypeEnum, TranslationKeys>> =
+  {
+    [ContributionTypeEnum.SERIE]: "cbundle.form.addBook",
+    [ContributionTypeEnum.BOOK]: "cbundle.form.addEdition",
+    [ContributionTypeEnum.ISSUE_SERIE]: "cbundle.form.addIssue",
+    [ContributionTypeEnum.ISSUE]: "cbundle.form.addNextIssue",
+  };
+
+const ISSUES_PREVIEW_COUNT = 3;
+
+interface IconActionProps {
+  label: string;
+  onClick: () => void;
+  className?: string;
+  children: React.ReactNode;
+}
+
+// Icon-only button labelled through a tooltip, bigger on touch screens
+function IconAction({ label, onClick, className, children }: IconActionProps) {
+  return (
+    <Tooltip
+      delay={200}
+      trigger={
+        <button
+          type="button"
+          aria-label={label}
+          onClick={onClick}
+          className={twMerge(
+            "flex size-6 pointer-coarse:size-10 items-center justify-center rounded text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors cursor-pointer focus-visible:outline-1 focus-visible:outline-indigo-400",
+            className,
+          )}
+        >
+          {children}
+        </button>
+      }
+      content={<p>{label}</p>}
+    />
+  );
+}
+
 interface ContributionTreeRowProps {
   contribution: ContributionTree;
-  indent: number;
   buttons?: ContributionTreeListProps["buttons"];
   adminActions?: boolean;
   onAdd: (c: ContributionTree) => void;
@@ -220,7 +268,6 @@ interface ContributionTreeRowProps {
 
 function ContributionTreeRow({
   contribution,
-  indent,
   buttons,
   adminActions,
   onAdd,
@@ -231,222 +278,233 @@ function ContributionTreeRow({
   locale,
 }: ContributionTreeRowProps) {
   const [collapsed, setCollapsed] = useState(false);
-  const linkedIssues =
-    contribution.entityType === ContributionTypeEnum.BOOK
-      ? getIssueList(contribution)
-      : [];
-  const criticalIssues =
-    contribution.entityType === ContributionTypeEnum.BOOK
-      ? getCriticalIssueList(contribution)
-      : [];
-  const displayedIssues = adminActions ? criticalIssues : linkedIssues;
-  const hasIssueInfo = displayedIssues.length > 0;
+  const children = contribution.children ?? [];
+  const hasChildren = children.length > 0;
 
-  const renderIssueGroups = () => {
-    if (!hasIssueInfo) {
-      return null;
-    }
+  const isClosed =
+    contribution.status === ContributionStatusEnum.APPROVED ||
+    contribution.status === ContributionStatusEnum.REJECTED;
 
-    const title = adminActions
-      ? t("contribution.book.criticalIssues")
-      : t("contribution.book.linkedIssues");
+  // Admins only care about the issues that must be created first
+  const displayedIssues =
+    contribution.entityType === ContributionTypeEnum.BOOK
+      ? adminActions
+        ? getCriticalIssueList(contribution)
+        : getIssueList(contribution)
+      : [];
+
+  const addChildLabelKey = addChildLabelKeys[contribution.entityType];
+
+  const renderLinkedIssues = () => {
+    if (displayedIssues.length === 0) return null;
 
     return (
-      <span className="flex flex-col gap-2 px-2 py-2 bg-amber-500/10 text-amber-100">
-        <span className="text-[10px] uppercase tracking-widest text-amber-200">
-          {title}
-        </span>
-        {groupIssuesBySerie(displayedIssues, t).map((group, idx) => (
-          <span
-            key={idx}
-            className="flex flex-wrap items-center gap-2 text-[10px] rounded-full bg-amber-500/10 px-2 py-0.5 text-amber-100"
-          >
-            <span className="font-semibold text-amber-200">{group.title}:</span>
-            {group.items.slice(0, 2).map((issue, issueIdx) => (
-              <span key={issueIdx}>
-                {issue.name ?? formatIssueReference(issue, t)}
-              </span>
-            ))}
-            {group.items.length > 2 && (
-              <span>+{group.items.length - 2} more</span>
-            )}
+      <div
+        className={twMerge(
+          "flex w-full min-w-0 items-center gap-1 pl-[22px] text-xs",
+          adminActions ? "text-amber-300" : "text-zinc-400",
+        )}
+      >
+        {adminActions ? (
+          <MdWarningAmber size={12} className="shrink-0" />
+        ) : (
+          <MdLink size={12} className="shrink-0" />
+        )}
+        <span className="min-w-0 truncate">
+          <span className="font-medium">
+            {adminActions
+              ? t("contribution.book.criticalIssues")
+              : t("contribution.book.linkedIssues")}
+            {" : "}
           </span>
-        ))}
-      </span>
+          {groupIssuesBySerie(displayedIssues, t)
+            .map((group) => {
+              const names = group.items
+                .slice(0, ISSUES_PREVIEW_COUNT)
+                .map((issue) => issue.name ?? formatIssueReference(issue, t));
+              const more = group.items.length - ISSUES_PREVIEW_COUNT;
+              return `${group.title} (${names.join(", ")}${
+                more > 0
+                  ? `, ${t("generic.andMore", { parameters: { n: more } })}`
+                  : ""
+              })`;
+            })
+            .join(" · ")}
+        </span>
+      </div>
     );
   };
 
   const renderAdminStatusActions = () => {
-    if (
-      !adminActions ||
-      contribution.status === ContributionStatusEnum.APPROVED ||
-      contribution.status === ContributionStatusEnum.REJECTED
-    ) {
-      return null;
-    }
+    if (!adminActions || isClosed) return null;
 
     return (
-      <span className="flex gap-0.5 px-2 py-1 bg-white/5">
-        <BiSolidLike
-          size={16}
+      <div className="flex items-center gap-0.5 pointer-coarse:gap-1 pr-1 mr-1 border-r border-zinc-800">
+        <IconAction
+          label={t("contribution.review.approve")}
           onClick={() =>
             triggerUpdateStatus(contribution, ContributionStatusEnum.APPROVED)
           }
-          className="text-green-400/70 cursor-pointer"
-        />
-        <BiSolidDislike
-          size={16}
+          className="text-green-400 hover:text-green-300"
+        >
+          <BiSolidLike size={14} />
+        </IconAction>
+        <IconAction
+          label={t("contribution.review.reject")}
           onClick={() =>
             triggerUpdateStatus(contribution, ContributionStatusEnum.REJECTED)
           }
-          className="text-red-400/70 cursor-pointer"
-        />
-        <BiRevision
-          size={16}
+          className="text-red-400 hover:text-red-300"
+        >
+          <BiSolidDislike size={14} />
+        </IconAction>
+        <IconAction
+          label={t("contribution.review.revise")}
           onClick={() =>
             triggerUpdateStatus(
               contribution,
               ContributionStatusEnum.NEEDS_REVISION,
             )
           }
-          className="text-purple-400/70 cursor-pointer"
-        />
-        <BiSkipNextCircle
-          size={16}
+          className="text-purple-400 hover:text-purple-300"
+        >
+          <BiRevision size={14} />
+        </IconAction>
+        <IconAction
+          label={t("contribution.review.skip")}
           onClick={() =>
             triggerUpdateStatus(contribution, ContributionStatusEnum.SKIPPED)
           }
-          className="text-amber-400/70 cursor-pointer"
-        />
-      </span>
+          className="text-amber-400 hover:text-amber-300"
+        >
+          <BiSkipNextCircle size={14} />
+        </IconAction>
+      </div>
     );
   };
 
   const renderActionButtons = () => {
-    if (
-      contribution.status === ContributionStatusEnum.APPROVED ||
-      contribution.status === ContributionStatusEnum.REJECTED
-    ) {
-      return null;
-    }
+    if (isClosed) return null;
 
+    // Desktop : revealed on row hover / keyboard focus (like GitHub, Linear). Touch : always visible
     return (
-      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-        {buttons?.add && (
-          <MdAdd
-            size={16}
+      <div className="flex items-center gap-0.5 pointer-coarse:gap-1 transition-opacity pointer-fine:opacity-0 pointer-fine:group-hover/row:opacity-100 pointer-fine:group-focus-within/row:opacity-100">
+        {buttons?.add && addChildLabelKey && (
+          <button
+            type="button"
             onClick={() => onAdd(contribution)}
-            className="cursor-pointer text-white/30 hover:text-emerald-400 transition-colors"
-          />
+            className="flex h-6 pointer-coarse:h-10 items-center gap-0.5 rounded border border-zinc-700 px-1.5 pointer-coarse:px-3 text-xs font-medium text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition-colors cursor-pointer focus-visible:outline-1 focus-visible:outline-indigo-400"
+          >
+            <MdAdd size={12} />
+            {t(addChildLabelKey)}
+          </button>
         )}
         {buttons?.edit && (
-          <MdModeEdit
-            size={16}
+          <IconAction
+            label={t("generic.edit")}
             onClick={() => onEdit(contribution)}
-            className="cursor-pointer text-white/30 hover:text-indigo-400 transition-colors"
-          />
+          >
+            <MdModeEdit size={14} />
+          </IconAction>
         )}
         {buttons?.delete && (
-          <MdDelete
-            size={16}
+          <IconAction
+            label={t("generic.remove")}
             onClick={() => onRemove(contribution)}
-            className="cursor-pointer text-white/30 hover:text-rose-400 transition-colors"
-          />
+            className="hover:text-rose-400"
+          >
+            <MdDelete size={14} />
+          </IconAction>
         )}
       </div>
     );
   };
 
   return (
-    <div key={contribution.id} className="pb-1">
-      <div className="flex items-center gap-1 group">
-        {contribution.children && contribution.children.length > 0 ? (
-          collapsed ? (
-            <BsArrowsExpand
-              onClick={() => setCollapsed(false)}
-              size={12}
-              className="text-white/20 flex-shrink-0 cursor-pointer hover:text-white/50"
-            />
+    <div>
+      <div className="group/row flex flex-wrap items-center gap-x-2 gap-y-0.5 rounded px-1 py-0.5 hover:bg-zinc-900 focus-within:bg-zinc-900 transition-colors">
+        <div className="flex min-w-0 flex-1 items-center gap-1.5">
+          {/* Collapse toggle (or spacer to keep names aligned) */}
+          {hasChildren ? (
+            <button
+              type="button"
+              onClick={() => setCollapsed((c) => !c)}
+              aria-expanded={!collapsed}
+              aria-label={t(collapsed ? "generic.expand" : "generic.collapse")}
+              className="relative flex size-4 shrink-0 items-center justify-center rounded text-zinc-400 hover:text-zinc-200 cursor-pointer after:absolute after:-inset-1 after:content-[''] pointer-coarse:after:-inset-3"
+            >
+              <MdExpandMore
+                size={16}
+                className={twMerge(
+                  "transition-transform",
+                  collapsed && "-rotate-90",
+                )}
+              />
+            </button>
           ) : (
-            <BsArrowsCollapse
-              onClick={() => setCollapsed(true)}
-              size={12}
-              className="text-white/20 flex-shrink-0 cursor-pointer hover:text-white/50"
-            />
-          )
-        ) : null}
-        <div
-          className="flex items-center gap-2"
-          style={{ marginLeft: `${indent * 20}px` }}
-        >
-          {indent > 0 && (
-            <PiArrowElbowDownRightBold
-              size={12}
-              className="text-white/20 flex-shrink-0"
-            />
+            <span className="size-4 shrink-0" />
           )}
 
-          <div className="flex items-center gap-0 text-xs rounded-md overflow-hidden border border-white/8">
+          <span
+            className="shrink-0 rounded border border-sky-400/25 bg-sky-500/10 px-1 text-[11px] leading-4 font-medium text-sky-300"
+          >
+            {t(`contribution.enum.type.${contribution.entityType}`)}
+          </span>
+          <span className="truncate text-sm text-zinc-100">
+            {getContributionName(contribution, locale)}
+          </span>
+          {/* Meta, muted */}
+          <span className="shrink-0 text-xs text-zinc-400">
+            {t(`contribution.enum.action.${contribution.action}`)}
             {contribution.id && (
+              <span className="font-mono"> · #{contribution.id}</span>
+            )}
+            {collapsed && hasChildren && (
               <>
-                <span className="px-2 py-1 bg-white/5 text-white/30 font-mono">
-                  #{contribution.id}
-                </span>
-                <span className="w-px h-full bg-white/8" />
+                {" · "}
+                {t("contribution.list.hiddenChildren", {
+                  parameters: { n: children.length },
+                })}
               </>
             )}
-            <span className="px-2 py-1 bg-white/5 text-indigo-300/70 font-medium">
-              {t(`contribution.enum.type.${contribution.entityType}`)}
-            </span>
-            <span className="w-px h-full bg-white/8" />
-            <span className="px-2 py-1 text-white/40">
-              {t(`contribution.enum.action.${contribution.action}`)}
-            </span>
-            <span className="w-px h-full bg-white/8" />
-            <span className="px-2 py-1 text-white/70">
-              {getContributionName(contribution, locale)}
-            </span>
-            {renderIssueGroups()}
-            {contribution.status && (
-              <ContributionStatusBadge
-                className="ml-2"
-                status={contribution.status}
-              />
-            )}
-            {renderAdminStatusActions()}
-          </div>
+          </span>
         </div>
 
-        {renderActionButtons()}
+        {/* Status + actions */}
+        <div className="ml-auto flex shrink-0 items-center gap-1">
+          {contribution.status && (
+            <ContributionStatusBadge
+              status={contribution.status}
+              className="py-0 text-[11px] leading-4"
+            />
+          )}
+          {renderAdminStatusActions()}
+          {renderActionButtons()}
+        </div>
+
+        {renderLinkedIssues()}
       </div>
 
-      {!collapsed &&
-        contribution.children &&
-        contribution.children.length > 0 && (
-          <div className="ml-1 mt-1 border-l border-white/8 pl-1">
-            <GenericList
-              list={contribution.children.sort(
-                (a, b) => (b.localRef || b.id) - (a.localRef || a.id),
-              )}
-              emptyMsg=""
-              elemGenerator={(child: ContributionTree) => (
-                <ContributionTreeRow
-                  contribution={child}
-                  indent={indent + 1}
-                  buttons={buttons}
-                  adminActions={adminActions}
-                  onAdd={onAdd}
-                  onEdit={onEdit}
-                  onRemove={onRemove}
-                  triggerUpdateStatus={triggerUpdateStatus}
-                  t={t}
-                  locale={locale}
-                />
-              )}
-              vertical
-            />
-          </div>
-        )}
+      {!collapsed && hasChildren && (
+        <div className="ml-[11px] border-l border-zinc-800 pl-1.5">
+          {children
+            .sort((a, b) => (b.localRef || b.id) - (a.localRef || a.id))
+            .map((child) => (
+              <ContributionTreeRow
+                key={child.id}
+                contribution={child}
+                buttons={buttons}
+                adminActions={adminActions}
+                onAdd={onAdd}
+                onEdit={onEdit}
+                onRemove={onRemove}
+                triggerUpdateStatus={triggerUpdateStatus}
+                t={t}
+                locale={locale}
+              />
+            ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -480,6 +538,8 @@ export function IndentedContributionList({
     confirm({
       title: t("contribution.confirmstatuschange"),
       message: t(`contribution.confirmstatuschangemessage.${newStatus}`),
+      variant:
+        newStatus === ContributionStatusEnum.REJECTED ? "danger" : "default",
       onConfirm: async () => {
         const result = await updateStatus({ contributionId: c.id, newStatus });
         if ("error" in result) {
@@ -563,7 +623,6 @@ export function IndentedContributionList({
         <ContributionTreeRow
           key={c.id}
           contribution={c}
-          indent={0}
           buttons={buttons}
           adminActions={adminActions}
           onAdd={onAdd}
@@ -575,7 +634,7 @@ export function IndentedContributionList({
         />
       )}
       vertical
-      className={className}
+      className={twMerge("gap-0.5 p-1", className)}
     />
   );
 }

@@ -21,6 +21,7 @@ import { TextRhfInput } from "../fields/TextRhfInput";
 import { TextRhfInputWithAction } from "../fields/TextRhfInputWithAction";
 import { GenericForm } from "../GenericForm";
 import { useToast } from "~/components/toast/Toast";
+import { decimalValueAs } from "../fields/fieldStyles";
 
 interface IssueFormProps {
   issue?: Issue;
@@ -177,6 +178,7 @@ export function IssueContributionForm({
         action === "update" ? t("issue.form.modify") : t("issue.form.create")
       }
       onSubmit={handleSubmit(triggerSubmission)}
+    showRequiredHint
     >
       {/* Fandom Url field */}
       <TextRhfInputWithAction
@@ -191,6 +193,7 @@ export function IssueContributionForm({
       {/* Name field */}
       <TextRhfInput
         label={t("issue.name")}
+        required
         registration={register("name")}
         error={errors.name}
       />
@@ -199,6 +202,7 @@ export function IssueContributionForm({
         {/* IssueSerie selection */}
         <SearchSelectInput
           label={t("issue.serie")}
+          required
           placeholder={t("generic.search.placeholder")}
           localRefLabel={t("issue.form.localRefPresent")}
           selectedItem={selectedIssueSerie}
@@ -216,8 +220,9 @@ export function IssueContributionForm({
 
         <TextRhfInput
           label={t("issue.number")}
-          registration={register("number")}
-          inputProps={{ type: "number", inputMode: "numeric" }}
+          required
+          registration={register("number", { setValueAs: decimalValueAs })}
+          inputProps={{ inputMode: "numeric" }}
           error={errors.number}
         />
       </div>
@@ -225,12 +230,14 @@ export function IssueContributionForm({
       <div className="grid grid-cols-1 sm:grid-cols-2 items-start gap-4">
         <DateRhfInput
           label={t("issue.parutionDate")}
+          required
           registration={register("parutionDate")}
           error={errors.parutionDate}
           tooltip={t("issue.parutionDateExplanation")}
         />
         <DateRhfInput
           label={t("issue.coverDate")}
+          required
           registration={register("coverDate")}
           error={errors.coverDate}
           tooltip={t("issue.coverDateExplanation")}

@@ -20,7 +20,7 @@ export function HelpBadgeTooltip({
       trigger={
         <GoQuestion
           size={size}
-          className="inline-block text-xs text-white/40"
+          className="inline-block text-xs text-zinc-400"
         />
       }
       content={<p>{tooltipContent}</p>}

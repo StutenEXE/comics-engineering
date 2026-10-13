@@ -20,6 +20,7 @@ import { CheckboxRhfInput } from "../fields/CheckboxRhfInput";
 import { DateRangeRhfInput } from "../fields/DateRangeRhfInput";
 import { TextRhfInput } from "../fields/TextRhfInput";
 import { GenericForm } from "../GenericForm";
+import { decimalValueAs } from "../fields/fieldStyles";
 
 interface SerieFormProps {
   serie?: Serie;
@@ -96,10 +97,12 @@ export function SerieContributionForm({
         action === "update" ? t("serie.form.modify") : t("serie.form.create")
       }
       onSubmit={handleSubmit(triggerSubmission)}
+    showRequiredHint
     >
       {/* Name field */}
       <TextRhfInput
         label={t("serie.name")}
+        required
         registration={register("name")}
         error={errors.name}
       />
@@ -123,8 +126,8 @@ export function SerieContributionForm({
         {/* Nvolumes */}
         <TextRhfInput
           label={t("serie.nvolumes")}
-          registration={register("nvolumes")}
-          inputProps={{ type: "number", inputMode: "numeric", min: 0 }}
+          registration={register("nvolumes", { setValueAs: decimalValueAs })}
+          inputProps={{ inputMode: "numeric" }}
           error={errors.nvolumes}
           className="w-40"
         />
