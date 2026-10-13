@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router";
+import { twMerge } from "tailwind-merge";
 import { useTranslation } from "~/i18n/i18n";
 import { translateApiError, type Error } from "~/utils/error";
 import { HelpBadgeTooltip } from "../badges/HelpBadge";
@@ -17,6 +18,8 @@ interface PageTemplateProps {
   children?: ReactNode;
   // Shown on the right of the content (under it on small screens), ex : change history
   aside?: ReactNode;
+  // Overrides the large screen aside position (ex : inside a modal)
+  asideClassName?: string;
 }
 
 export function InfoPageTemplate({
@@ -28,6 +31,7 @@ export function InfoPageTemplate({
   className,
   children,
   aside,
+  asideClassName,
 }: PageTemplateProps) {
   const { t } = useTranslation();
 
@@ -75,7 +79,12 @@ export function InfoPageTemplate({
 
         {/* Aside, large screens */}
         {!error && aside && (
-          <aside className="hidden lg:block w-72 shrink-0 sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto pl-6 border-l border-white/10">
+          <aside
+            className={twMerge(
+              "hidden lg:block w-72 shrink-0 sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto pl-6 border-l border-white/10",
+              asideClassName,
+            )}
+          >
             {aside}
           </aside>
         )}
