@@ -225,7 +225,7 @@ export function IssueSerieContributionForm({
         inputProps={{
           rows: 6,
         }}
-        className="min-w-200"
+        className="md:min-w-200"
         error={errors.desc}
       />
     </GenericForm>

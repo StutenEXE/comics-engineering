@@ -342,6 +342,7 @@ export default {
   "header.login": "Connexion",
   "header.signup": "Inscription",
   "header.logout": "Déconnexion",
+  "header.menu": "Menu",
   // Info header
   "infoheader.addedBy": "Ajouté par",
   "infoheader.modified": "Dernière modification le",

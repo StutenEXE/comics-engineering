@@ -360,7 +360,7 @@ export function ContributionBundleForm({
             onAdd={addContributionFrom}
             onEdit={editContribution}
             onRemove={removeContribution}
-            className="border border-white/10 rounded-md bg-white/5 min-h-[80px] min-w-[300px] p-3"
+            className="border border-white/10 rounded-md bg-white/5 min-h-[80px] sm:min-w-[300px] p-3"
           />
         </div>
 

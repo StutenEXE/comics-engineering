@@ -34,8 +34,8 @@ export function InfoPageHeaderComponent({
   return (
     <div className="flex flex-col gap-3 pb-4 border-b border-white/10">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-widest">
-        <span className="text-white/30">{headerTitle}</span>
+      <div className="flex items-center gap-1.5 min-w-0 text-xs font-medium uppercase tracking-widest">
+        <span className="shrink-0 text-white/30">{headerTitle}</span>
         <span className="text-white/15">›</span>
         {/* Name loading */}
         {isLoading && (
@@ -49,12 +49,12 @@ export function InfoPageHeaderComponent({
             {headerTitleTo ? (
               <Link
                 to={headerTitleTo}
-                className="text-white/50 hover:underline hover:text-indigo-300 transition-colors"
+                className="truncate text-white/50 hover:underline hover:text-indigo-300 transition-colors"
               >
                 {title} <span className="font-normal">↗</span>
               </Link>
             ) : (
-              <span className="text-white/50">{title}</span>
+              <span className="truncate text-white/50">{title}</span>
             )}
           </>
         )}
@@ -96,7 +96,7 @@ export function InfoPageHeaderComponent({
       </div>
 
       {/* Metadata */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
         <p className="text-xs text-white/25">
           {t("infoheader.addedBy")}&nbsp;
           {/* Loading & loaded */}

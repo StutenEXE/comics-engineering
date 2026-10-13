@@ -119,7 +119,7 @@ export function OwnedEditionForm({
       }
       onSubmit={handleSubmit(triggerSubmission)}
     >
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <EditionCard
           disableInteractions
           edition={
@@ -127,7 +127,7 @@ export function OwnedEditionForm({
               ? editionToSimpleEdition(ownedEdition.edition)
               : undefined
           }
-          className="w-35 h-min"
+          className="w-28 sm:w-35 h-min self-center sm:self-start"
         />
         <div className="flex flex-col gap-2">
           {/* Add Date */}
@@ -153,7 +153,7 @@ export function OwnedEditionForm({
             />
           </div>
 
-          <div className="w-[100%] flex gap-12">
+          <div className="w-[100%] flex flex-wrap gap-x-12 gap-y-3">
             <div className="flex gap-6">
               {/* Gift */}
               <CheckboxRhfInput
@@ -171,7 +171,7 @@ export function OwnedEditionForm({
           </div>
 
           <div>
-            <div className="flex gap-6 mt-2">
+            <div className="flex flex-wrap gap-x-6 gap-y-3 mt-2">
               {/* Purchase Price */}
               <TextRhfInput
                 className="w-30"
