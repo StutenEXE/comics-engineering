@@ -569,4 +569,5 @@ export default {
   "contribution.list.hiddenChildren": "%n% contribution(s) masquée(s)",
   "cbundle.form.addNextIssue": "Issue suivante",
   "form.requiredHint": "Les champs marqués d'un * sont obligatoires",
+  "edition.form.coverType.required": "Type de couverture requis",
 };

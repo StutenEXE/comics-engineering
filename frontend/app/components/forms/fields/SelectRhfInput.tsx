@@ -1,7 +1,7 @@
 // Component made by AI (Claude Sonnet 4.6)
 
 import { useState } from "react";
-import type { UseFormRegisterReturn } from "react-hook-form";
+import type { FieldError as RhfFieldError, UseFormRegisterReturn } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
 import {
   Select,
@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "~/components/shadcn/ui/select";
 import { useTranslation } from "~/i18n/i18n";
-import { FieldLabel, useFieldIds } from "./FieldParts";
+import { FieldError, FieldLabel, inputA11yProps, useFieldIds } from "./FieldParts";
 import { fieldInputClass, fieldWrapperClass } from "./fieldStyles";
 
 interface SelectRhfInputProps {
@@ -21,6 +21,7 @@ interface SelectRhfInputProps {
   registration: UseFormRegisterReturn;
   placeholder?: string;
   required?: boolean;
+  error?: RhfFieldError;
 }
 
 export function SelectRhfInput({
@@ -30,9 +31,10 @@ export function SelectRhfInput({
   registration,
   placeholder,
   required,
+  error,
 }: SelectRhfInputProps) {
   const { t } = useTranslation();
-  const { inputId } = useFieldIds();
+  const { inputId, errorId } = useFieldIds();
 
   const [selectedValue, setSelectedValue] = useState(defaultVal);
 
@@ -54,7 +56,7 @@ export function SelectRhfInput({
       <Select value={selectedValue} onValueChange={handleValueChange}>
         <SelectTrigger
           id={inputId}
-          aria-required={required || undefined}
+          {...inputA11yProps(errorId, !!error, required)}
           className={twMerge(fieldInputClass, "cursor-pointer")}
         >
           <SelectValue
@@ -75,7 +77,8 @@ export function SelectRhfInput({
           ))}
         </SelectContent>
       </Select>
-      <input type="hidden" {...registration} value={selectedValue} />
+      <input type="hidden" {...registration} value={selectedValue ?? ""} />
+      <FieldError id={errorId} message={error?.message} />
     </div>
   );
 }

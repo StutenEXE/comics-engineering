@@ -162,4 +162,5 @@ export default {
   "contribution.list.hiddenChildren": "%n% hidden contribution(s)",
   "cbundle.form.addNextIssue": "Next issue",
   "form.requiredHint": "Fields marked with * are required",
+  "edition.form.coverType.required": "Cover type required",
 };

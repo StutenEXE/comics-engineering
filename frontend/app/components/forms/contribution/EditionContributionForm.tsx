@@ -74,7 +74,9 @@ export function EditionContributionForm({
       imgUrl: z
         .httpUrl(t("generic.invalidUrl"))
         .min(1, t("generic.required", { capitalize: true })),
-      coverType: z.string(), //z.literal(["Hardcover", "Paperback", "Single issue"]),
+      coverType: z
+        .string({ error: t("edition.form.coverType.required") })
+        .min(1, t("edition.form.coverType.required")), //z.literal(["Hardcover", "Paperback", "Single issue"]),
       parutionDate: zDateRequired(t("generic.required", { capitalize: true })),
       width: z.coerce.number().gte(0, t("edition.form.width.gte0")).optional(),
       height: z.coerce
@@ -381,6 +383,7 @@ export function EditionContributionForm({
           {/* CoverType*/}
           <SelectRhfInput
             label={t("edition.coverType")}
+            required
             defaultVal={edition?.coverType}
             options={[
               { label: t("edition.coverType.hardcover"), value: "hardcover" },
@@ -388,6 +391,7 @@ export function EditionContributionForm({
               { label: t("edition.coverType.singleissue"), value: "singleissue" },
             ]}
             registration={register("coverType")}
+            error={errors.coverType}
           />
         </div>
       </FormSection>
