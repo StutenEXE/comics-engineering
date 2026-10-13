@@ -20,7 +20,8 @@ import {
 } from "~/store/services/api";
 import { toHtmlInputString, toYYYYmmDD, zDateRequired } from "~/utils/date";
 import { noPropagationEvt } from "~/utils/events";
-import { GenericButton } from "../../buttons/GenericButton";
+import { FormSection } from "../FormSection";
+import { CoverPreview } from "../fields/CoverPreview";
 import { DateRhfInput } from "../fields/DateRhfInput";
 import { SearchSelectInput } from "../fields/SearchSelectInput";
 import { SelectRhfInput } from "../fields/SelectRhfInput";
@@ -262,117 +263,139 @@ export function EditionContributionForm({
           : t("edition.form.create")
       }
       onSubmit={handleSubmit(triggerSubmission)}
+      size="lg"
     >
-      {/* Book selection */}
-      <SearchSelectInput
-        label={t("edition.book")}
-        placeholder={t("generic.search.placeholder")}
-        localRefLabel={t("edition.form.localRefPresent")}
-        selectedItem={selectedBook}
-        localRef={bookLocalRef}
-        results={booksData?.books.map(bookToSimpleBook)}
-        onSearch={handleBookSearch}
-        onSelect={setSelectedBook}
-        onClear={() => setSelectedBook(undefined)}
-        error={
-          !isValid && !bookLocalRef && !selectedBook
-            ? t("edition.form.book.required")
-            : undefined
-        }
-      />
+      <FormSection title={t("form.section.identification")}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 items-start gap-4">
+          {/* Book selection */}
+          <SearchSelectInput
+            label={t("edition.book")}
+            placeholder={t("generic.search.placeholder")}
+            localRefLabel={t("edition.form.localRefPresent")}
+            selectedItem={selectedBook}
+            localRef={bookLocalRef}
+            results={booksData?.books.map(bookToSimpleBook)}
+            onSearch={handleBookSearch}
+            onSelect={setSelectedBook}
+            onClear={() => setSelectedBook(undefined)}
+            error={
+              !isValid && !bookLocalRef && !selectedBook
+                ? t("edition.form.book.required")
+                : undefined
+            }
+          />
 
-      {/* Publisher selection */}
-      <SearchSelectInput
-        label={t("edition.publisher")}
-        placeholder={t("generic.search.placeholder")}
-        selectedItem={selectedPublisher}
-        results={pubsData?.publishers.map(publisherToSimplePublisher)}
-        onSearch={handlePublisherSearch}
-        onSelect={setSelectedPublisher}
-        onClear={() => setSelectedPublisher(undefined)}
-        error={
-          !isValid && !selectedPublisher
-            ? t("edition.form.publisher.required")
-            : undefined
-        }
-      />
+          {/* Publisher selection */}
+          <SearchSelectInput
+            label={t("edition.publisher")}
+            placeholder={t("generic.search.placeholder")}
+            selectedItem={selectedPublisher}
+            results={pubsData?.publishers.map(publisherToSimplePublisher)}
+            onSearch={handlePublisherSearch}
+            onSelect={setSelectedPublisher}
+            onClear={() => setSelectedPublisher(undefined)}
+            error={
+              !isValid && !selectedPublisher
+                ? t("edition.form.publisher.required")
+                : undefined
+            }
+          />
 
-      {/* ISBN */}
-      <TextRhfInputWithAction
-        inputLabel={t("edition.isbn")}
-        registration={register("isbn", {
-          onChange: (e) => {
-            const raw = e.target.value.replace(/\D/g, ""); // Replace anything that is not a digit
-            setIsbnDisplay(raw);
-          },
-        })}
-        inputProps={{
-          value: isbnDisplay,
-          inputMode: "numeric",
-        }}
-        buttonLabel={t("form.autofill")}
-        buttonOnClick={triggerScraping}
-        isLoading={scraperLoading}
-        error={errors.isbn}
-      />
+          {/* ISBN */}
+          <TextRhfInputWithAction
+            inputLabel={t("edition.isbn")}
+            registration={register("isbn", {
+              onChange: (e) => {
+                const raw = e.target.value.replace(/\D/g, ""); // Replace anything that is not a digit
+                setIsbnDisplay(raw);
+              },
+            })}
+            inputProps={{
+              value: isbnDisplay,
+              inputMode: "numeric",
+            }}
+            buttonLabel={t("form.autofill")}
+            buttonOnClick={triggerScraping}
+            isLoading={scraperLoading}
+            error={errors.isbn}
+          />
 
-      <div className="flex items-start gap-3">
-        {/* EAN */}
-        <TextRhfInput
-          label={t("edition.ean")}
-          registration={register("ean", {
-            // Until the specific rule of EANs displays isn't understood, we use the same logic as for ISBNs
-            onChange: (e) => {
-              const raw = e.target.value.replace(/\D/g, ""); // Replace anything that is not a digit
-              setEanDisplay(raw);
-            },
-          })}
-          inputProps={{
-            value: eanDisplay,
-            inputMode: "numeric",
-          }}
-          error={errors.ean}
-        />
+          {/* EAN */}
+          <TextRhfInput
+            label={t("edition.ean")}
+            registration={register("ean", {
+              // Until the specific rule of EANs displays isn't understood, we use the same logic as for ISBNs
+              onChange: (e) => {
+                const raw = e.target.value.replace(/\D/g, ""); // Replace anything that is not a digit
+                setEanDisplay(raw);
+              },
+            })}
+            inputProps={{
+              value: eanDisplay,
+              inputMode: "numeric",
+            }}
+            error={errors.ean}
+          />
+        </div>
+      </FormSection>
 
-        {/* Parution date */}
-        <DateRhfInput
-          label={t("edition.parutionDate")}
-          registration={register("parutionDate")}
-          error={errors.parutionDate}
-        />
-      </div>
+      <FormSection title={t("form.section.details")}>
+        <div className="grid grid-cols-1 sm:grid-cols-3 items-start gap-4">
+          {/* Parution date */}
+          <DateRhfInput
+            label={t("edition.parutionDate")}
+            registration={register("parutionDate")}
+            error={errors.parutionDate}
+          />
+          {/* nPages */}
+          <TextRhfInput
+            label={t("edition.npages")}
+            registration={register("npages")}
+            inputProps={{
+              type: "number",
+              inputMode: "numeric",
+              min: 0,
+            }}
+            error={errors.npages}
+          />
+          {/* Price */}
+          <TextRhfInput
+            label={t("edition.price")}
+            registration={register("price")}
+            inputProps={{
+              type: "number",
+              step: ".01",
+              inputMode: "numeric",
+              min: 0,
+            }}
+            error={errors.price}
+          />
+        </div>
 
-      <div className="flex items-start gap-3">
-        {/* nPages */}
-        <TextRhfInput
-          label={t("edition.npages")}
-          registration={register("npages")}
-          inputProps={{
-            type: "number",
-            inputMode: "numeric",
-            min: 0,
-          }}
-          error={errors.npages}
-        />
-        {/* Price */}
-        <TextRhfInput
-          label={t("edition.price")}
-          registration={register("price")}
-          inputProps={{
-            type: "number",
-            step: ".01",
-            inputMode: "numeric",
-            min: 0,
-          }}
-          error={errors.price}
-        />
-      </div>
+        <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr] items-start gap-4">
+          {/* Url */}
+          <TextRhfInput
+            label={t("edition.url")}
+            registration={register("url")}
+            error={errors.url}
+          />
 
-      <div>
-        <label className="flex items-center gap-2 text-xs  font-medium uppercase tracking-widest text-white/40">
-          {t("edition.dimensions")}
-        </label>
-        <div className="flex items-start gap-3">
+          {/* CoverType*/}
+          <SelectRhfInput
+            label={t("edition.coverType")}
+            defaultVal={edition?.coverType}
+            options={[
+              { label: t("edition.coverType.hardcover"), value: "hardcover" },
+              { label: t("edition.coverType.paperback"), value: "paperback" },
+              { label: t("edition.coverType.singleissue"), value: "singleissue" },
+            ]}
+            registration={register("coverType")}
+          />
+        </div>
+      </FormSection>
+
+      <FormSection title={t("edition.dimensions")}>
+        <div className="grid grid-cols-3 items-start gap-4">
           {/* Height */}
           <TextRhfInput
             label={t("edition.dimensions.height")}
@@ -410,45 +433,22 @@ export function EditionContributionForm({
             error={errors.thickness}
           />
         </div>
-      </div>
+      </FormSection>
 
-      <div className="flex flex-col sm:flex-row sm:items-end gap-3">
-        {/* Url */}
-        <TextRhfInput
-          label={t("edition.url")}
-          registration={register("url")}
-          error={errors.url}
-          className="w-full sm:w-100"
-        />
-
-        {/* CoverType*/}
-        <SelectRhfInput
-          label={t("edition.coverType")}
-          defaultVal={edition?.coverType}
-          options={[
-            { label: t("edition.coverType.hardcover"), value: "hardcover" },
-            { label: t("edition.coverType.paperback"), value: "paperback" },
-            { label: t("edition.coverType.singleissue"), value: "singleissue" },
-          ]}
-          registration={register("coverType")}
-        />
-      </div>
-
-      <div className="flex gap-3">
-        <TextRhfInput
-          label={t("edition.imgUrl")}
-          registration={register("imgUrl")}
-          error={errors.imgUrl}
-          className="w-full sm:w-100"
-        />
-        {!errors.imgUrl && watchedImgUrl && (
-          <img
-            src={watchedImgUrl}
-            alt={t("edition.form.altNewImage")}
-            className="w-[100px]"
+      <FormSection title={t("form.section.cover")}>
+        <div className="flex items-start gap-4">
+          <TextRhfInput
+            label={t("edition.imgUrl")}
+            registration={register("imgUrl")}
+            error={errors.imgUrl}
+            className="flex-1"
           />
-        )}
-      </div>
+          <CoverPreview
+            src={!errors.imgUrl ? watchedImgUrl : undefined}
+            alt={t("edition.form.altNewImage")}
+          />
+        </div>
+      </FormSection>
     </GenericForm>
   );
 }

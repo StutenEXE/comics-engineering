@@ -195,7 +195,7 @@ export function IssueContributionForm({
         error={errors.name}
       />
 
-      <div className="flex items-start gap-3">
+      <div className="grid grid-cols-[1fr_6rem] items-start gap-4">
         {/* IssueSerie selection */}
         <SearchSelectInput
           label={t("issue.serie")}
@@ -219,24 +219,21 @@ export function IssueContributionForm({
           registration={register("number")}
           inputProps={{ type: "number", inputMode: "numeric" }}
           error={errors.number}
-          className="w-25"
         />
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 items-start gap-4">
         <DateRhfInput
           label={t("issue.parutionDate")}
           registration={register("parutionDate")}
           error={errors.parutionDate}
           tooltip={t("issue.parutionDateExplanation")}
-          className="max-w-50"
         />
         <DateRhfInput
           label={t("issue.coverDate")}
           registration={register("coverDate")}
           error={errors.coverDate}
           tooltip={t("issue.coverDateExplanation")}
-          className="max-w-50"
         />
       </div>
     </GenericForm>

@@ -3,6 +3,7 @@ import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
 import { GenericButton } from "~/components/buttons/GenericButton";
 import { TextRhfInput, type TextRhfInputHandle } from "./TextRhfInput";
 import LoadingBadge from "~/components/badges/LoadingBadge";
+import { secondaryButtonClass } from "./fieldStyles";
 
 interface TextRhfInputWithActionProps {
     inputLabel: string;
@@ -16,18 +17,18 @@ interface TextRhfInputWithActionProps {
     className?: string;
 }
 
-export function TextRhfInputWithAction({ 
-    inputLabel, 
-    registration, 
-    inputProps, 
-    buttonLabel, 
-    buttonOnClick, 
-    error, 
+export function TextRhfInputWithAction({
+    inputLabel,
+    registration,
+    inputProps,
+    buttonLabel,
+    buttonOnClick,
+    error,
     tooltip,
-    isLoading = false, 
-    className 
+    isLoading = false,
+    className
 }: TextRhfInputWithActionProps) {
-    
+
     const iptRef = useRef<TextRhfInputHandle>(null);
 
     const handleClick = () => {
@@ -44,7 +45,6 @@ export function TextRhfInputWithAction({
     };
 
     return (
-    <div className="flex items-end gap-3">
         <TextRhfInput
             ref={iptRef}
             label={inputLabel}
@@ -56,11 +56,12 @@ export function TextRhfInputWithAction({
             error={error}
             tooltip={tooltip}
             className={className}
+            endAdornment={
+                <GenericButton onClick={handleClick} disabled={isLoading} className={secondaryButtonClass}>
+                    {buttonLabel}
+                    <LoadingBadge size={16} isLoading={isLoading} className="text-zinc-100" />
+                </GenericButton>
+            }
         />
-        <GenericButton onClick={handleClick}>
-            {buttonLabel}
-            <LoadingBadge size={20} isLoading={isLoading} className="text-white" />
-        </GenericButton>
-    </div>
     )
 }

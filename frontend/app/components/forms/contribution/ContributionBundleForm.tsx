@@ -34,6 +34,10 @@ import { SerieContributionModal } from "../../modals/contribution/SerieContribut
 import { TextAreaRhfInput } from "../fields/TextAreaRhfInput";
 import { GenericForm } from "../GenericForm";
 import dayjs from "dayjs";
+import { MdAdd } from "react-icons/md";
+import { twMerge } from "tailwind-merge";
+import { FormSection } from "../FormSection";
+import { secondaryButtonClass } from "../fields/fieldStyles";
 
 interface ContributionBundleFormProps {
   bundle?: ContributionBundle;
@@ -304,11 +308,9 @@ export function ContributionBundleForm({
         onSubmit={handleSubmit(triggerSubmission)}
         isLoading={disabled}
         disabled={contributions.length <= 0 || disabled}
+        size="lg"
       >
-        <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-widest text-white/40">
-            {t("cbundle.form.add")}
-          </span>
+        <FormSection title={t("cbundle.form.add")}>
           <div className="flex flex-wrap gap-2">
             {[
               {
@@ -340,19 +342,16 @@ export function ContributionBundleForm({
                   openModal(key);
                 })}
                 disabled={disableNewContributions}
-                className="bg-white/5 border border-white/10 text-white/60 text-xs font-medium px-3 py-1.5 rounded-md hover:bg-indigo-500/20 hover:border-indigo-500/40 hover:text-indigo-300 transition-all"
+                className={twMerge(secondaryButtonClass, "h-8 gap-1 px-2.5")}
               >
-                <span className="mr-1 opacity-50">+</span>
+                <MdAdd size={14} className="text-zinc-400" />
                 {label}
               </GenericButton>
             ))}
           </div>
-        </div>
+        </FormSection>
 
-        <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-widest text-white/40">
-            {t("cbundle.form.newContributions")}
-          </span>
+        <FormSection title={t("cbundle.form.newContributions")}>
           <IndentedContributionList
             contributionList={contributions}
             buttons={{ add: true, edit: true, delete: action === "create" }}
@@ -360,9 +359,9 @@ export function ContributionBundleForm({
             onAdd={addContributionFrom}
             onEdit={editContribution}
             onRemove={removeContribution}
-            className="border border-white/10 rounded-md bg-white/5 min-h-[80px] sm:min-w-[300px] p-3"
+            className="border border-zinc-800 rounded-md bg-zinc-900/50 min-h-20 p-3"
           />
-        </div>
+        </FormSection>
 
         <TextAreaRhfInput
           label={t("cbundle.note")}

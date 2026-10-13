@@ -104,9 +104,9 @@ export function SerieContributionForm({
         error={errors.name}
       />
 
-      <div className="w-[100%] flex flex-wrap gap-x-12 gap-y-3">
+      <div className="flex flex-wrap items-end gap-x-8 gap-y-4">
         {/* Checkboxes */}
-        <div className="flex gap-6">
+        <div className="flex h-9 items-center gap-6">
           <CheckboxRhfInput
             label={t("serie.ongoing")}
             registration={register("ongoing")}
@@ -126,6 +126,7 @@ export function SerieContributionForm({
           registration={register("nvolumes")}
           inputProps={{ type: "number", inputMode: "numeric", min: 0 }}
           error={errors.nvolumes}
+          className="w-40"
         />
       </div>
     </GenericForm>

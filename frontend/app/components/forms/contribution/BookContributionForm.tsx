@@ -31,6 +31,10 @@ import { useLazyScrapeIsbnQuery } from "~/store/services/scrapers";
 import { TextRhfInputWithAction } from "../fields/TextRhfInputWithAction";
 import { isntEmpty } from "~/utils/strings";
 import { useToast } from "~/components/toast/Toast";
+import { MdClose } from "react-icons/md";
+import { FormSection } from "../FormSection";
+import { CoverPreview } from "../fields/CoverPreview";
+import { fieldInputClass } from "../fields/fieldStyles";
 
 interface BookFormProps {
   book?: Book;
@@ -276,96 +280,91 @@ export function BookContributionForm({
         action === "update" ? t("book.form.modify") : t("book.form.create")
       }
       onSubmit={handleSubmit(triggerSubmission)}
+      size="lg"
     >
-      {/* ISBN for autofill */}
-      <TextRhfInputWithAction
-        inputLabel={t("book.form.isbnautofill")}
-        buttonLabel={t("form.autofill")}
-        buttonOnClick={triggerScraping}
-        isLoading={scraperLoading}
-      />
-
-      {/* Name field */}
-      <TextRhfInput
-        label={t("book.name")}
-        registration={register("name")}
-        error={errors.name}
-      />
-
-      <div className="flex items-start gap-3">
-        {/* Serie selection */}
-        <SearchSelectInput
-          label={t("book.serie")}
-          placeholder={t("generic.search.placeholder")}
-          localRefLabel={t("book.form.localRefPresent")}
-          selectedItem={selectedSerie}
-          localRef={serieLocalRef}
-          results={bookSeriesResults?.series}
-          onSearch={handleSearch}
-          onSelect={setSelectedSerie}
-          onClear={() => setSelectedSerie(undefined)}
-          error={
-            !isValid && !serieLocalRef && !selectedSerie
-              ? t("book.form.serie.required")
-              : undefined
-          }
+      <FormSection title={t("form.section.general")}>
+        {/* ISBN for autofill */}
+        <TextRhfInputWithAction
+          inputLabel={t("book.form.isbnautofill")}
+          buttonLabel={t("form.autofill")}
+          buttonOnClick={triggerScraping}
+          isLoading={scraperLoading}
         />
 
-        {/* Number */}
+        {/* Name field */}
         <TextRhfInput
-          label={t("book.number")}
-          registration={register("number")}
-          inputProps={{ type: "number", inputMode: "numeric", min: 0 }}
-          error={errors.number}
-          className="w-25"
+          label={t("book.name")}
+          registration={register("name")}
+          error={errors.name}
         />
-      </div>
 
-      {/* Description field */}
-      <TextAreaRhfInput
-        label={t("book.description")}
-        registration={register("desc")}
-        error={errors.desc}
-      />
-
-      {/* VO Content field */}
-      <TextAreaRhfInput
-        label={t("book.voContent")}
-        registration={register("voContent")}
-        error={errors.voContent}
-      />
-
-      {/* Image field */}
-      <div className="flex gap-3">
-        <TextRhfInput
-          label={t("book.imgUrl")}
-          registration={register("imgUrl")}
-          error={errors.imgUrl}
-          className="w-[100%]"
-        />
-        {!errors.imgUrl && watchedImgUrl && (
-          <img
-            src={watchedImgUrl}
-            alt={t("book.form.altNewImage")}
-            className="w-[100px]"
+        <div className="grid grid-cols-[1fr_6rem] items-start gap-4">
+          {/* Serie selection */}
+          <SearchSelectInput
+            label={t("book.serie")}
+            placeholder={t("generic.search.placeholder")}
+            localRefLabel={t("book.form.localRefPresent")}
+            selectedItem={selectedSerie}
+            localRef={serieLocalRef}
+            results={bookSeriesResults?.series}
+            onSearch={handleSearch}
+            onSelect={setSelectedSerie}
+            onClear={() => setSelectedSerie(undefined)}
+            error={
+              !isValid && !serieLocalRef && !selectedSerie
+                ? t("book.form.serie.required")
+                : undefined
+            }
           />
-        )}
-      </div>
+
+          {/* Number */}
+          <TextRhfInput
+            label={t("book.number")}
+            registration={register("number")}
+            inputProps={{ type: "number", inputMode: "numeric", min: 0 }}
+            error={errors.number}
+          />
+        </div>
+      </FormSection>
+
+      <FormSection title={t("form.section.content")}>
+        {/* Description field */}
+        <TextAreaRhfInput
+          label={t("book.description")}
+          registration={register("desc")}
+          error={errors.desc}
+        />
+
+        {/* VO Content field */}
+        <TextAreaRhfInput
+          label={t("book.voContent")}
+          registration={register("voContent")}
+          error={errors.voContent}
+        />
+      </FormSection>
+
+      <FormSection title={t("form.section.cover")}>
+        <div className="flex items-start gap-4">
+          <TextRhfInput
+            label={t("book.imgUrl")}
+            registration={register("imgUrl")}
+            error={errors.imgUrl}
+            className="flex-1"
+          />
+          <CoverPreview
+            src={!errors.imgUrl ? watchedImgUrl : undefined}
+            alt={t("book.form.altNewImage")}
+          />
+        </div>
+      </FormSection>
 
       {/* Linked issues picker */}
-      <div className="mt-3">
-        <div className="flex items-center justify-between gap-3">
-          <label className="text-sm font-medium text-white/60">
-            {t("book.form.linkedIssues")}
-          </label>
-          <span className="text-xs text-white/40">
-            {t("book.form.linkedIssuesHint")}
-          </span>
-        </div>
-
-        {/* Linked Issues */}
-        <div className="grid gap-3 grid-cols-[1fr_280px] mt-2">
-          <div className="space-y-3">
+      <FormSection
+        title={t("book.form.linkedIssues")}
+        description={t("book.form.linkedIssuesHint")}
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_16rem] items-start gap-4">
+          <div className="flex flex-col gap-3 min-w-0">
             <SearchSelectInput
               label={t("book.form.issueSerie")}
               placeholder={t("book.form.issueSeriePlaceholder")}
@@ -382,9 +381,9 @@ export function BookContributionForm({
               onClear={() => setSelectedIssueSerie(undefined)}
               renderResult={(serie) => (
                 <div>
-                  <div className="font-medium text-white">{serie.name}</div>
+                  <div className="font-medium text-zinc-100">{serie.name}</div>
                   {serie.id < 0 && (
-                    <div className="text-xs text-white/40">
+                    <div className="text-xs text-zinc-500">
                       {t("generic.local")}
                     </div>
                   )}
@@ -393,98 +392,100 @@ export function BookContributionForm({
             />
 
             {selectedIssueSerie && (
-              <div className="w-full rounded-md border border-white/10 bg-white/5 p-3">
-                <div className="space-y-3">
-                  <input
-                    type="number"
-                    placeholder={t("book.form.issueNumberSearch")}
-                    value={issueNumberQuery}
-                    onChange={(e) => setIssueNumberQuery(e.target.value)}
-                    className="w-full rounded border border-white/10 bg-black/10 px-3 py-2 text-sm text-white outline-none focus:border-white"
-                  />
+              <div className="flex flex-col gap-3 rounded-md border border-zinc-800 bg-zinc-900/50 p-3">
+                <input
+                  type="number"
+                  placeholder={t("book.form.issueNumberSearch")}
+                  value={issueNumberQuery}
+                  onChange={(e) => setIssueNumberQuery(e.target.value)}
+                  className={fieldInputClass}
+                />
 
-                  {filteredAvailableIssues.length > 0 ? (
-                    <div className="w-full grid grid-cols-8 gap-2">
-                      {filteredAvailableIssues
-                        .sort((a, b) => (a.number ?? 0) - (b.number ?? 0))
-                        .map((issue) => {
-                          const linked = selectedLinkedIssues.some(
-                            (li) => li.id === issue.id,
-                          );
-                          return (
-                            <button
-                              type="button"
-                              key={issue.id}
-                              onClick={() => addLinkedIssue(issue)}
-                              disabled={linked}
-                              className={`rounded-md border px-2 py-2 text-sm cursor-pointer ${
-                                linked
-                                  ? "border-white/10 bg-white/10 text-white/50 cursor-not-allowed"
-                                  : "border-white/10 bg-black/10 text-white hover:border-white/30"
-                              }`}
-                            >
-                              #{issue.number}
-                            </button>
-                          );
-                        })}
-                    </div>
-                  ) : (
-                    <div className="text-xs text-white/40">
-                      {t("book.form.noIssuesInSerie")}
-                    </div>
-                  )}
-                </div>
+                {filteredAvailableIssues.length > 0 ? (
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(3.5rem,1fr))] gap-2">
+                    {filteredAvailableIssues
+                      .sort((a, b) => (a.number ?? 0) - (b.number ?? 0))
+                      .map((issue) => {
+                        const linked = selectedLinkedIssues.some(
+                          (li) => li.id === issue.id,
+                        );
+                        return (
+                          <button
+                            type="button"
+                            key={issue.id}
+                            onClick={() => addLinkedIssue(issue)}
+                            disabled={linked}
+                            className={`h-8 rounded-md border text-sm transition-colors ${
+                              linked
+                                ? "border-indigo-500/40 bg-indigo-500/15 text-indigo-200 cursor-not-allowed"
+                                : "border-zinc-700 bg-zinc-900 text-zinc-200 hover:border-zinc-500 cursor-pointer"
+                            }`}
+                          >
+                            #{issue.number}
+                          </button>
+                        );
+                      })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-zinc-500">
+                    {t("book.form.noIssuesInSerie")}
+                  </p>
+                )}
               </div>
             )}
           </div>
 
-          <div className="rounded-md border border-white/10 bg-white/5 p-3">
-            <div className="text-xs uppercase tracking-widest text-white/40 mb-2">
+          <div className="flex flex-col gap-2 rounded-md border border-zinc-800 bg-zinc-900/50 p-3">
+            <span className="text-sm font-medium text-zinc-300">
               {t("book.form.linkedIssuesSelected")}
-            </div>
-            <div className="space-y-2">
-              {selectedLinkedIssues.length === 0 ? (
-                <div className="text-sm text-white/50">
-                  {t("book.form.noLinkedIssues")}
-                </div>
-              ) : (
-                Object.entries(selectedIssuesBySerie).map(
-                  ([serieLabel, issues]) => (
-                    <div key={serieLabel} className="space-y-2">
-                      <div className="text-xs text-white/50">{serieLabel}</div>
-                      <div className="flex flex-wrap gap-2">
-                        {issues
-                          .sort((a, b) => a.number - b.number)
-                          .map((issue) => (
-                            <div
-                              key={issue.id}
-                              className="flex items-center gap-2 rounded-full border border-white/10 bg-black/10 px-3 py-1 text-sm"
-                            >
-                              <span>{issue.number ?? issue.name}</span>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  removeLinked(
-                                    selectedLinkedIssues.findIndex(
-                                      (li) => li.id === issue.id,
-                                    ),
-                                  )
-                                }
-                                className="text-rose-400 text-xs cursor-pointer"
-                              >
-                                x
-                              </button>
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  ),
-                )
+              {selectedLinkedIssues.length > 0 && (
+                <span className="ml-1.5 text-zinc-500">
+                  ({selectedLinkedIssues.length})
+                </span>
               )}
-            </div>
+            </span>
+            {selectedLinkedIssues.length === 0 ? (
+              <p className="text-sm text-zinc-500">
+                {t("book.form.noLinkedIssues")}
+              </p>
+            ) : (
+              Object.entries(selectedIssuesBySerie).map(
+                ([serieLabel, issues]) => (
+                  <div key={serieLabel} className="flex flex-col gap-1.5">
+                    <span className="text-xs text-zinc-400">{serieLabel}</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {issues
+                        .sort((a, b) => a.number - b.number)
+                        .map((issue) => (
+                          <span
+                            key={issue.id}
+                            className="flex items-center gap-1 rounded-md border border-zinc-700 bg-zinc-900 pl-2 pr-1 py-0.5 text-sm text-zinc-200"
+                          >
+                            #{issue.number ?? issue.name}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                removeLinked(
+                                  selectedLinkedIssues.findIndex(
+                                    (li) => li.id === issue.id,
+                                  ),
+                                )
+                              }
+                              className="rounded p-0.5 text-zinc-500 hover:text-rose-400 cursor-pointer"
+                              aria-label={t("generic.remove")}
+                            >
+                              <MdClose size={14} />
+                            </button>
+                          </span>
+                        ))}
+                    </div>
+                  </div>
+                ),
+              )
+            )}
           </div>
         </div>
-      </div>
+      </FormSection>
     </GenericForm>
   );
 }

@@ -144,4 +144,11 @@ export default {
   "apierror.bundle.not_created": "The contribution bundle could not be created",
   "apierror.bundle.not_updated": "The contribution bundle could not be updated",
   "apierror.bundle.status_not_updated": "The bundle status could not be updated",
+  // Forms
+  "generic.remove": "Remove",
+  "form.section.general": "General information",
+  "form.section.identification": "Identification",
+  "form.section.details": "Details",
+  "form.section.content": "Content",
+  "form.section.cover": "Cover",
 };
