@@ -16,6 +16,7 @@ import dev.stuten.vps.models.dtos.full.ContributionDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionBundleDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionDTO;
 import dev.stuten.vps.models.dtos.template.IdDTO;
+import dev.stuten.vps.models.mappers.utils.ContributionDataUtils;
 import dev.stuten.vps.models.mappers.utils.MappingUtils;
 
 public class ContributionMapper {
@@ -55,7 +56,7 @@ public class ContributionMapper {
                 .action(r.get(getFieldName(CONTRIBUTIONS.ACTION), ContributionActionEnum.class))
                 .entityId(r.get(getFieldName(CONTRIBUTIONS.ENTITY_ID), Integer.class))
                 .proposedData(MappingUtils.jsonbToIdDTO(proposedDataJsonb, type))
-                .entitySnapshot(MappingUtils.jsonbToIdDTO(entitySnapshotJsonb, type))
+                .entitySnapshot(ContributionDataUtils.fromJsonb(entitySnapshotJsonb))
                 .status(r.get(getFieldName(CONTRIBUTIONS.STATUS), ContributionStatusEnum.class))
                 .resolvedEntityId(r.get(getFieldName(CONTRIBUTIONS.RESOLVED_ENTITY_ID), Integer.class))
                 .build();
@@ -77,7 +78,7 @@ public class ContributionMapper {
                 .action(r.get(getFieldName(CONTRIBUTIONS.ACTION), ContributionActionEnum.class))
                 .entityId(r.get(getFieldName(CONTRIBUTIONS.ENTITY_ID), Integer.class))
                 .proposedData(MappingUtils.jsonbToIdDTO(proposedDataJsonb, type))
-                .entitySnapshot(MappingUtils.jsonbToIdDTO(entitySnapshotJsonb, type))
+                .entitySnapshot(ContributionDataUtils.fromJsonb(entitySnapshotJsonb))
                 .status(r.get(getFieldName(CONTRIBUTIONS.STATUS), ContributionStatusEnum.class))
                 .resolvedEntityId(r.get(getFieldName(CONTRIBUTIONS.RESOLVED_ENTITY_ID), Integer.class))
                 .build();

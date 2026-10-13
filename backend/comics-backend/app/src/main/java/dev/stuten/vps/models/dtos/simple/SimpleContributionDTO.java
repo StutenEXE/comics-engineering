@@ -2,6 +2,7 @@ package dev.stuten.vps.models.dtos.simple;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import dev.stuten.vps.jooq.enums.ContributionActionEnum;
@@ -44,8 +45,15 @@ public class SimpleContributionDTO<T extends IdDTO> extends IdDTO {
     @JsonProperty("proposedData")
     private T proposedData;
 
+    /**
+     * Previous state of the entity, built by the server (see
+     * ContributionDataUtils.buildSnapshot) :
+     * - create : null
+     * - update : previous values of the fields changed by the proposal only
+     * - delete : the deleted entity
+     */
     @JsonProperty("entitySnapshot")
-    private T entitySnapshot;
+    private JsonNode entitySnapshot;
 
     @JsonProperty("status")
     private ContributionStatusEnum status;

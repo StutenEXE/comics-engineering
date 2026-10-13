@@ -32,6 +32,7 @@ import dev.stuten.vps.models.dtos.response.ContributionsStatsDTO;
 import dev.stuten.vps.models.dtos.response.ContributionsStatsDTO.ContributionStatusStatsDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionDTO;
 import dev.stuten.vps.models.dtos.template.IdDTO;
+import dev.stuten.vps.models.mappers.utils.ContributionDataUtils;
 import dev.stuten.vps.services.utils.AuthServiceUtil;
 import dev.stuten.vps.web.ErrorCode;
 import dev.stuten.vps.web.ErrorResponse;
@@ -57,19 +58,30 @@ public class ContributionService {
         };
     }
 
+    /**
+     * Saves what is needed of the entity's current state (see
+     * ContributionDataUtils.buildSnapshot)
+     */
+    private static void snapshotEntity(SimpleContributionDTO<? extends IdDTO> contrib, TransactionContext tx) {
+        contrib.setEntitySnapshot(null);
+        if (contrib.getAction() == ContributionActionEnum.create) {
+            return;
+        }
+        ContributableDAO<? extends IdDTO> targetDAO = getDAOFromEntityType(contrib.getEntityType(), tx);
+        Optional<? extends IdDTO> entity = targetDAO.findById(contrib.getEntityId());
+        if (entity.isEmpty()) {
+            throw new RuntimeException("Cannot find entity of type %s and of id %d"
+                    .formatted(contrib.getEntityType(), contrib.getEntityId()));
+        }
+        contrib.setEntitySnapshot(ContributionDataUtils.buildSnapshot(contrib.getEntityType(), contrib.getAction(),
+                entity.get(), contrib.getProposedData()));
+    }
+
     protected static <T extends IdDTO> Optional<Integer> createContribution(SimpleContributionDTO<T> contrib,
             TransactionContext tx) {
         contrib.setStatus(ContributionStatusEnum.pending);
         // If we are updating or deleting save previous entity state
-        if (contrib.getAction() != ContributionActionEnum.create) {
-            ContributableDAO<? extends IdDTO> targetDAO = getDAOFromEntityType(contrib.getEntityType(), tx);
-            Optional<T> entity = (Optional<T>) targetDAO.findById(contrib.getEntityId());
-            if (entity.isEmpty()) {
-                throw new RuntimeException("Cannot find entity of type %s and of id %d"
-                        .formatted(contrib.getEntityType(), contrib.getId()));
-            }
-            contrib.setEntitySnapshot(entity.get());
-        }
+        snapshotEntity(contrib, tx);
         // Create
         Optional<Integer> result = new ContributionDAO(tx.dsl()).create(contrib);
         return result;
@@ -144,7 +156,12 @@ public class ContributionService {
             ErrorResponse.send(HttpStatus.METHOD_NOT_ALLOWED, ErrorCode.CONTRIBUTION_ALREADY_CLOSED, message);
         }
 
-        boolean updated = contributionDAO.update(contribution);
+        // The snapshot only holds the fields changed by the proposal : it changes with
+        // the proposal
+        boolean updated = Transactions.run(tx -> {
+            snapshotEntity(contribution, tx);
+            return new ContributionDAO(tx.dsl()).update(contribution);
+        });
         if (!updated) {
             ErrorResponse.send(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.CONTRIBUTION_NOT_UPDATED, "Failed to update contribution");
         }

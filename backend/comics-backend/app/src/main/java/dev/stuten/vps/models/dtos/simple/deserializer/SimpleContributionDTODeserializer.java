@@ -43,9 +43,9 @@ public class SimpleContributionDTODeserializer extends JsonDeserializer<SimpleCo
 
         // Deserialize the typed fields
         IdDTO proposedData = deserializeNode(node.get("proposedData"), dataClass, codec);
-        IdDTO entitySnapshot = deserializeNode(node.get("entitySnapshot"), dataClass, codec);
 
         // Build the DTO manually
+        // The entity snapshot sent by the client is ignored, it is built by the server
         return SimpleContributionDTO.builder()
                 .id(nullableInt(node, "id"))
                 .bundleId(nullableInt(node, "bundleId"))
@@ -54,7 +54,6 @@ public class SimpleContributionDTODeserializer extends JsonDeserializer<SimpleCo
                 .action(codec.treeToValue(node.get("action"), ContributionActionEnum.class))
                 .entityId(nullableInt(node, "entityId"))
                 .proposedData(proposedData)
-                .entitySnapshot(entitySnapshot)
                 .status(node.has("status") && !node.get("status").isNull()
                         ? codec.treeToValue(node.get("status"), ContributionStatusEnum.class)
                         : null)
