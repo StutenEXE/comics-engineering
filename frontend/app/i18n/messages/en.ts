@@ -38,6 +38,13 @@ export default {
   "contribution.stats.edition": "Editions",
   "contribution.stats.issue": "Issues",
   "contribution.stats.issueserie": "Issue series",
+  // Change history (timeline on item pages)
+  "history.title": "Change history",
+  "history.empty": "No recorded change",
+  "history.by": "by",
+  "history.noChange": "No field changed",
+  "history.previousImageNotKept": "The previous image is not kept",
+  "history.imageUnavailable": "Image unavailable",
   // Contribution Actions
   "contrib.action": "Contribution Type",
   "contrib.action.create": "Create New Item",

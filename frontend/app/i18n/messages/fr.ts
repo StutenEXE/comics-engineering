@@ -112,6 +112,13 @@ export default {
   "contribution.enum.type.edition": "Edition",
   "contribution.enum.type.issueserie": "Série d'issues",
   "contribution.enum.type.issue": "Issue",
+  // Change history (timeline on item pages)
+  "history.title": "Historique des modifications",
+  "history.empty": "Aucune modification enregistrée",
+  "history.by": "par",
+  "history.noChange": "Aucun champ modifié",
+  "history.previousImageNotKept": "L'image précédente n'est pas conservée",
+  "history.imageUnavailable": "Image indisponible",
   "contribution.confirmstatuschange": "Changement de statut de contribution",
   "contribution.book.criticalIssues": "Issues a créer avant",
   "contribution.book.linkedIssues": "Issues liées",

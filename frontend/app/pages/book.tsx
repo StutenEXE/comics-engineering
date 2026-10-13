@@ -13,7 +13,9 @@ import { useTranslation } from "~/i18n/i18n";
 import {
   wrapInNewBundle,
   type SimpleContribution,
+  ContributionTypeEnum,
 } from "~/models/contribution";
+import { ContributionHistoryTimeline } from "~/components/timelines/ContributionHistoryTimeline";
 import { useAppSelector } from "~/store/hooks";
 import {
   useBookByIdQuery,
@@ -84,6 +86,12 @@ export default function BookPage({ params }: { params: { id: number } }) {
         imgAlt={book?.name}
         isLoading={isFetching}
         error={err}
+        aside={
+          <ContributionHistoryTimeline
+            type={ContributionTypeEnum.BOOK}
+            id={book?.id}
+          />
+        }
       >
         <InfoPageHeaderComponent
           headerTitle={t("page.book.header")}

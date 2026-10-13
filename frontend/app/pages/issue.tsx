@@ -12,7 +12,9 @@ import { useTranslation } from "~/i18n/i18n";
 import {
   type SimpleContribution,
   wrapInNewBundle,
+  ContributionTypeEnum,
 } from "~/models/contribution";
+import { ContributionHistoryTimeline } from "~/components/timelines/ContributionHistoryTimeline";
 import { buildIssueShortName } from "~/models/issue";
 import { useAppSelector } from "~/store/hooks";
 import {
@@ -84,6 +86,12 @@ export default function IssuePage({ params }: { params: { id: number } }) {
         imgUrl={imgUrl}
         isLoading={isFetching}
         error={err}
+        aside={
+          <ContributionHistoryTimeline
+            type={ContributionTypeEnum.ISSUE}
+            id={issue?.id}
+          />
+        }
       >
         <InfoPageHeaderComponent
           headerTitle={t("page.issue.header")}

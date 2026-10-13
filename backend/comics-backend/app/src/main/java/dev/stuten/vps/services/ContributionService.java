@@ -232,6 +232,20 @@ public class ContributionService {
         ctx.json(Map.of("contributions", contributions));
     }
 
+    /**
+     * Change history of an entity : its approved contributions, latest first
+     */
+    public static void getHistory(Context ctx) {
+        ContributionTypeEnum type = ContributionTypeEnum.lookupLiteral(ctx.queryParam("type"));
+        if (type == null) {
+            ErrorResponse.send(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_REQUEST,
+                    "Missing or unknown 'type' (%s)".formatted(ctx.queryParam("type")));
+        }
+        List<ContributionDTO<? extends IdDTO>> contributions = contributionDAO.findHistory(type, requireId(ctx));
+
+        ctx.json(Map.of("contributions", contributions));
+    }
+
     public static void getStatsBySubmitterId(Context ctx) {
         List<ContributionDTO<? extends IdDTO>> contributions = contributionDAO.findBySubmitterId(requireId(ctx));
 

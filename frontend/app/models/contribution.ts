@@ -124,6 +124,61 @@ export function getContributionName(c: SimpleContribution | Contribution, locale
     }
 }
 
+export interface FieldChange {
+    field: string,
+    before: any,
+    after: any,
+}
+
+/**
+ * Fields changed by an update : for each field of the snapshot (previous values),
+ * the previous and the proposed value. Same rules as the backend
+ * (ContributionDataUtils) : references are compared by id, lists of references
+ * by ids, whatever their order.
+ */
+export function getFieldChanges(c: SimpleContribution | Contribution): FieldChange[] {
+    if (c.action !== ContributionActionEnum.UPDATE || !c.entitySnapshot) {
+        return [];
+    }
+    return Object.entries(c.entitySnapshot)
+        .filter(([field, before]) => !isSameValue(before, c.proposedData?.[field]))
+        .map(([field, before]) => ({ field, before, after: c.proposedData?.[field] }));
+}
+
+export function isReference(v: any): v is { id: number } & Record<string, any> {
+    return v !== null && typeof v === "object" && !Array.isArray(v) && v.id != null;
+}
+
+export function isReferenceList(v: any): v is ({ id: number } & Record<string, any>)[] {
+    return Array.isArray(v) && v.every(isReference);
+}
+
+function isSameValue(a: any, b: any): boolean {
+    // Missing = null
+    a = a ?? null;
+    b = b ?? null;
+    if (a === null || b === null) {
+        return a === b;
+    }
+    if (isReference(a) && isReference(b)) {
+        return isSameValue(a.id, b.id);
+    }
+    if (isReferenceList(a) && isReferenceList(b)) {
+        const ids = (l: { id: number }[]) => l.map((r) => String(r.id)).sort().join(",");
+        return ids(a) === ids(b);
+    }
+    if (typeof a === "object" && typeof b === "object") {
+        const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+        return Array.isArray(a) === Array.isArray(b)
+            && [...keys].every((k) => isSameValue(a[k], b[k]));
+    }
+    // Numbers by value (1.50 = 1.5)
+    if (typeof a === "number" || typeof b === "number") {
+        return Number(a) === Number(b);
+    }
+    return a === b;
+}
+
 export function wrapInNewBundle(c: Partial<SimpleContribution>, submitter: SimpleUser): Partial<ContributionBundle> {
     const b = newBundle(submitter)
     b.note = `${c.action} - ${c.entityType} - ${c.entityId}`
