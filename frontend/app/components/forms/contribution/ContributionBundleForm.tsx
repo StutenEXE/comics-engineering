@@ -47,7 +47,8 @@ interface ContributionBundleFormProps {
     bundle: Partial<ContributionBundle>,
     hasChanges: boolean,
   ) => Promise<void>;
-  onCancel?: () => void;
+  // hasChanges : something would be lost by cancelling
+  onCancel?: (hasChanges: boolean) => void;
   // Returing boolean : didn't create a new contribution in DB
   onContributionAdd?: (
     contribution: SimpleContribution,
@@ -299,7 +300,10 @@ export function ContributionBundleForm({
             ? t("cbundle.form.title.update")
             : t("cbundle.form.title.create")
         }
-        onCancel={noPropagationEvt(onCancel)}
+        onCancel={noPropagationEvt(() =>
+          // In update mode, contributions are already saved : only the note can be lost
+          onCancel?.(isDirty || (action === "create" && contributions.length > 0)),
+        )}
         submitLabel={
           action === "update"
             ? t("cbundle.form.update")
@@ -359,7 +363,7 @@ export function ContributionBundleForm({
             onAdd={addContributionFrom}
             onEdit={editContribution}
             onRemove={removeContribution}
-            className="border border-zinc-800 rounded-md bg-zinc-900/50 min-h-20 p-3"
+            className="max-h-none min-h-20 border border-zinc-800 rounded-md bg-zinc-950"
           />
         </FormSection>
 

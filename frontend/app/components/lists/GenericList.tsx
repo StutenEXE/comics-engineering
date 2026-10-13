@@ -37,13 +37,13 @@ export function GenericList<T>({
   return (
     <div className={divClassName}>
       {isLoading && (
-        <p className="flex gap-1 text-xs text-white/30 italic px-1 py-2">
+        <p className="flex gap-1 text-xs text-zinc-400 italic px-1 py-2">
           {t("generic.loading", { capitalize: true })}{" "}
-          <LoadingBadge className="text-white/30" />
+          <LoadingBadge className="text-zinc-400" />
         </p>
       )}
       {!isLoading && isEmpty && (
-        <p className="text-xs text-white/30 italic px-1 py-2">{emptyMsg}</p>
+        <p className="text-xs text-zinc-400 italic px-1 py-2">{emptyMsg}</p>
       )}
       {!isLoading && !isEmpty && list.map(elemGenerator)}
     </div>

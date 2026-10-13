@@ -10,7 +10,7 @@ type LoginModalProps = {
 export function LoginModal({ isOpen, onDone, onCancel }: LoginModalProps) {
   return (
     <GenericModal isOpen={isOpen} onClose={onCancel}>
-      <div className="border border-gray-300 rounded-lg shadow-md bg-black">
+      <div>
         <LoginForm onDone={onDone} onCancel={onCancel} />
       </div>
     </GenericModal>

@@ -18,7 +18,12 @@ export function CreateContributionBundleForm({
   const { t } = useTranslation();
   const confirm = useConfirm();
 
-  const handleCancel = () => {
+  // Only ask when something would be lost
+  const handleCancel = (hasChanges: boolean) => {
+    if (!hasChanges) {
+      onCancel?.();
+      return;
+    }
     confirm({
       title: t("cbundle.form.cancel.title"),
       message: t("cbundle.form.cancel.message"),

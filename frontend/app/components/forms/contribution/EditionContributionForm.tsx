@@ -31,6 +31,7 @@ import { TextRhfInputWithAction } from "../fields/TextRhfInputWithAction";
 import { useLazyScrapeIsbnQuery } from "~/store/services/scrapers";
 import { isntEmpty } from "~/utils/strings";
 import { useToast } from "~/components/toast/Toast";
+import { decimalValueAs } from "../fields/fieldStyles";
 
 interface EditionFormProps {
   edition?: Edition;
@@ -263,6 +264,7 @@ export function EditionContributionForm({
           : t("edition.form.create")
       }
       onSubmit={handleSubmit(triggerSubmission)}
+      showRequiredHint
       size="lg"
     >
       <FormSection title={t("form.section.identification")}>
@@ -270,6 +272,7 @@ export function EditionContributionForm({
           {/* Book selection */}
           <SearchSelectInput
             label={t("edition.book")}
+            required
             placeholder={t("generic.search.placeholder")}
             localRefLabel={t("edition.form.localRefPresent")}
             selectedItem={selectedBook}
@@ -288,6 +291,7 @@ export function EditionContributionForm({
           {/* Publisher selection */}
           <SearchSelectInput
             label={t("edition.publisher")}
+            required
             placeholder={t("generic.search.placeholder")}
             selectedItem={selectedPublisher}
             results={pubsData?.publishers.map(publisherToSimplePublisher)}
@@ -304,6 +308,7 @@ export function EditionContributionForm({
           {/* ISBN */}
           <TextRhfInputWithAction
             inputLabel={t("edition.isbn")}
+            required
             registration={register("isbn", {
               onChange: (e) => {
                 const raw = e.target.value.replace(/\D/g, ""); // Replace anything that is not a digit
@@ -344,30 +349,22 @@ export function EditionContributionForm({
           {/* Parution date */}
           <DateRhfInput
             label={t("edition.parutionDate")}
+            required
             registration={register("parutionDate")}
             error={errors.parutionDate}
           />
           {/* nPages */}
           <TextRhfInput
             label={t("edition.npages")}
-            registration={register("npages")}
-            inputProps={{
-              type: "number",
-              inputMode: "numeric",
-              min: 0,
-            }}
+            registration={register("npages", { setValueAs: decimalValueAs })}
+            inputProps={{ inputMode: "numeric" }}
             error={errors.npages}
           />
           {/* Price */}
           <TextRhfInput
             label={t("edition.price")}
-            registration={register("price")}
-            inputProps={{
-              type: "number",
-              step: ".01",
-              inputMode: "numeric",
-              min: 0,
-            }}
+            registration={register("price", { setValueAs: decimalValueAs })}
+            inputProps={{ inputMode: "decimal" }}
             error={errors.price}
           />
         </div>
@@ -376,6 +373,7 @@ export function EditionContributionForm({
           {/* Url */}
           <TextRhfInput
             label={t("edition.url")}
+            required
             registration={register("url")}
             error={errors.url}
           />
@@ -399,37 +397,22 @@ export function EditionContributionForm({
           {/* Height */}
           <TextRhfInput
             label={t("edition.dimensions.height")}
-            registration={register("height")}
-            inputProps={{
-              type: "number",
-              step: ".01",
-              inputMode: "numeric",
-              min: 0,
-            }}
+            registration={register("height", { setValueAs: decimalValueAs })}
+            inputProps={{ inputMode: "decimal" }}
             error={errors.height}
           />
           {/* Width */}
           <TextRhfInput
             label={t("edition.dimensions.width")}
-            registration={register("width")}
-            inputProps={{
-              type: "number",
-              step: ".01",
-              inputMode: "numeric",
-              min: 0,
-            }}
+            registration={register("width", { setValueAs: decimalValueAs })}
+            inputProps={{ inputMode: "decimal" }}
             error={errors.width}
           />
           {/* Thickness */}
           <TextRhfInput
             label={t("edition.dimensions.thickness")}
-            registration={register("thickness")}
-            inputProps={{
-              type: "number",
-              step: ".01",
-              inputMode: "numeric",
-              min: 0,
-            }}
+            registration={register("thickness", { setValueAs: decimalValueAs })}
+            inputProps={{ inputMode: "decimal" }}
             error={errors.thickness}
           />
         </div>
@@ -439,6 +422,7 @@ export function EditionContributionForm({
         <div className="flex items-start gap-4">
           <TextRhfInput
             label={t("edition.imgUrl")}
+            required
             registration={register("imgUrl")}
             error={errors.imgUrl}
             className="flex-1"

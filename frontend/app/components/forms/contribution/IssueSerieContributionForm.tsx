@@ -180,6 +180,7 @@ export function IssueSerieContributionForm({
           : t("issueserie.form.create")
       }
       onSubmit={handleSubmit(triggerSubmission)}
+    showRequiredHint
     >
       {/* Fandom Url field */}
       <TextRhfInputWithAction
@@ -194,6 +195,7 @@ export function IssueSerieContributionForm({
       {/* Name field */}
       <TextRhfInput
         label={t("issueserie.name")}
+        required
         registration={register("name")}
         error={errors.name}
       />
@@ -202,6 +204,7 @@ export function IssueSerieContributionForm({
       <DateRangeRhfInput
         startProps={{
           label: t("issueserie.startDate"),
+          required: true,
           registration: register("startDate", {
             onChange: onStartDateChange,
           }),

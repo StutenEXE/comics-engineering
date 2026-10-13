@@ -34,7 +34,7 @@ import { useToast } from "~/components/toast/Toast";
 import { MdClose } from "react-icons/md";
 import { FormSection } from "../FormSection";
 import { CoverPreview } from "../fields/CoverPreview";
-import { fieldInputClass } from "../fields/fieldStyles";
+import { decimalValueAs, fieldInputClass } from "../fields/fieldStyles";
 
 interface BookFormProps {
   book?: Book;
@@ -280,6 +280,7 @@ export function BookContributionForm({
         action === "update" ? t("book.form.modify") : t("book.form.create")
       }
       onSubmit={handleSubmit(triggerSubmission)}
+      showRequiredHint
       size="lg"
     >
       <FormSection title={t("form.section.general")}>
@@ -294,6 +295,7 @@ export function BookContributionForm({
         {/* Name field */}
         <TextRhfInput
           label={t("book.name")}
+          required
           registration={register("name")}
           error={errors.name}
         />
@@ -302,6 +304,7 @@ export function BookContributionForm({
           {/* Serie selection */}
           <SearchSelectInput
             label={t("book.serie")}
+            required
             placeholder={t("generic.search.placeholder")}
             localRefLabel={t("book.form.localRefPresent")}
             selectedItem={selectedSerie}
@@ -320,8 +323,8 @@ export function BookContributionForm({
           {/* Number */}
           <TextRhfInput
             label={t("book.number")}
-            registration={register("number")}
-            inputProps={{ type: "number", inputMode: "numeric", min: 0 }}
+            registration={register("number", { setValueAs: decimalValueAs })}
+            inputProps={{ inputMode: "numeric" }}
             error={errors.number}
           />
         </div>
@@ -347,6 +350,7 @@ export function BookContributionForm({
         <div className="flex items-start gap-4">
           <TextRhfInput
             label={t("book.imgUrl")}
+            required
             registration={register("imgUrl")}
             error={errors.imgUrl}
             className="flex-1"
@@ -383,7 +387,7 @@ export function BookContributionForm({
                 <div>
                   <div className="font-medium text-zinc-100">{serie.name}</div>
                   {serie.id < 0 && (
-                    <div className="text-xs text-zinc-500">
+                    <div className="text-xs text-zinc-400">
                       {t("generic.local")}
                     </div>
                   )}
@@ -413,12 +417,21 @@ export function BookContributionForm({
                           <button
                             type="button"
                             key={issue.id}
-                            onClick={() => addLinkedIssue(issue)}
-                            disabled={linked}
-                            className={`h-8 rounded-md border text-sm transition-colors ${
+                            // Toggle : a second click unlinks the issue
+                            onClick={() =>
                               linked
-                                ? "border-indigo-500/40 bg-indigo-500/15 text-indigo-200 cursor-not-allowed"
-                                : "border-zinc-700 bg-zinc-900 text-zinc-200 hover:border-zinc-500 cursor-pointer"
+                                ? removeLinked(
+                                    selectedLinkedIssues.findIndex(
+                                      (li) => li.id === issue.id,
+                                    ),
+                                  )
+                                : addLinkedIssue(issue)
+                            }
+                            aria-pressed={linked}
+                            className={`h-8 pointer-coarse:h-10 rounded-md border text-sm transition-colors cursor-pointer focus-visible:outline-1 focus-visible:outline-indigo-400 ${
+                              linked
+                                ? "border-indigo-400 bg-indigo-500/20 text-indigo-100 hover:bg-indigo-500/30"
+                                : "border-zinc-700 bg-zinc-900 text-zinc-200 hover:border-zinc-500"
                             }`}
                           >
                             #{issue.number}
@@ -427,7 +440,7 @@ export function BookContributionForm({
                       })}
                   </div>
                 ) : (
-                  <p className="text-sm text-zinc-500">
+                  <p className="text-sm text-zinc-400">
                     {t("book.form.noIssuesInSerie")}
                   </p>
                 )}
@@ -439,13 +452,13 @@ export function BookContributionForm({
             <span className="text-sm font-medium text-zinc-300">
               {t("book.form.linkedIssuesSelected")}
               {selectedLinkedIssues.length > 0 && (
-                <span className="ml-1.5 text-zinc-500">
+                <span className="ml-1.5 text-zinc-400">
                   ({selectedLinkedIssues.length})
                 </span>
               )}
             </span>
             {selectedLinkedIssues.length === 0 ? (
-              <p className="text-sm text-zinc-500">
+              <p className="text-sm text-zinc-400">
                 {t("book.form.noLinkedIssues")}
               </p>
             ) : (
@@ -471,7 +484,7 @@ export function BookContributionForm({
                                   ),
                                 )
                               }
-                              className="rounded p-0.5 text-zinc-500 hover:text-rose-400 cursor-pointer"
+                              className="rounded p-0.5 pointer-coarse:p-2 text-zinc-400 hover:text-rose-400 cursor-pointer"
                               aria-label={t("generic.remove")}
                             >
                               <MdClose size={14} />

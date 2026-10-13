@@ -151,4 +151,15 @@ export default {
   "form.section.details": "Details",
   "form.section.content": "Content",
   "form.section.cover": "Cover",
+  // Contribution list
+  "generic.expand": "Expand",
+  "generic.collapse": "Collapse",
+  "generic.andMore": "+%n% more",
+  "contribution.review.approve": "Approve",
+  "contribution.review.reject": "Reject",
+  "contribution.review.revise": "Request a revision",
+  "contribution.review.skip": "Skip",
+  "contribution.list.hiddenChildren": "%n% hidden contribution(s)",
+  "cbundle.form.addNextIssue": "Next issue",
+  "form.requiredHint": "Fields marked with * are required",
 };

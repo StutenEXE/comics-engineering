@@ -1,14 +1,9 @@
 import { forwardRef, useImperativeHandle, useRef } from "react";
-import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
+import type { FieldError as RhfFieldError, UseFormRegisterReturn } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
-import { HelpBadgeTooltip } from "~/components/badges/HelpBadge";
 import { Input } from "~/components/shadcn/ui/input";
-import {
-  fieldErrorClass,
-  fieldInputClass,
-  fieldLabelClass,
-  fieldWrapperClass,
-} from "./fieldStyles";
+import { FieldError, FieldLabel, inputA11yProps, useFieldIds } from "./FieldParts";
+import { fieldInputClass, fieldWrapperClass } from "./fieldStyles";
 
 export interface TextRhfInputHandle {
   getValue: () => string;
@@ -18,8 +13,9 @@ interface TextRhfInputProps {
   label: string;
   registration?: UseFormRegisterReturn;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
-  error?: FieldError;
+  error?: RhfFieldError;
   tooltip?: string;
+  required?: boolean;
   // Element rendered right next to the input (ex : an action button)
   endAdornment?: React.ReactNode;
   className?: string;
@@ -27,10 +23,20 @@ interface TextRhfInputProps {
 
 export const TextRhfInput = forwardRef<TextRhfInputHandle, TextRhfInputProps>(
   function TextRhfInput(
-    { label, registration, inputProps, error, tooltip, endAdornment, className },
+    {
+      label,
+      registration,
+      inputProps,
+      error,
+      tooltip,
+      required,
+      endAdornment,
+      className,
+    },
     ref,
   ) {
     const iptRef = useRef<HTMLInputElement>(null);
+    const { inputId, errorId } = useFieldIds(inputProps?.id);
 
     useImperativeHandle(
       ref,
@@ -57,21 +63,25 @@ export const TextRhfInput = forwardRef<TextRhfInputHandle, TextRhfInputProps>(
 
     return (
       <div className={twMerge(fieldWrapperClass, className)}>
-        <label className={fieldLabelClass}>
-          {label} {tooltip && <HelpBadgeTooltip tooltipContent={tooltip} />}
-        </label>
+        <FieldLabel
+          htmlFor={inputId}
+          label={label}
+          required={required}
+          tooltip={tooltip}
+        />
         <div className="flex gap-2">
           <Input
             ref={mergedRef}
             autoComplete="off"
-            aria-invalid={error ? true : undefined}
+            {...inputA11yProps(errorId, !!error, required)}
             {...restRegistration}
             {...inputProps}
+            id={inputId}
             className={fieldInputClass}
           />
           {endAdornment}
         </div>
-        {error && <p className={fieldErrorClass}>{error.message}</p>}
+        <FieldError id={errorId} message={error?.message} />
       </div>
     );
   },
