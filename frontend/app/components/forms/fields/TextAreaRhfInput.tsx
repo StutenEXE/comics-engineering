@@ -1,5 +1,11 @@
 import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
+import {
+  fieldErrorClass,
+  fieldInputClass,
+  fieldLabelClass,
+  fieldWrapperClass,
+} from "./fieldStyles";
 
 interface TextAreaRhfInputProps {
   label: string;
@@ -17,18 +23,17 @@ export function TextAreaRhfInput({
   className
 }: TextAreaRhfInputProps) {
   return (
-    <div className={twMerge("flex flex-col gap-1.5 sm:min-w-[300px]", className)}>
-      <label className="text-xs font-medium uppercase tracking-widest text-white/40">
-        {label}
-      </label>
+    <div className={twMerge(fieldWrapperClass, className)}>
+      <label className={fieldLabelClass}>{label}</label>
       <textarea
         autoComplete="off"
         rows={3}
+        aria-invalid={error ? true : undefined}
         {...registration}
         {...inputProps}
-        className="w-full min-h-[80px] bg-white/5 border border-white/10 rounded-md px-3 py-2 text-sm text-white/80 placeholder-white/20 outline-none focus:border-indigo-500/70 focus:ring-1 focus:ring-indigo-500/30 transition-all resize-none w-full disabled:opacity-30 disabled:cursor-not-allowed"
+        className={twMerge(fieldInputClass, "h-auto min-h-20 resize-y")}
       />
-      {error && <p className="text-xs text-rose-400/80">{error.message}</p>}
+      {error && <p className={fieldErrorClass}>{error.message}</p>}
     </div>
   );
 }

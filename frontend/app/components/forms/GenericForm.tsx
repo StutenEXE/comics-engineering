@@ -1,7 +1,16 @@
+import { twMerge } from "tailwind-merge";
 import { useTranslation } from "~/i18n/i18n";
 import { GenericButton } from "../buttons/GenericButton";
 import { noPropagationEvt } from "~/utils/events";
 import LoadingBadge from "../badges/LoadingBadge";
+
+// Fixed widths so that forms don't resize while the user types / selects,
+// capped by the viewport on small screens
+const formWidths = {
+  sm: "w-[min(28rem,calc(100vw-2rem))]",
+  md: "w-[min(36rem,calc(100vw-2rem))]",
+  lg: "w-[min(48rem,calc(100vw-2rem))]",
+};
 
 interface GenericFormProps {
   title: string;
@@ -11,6 +20,7 @@ interface GenericFormProps {
   onSubmit?: (event: React.SubmitEvent<HTMLFormElement>) => void;
   disabled?: boolean;
   isLoading?: boolean;
+  size?: keyof typeof formWidths;
   children?: React.ReactNode;
 }
 
@@ -22,24 +32,28 @@ export function GenericForm({
   onSubmit,
   disabled,
   isLoading = false,
+  size = "md",
   children,
 }: GenericFormProps) {
   const { t } = useTranslation();
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-6 p-6">
+    <form
+      onSubmit={onSubmit}
+      className={twMerge("flex flex-col", formWidths[size])}
+    >
       {/* Title */}
-      <h2 className="text-lg font-semibold tracking-wide text-white/90 text-center border-b border-white/10 pb-4">
+      <h2 className="px-6 pt-5 pb-4 text-lg font-semibold text-zinc-100 border-b border-zinc-800">
         {title}
       </h2>
 
-      {children}
+      <div className="flex flex-col gap-6 px-6 py-5">{children}</div>
 
-      {/* Actions */}
-      <div className="flex justify-between gap-3 pt-2 border-t border-white/10">
+      {/* Actions : stay visible while scrolling long forms */}
+      <div className="sticky bottom-0 flex justify-end gap-2 px-6 py-3 border-t border-zinc-800 bg-zinc-950">
         <GenericButton
           onClick={onCancel}
-          className="flex-1 bg-white/5 border border-white/10 text-white/60 font-medium text-sm py-2 rounded-md hover:bg-white/10 hover:text-white/80 transition-all"
+          className="h-9 px-4 rounded-md bg-transparent text-zinc-300 font-medium text-sm hover:bg-zinc-800 hover:text-zinc-100"
         >
           {cancelLabel ?? t("generic.cancel", { capitalize: true })}
         </GenericButton>
@@ -47,7 +61,7 @@ export function GenericForm({
           type="submit"
           onClick={noPropagationEvt()}
           disabled={disabled}
-          className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm py-2 rounded-md transition-all shadow-lg shadow-indigo-900/40 disabled:opacity-30 disabled:cursor-not-allowed"
+          className="h-9 px-4 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm disabled:bg-indigo-600 disabled:opacity-40"
         >
           {submitLabel ?? t("generic.submit", { capitalize: true })}
           <LoadingBadge className="text-white" isLoading={isLoading} />

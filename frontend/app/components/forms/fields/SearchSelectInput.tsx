@@ -4,7 +4,14 @@ import { useState } from "react";
 import type { FieldError } from "react-hook-form";
 import { MdDelete } from "react-icons/md";
 import { Input } from "~/components/shadcn/ui/input";
+import { twMerge } from "tailwind-merge";
 import { useTranslation } from "~/i18n/i18n";
+import {
+  fieldErrorClass,
+  fieldInputClass,
+  fieldLabelClass,
+  fieldWrapperClass,
+} from "./fieldStyles";
 
 export interface SearchSelectItem {
   id: number;
@@ -104,23 +111,20 @@ export function SearchSelectInput<T extends SearchSelectItem>({
   const isNegativeId = selectedItem && selectedItem.id < 0;
 
   return (
-    <div className="w-full sm:w-120 min-w-0 flex flex-col gap-1.5">
+    <div className={twMerge(fieldWrapperClass, "w-full")}>
       {/* Label */}
-      <label
-        htmlFor="search-select-input"
-        className="text-xs font-medium uppercase tracking-widest text-white/40"
-      >
+      <label htmlFor="search-select-input" className={fieldLabelClass}>
         {label}
       </label>
 
       {isSelected ? (
         /* Selected / local-ref badge */
-        <div className="w-full flex items-center justify-between gap-2 bg-indigo-500/10 border border-indigo-500/30 rounded-md px-3 py-2">
-          <div className="flex items-center gap-2 text-sm">
+        <div className="h-9 w-full flex items-center justify-between gap-2 bg-zinc-900 border border-zinc-700 rounded-md px-3">
+          <div className="flex items-center gap-2 text-sm min-w-0">
             {/* Checkmark icon */}
             <svg
               viewBox="0 0 10 10"
-              className="w-3 h-3 shrink-0 text-indigo-400"
+              className="w-3 h-3 shrink-0 text-emerald-400"
               fill="none"
             >
               <path
@@ -134,7 +138,7 @@ export function SearchSelectInput<T extends SearchSelectItem>({
 
             {/* Local-ref or negative-id variant */}
             {isLocalRef || isNegativeId ? (
-              <span className="text-xs text-indigo-300/60 flex items-center gap-1">
+              <span className="text-sm text-zinc-300 truncate">
                 {localRefLabel ?? t("generic.localRefPresent")}
               </span>
             ) : selectedItem ? (
@@ -143,10 +147,10 @@ export function SearchSelectInput<T extends SearchSelectItem>({
                 renderSelected(selectedItem)
               ) : (
                 <>
-                  <span className="text-indigo-300 font-medium">
+                  <span className="text-zinc-100 font-medium truncate">
                     {selectedItem.name}
                   </span>
-                  <span className="text-white/20 font-mono text-xs">
+                  <span className="text-zinc-500 font-mono text-xs">
                     #{selectedItem.id}
                   </span>
                 </>
@@ -160,7 +164,7 @@ export function SearchSelectInput<T extends SearchSelectItem>({
               <button
                 type="button"
                 onClick={handleClear}
-                className="text-white/20 hover:text-rose-400 transition-colors cursor-pointer"
+                className="text-zinc-500 hover:text-rose-400 transition-colors cursor-pointer"
                 aria-label="Clear selection"
               >
                 <MdDelete size={15} />
@@ -179,16 +183,17 @@ export function SearchSelectInput<T extends SearchSelectItem>({
             disabled={isLocalRef}
             placeholder={placeholder}
             onChange={handleChange}
-            className="bg-white/5 border border-white/10 rounded-md px-3 py-2 text-sm text-white/80 placeholder-white/20 outline-none focus:border-indigo-500/70 focus:ring-1 focus:ring-indigo-500/30 transition-all w-full disabled:opacity-30 disabled:cursor-not-allowed"
+            aria-invalid={error ? true : undefined}
+            className={fieldInputClass}
           />
           <div className="relative">
             {results.length > 0 && (
-              <ol className="absolute top-full left-0 right-0 border bg-black border-white/25 rounded-md overflow-hidden">
+              <ol className="absolute z-10 top-1 left-0 right-0 max-h-60 overflow-auto border bg-zinc-900 border-zinc-700 rounded-md">
                 {results.map((item) => (
                   <li
                     key={item.id}
                     onClick={() => handleSelect(item)}
-                    className="px-3 py-2 text-sm text-white/70 border-b border-white/5 last:border-none hover:bg-white/5 transition-colors cursor-pointer"
+                    className="px-3 py-2 text-sm text-zinc-200 border-b border-zinc-800 last:border-none hover:bg-zinc-800 transition-colors cursor-pointer"
                   >
                     {renderResult ? renderResult(item) : item.name}
                   </li>
@@ -198,7 +203,7 @@ export function SearchSelectInput<T extends SearchSelectItem>({
           </div>
         </>
       )}
-      {error && <p className="text-xs text-rose-400/80">{error}</p>}
+      {error && <p className={fieldErrorClass}>{error}</p>}
     </div>
   );
 }

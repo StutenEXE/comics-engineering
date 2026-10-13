@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { UseFormRegisterReturn } from "react-hook-form";
+import { twMerge } from "tailwind-merge";
 import {
   Select,
   SelectContent,
@@ -10,6 +11,11 @@ import {
   SelectValue,
 } from "~/components/shadcn/ui/select";
 import { useTranslation } from "~/i18n/i18n";
+import {
+  fieldInputClass,
+  fieldLabelClass,
+  fieldWrapperClass,
+} from "./fieldStyles";
 
 interface SelectRhfInputProps {
   label?: string;
@@ -41,14 +47,12 @@ export function SelectRhfInput({
   };
 
   return (
-    <div className=" flex flex-col gap-1.5">
-      {label && (
-        <label className="w-full text-xs font-medium uppercase tracking-widest text-white/40">
-          {label}
-        </label>
-      )}
+    <div className={fieldWrapperClass}>
+      {label && <label className={fieldLabelClass}>{label}</label>}
       <Select value={selectedValue} onValueChange={handleValueChange}>
-        <SelectTrigger className="w-full min-w-50 bg-white/5 border border-white/10 rounded-md px-3 py-2 text-sm text-white/80 outline-none focus:border-indigo-500/70 focus:ring-1 focus:ring-indigo-500/30 transition-all cursor-pointer">
+        <SelectTrigger
+          className={twMerge(fieldInputClass, "cursor-pointer")}
+        >
           <SelectValue
             placeholder={
               placeholder ?? t("generic.select", { capitalize: true })

@@ -1,4 +1,3 @@
-import type { UseFormRegisterReturn, FieldError } from "react-hook-form";
 import { DateRhfInput, type DateRhfInputProps } from "./DateRhfInput";
 
 interface DateRangeRhfInputProps {
@@ -11,9 +10,9 @@ export function DateRangeRhfInput({
   endProps,
 }: DateRangeRhfInputProps) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3">
       <DateRhfInput {...startProps} />
-      <span className="text-white/20 mt-5 text-lg">→</span>
+      <span className="text-zinc-500 mt-8 text-sm">→</span>
       <DateRhfInput {...endProps} />
     </div>
   );
