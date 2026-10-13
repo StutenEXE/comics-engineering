@@ -1,6 +1,7 @@
 package dev.stuten.vps.models.dtos.full;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import dev.stuten.vps.jooq.enums.ContributionActionEnum;
 import dev.stuten.vps.jooq.enums.ContributionStatusEnum;
@@ -43,8 +44,11 @@ public class ContributionDTO<T extends IdDTO> extends IdDTO {
     @JsonProperty("proposedData")
     private T proposedData;
 
+    /**
+     * See SimpleContributionDTO.entitySnapshot
+     */
     @JsonProperty("entitySnapshot")
-    private T entitySnapshot;
+    private JsonNode entitySnapshot;
 
     @JsonProperty("status")
     private ContributionStatusEnum status;

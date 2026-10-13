@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.jooq.DSLContext;
+import org.jooq.JSONB;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.SelectFieldOrAsterisk;
@@ -19,7 +20,7 @@ import dev.stuten.vps.models.dtos.full.ContributionDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionDTO;
 import dev.stuten.vps.models.dtos.template.IdDTO;
 import dev.stuten.vps.models.mappers.ContributionMapper;
-import dev.stuten.vps.models.mappers.utils.MappingUtils;
+import dev.stuten.vps.models.mappers.utils.ContributionDataUtils;
 
 public class ContributionDAO extends DAO {
 
@@ -69,8 +70,8 @@ public class ContributionDAO extends DAO {
                 .set(CONTRIBUTIONS.ENTITY_TYPE, dto.getEntityType())
                 .set(CONTRIBUTIONS.ACTION, dto.getAction())
                 .set(CONTRIBUTIONS.ENTITY_ID, dto.getEntityId())
-                .set(CONTRIBUTIONS.PROPOSED_DATA, MappingUtils.mapToJsonb(dto.getProposedData()))
-                .set(CONTRIBUTIONS.ENTITY_SNAPSHOT, MappingUtils.mapToJsonb(dto.getEntitySnapshot()))
+                .set(CONTRIBUTIONS.PROPOSED_DATA, compactProposedData(dto))
+                .set(CONTRIBUTIONS.ENTITY_SNAPSHOT, ContributionDataUtils.toJsonb(dto.getEntitySnapshot()))
                 .set(CONTRIBUTIONS.STATUS, ContributionStatusEnum.pending)
                 .set(CONTRIBUTIONS.RESOLVED_ENTITY_ID, dto.getResolvedEntityId())
                 .returning(CONTRIBUTIONS.ID)
@@ -78,10 +79,15 @@ public class ContributionDAO extends DAO {
                 .map(record -> record.get(CONTRIBUTIONS.ID));
     }
 
+    private static JSONB compactProposedData(SimpleContributionDTO<? extends IdDTO> dto) {
+        return ContributionDataUtils.toJsonb(ContributionDataUtils.compact(dto.getEntityType(), dto.getProposedData()));
+    }
+
     /**
      * Only updateable data :
      * - entityId
      * - proposedData
+     * - entitySnapshot
      * - resolvedEntityId
      * 
      * To modify status, use updateStatus
@@ -94,7 +100,8 @@ public class ContributionDAO extends DAO {
     public Boolean update(SimpleContributionDTO<? extends IdDTO> dto) {
         return DSL().update(CONTRIBUTIONS)
                 .set(CONTRIBUTIONS.ENTITY_ID, dto.getEntityId())
-                .set(CONTRIBUTIONS.PROPOSED_DATA, MappingUtils.mapToJsonb(dto.getProposedData()))
+                .set(CONTRIBUTIONS.PROPOSED_DATA, compactProposedData(dto))
+                .set(CONTRIBUTIONS.ENTITY_SNAPSHOT, ContributionDataUtils.toJsonb(dto.getEntitySnapshot()))
                 .set(CONTRIBUTIONS.RESOLVED_ENTITY_ID, dto.getResolvedEntityId())
                 .where(CONTRIBUTIONS.ID.eq(dto.getId()))
                 .execute() > 0;
