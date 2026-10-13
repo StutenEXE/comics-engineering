@@ -17,7 +17,7 @@ export function TextAreaRhfInput({
   className
 }: TextAreaRhfInputProps) {
   return (
-    <div className={twMerge("flex flex-col gap-1.5 min-w-[300px]", className)}>
+    <div className={twMerge("flex flex-col gap-1.5 sm:min-w-[300px]", className)}>
       <label className="text-xs font-medium uppercase tracking-widest text-white/40">
         {label}
       </label>

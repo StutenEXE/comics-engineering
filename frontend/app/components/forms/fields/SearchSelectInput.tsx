@@ -104,7 +104,7 @@ export function SearchSelectInput<T extends SearchSelectItem>({
   const isNegativeId = selectedItem && selectedItem.id < 0;
 
   return (
-    <div className="w-120 flex flex-col gap-1.5">
+    <div className="w-full sm:w-120 min-w-0 flex flex-col gap-1.5">
       {/* Label */}
       <label
         htmlFor="search-select-input"

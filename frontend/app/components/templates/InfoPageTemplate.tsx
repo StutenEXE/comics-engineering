@@ -35,20 +35,42 @@ export function InfoPageTemplate({
 }: PageTemplateProps) {
   const { t } = useTranslation();
 
+  const imgSrc = imgUrl ?? "/placeholder.jpg";
+  const cover = isLoading ? (
+    <SkeletonImage className="w-full aspect-[2/3] rounded-lg shadow-xl shadow-black/40" />
+  ) : (
+    <EnlargeableImage
+      src={imgSrc}
+      alt={imgUrl ?? imgAlt}
+      className="w-full rounded-lg border border-white/8 shadow-xl shadow-black/40 object-cover"
+    />
+  );
+
   return (
     <GenericPageTemplate className={className}>
-      <div className="flex gap-8 items-start">
+      <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch md:items-start">
+        {/* Cover, small screens : blurred backdrop banner */}
         {hasImg && (
-          <div className="w-50 shrink-0 sticky top-24">
-            {isLoading ? (
-              <SkeletonImage className="w-full aspect-[2/3] rounded-lg shadow-xl shadow-black/40" />
-            ) : (
-              <EnlargeableImage
-                src={imgUrl ?? "/placeholder.jpg"}
-                alt={imgUrl ?? imgAlt}
-                className="w-full rounded-lg border border-white/8 shadow-xl shadow-black/40 object-cover"
-              />
+          <div className="md:hidden relative overflow-hidden rounded-xl border border-white/8 bg-white/3">
+            {!isLoading && (
+              <>
+                <img
+                  src={imgSrc}
+                  alt=""
+                  aria-hidden
+                  className="absolute inset-0 w-full h-full object-cover scale-125 blur-2xl opacity-60"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/80" />
+              </>
             )}
+            <div className="relative w-36 mx-auto py-6">{cover}</div>
+          </div>
+        )}
+
+        {/* Cover, large screens : sticky side column */}
+        {hasImg && (
+          <div className="hidden md:block w-50 shrink-0 sticky top-24">
+            {cover}
           </div>
         )}
         <div className="flex-1 flex flex-col gap-6 min-w-0">
@@ -170,7 +192,7 @@ export function InfoPageField({
         </a>
       ) : (
         // No link
-        <span className="text-sm text-white/80">{displayValue}</span>
+        <span className="text-sm text-white/80 break-words">{displayValue}</span>
       )}
     </>
   );
@@ -184,7 +206,7 @@ export function InfoPageFields({
   isLoading?: boolean;
 }) {
   return (
-    <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2.5 items-baseline">
+    <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-2.5 items-baseline">
       {fieldProps.map((props) => (
         <InfoPageField key={props.label} {...props} isLoading={isLoading} />
       ))}
