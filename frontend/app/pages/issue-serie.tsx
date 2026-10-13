@@ -13,7 +13,9 @@ import type { SimpleBook } from "~/models/book";
 import {
   type SimpleContribution,
   wrapInNewBundle,
+  ContributionTypeEnum,
 } from "~/models/contribution";
+import { ContributionHistoryTimeline } from "~/components/timelines/ContributionHistoryTimeline";
 import { useAppSelector } from "~/store/hooks";
 import {
   useIssueSerieByIdQuery,
@@ -97,6 +99,12 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
         imgUrl={imgUrl}
         isLoading={isFetching}
         error={err}
+        aside={
+          <ContributionHistoryTimeline
+            type={ContributionTypeEnum.ISSUE_SERIE}
+            id={issueSerie?.id}
+          />
+        }
       >
         <InfoPageHeaderComponent
           headerTitle={t("page.issueserie.header")}

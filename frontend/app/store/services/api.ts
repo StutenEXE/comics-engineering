@@ -7,6 +7,7 @@ import {
 } from "~/models/book";
 import {
   ContributionStatusEnum,
+  ContributionTypeEnum,
   parseToContribution,
   parseToSimpleContribution,
   type Contribution,
@@ -365,6 +366,20 @@ export const publicApi = createApi({
         params: params,
       }),
     }),
+    // Get the change history of an item (approved contributions, latest first)
+    contributionHistory: build.query<
+      { contributions: Contribution[] },
+      { type: ContributionTypeEnum; id: number }
+    >({
+      query: (params) => ({
+        url: "/contributions/history",
+        method: "GET",
+        params: params,
+      }),
+      transformResponse: (resp: { contributions: Contribution[] }) => ({
+        contributions: resp.contributions.map(parseToContribution),
+      }),
+    }),
   }),
 });
 
@@ -393,6 +408,7 @@ export const {
   useContributionStatsQuery,
   useContributionBySubmitterIdQuery,
   useContributionStatsBySubmitterIdQuery,
+  useContributionHistoryQuery,
 } = publicApi;
 
 ////////////////////////////////////

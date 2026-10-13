@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.JSONB;
 import org.jooq.Record;
@@ -15,7 +16,9 @@ import org.jooq.RecordMapper;
 import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.SelectJoinStep;
 
+import dev.stuten.vps.jooq.enums.ContributionActionEnum;
 import dev.stuten.vps.jooq.enums.ContributionStatusEnum;
+import dev.stuten.vps.jooq.enums.ContributionTypeEnum;
 import dev.stuten.vps.models.dtos.full.ContributionDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleContributionDTO;
 import dev.stuten.vps.models.dtos.template.IdDTO;
@@ -134,5 +137,23 @@ public class ContributionDAO extends DAO {
 
     public List<ContributionDTO<? extends IdDTO>> findByStatus(ContributionStatusEnum status) {
         return super.selectMany(CONTRIBUTIONS.STATUS.eq(status));
+    }
+
+    /**
+     * @return The approved contributions applied to the given entity (its creation
+     *         and its modifications), latest first
+     */
+    public List<ContributionDTO<? extends IdDTO>> findHistory(ContributionTypeEnum entityType, Integer entityId) {
+        // A creation only knows the entity id once approved (resolved entity id)
+        Condition targetsEntity = CONTRIBUTIONS.ACTION.eq(ContributionActionEnum.create)
+                .and(CONTRIBUTIONS.RESOLVED_ENTITY_ID.eq(entityId))
+                .or(CONTRIBUTIONS.ACTION.ne(ContributionActionEnum.create)
+                        .and(CONTRIBUTIONS.ENTITY_ID.eq(entityId)));
+        return super.selectMany(
+                CONTRIBUTIONS.ENTITY_TYPE.eq(entityType)
+                        .and(CONTRIBUTIONS.STATUS.eq(ContributionStatusEnum.approved))
+                        .and(targetsEntity),
+                null,
+                CONTRIBUTION_BUNDLES.CREATED_AT.desc(), CONTRIBUTIONS.ID.desc());
     }
 }

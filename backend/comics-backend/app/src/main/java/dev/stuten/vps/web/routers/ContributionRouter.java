@@ -14,6 +14,7 @@ public class ContributionRouter implements Router {
         app.get(APIPathBuilder.buildPublicPath("/contributions/submitter"), ContributionService::getBySubmitterId);
         app.get(APIPathBuilder.buildPublicPath("/contributions/submitter/stats"),
                 ContributionService::getStatsBySubmitterId);
+        app.get(APIPathBuilder.buildPublicPath("/contributions/history"), ContributionService::getHistory);
 
         // Private endpoints
         app.post(APIPathBuilder.buildPrivatePath("/contribute"), ContributionBundleService::submit);

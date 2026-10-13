@@ -15,6 +15,8 @@ interface PageTemplateProps {
   error?: Error;
   className?: string;
   children?: ReactNode;
+  // Shown on the right of the content (under it on small screens), ex : change history
+  aside?: ReactNode;
 }
 
 export function InfoPageTemplate({
@@ -25,6 +27,7 @@ export function InfoPageTemplate({
   error,
   className,
   children,
+  aside,
 }: PageTemplateProps) {
   const { t } = useTranslation();
 
@@ -61,7 +64,21 @@ export function InfoPageTemplate({
 
           {/* Content */}
           {!error && children}
+
+          {/* Aside, small screens */}
+          {!error && aside && (
+            <div className="lg:hidden pt-4 border-t border-white/10">
+              {aside}
+            </div>
+          )}
         </div>
+
+        {/* Aside, large screens */}
+        {!error && aside && (
+          <aside className="hidden lg:block w-72 shrink-0 sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto pl-6 border-l border-white/10">
+            {aside}
+          </aside>
+        )}
       </div>
     </GenericPageTemplate>
   );

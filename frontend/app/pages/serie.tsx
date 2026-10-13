@@ -11,7 +11,9 @@ import { useTranslation } from "~/i18n/i18n";
 import {
   wrapInNewBundle,
   type SimpleContribution,
+  ContributionTypeEnum,
 } from "~/models/contribution";
+import { ContributionHistoryTimeline } from "~/components/timelines/ContributionHistoryTimeline";
 import { useAppSelector } from "~/store/hooks";
 import {
   useSerieByIdQuery,
@@ -80,7 +82,17 @@ export default function SeriePage({ params }: { params: { id: number } }) {
 
   return (
     <>
-      <InfoPageTemplate hasImg={false} isLoading={isFetching} error={err}>
+      <InfoPageTemplate
+        hasImg={false}
+        isLoading={isFetching}
+        error={err}
+        aside={
+          <ContributionHistoryTimeline
+            type={ContributionTypeEnum.SERIE}
+            id={serie?.id}
+          />
+        }
+      >
         <InfoPageHeaderComponent
           headerTitle={t("serie.header")}
           title={serie?.name || ""}
