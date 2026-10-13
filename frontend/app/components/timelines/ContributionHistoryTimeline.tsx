@@ -12,6 +12,7 @@ import {
   type FieldChange,
 } from "~/models/contribution";
 import { useContributionHistoryQuery } from "~/store/services/api";
+import { formatCurrency } from "~/utils/currency";
 import { toDDmmYYYY } from "~/utils/date";
 import { SkeletonText } from "../misc/Skeleton";
 
@@ -198,7 +199,7 @@ function FieldChangeRow({
   type: ContributionTypeEnum;
   change: FieldChange;
 }) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const label = t(FIELD_LABELS[type][change.field]);
 
   // Lists of references : what was added and removed
@@ -251,13 +252,13 @@ function FieldChangeRow({
       <span className="text-[11px] uppercase tracking-wider text-white/30">
         {label}
       </span>
-      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs min-w-0">
+      {/* Previous value (struck through) above the new one */}
+      <div className="flex flex-col gap-0.5 text-xs min-w-0">
         <span className="text-white/35 line-through decoration-white/20 min-w-0 break-words">
-          <FieldValue value={change.before} />
+          <FieldValue value={formatFieldValue(change.field, change.before, t, locale)} />
         </span>
-        <span className="text-white/25">→</span>
         <span className="text-white/80 min-w-0 break-words">
-          <FieldValue value={change.after} />
+          <FieldValue value={formatFieldValue(change.field, change.after, t, locale)} />
         </span>
       </div>
     </div>
@@ -342,6 +343,32 @@ function FieldImage({ url }: { url?: string | null }) {
       />
     </a>
   );
+}
+
+/**
+ * Field specific display of a value (edition fields), others are shown as is
+ */
+function formatFieldValue(
+  field: string,
+  value: any,
+  t: ReturnType<typeof useTranslation>["t"],
+  locale: string,
+): any {
+  if (value === null || value === undefined || value === "") {
+    return value;
+  }
+  switch (field) {
+    case "coverType":
+      return t(`edition.coverType.${value}`);
+    case "price":
+      return formatCurrency(Number(value), "EUR", locale);
+    case "dimensions": {
+      const sizes = [value.height, value.width, value.thickness];
+      return `${sizes.map((s) => (s == null ? "?" : Number(s).toFixed(2))).join(" × ")} cm`;
+    }
+    default:
+      return value;
+  }
 }
 
 function formatReference(r: Record<string, any>): string {

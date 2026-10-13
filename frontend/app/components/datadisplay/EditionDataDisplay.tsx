@@ -19,6 +19,9 @@ interface EditionDataDisplayProps {
   error?: Error;
   className?: string;
   children?: ReactNode;
+  // See InfoPageTemplate
+  aside?: ReactNode;
+  asideClassName?: string;
 }
 
 export function EditionDataDisplay({
@@ -28,6 +31,8 @@ export function EditionDataDisplay({
   error,
   className,
   children,
+  aside,
+  asideClassName,
 }: EditionDataDisplayProps) {
   const { t, locale } = useTranslation();
 
@@ -39,6 +44,8 @@ export function EditionDataDisplay({
       isLoading={isLoading}
       error={error}
       className={className}
+      aside={aside}
+      asideClassName={asideClassName}
     >
       <InfoPageHeaderComponent
         headerTitle={t("page.edition.header")}

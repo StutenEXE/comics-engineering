@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "~/i18n/i18n";
 import {
+  ContributionTypeEnum,
   type SimpleContribution,
   wrapInNewBundle,
 } from "~/models/contribution";
@@ -17,6 +18,7 @@ import { useToast } from "../toast/Toast";
 import { AddToCollectionModal } from "./AddToCollectionModal";
 import { EditionContributionModal } from "./contribution/EditionContributionModal";
 import { GenericModal } from "./GenericModal";
+import { ContributionHistoryTimeline } from "../timelines/ContributionHistoryTimeline";
 
 interface EditionModalProps {
   editionId: number;
@@ -102,6 +104,14 @@ export function EditionModal({
           }}
           isLoading={isFetching}
           error={err}
+          aside={
+            <ContributionHistoryTimeline
+              type={ContributionTypeEnum.EDITION}
+              id={edition?.id}
+            />
+          }
+          // The modal scrolls on its own and is at most 37.5rem high (max-h-150)
+          asideClassName="top-0 max-h-[33rem]"
         >
           {isAuthenticated && (
             <GenericButton
