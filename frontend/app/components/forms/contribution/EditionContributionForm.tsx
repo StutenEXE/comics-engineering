@@ -412,13 +412,13 @@ export function EditionContributionForm({
         </div>
       </div>
 
-      <div className="flex items-end gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-end gap-3">
         {/* Url */}
         <TextRhfInput
           label={t("edition.url")}
           registration={register("url")}
           error={errors.url}
-          className="w-100"
+          className="w-full sm:w-100"
         />
 
         {/* CoverType*/}
@@ -439,7 +439,7 @@ export function EditionContributionForm({
           label={t("edition.imgUrl")}
           registration={register("imgUrl")}
           error={errors.imgUrl}
-          className="w-100"
+          className="w-full sm:w-100"
         />
         {!errors.imgUrl && watchedImgUrl && (
           <img

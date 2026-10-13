@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { noPropagationEvt } from "~/utils/events";
 
 interface GenericModalProps {
@@ -19,19 +20,22 @@ export function GenericModal({ isOpen, onClose, shouldCloseOnOOBClick = true, ch
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === "undefined") return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+  // Rendered in body so that no transformed / blurred ancestor can offset the "fixed" positioning
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-6">
       <div className="absolute inset-0 bg-black/50" onClick={shouldCloseOnOOBClick ? onClose : () => {}}></div>
       <div
         role="dialog"
         aria-modal="true"
-        className="relative z-50 max-h-150 overflow-x-auto border border-gray-300 rounded-lg shadow-md bg-black"
+        // Small screens : fits the viewport (dvh follows the mobile browser bars), scrolls vertically
+        className="relative z-50 w-fit max-w-full max-h-[calc(100dvh-1.5rem)] md:max-h-150 overflow-auto overscroll-contain border border-gray-300 rounded-lg shadow-md bg-black"
         onClick={noPropagationEvt()}
       >
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

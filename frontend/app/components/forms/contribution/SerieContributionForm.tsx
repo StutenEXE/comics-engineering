@@ -104,7 +104,7 @@ export function SerieContributionForm({
         error={errors.name}
       />
 
-      <div className="w-[100%] flex gap-12">
+      <div className="w-[100%] flex flex-wrap gap-x-12 gap-y-3">
         {/* Checkboxes */}
         <div className="flex gap-6">
           <CheckboxRhfInput
