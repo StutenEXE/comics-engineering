@@ -11,6 +11,7 @@ public class BookRouter implements Router {
         app.get(APIPathBuilder.buildPublicPath("/books"), BookService::getByID);
         app.get(APIPathBuilder.buildPublicPath("/books/serie"), BookService::getBySerieID);
         app.get(APIPathBuilder.buildPublicPath("/books/latest"), BookService::getLatest);
+        app.get(APIPathBuilder.buildPublicPath("/books/relations"), BookService::getRelations);
     }
     
 }

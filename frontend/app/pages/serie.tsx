@@ -13,7 +13,7 @@ import {
   type SimpleContribution,
   ContributionTypeEnum,
 } from "~/models/contribution";
-import { ContributionHistoryTimeline } from "~/components/timelines/ContributionHistoryTimeline";
+import { useHistoryTab } from "~/components/timelines/ContributionHistoryTimeline";
 import { useAppSelector } from "~/store/hooks";
 import {
   useSerieByIdQuery,
@@ -39,6 +39,9 @@ export default function SeriePage({ params }: { params: { id: number } }) {
   });
   const serie = data?.serie;
   const err = createError(error);
+
+  // Side panel
+  const historyTab = useHistoryTab(ContributionTypeEnum.SERIE, serie?.id);
 
   // Submit a contribution bundle
   const [submitBundle, { isError, isSuccess, error: submitError }] =
@@ -86,12 +89,7 @@ export default function SeriePage({ params }: { params: { id: number } }) {
         hasImg={false}
         isLoading={isFetching}
         error={err}
-        aside={
-          <ContributionHistoryTimeline
-            type={ContributionTypeEnum.SERIE}
-            id={serie?.id}
-          />
-        }
+        sideTabs={[historyTab]}
       >
         <InfoPageHeaderComponent
           headerTitle={t("serie.header")}

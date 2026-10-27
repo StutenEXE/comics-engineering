@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { InfoPageHeaderComponent } from "~/components/headers/InfoPageHeader";
-import { BookList } from "~/components/lists/booklists/BookList";
 import { IssueContributionModal } from "~/components/modals/contribution/IssueContributionModal";
 import {
   InfoPageFields,
-  InfoPageSection,
   InfoPageTemplate,
 } from "~/components/templates/InfoPageTemplate";
 import { useToast } from "~/components/toast/Toast";
@@ -14,7 +12,11 @@ import {
   wrapInNewBundle,
   ContributionTypeEnum,
 } from "~/models/contribution";
-import { ContributionHistoryTimeline } from "~/components/timelines/ContributionHistoryTimeline";
+import { useHistoryTab } from "~/components/timelines/ContributionHistoryTimeline";
+import {
+  BookRelationGroup,
+  useRelationsTab,
+} from "~/components/misc/RelationsPanel";
 import { buildIssueShortName } from "~/models/issue";
 import { useAppSelector } from "~/store/hooks";
 import {
@@ -47,6 +49,16 @@ export default function IssuePage({ params }: { params: { id: number } }) {
   // Previous & next issues of the same issue serie
   const { data: neighbours, isFetching: isFetchingNeighbours } =
     useIssueNeighboursQuery({ id: params.id });
+
+  // Side panel
+  const relationsTab = useRelationsTab({
+    count: issue?.books.length ?? 0,
+    isLoading: isFetching,
+    children: (
+      <BookRelationGroup label={t("relations.books")} books={issue?.books} />
+    ),
+  });
+  const historyTab = useHistoryTab(ContributionTypeEnum.ISSUE, issue?.id);
 
   // Submit a contribution bundle
   const [submitBundle, { isError, isSuccess, error: submitError }] =
@@ -96,12 +108,7 @@ export default function IssuePage({ params }: { params: { id: number } }) {
         imgUrl={imgUrl}
         isLoading={isFetching}
         error={err}
-        aside={
-          <ContributionHistoryTimeline
-            type={ContributionTypeEnum.ISSUE}
-            id={issue?.id}
-          />
-        }
+        sideTabs={[relationsTab, historyTab]}
       >
         <InfoPageHeaderComponent
           headerTitle={t("page.issue.header")}
@@ -154,13 +161,6 @@ export default function IssuePage({ params }: { params: { id: number } }) {
             },
           ]}
         />
-
-        <InfoPageSection label={t("page.issue.books")} isLoading={isFetching}>
-          <BookList
-            bookList={issue?.books}
-            className="border border-white/8 rounded-lg"
-          />
-        </InfoPageSection>
       </InfoPageTemplate>
       <IssueContributionModal
         issue={issue}

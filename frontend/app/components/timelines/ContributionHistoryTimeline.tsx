@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 import { twMerge } from "tailwind-merge";
 import { useTranslation, type TranslationKeys } from "~/i18n/i18n";
@@ -15,6 +15,7 @@ import { useContributionHistoryQuery } from "~/store/services/api";
 import { formatCurrency } from "~/utils/currency";
 import { toDDmmYYYY } from "~/utils/date";
 import { SkeletonText } from "../misc/Skeleton";
+import type { SidePanelTab } from "../misc/SidePanelTabs";
 
 // Label of each field that a contribution can change
 const FIELD_LABELS: Record<ContributionTypeEnum, Record<string, TranslationKeys>> = {
@@ -79,6 +80,33 @@ interface ContributionHistoryTimelineProps {
   className?: string;
 }
 
+// Number of changes shown before "show all"
+const COLLAPSED_ENTRIES = 3;
+
+function useHistory(type: ContributionTypeEnum, id?: number) {
+  return useContributionHistoryQuery({ type, id: id! }, { skip: id == null });
+}
+
+/**
+ * Change history tab of the info pages side panel (see SidePanelTabs)
+ */
+export function useHistoryTab(
+  type: ContributionTypeEnum,
+  id?: number,
+): SidePanelTab {
+  const { t } = useTranslation();
+  // Same query as the timeline : fetched once
+  const { data, isFetching } = useHistory(type, id);
+
+  return {
+    id: "history",
+    label: t("history.tab"),
+    title: t("history.title"),
+    count: isFetching ? undefined : data?.contributions.length,
+    content: <ContributionHistoryTimeline type={type} id={id} />,
+  };
+}
+
 /**
  * Vertical timeline of the approved changes of an item, latest first
  */
@@ -88,18 +116,20 @@ export function ContributionHistoryTimeline({
   className,
 }: ContributionHistoryTimelineProps) {
   const { t } = useTranslation();
-  const { data, isFetching, isError } = useContributionHistoryQuery(
-    { type, id: id! },
-    { skip: id == null },
-  );
+  const { data, isFetching, isError } = useHistory(type, id);
   const contributions = data?.contributions ?? [];
+
+  const [isExpanded, setIsExpanded] = useState(false);
+  // Collapsed again when showing another item (ex : issue navigation)
+  useEffect(() => setIsExpanded(false), [type, id]);
+  const isCollapsible = contributions.length > COLLAPSED_ENTRIES;
+  const shownContributions =
+    isCollapsible && !isExpanded
+      ? contributions.slice(0, COLLAPSED_ENTRIES)
+      : contributions;
 
   return (
     <div className={twMerge("flex flex-col gap-3", className)}>
-      <span className="text-xs font-medium uppercase tracking-widest text-white/40">
-        {t("history.title")}
-      </span>
-
       {isFetching && <SkeletonText lines={4} />}
 
       {!isFetching && isError && (
@@ -112,10 +142,24 @@ export function ContributionHistoryTimeline({
 
       {!isFetching && !isError && contributions.length > 0 && (
         <ol className="flex flex-col gap-5 border-l border-white/10 ml-1">
-          {contributions.map((c) => (
+          {shownContributions.map((c) => (
             <TimelineEntry key={c.id} contribution={c} />
           ))}
         </ol>
+      )}
+
+      {!isFetching && !isError && isCollapsible && (
+        <button
+          type="button"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-fit text-xs text-indigo-300/70 hover:underline hover:text-indigo-300 transition-colors cursor-pointer"
+        >
+          {isExpanded
+            ? t("history.showLess")
+            : t("history.showAll", {
+                parameters: { x: contributions.length },
+              })}
+        </button>
       )}
     </div>
   );

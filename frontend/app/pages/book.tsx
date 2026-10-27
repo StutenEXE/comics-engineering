@@ -15,10 +15,15 @@ import {
   type SimpleContribution,
   ContributionTypeEnum,
 } from "~/models/contribution";
-import { ContributionHistoryTimeline } from "~/components/timelines/ContributionHistoryTimeline";
+import { useHistoryTab } from "~/components/timelines/ContributionHistoryTimeline";
+import {
+  BookRelationGroup,
+  useRelationsTab,
+} from "~/components/misc/RelationsPanel";
 import { useAppSelector } from "~/store/hooks";
 import {
   useBookByIdQuery,
+  useBookRelationsQuery,
   useSubmitContributionBundleMutation,
 } from "~/store/services/api";
 import { createError, translateApiError } from "~/utils/error";
@@ -40,6 +45,36 @@ export default function BookPage({ params }: { params: { id: number } }) {
   const { data, isFetching, error } = useBookByIdQuery({ id: params.id });
   const book = data?.book;
   const err = createError(error);
+
+  // Books containing / contained in this one
+  const { data: relations, isFetching: isFetchingRelations } =
+    useBookRelationsQuery({ id: params.id });
+
+  // Side panel
+  const relationsTab = useRelationsTab({
+    count:
+      (relations?.containedIn.length ?? 0) +
+      (relations?.contains.length ?? 0) +
+      (relations?.sameContent.length ?? 0),
+    isLoading: isFetchingRelations,
+    children: (
+      <>
+        <BookRelationGroup
+          label={t("relations.book.containedIn")}
+          books={relations?.containedIn}
+        />
+        <BookRelationGroup
+          label={t("relations.book.contains")}
+          books={relations?.contains}
+        />
+        <BookRelationGroup
+          label={t("relations.book.sameContent")}
+          books={relations?.sameContent}
+        />
+      </>
+    ),
+  });
+  const historyTab = useHistoryTab(ContributionTypeEnum.BOOK, book?.id);
 
   // Submit a contribution bundle
   const [submitBundle, { isError, isSuccess, error: submitError }] =
@@ -86,12 +121,7 @@ export default function BookPage({ params }: { params: { id: number } }) {
         imgAlt={book?.name}
         isLoading={isFetching}
         error={err}
-        aside={
-          <ContributionHistoryTimeline
-            type={ContributionTypeEnum.BOOK}
-            id={book?.id}
-          />
-        }
+        sideTabs={[relationsTab, historyTab]}
       >
         <InfoPageHeaderComponent
           headerTitle={t("page.book.header")}

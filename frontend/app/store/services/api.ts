@@ -131,6 +131,30 @@ export const publicApi = createApi({
         books: resp.books.map((book) => parseToBook(book)),
       }),
     }),
+    // Get the books containing / contained in a book (based on their issues)
+    bookRelations: build.query<
+      {
+        containedIn: SimpleBook[];
+        contains: SimpleBook[];
+        sameContent: SimpleBook[];
+      },
+      { id: number }
+    >({
+      query: (params) => ({
+        url: "/books/relations",
+        method: "GET",
+        params: params,
+      }),
+      transformResponse: (resp: {
+        containedIn: SimpleBook[];
+        contains: SimpleBook[];
+        sameContent: SimpleBook[];
+      }) => ({
+        containedIn: resp.containedIn.map((bk) => parseToSimpleBook(bk)),
+        contains: resp.contains.map((bk) => parseToSimpleBook(bk)),
+        sameContent: resp.sameContent.map((bk) => parseToSimpleBook(bk)),
+      }),
+    }),
     // Latest books endpoint (reuse parseDateLikeFields)
     latestBooks: build.query<Page<SimpleBook>, PageRequest>({
       query: (params) => ({
@@ -413,6 +437,7 @@ export const {
   useRefreshQuery,
   usePublicUserByIdQuery,
   useBookByIdQuery,
+  useBookRelationsQuery,
   useBookBySerieIdQuery,
   useLatestBooksQuery,
   useEditionByIdQuery,

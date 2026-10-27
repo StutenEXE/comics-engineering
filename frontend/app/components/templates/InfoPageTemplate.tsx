@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Link } from "react-router";
 import { twMerge } from "tailwind-merge";
 import { useTranslation } from "~/i18n/i18n";
@@ -6,6 +6,7 @@ import { translateApiError, type Error } from "~/utils/error";
 import { HelpBadgeTooltip } from "../badges/HelpBadge";
 import { GenericPageTemplate } from "./GenericPageTemplate";
 import { EnlargeableImage } from "../misc/EnlargeableImage";
+import { SidePanelTabs, type SidePanelTab } from "../misc/SidePanelTabs";
 import { SkeletonImage, SkeletonText, SkeletonField } from "../misc/Skeleton";
 
 interface PageTemplateProps {
@@ -16,8 +17,9 @@ interface PageTemplateProps {
   error?: Error;
   className?: string;
   children?: ReactNode;
-  // Shown on the right of the content (under it on small screens), ex : change history
-  aside?: ReactNode;
+  // Shown on the right of the content (under it on small screens), one at a time,
+  // ex : relations, change history
+  sideTabs?: SidePanelTab[];
   // Overrides the large screen aside position (ex : inside a modal)
   asideClassName?: string;
 }
@@ -30,10 +32,21 @@ export function InfoPageTemplate({
   error,
   className,
   children,
-  aside,
+  sideTabs,
   asideClassName,
 }: PageTemplateProps) {
   const { t } = useTranslation();
+
+  // Shared by the small and large screens panels
+  const [activeTabId, setActiveTabId] = useState<string>();
+  const hasSideTabs = !!sideTabs?.some((tab) => !tab.hidden);
+  const sidePanel = hasSideTabs && (
+    <SidePanelTabs
+      tabs={sideTabs!}
+      activeId={activeTabId}
+      onChange={setActiveTabId}
+    />
+  );
 
   const imgSrc = imgUrl ?? "/placeholder.jpg";
   const cover = isLoading ? (
@@ -91,23 +104,23 @@ export function InfoPageTemplate({
           {/* Content */}
           {!error && children}
 
-          {/* Aside, small screens */}
-          {!error && aside && (
+          {/* Side panel, small screens */}
+          {!error && hasSideTabs && (
             <div className="lg:hidden pt-4 border-t border-white/10">
-              {aside}
+              {sidePanel}
             </div>
           )}
         </div>
 
-        {/* Aside, large screens */}
-        {!error && aside && (
+        {/* Side panel, large screens */}
+        {!error && hasSideTabs && (
           <aside
             className={twMerge(
               "hidden lg:block w-72 shrink-0 sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto pl-6 border-l border-white/10",
               asideClassName,
             )}
           >
-            {aside}
+            {sidePanel}
           </aside>
         )}
       </div>

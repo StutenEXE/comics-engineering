@@ -9,7 +9,9 @@ import static dev.stuten.vps.jooq.tables.Users.USERS;
 import static org.jooq.impl.DSL.multiset;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +29,7 @@ import org.jooq.impl.DSL;
 import dev.stuten.vps.jooq.tables.records.BooksIssuesRecord;
 import dev.stuten.vps.models.daos.utils.ImageUploader;
 import dev.stuten.vps.models.dtos.request.search.PaginationDTO;
+import dev.stuten.vps.models.dtos.response.BookRelationsDTO;
 import dev.stuten.vps.models.dtos.response.PageDTO;
 import dev.stuten.vps.models.dtos.full.BookDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleBookDTO;
@@ -205,5 +208,64 @@ public class BookDAO extends ContributableDAO<BookDTO> {
                 String searchPattern = toSearchPattern(query);
                 return super.selectMany(BOOKS.NAME.likeIgnoreCase(searchPattern), pagination,
                                 BOOKS.NAME.asc(), BOOKS.ID.asc());
+        }
+
+        /**
+         * Finds the books related to the given one through their issues : the books
+         * containing all of its issues, the books whose issues are all in it, and the
+         * books having exactly the same issues. A book without issues has no relation.
+         */
+        public BookRelationsDTO findRelations(Integer bookId) {
+                BookRelationsDTO relations = new BookRelationsDTO();
+                int total = DSL().fetchCount(BOOKS_ISSUES, BOOKS_ISSUES.BOOK_ID.eq(bookId));
+                if (total == 0) {
+                        return relations;
+                }
+
+                // Number of issues shared with each other book
+                var self = BOOKS_ISSUES.as("self");
+                var other = BOOKS_ISSUES.as("other");
+                var count = DSL.count();
+                Map<Integer, Integer> shared = DSL().select(other.BOOK_ID, count)
+                                .from(self)
+                                .join(other).on(other.ISSUE_ID.eq(self.ISSUE_ID))
+                                .where(self.BOOK_ID.eq(bookId))
+                                .and(other.BOOK_ID.ne(bookId))
+                                .groupBy(other.BOOK_ID)
+                                .fetchMap(other.BOOK_ID, count);
+                if (shared.isEmpty()) {
+                        return relations;
+                }
+
+                // Total number of issues of each of these books
+                Map<Integer, Integer> totals = DSL().select(BOOKS_ISSUES.BOOK_ID, count)
+                                .from(BOOKS_ISSUES)
+                                .where(BOOKS_ISSUES.BOOK_ID.in(shared.keySet()))
+                                .groupBy(BOOKS_ISSUES.BOOK_ID)
+                                .fetchMap(BOOKS_ISSUES.BOOK_ID, count);
+
+                // Sorted in Java, as the simple select is distinct
+                List<SimpleBookDTO> books = new ArrayList<>(getSimpleFromClause()
+                                .where(BOOKS.ID.in(shared.keySet()))
+                                .fetch(BookMapper::mapToSimpleDTO));
+                books.sort(Comparator
+                                .comparing(SimpleBookDTO::getSerieName,
+                                                Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+                                .thenComparing(SimpleBookDTO::getNumber, Comparator.nullsLast(Integer::compare))
+                                .thenComparing(SimpleBookDTO::getId));
+
+                for (SimpleBookDTO book : books) {
+                        int common = shared.get(book.getId());
+                        boolean hasAllIssues = common == total; // Every issue of this book is in the other one
+                        boolean isPartOf = common == totals.get(book.getId()); // Every issue of the other one is in this book
+                        if (hasAllIssues && isPartOf) {
+                                relations.getSameContent().add(book);
+                        } else if (hasAllIssues) {
+                                relations.getContainedIn().add(book);
+                        } else if (isPartOf) {
+                                relations.getContains().add(book);
+                        }
+                }
+                return relations;
         }
 }
