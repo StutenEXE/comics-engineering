@@ -115,11 +115,21 @@ export default {
   "contribution.enum.type.issue": "Issue",
   // Change history (timeline on item pages)
   "history.title": "Historique des modifications",
+  "history.tab": "Historique",
+  "history.showAll": "Tout afficher (%x%)",
+  "history.showLess": "Afficher moins",
   "history.empty": "Aucune modification enregistrée",
   "history.by": "par",
   "history.noChange": "Aucun champ modifié",
   "history.previousImageNotKept": "L'image précédente n'est pas conservée",
   "history.imageUnavailable": "Image indisponible",
+  // Relations (panneau latéral des pages)
+  "relations.title": "Relations",
+  "relations.book.containedIn": "Contenu dans",
+  "relations.book.contains": "Contient",
+  "relations.book.sameContent": "Même contenu",
+  "relations.books": "Livres associés",
+  "relations.edition.otherEditions": "Autres éditions de ce livre",
   "contribution.confirmstatuschange": "Changement de statut de contribution",
   "contribution.book.criticalIssues": "Issues a créer avant",
   "contribution.book.linkedIssues": "Issues liées",
@@ -480,10 +490,8 @@ export default {
   "page.edition.header": "Edition",
   // Issue serie
   "page.issueserie.header": "Issue Serie",
-  "page.issueserie.books": "Livres associés",
   // Issue
   "page.issue.header": "Issue",
-  "page.issue.books": "Livres associés",
   "page.issue.previous": "Précédent",
   "page.issue.next": "Suivant",
   // Serie

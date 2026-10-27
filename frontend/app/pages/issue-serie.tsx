@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { InfoPageHeaderComponent } from "~/components/headers/InfoPageHeader";
-import { BookList } from "~/components/lists/booklists/BookList";
 import { IssueList } from "~/components/lists/issuelists/IssueList";
 import { IssueSerieContributionModal } from "~/components/modals/contribution/IssueSerieContributionModal";
 import {
@@ -15,7 +14,11 @@ import {
   wrapInNewBundle,
   ContributionTypeEnum,
 } from "~/models/contribution";
-import { ContributionHistoryTimeline } from "~/components/timelines/ContributionHistoryTimeline";
+import { useHistoryTab } from "~/components/timelines/ContributionHistoryTimeline";
+import {
+  BookRelationGroup,
+  useRelationsTab,
+} from "~/components/misc/RelationsPanel";
 import { useAppSelector } from "~/store/hooks";
 import {
   useIssueSerieByIdQuery,
@@ -78,6 +81,17 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
 
   const books: SimpleBook[] | undefined = issueSerie?.books;
 
+  // Side panel
+  const relationsTab = useRelationsTab({
+    count: books?.length ?? 0,
+    isLoading: isFetching,
+    children: <BookRelationGroup label={t("relations.books")} books={books} />,
+  });
+  const historyTab = useHistoryTab(
+    ContributionTypeEnum.ISSUE_SERIE,
+    issueSerie?.id,
+  );
+
   let subtitle = dateToMonthYearString(issueSerie?.startDate);
   if (!issueSerie?.endDate) {
     subtitle += ` - ${t("generic.present", { capitalize: true })}`;
@@ -99,12 +113,7 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
         imgUrl={imgUrl}
         isLoading={isFetching}
         error={err}
-        aside={
-          <ContributionHistoryTimeline
-            type={ContributionTypeEnum.ISSUE_SERIE}
-            id={issueSerie?.id}
-          />
-        }
+        sideTabs={[relationsTab, historyTab]}
       >
         <InfoPageHeaderComponent
           headerTitle={t("page.issueserie.header")}
@@ -160,16 +169,6 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
               ...is,
               issueSerie: { ...issueSerie },
             }))}
-            className="border border-white/8 rounded-lg"
-          />
-        </InfoPageSection>
-
-        <InfoPageSection
-          label={t("page.issueserie.books")}
-          isLoading={isFetching}
-        >
-          <BookList
-            bookList={books}
             className="border border-white/8 rounded-lg"
           />
         </InfoPageSection>

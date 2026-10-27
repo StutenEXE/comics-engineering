@@ -29,6 +29,13 @@ public class BookService {
         ctx.json(Map.of("book", book));
     }
 
+    public static void getRelations(Context ctx) {
+        Integer id = requireId(ctx);
+        requireFound(dao.findById(id), ErrorCode.BOOK_NOT_FOUND, "Book", id);
+
+        ctx.json(dao.findRelations(id));
+    }
+
     public static void getBySerieID(Context ctx) {
         List<BookDTO> books = dao.findBySerieId(requireId(ctx));
 

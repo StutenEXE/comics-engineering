@@ -40,11 +40,21 @@ export default {
   "contribution.stats.issueserie": "Issue series",
   // Change history (timeline on item pages)
   "history.title": "Change history",
+  "history.tab": "History",
+  "history.showAll": "Show all (%x%)",
+  "history.showLess": "Show less",
   "history.empty": "No recorded change",
   "history.by": "by",
   "history.noChange": "No field changed",
   "history.previousImageNotKept": "The previous image is not kept",
   "history.imageUnavailable": "Image unavailable",
+  // Relations (side panel on item pages)
+  "relations.title": "Relations",
+  "relations.book.containedIn": "Contained in",
+  "relations.book.contains": "Contains",
+  "relations.book.sameContent": "Same content",
+  "relations.books": "Related books",
+  "relations.edition.otherEditions": "Other editions of this book",
   // Contribution Actions
   "contrib.action": "Contribution Type",
   "contrib.action.create": "Create New Item",

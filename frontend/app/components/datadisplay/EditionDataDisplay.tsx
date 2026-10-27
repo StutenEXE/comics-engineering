@@ -9,6 +9,7 @@ import {
 } from "../templates/InfoPageTemplate";
 import type { ReactNode } from "react";
 import { Separator } from "../shadcn/ui/separator";
+import type { SidePanelTab } from "../misc/SidePanelTabs";
 import { formatCurrency } from "~/utils/currency";
 import { toDDmmYYYY } from "~/utils/date";
 
@@ -20,7 +21,7 @@ interface EditionDataDisplayProps {
   className?: string;
   children?: ReactNode;
   // See InfoPageTemplate
-  aside?: ReactNode;
+  sideTabs?: SidePanelTab[];
   asideClassName?: string;
 }
 
@@ -31,7 +32,7 @@ export function EditionDataDisplay({
   error,
   className,
   children,
-  aside,
+  sideTabs,
   asideClassName,
 }: EditionDataDisplayProps) {
   const { t, locale } = useTranslation();
@@ -44,7 +45,7 @@ export function EditionDataDisplay({
       isLoading={isLoading}
       error={error}
       className={className}
-      aside={aside}
+      sideTabs={sideTabs}
       asideClassName={asideClassName}
     >
       <InfoPageHeaderComponent
