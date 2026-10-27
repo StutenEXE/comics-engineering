@@ -6,6 +6,7 @@ import static dev.stuten.vps.jooq.tables.IssueSeries.ISSUE_SERIES;
 import static dev.stuten.vps.jooq.tables.Issues.ISSUES;
 import static dev.stuten.vps.jooq.tables.Users.USERS;
 import static org.jooq.impl.DSL.multiset;
+import static org.jooq.impl.DSL.row;
 import static org.jooq.impl.DSL.select;
 
 import java.time.LocalDateTime;
@@ -24,6 +25,7 @@ import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.models.dtos.request.search.PaginationDTO;
 import dev.stuten.vps.models.dtos.full.IssueDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleIssueDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleIssueSerieDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 import dev.stuten.vps.models.mappers.IssueMapper;
@@ -151,6 +153,30 @@ public class IssueDAO extends ContributableDAO<IssueDTO> {
                                                 .from(BOOKS_ISSUES)
                                                 .join(BOOKS).on(BOOKS.ID.eq(BOOKS_ISSUES.BOOK_ID))
                                                 .where(BOOKS.SERIES_ID.eq(bookSerieId))));
+        }
+
+        /**
+         * Finds the issue right before or after the given one in its issue serie,
+         * ordered by number (then by id, for issues sharing the same number)
+         * @param next true for the next issue, false for the previous one
+         */
+        public Optional<SimpleIssueDTO> findNeighbour(IssueDTO issue, boolean next) {
+                if (issue.getIssueSerie() == null || issue.getNumber() == null) {
+                        return Optional.empty();
+                }
+                var position = row(ISSUES.NUMBER, ISSUES.ID);
+                return DSL().select(getSimpleSelectFields())
+                                .from(ISSUES)
+                                .leftJoin(ISSUE_SERIES).on(ISSUES.SERIES_ID.eq(ISSUE_SERIES.ID))
+                                .where(ISSUES.SERIES_ID.eq(issue.getIssueSerie().getId()))
+                                .and(next
+                                                ? position.gt(issue.getNumber(), issue.getId())
+                                                : position.lt(issue.getNumber(), issue.getId()))
+                                .orderBy(next
+                                                ? List.of(ISSUES.NUMBER.asc(), ISSUES.ID.asc())
+                                                : List.of(ISSUES.NUMBER.desc(), ISSUES.ID.desc()))
+                                .limit(1)
+                                .fetchOptional(IssueMapper::mapToSimpleDTO);
         }
 
 }

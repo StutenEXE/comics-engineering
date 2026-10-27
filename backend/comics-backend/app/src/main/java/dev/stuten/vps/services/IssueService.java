@@ -3,12 +3,14 @@ package dev.stuten.vps.services;
 import static dev.stuten.vps.services.utils.RequestServiceUtil.requireFound;
 import static dev.stuten.vps.services.utils.RequestServiceUtil.requireId;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import dev.stuten.vps.db.JooqProvider;
 import dev.stuten.vps.models.daos.IssueDAO;
 import dev.stuten.vps.models.dtos.full.IssueDTO;
+import dev.stuten.vps.models.dtos.simple.SimpleIssueDTO;
 import dev.stuten.vps.web.ErrorCode;
 import io.javalin.http.Context;
 
@@ -25,6 +27,18 @@ public class IssueService {
         IssueDTO issue = requireFound(dao.findById(id), ErrorCode.ISSUE_NOT_FOUND, "Issue", id);
 
         ctx.json(Map.of("issue", issue));
+    }
+
+    public static void getNeighbours(Context ctx) {
+        Integer id = requireId(ctx);
+        IssueDTO issue = requireFound(dao.findById(id), ErrorCode.ISSUE_NOT_FOUND, "Issue", id);
+
+        // HashMap, as Map.of does not accept null values
+        Map<String, SimpleIssueDTO> neighbours = new HashMap<>();
+        neighbours.put("previous", dao.findNeighbour(issue, false).orElse(null));
+        neighbours.put("next", dao.findNeighbour(issue, true).orElse(null));
+
+        ctx.json(neighbours);
     }
 
     public static void getByBookId(Context ctx) {

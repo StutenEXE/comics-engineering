@@ -84,6 +84,9 @@ export default {
   "contribution.book.requiresIssues": "Requires issue(s) first",
   "contribution.issue.linkedBooks": "Linked to book(s)",
   "generic.local": "Local",
+  // Issue
+  "page.issue.previous": "Previous",
+  "page.issue.next": "Next",
   // Profile
   "profile.header": "Profile",
   "profile.memberSince": "Member since",

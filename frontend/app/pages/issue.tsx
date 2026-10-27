@@ -19,8 +19,10 @@ import { buildIssueShortName } from "~/models/issue";
 import { useAppSelector } from "~/store/hooks";
 import {
   useIssueByIdQuery,
+  useIssueNeighboursQuery,
   useSubmitContributionBundleMutation,
 } from "~/store/services/api";
+import { IssueNavigation } from "~/components/misc/IssueNavigation";
 import { dateToMonthYearString, dateToVerboseDateString } from "~/utils/date";
 import { createError, translateApiError } from "~/utils/error";
 import type { Route } from "../+types/root";
@@ -41,6 +43,10 @@ export default function IssuePage({ params }: { params: { id: number } }) {
   const { data, isFetching, error } = useIssueByIdQuery({ id: params.id });
   const issue = data?.issue;
   const err = createError(error);
+
+  // Previous & next issues of the same issue serie
+  const { data: neighbours, isFetching: isFetchingNeighbours } =
+    useIssueNeighboursQuery({ id: params.id });
 
   // Submit a contribution bundle
   const [submitBundle, { isError, isSuccess, error: submitError }] =
@@ -74,10 +80,14 @@ export default function IssuePage({ params }: { params: { id: number } }) {
   const openModal = () => setIsEditModalOpen(true);
   const closeModal = () => setIsEditModalOpen(false);
 
+  // Reset on fandomUrl change, as the page stays mounted when navigating between issues
   const [imgUrl, setImgUrl] = useState("");
-  if (issue?.fandomUrl) {
-    getImgUrlFromFandomUrl(issue.fandomUrl).then((url) => setImgUrl(url));
-  }
+  useEffect(() => {
+    setImgUrl("");
+    if (issue?.fandomUrl) {
+      getImgUrlFromFandomUrl(issue.fandomUrl).then((url) => setImgUrl(url));
+    }
+  }, [issue?.fandomUrl]);
 
   return (
     <>
@@ -109,6 +119,12 @@ export default function IssuePage({ params }: { params: { id: number } }) {
             openModal();
           }}
           isLoading={isFetching}
+        />
+
+        <IssueNavigation
+          previous={neighbours?.previous}
+          next={neighbours?.next}
+          isLoading={isFetchingNeighbours}
         />
 
         <InfoPageFields
