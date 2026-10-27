@@ -21,7 +21,12 @@ import {
   type SimpleContributionBundle,
 } from "~/models/contributionBundle";
 import { parseToEdition, type Edition } from "~/models/edition";
-import { parseToIssue, type Issue } from "~/models/issue";
+import {
+  parseToIssue,
+  parseToSimpleIssue,
+  type Issue,
+  type SimpleIssue,
+} from "~/models/issue";
 import { parseToIssueSerie, type IssueSerie } from "~/models/issue-serie";
 import {
   parseToOwnedEdition,
@@ -219,6 +224,24 @@ export const publicApi = createApi({
         issues: resp.issues.map((issue) => parseToIssue(issue)),
       }),
     }),
+    // Get the previous and next issues of the same issue serie
+    issueNeighbours: build.query<
+      { previous?: SimpleIssue; next?: SimpleIssue },
+      { id: number }
+    >({
+      query: (params) => ({
+        url: "/issues/neighbours",
+        method: "GET",
+        params: params,
+      }),
+      transformResponse: (resp: {
+        previous: SimpleIssue | null;
+        next: SimpleIssue | null;
+      }) => ({
+        previous: resp.previous ? parseToSimpleIssue(resp.previous) : undefined,
+        next: resp.next ? parseToSimpleIssue(resp.next) : undefined,
+      }),
+    }),
 
     /****************
      * PUBLISHER
@@ -398,6 +421,7 @@ export const {
   useIssueByIdQuery,
   useIssueByBookIdQuery,
   useLazyIssueBySerieIdQuery,
+  useIssueNeighboursQuery,
   usePublisherByIdQuery,
   useSerieByIdQuery,
   useLazySearchBooksByNameQuery,

@@ -484,6 +484,8 @@ export default {
   // Issue
   "page.issue.header": "Issue",
   "page.issue.books": "Livres associés",
+  "page.issue.previous": "Précédent",
+  "page.issue.next": "Suivant",
   // Serie
   "page.serie.serieOfXVolumes": "Série de %x% tomes",
   // Profile

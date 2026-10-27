@@ -11,6 +11,7 @@ public class IssueRouter implements Router {
         app.get(APIPathBuilder.buildPublicPath("/issues"), IssueService::getById);
         app.get(APIPathBuilder.buildPublicPath("/issues/book"), IssueService::getByBookId);
         app.get(APIPathBuilder.buildPublicPath("/issues/serie"), IssueService::getBySerieId);
+        app.get(APIPathBuilder.buildPublicPath("/issues/neighbours"), IssueService::getNeighbours);
     }
 
 }
