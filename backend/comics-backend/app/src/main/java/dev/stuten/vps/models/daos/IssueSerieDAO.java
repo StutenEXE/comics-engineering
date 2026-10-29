@@ -23,6 +23,7 @@ import org.jooq.SelectJoinStep;
 
 import dev.stuten.vps.models.dtos.request.search.PaginationDTO;
 import dev.stuten.vps.models.dtos.full.IssueSerieDTO;
+import dev.stuten.vps.models.dtos.response.BookCoverageDTO;
 import dev.stuten.vps.models.dtos.simple.SimpleUserDTO;
 import dev.stuten.vps.models.mappers.IssueSerieMapper;
 
@@ -121,6 +122,21 @@ public class IssueSerieDAO extends ContributableDAO<IssueSerieDTO> {
     @Override
     public Optional<IssueSerieDTO> findById(Integer id) {
         return super.selectOne(ISSUE_SERIES.ID.eq(id));
+    }
+
+    /**
+     * Finds, for each book containing issues of the given issue serie, which of them it contains
+     */
+    public List<BookCoverageDTO> findBookCoverage(Integer issueSerieId) {
+        return DSL().select(BOOKS_ISSUES.BOOK_ID, BOOKS_ISSUES.ISSUE_ID)
+                .from(BOOKS_ISSUES)
+                .join(ISSUES).on(BOOKS_ISSUES.ISSUE_ID.eq(ISSUES.ID))
+                .where(ISSUES.SERIES_ID.eq(issueSerieId))
+                .orderBy(BOOKS_ISSUES.BOOK_ID, BOOKS_ISSUES.ISSUE_ID)
+                .fetchGroups(BOOKS_ISSUES.BOOK_ID, BOOKS_ISSUES.ISSUE_ID)
+                .entrySet().stream()
+                .map(entry -> new BookCoverageDTO(entry.getKey(), entry.getValue()))
+                .toList();
     }
 
     public List<IssueSerieDTO> searchByName(String query, PaginationDTO pagination) {

@@ -9,6 +9,7 @@ public class IssueSerieRouter implements Router {
     @Override
     public void register(Javalin app) {
         app.get(APIPathBuilder.buildPublicPath("/issueseries"), IssueSerieService::getByID);
+        app.get(APIPathBuilder.buildPublicPath("/issueseries/coverage"), IssueSerieService::getBookCoverage);
     }
 
 }

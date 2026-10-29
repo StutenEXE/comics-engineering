@@ -24,4 +24,11 @@ public class IssueSerieService {
 
         ctx.json(Map.of("issueSerie", issueSerie));
     }
+
+    public static void getBookCoverage(Context ctx) {
+        Integer id = requireId(ctx);
+        requireFound(dao.findById(id), ErrorCode.ISSUESERIE_NOT_FOUND, "Issue serie", id);
+
+        ctx.json(Map.of("coverage", dao.findBookCoverage(id)));
+    }
 }
