@@ -13,7 +13,7 @@ export function meta({}: Route.MetaArgs) {
 export default function StashEditionPage() {
   const { t } = useTranslation();
   return (
-    <SideContentTemplate title={t("editions")}>
+    <SideContentTemplate title={t("editions", { capitalize: true })}>
       <OwnedEditionTable />
     </SideContentTemplate>
   );

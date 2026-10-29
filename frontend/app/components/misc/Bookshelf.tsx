@@ -1,4 +1,4 @@
-import { use, useState, type ReactNode } from "react";
+import { useState, type KeyboardEvent, type ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
 import type { OwnedEdition } from "~/models/ownedEdition";
 import { SelectInput } from "../forms/fields/SelectInput";
@@ -32,6 +32,8 @@ interface ShelfDimensions {
 interface BookshelfProps {
   oeditions?: OwnedEdition[];
   onClick?: (oe: OwnedEdition) => void;
+  // Highlighted on the shelf
+  selectedId?: number;
   sortable?: boolean;
   dimensions?: ShelfDimensions;
   isLoading?: boolean;
@@ -82,6 +84,7 @@ const sortingAlgorithmsRegistry = {
 export function Bookshelf({
   oeditions = [],
   onClick,
+  selectedId,
   dimensions = {},
   sortable = true,
   isLoading = false,
@@ -292,12 +295,37 @@ export function Bookshelf({
         const bookColorLight = `hsl(${hue}, 55%, 52%)`;
         const bookColorDark = `hsl(${hue}, 55%, 22%)`;
 
+        const isSelected = oe.id === selectedId;
+        const label = [
+          oe.edition.book?.name,
+          oe.edition.serie?.name,
+          oe.edition.book?.number && `#${oe.edition.book.number}`,
+        ]
+          .filter(Boolean)
+          .join(" · ");
+        const onKeyDown = (e: KeyboardEvent) => {
+          if (e.key !== "Enter" && e.key !== " ") return;
+          e.preventDefault();
+          onClick?.(oe);
+        };
+
         books.push(
           <g
             key={`book-${rowIndex}-${bookIndex}`}
             filter="url(#bookShadow)"
             onClick={() => onClick?.(oe)}
+            onKeyDown={onKeyDown}
+            role={onClick ? "button" : undefined}
+            tabIndex={onClick ? 0 : undefined}
+            aria-label={label}
+            aria-pressed={onClick ? isSelected : undefined}
+            className="outline-none [&:focus-visible>rect:first-of-type]:stroke-stash-200 [&:focus-visible>rect:first-of-type]:stroke-[3]"
+            // The selected book is pulled out of the shelf a little
+            transform={isSelected ? "translate(0 -12)" : undefined}
+            style={{ transition: "transform 150ms ease-out" }}
           >
+            {/* Native tooltip with the full title, spines are often too thin for it */}
+            <title>{label}</title>
             {/* Spine body */}
             <rect
               x={xoffset}
@@ -306,8 +334,9 @@ export function Bookshelf({
               height={height}
               fill={bookColor}
               stroke={bookColorDark}
-              strokeWidth={1}
-              className="cursor-pointer"
+              strokeWidth={isSelected ? 3 : 1}
+              // A class, since the stroke attribute can't read the theme's CSS variables
+              className={isSelected ? "cursor-pointer stroke-stash-200" : "cursor-pointer"}
             />
             {/* Left-edge highlight to simulate spine curvature */}
             <rect
@@ -370,16 +399,17 @@ export function Bookshelf({
     return books;
   };
 
+  const SortIcon = ascSort ? TbSortAscendingLetters : TbSortDescendingLetters;
+
   return (
-    // Scrollable container, the SVG height grows with row count, native scroll handles overflow
     <div
       className={twMerge(
-        "w-full overflow-y-auto border border-neutral-800 rounded-lg",
+        "w-full overflow-hidden rounded-xl border border-white/8 bg-white/3",
         className,
       )}
     >
       {sortable && (
-        <div className="flex py-2 px-1 gap-2 items-center">
+        <div className="flex flex-wrap items-center gap-2 border-b border-white/8 px-3 py-2">
           <SelectInput
             options={[
               {
@@ -401,31 +431,58 @@ export function Bookshelf({
               setSortingAlgorithm(() => sortingAlgorithmsRegistry[key]);
             }}
           />
-          {ascSort && (
-            <TbSortAscendingLetters
-              className="p-1 cursor-pointer rounded duration-150 hover:bg-neutral-600/40 active:scale-95"
-              size={30}
-              onClick={() => setAscSort(false)}
-            />
-          )}
-          {!ascSort && (
-            <TbSortDescendingLetters
-              className="p-1 cursor-pointer rounded duration-150 hover:bg-neutral-600/40 active:scale-95"
-              size={30}
-              onClick={() => setAscSort(true)}
-            />
+          <button
+            type="button"
+            onClick={() => setAscSort(!ascSort)}
+            aria-label={t(
+              ascSort
+                ? "stash.bookshelf.sortAscending"
+                : "stash.bookshelf.sortDescending",
+            )}
+            title={t(
+              ascSort
+                ? "stash.bookshelf.sortAscending"
+                : "stash.bookshelf.sortDescending",
+            )}
+            className="flex size-9 cursor-pointer items-center justify-center rounded-md text-white/60 transition-colors hover:bg-white/5 hover:text-white active:scale-95"
+          >
+            <SortIcon size={20} />
+          </button>
+          {!isLoading && (
+            <span className="ml-auto text-xs tabular-nums text-white/30">
+              {t("stash.bookshelf.count", {
+                parameters: { n: oeditions.length },
+              })}
+            </span>
           )}
         </div>
       )}
-      <svg
-        width={TOTAL_WIDTH}
-        height={TOTAL_HEIGHT}
-        viewBox={`0 0 ${TOTAL_WIDTH} ${TOTAL_HEIGHT}`}
-        style={{ display: "block", width: "100%", height: "auto" }}
-      >
-        {drawShelfStructure()}
-        {drawBooks()}
-      </svg>
+      {isLoading ? (
+        <div
+          className="w-full animate-pulse bg-white/5"
+          style={{ aspectRatio: `${TOTAL_WIDTH} / ${TOTAL_HEIGHT}` }}
+          aria-busy="true"
+        />
+      ) : (
+        <div className="relative p-2 sm:p-3">
+          <svg
+            width={TOTAL_WIDTH}
+            height={TOTAL_HEIGHT}
+            viewBox={`0 0 ${TOTAL_WIDTH} ${TOTAL_HEIGHT}`}
+            style={{ display: "block", width: "100%", height: "auto" }}
+            role="group"
+            aria-label={t("stash.bookshelf")}
+          >
+            {drawShelfStructure()}
+            {drawBooks()}
+          </svg>
+          {oeditions.length === 0 && (
+            <p className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-white/50">
+              {t("stash.bookshelf.empty")}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -2,14 +2,7 @@ import { BsBookshelf } from "react-icons/bs";
 import { FaReadme, FaWallet } from "react-icons/fa6";
 import { MdBook, MdEditDocument } from "react-icons/md";
 import { useTranslation } from "~/i18n/i18n";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "../shadcn/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarHeader } from "../shadcn/ui/sidebar";
 import { NavSection } from "./NavSection";
 import { PiCurrencyEurBold, PiStackFill } from "react-icons/pi";
 
@@ -17,39 +10,20 @@ export function CollectionSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation();
+
   return (
     <Sidebar
-      className="border-sidebar-border bg-sidebar text-sidebar-foreground shadow-sm"
+      className="border-sidebar-border bg-sidebar text-sidebar-foreground"
       collapsible="offcanvas"
       {...props}
     >
-      <SidebarHeader className="border-b border-sidebar-border pb-2">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:p-1.5!"
-            >
-              <a
-                href="#"
-                className="text-lg font-medium uppercase tracking-wide"
-              >
-                {t("stash.title")}
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+      {/* Same height as the page header (SideContentHeader) so both borders line up */}
+      <SidebarHeader className="h-13 shrink-0 justify-center border-b border-sidebar-border px-4 py-0">
+        <span className="text-xs font-medium uppercase tracking-widest text-stash-400/70">
+          {t("stash.title")}
+        </span>
       </SidebarHeader>
-      <SidebarContent>
-        <NavSection
-          items={[
-            {
-              title: t("contributions"),
-              url: "/stash/contributions",
-              icon: MdEditDocument,
-            },
-          ]}
-        />
+      <SidebarContent className="py-2">
         <NavSection
           label={t("stash.library")}
           items={[
@@ -87,6 +61,16 @@ export function CollectionSidebar({
               title: t("stash.reading"),
               url: "/stash/reading",
               icon: FaReadme,
+            },
+          ]}
+        />
+        <NavSection
+          label={t("stash.activity")}
+          items={[
+            {
+              title: t("contributions"),
+              url: "/stash/contributions",
+              icon: MdEditDocument,
             },
           ]}
         />

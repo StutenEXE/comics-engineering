@@ -1,7 +1,6 @@
 import { createColumnHelper } from "@tanstack/react-table";
-import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
-import { MdDelete, MdModeEdit } from "react-icons/md";
+import { Link } from "react-router";
 import { useTranslation } from "~/i18n/i18n";
 import { type OwnedEdition } from "~/models/ownedEdition";
 import { useAppSelector } from "~/store/hooks";
@@ -12,6 +11,11 @@ import {
 import type { CollectionSortField } from "~/store/services/apiModels";
 import { toDDmmYYYY } from "~/utils/date";
 import { createError, translateApiError } from "~/utils/error";
+import { OwnedEditionStatusIcons } from "../badges/OwnedEditionStatusIcons";
+import {
+  OwnedEditionActions,
+  OwnedEditionListItem,
+} from "../cards/OwnedEditionListItem";
 import { useConfirm } from "../modals/ConfirmModalProvider";
 import { EditOwnedEditionModal } from "../modals/EditOwnedEditionModal";
 import { OwnedEditionModal } from "../modals/OwnedEditionModal";
@@ -51,18 +55,12 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
 
   // Handles modal open/close state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const openModal = () => {
-    setIsEditModalOpen(true);
-  };
   const closeModal = () => {
     setIsEditModalOpen(false);
   };
 
   // Handles edition details modal
   const [isOeditionModalOpen, setIsEditionModalOpen] = useState(false);
-  const openOeditionModal = () => {
-    setIsEditionModalOpen(true);
-  };
   const closeOeditionModal = () => {
     setIsEditionModalOpen(false);
   };
@@ -86,6 +84,24 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
     refetch();
   };
 
+  // Row actions, shared by the table and the cards
+  const showOedition = (oe: OwnedEdition) => {
+    setEditionToShow(oe);
+    setIsEditionModalOpen(true);
+  };
+  const editOedition = (oe: OwnedEdition) => {
+    setEditedOwnedEdition(oe);
+    setIsEditModalOpen(true);
+  };
+  const removeOedition = (oe: OwnedEdition) =>
+    confirm({
+      title: t("stash.remove.title"),
+      message: t("stash.remove.message"),
+      onConfirm: () => {
+        removeFromCollection({ id: oe.id });
+      },
+    });
+
   // Define columns
   const col = createColumnHelper<OwnedEdition>();
   const columns = useMemo(
@@ -95,19 +111,18 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
         id: "cover",
         header: t("oedition.cover"),
         cell: ({ row }) => (
-          <div
-            className="cursor-pointer"
-            onClick={() => {
-              setEditionToShow(row.original);
-              openOeditionModal();
-            }}
+          <button
+            type="button"
+            className="cursor-pointer overflow-hidden rounded border border-white/8 transition-colors hover:border-stash-400/40"
+            onClick={() => showOedition(row.original)}
+            aria-label={row.original.edition.book?.name}
           >
             <img
               src={row.original.edition.imgUrl}
-              alt={row.original.edition.book?.name}
+              alt=""
               className="max-h-[75px]"
             />
-          </div>
+          </button>
         ),
       }),
       // Column IDs are the API sort fields and filter names
@@ -117,12 +132,12 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
         header: t("oedition.book.name"),
         meta: { filterType: "text" },
         cell: (info) => (
-          <a
+          <Link
             className="hover:underline"
-            href={`/book/${info.row.original.edition.book?.id}`}
+            to={`/book/${info.row.original.edition.book?.id}`}
           >
             {info.getValue()}&nbsp;<span className="font-normal">↗</span>
-          </a>
+          </Link>
         ),
       }),
       // Serie name
@@ -131,12 +146,12 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
         header: t("oedition.serie.name"),
         meta: { filterType: "text" },
         cell: (info) => (
-          <a
+          <Link
             className="hover:underline"
-            href={`/serie/${info.row.original.edition.serie?.id}`}
+            to={`/serie/${info.row.original.edition.serie?.id}`}
           >
             {info.getValue()}&nbsp;<span className="font-normal">↗</span>
-          </a>
+          </Link>
         ),
       }),
       // Volume
@@ -191,29 +206,10 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
       col.display({
         id: "actions",
         cell: ({ row }) => (
-          <div className="w-min flex gap-2 justify-center items-center">
-            <MdModeEdit
-              size={20}
-              onClick={() => {
-                setEditedOwnedEdition(row.original);
-                openModal();
-              }}
-              className="cursor-pointer hover:text-blue-500"
-            />
-            <MdDelete
-              size={20}
-              onClick={() => {
-                confirm({
-                  title: t("stash.remove.title"),
-                  message: t("stash.remove.message"),
-                  onConfirm: () => {
-                    removeFromCollection({ id: row.original.id });
-                  },
-                });
-              }}
-              className="cursor-pointer hover:text-red-500"
-            />
-          </div>
+          <OwnedEditionActions
+            onEdit={() => editOedition(row.original)}
+            onRemove={() => removeOedition(row.original)}
+          />
         ),
       }),
     ],
@@ -229,6 +225,19 @@ export function OwnedEditionTable({}: OwnedEditionTableProps) {
         isFetching={isFetching}
         error={err}
         server={{ ...control, rowCount: data?.total ?? 0 }}
+        renderCard={(oe) => (
+          <OwnedEditionListItem
+            oedition={oe}
+            onOpen={() => showOedition(oe)}
+            onEdit={() => editOedition(oe)}
+            onRemove={() => removeOedition(oe)}
+          >
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/40">
+              <span className="tabular-nums">{toDDmmYYYY(oe.date, locale)}</span>
+              <OwnedEditionStatusIcons oedition={oe} />
+            </div>
+          </OwnedEditionListItem>
+        )}
       />
       <EditOwnedEditionModal
         ownedEdition={editedOwnedEdition!}

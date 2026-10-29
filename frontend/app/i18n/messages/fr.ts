@@ -36,6 +36,13 @@ export default {
   "generic.localRefPresent": "Référence locale présente",
   "generic.currencyDisclaimer": "Tous les prix sont indiqués en euros (€)",
   "generic.errorOccured": "Une erreur est survenue",
+  "generic.filters": "Filtres",
+  "generic.filters.clear": "Effacer les filtres",
+  "generic.sortBy": "Trier par",
+  "generic.sort.asc": "Ordre croissant",
+  "generic.sort.desc": "Ordre décroissant",
+  "generic.previousPage": "Page précédente",
+  "generic.nextPage": "Page suivante",
   // ============================
   // == Toasts
   // ============================
@@ -314,6 +321,7 @@ export default {
   "oedition.saved.percentOfPrice": "%percent%% d'économies",
   "oedition.publisher.select": "Choisir un éditeur",
   "oedition.spending": "Dépenses",
+  "oedition.viewDetails": "Voir la fiche complète",
   // Serie
   serie: "Série",
   series: "Séries",
@@ -326,6 +334,8 @@ export default {
   "serie.startDate": "Date de début",
   "serie.endDate": "Date de fin",
   "serie.books": "Livres",
+  "serie.myCollection": "Dans ma collection",
+  "serie.myCollection.seeAll": "Voir toutes mes séries",
   "serie.form.title.create": "Créer une série",
   "serie.form.title.modify": "Modifier une série",
   "serie.form.create": "Créer la série",
@@ -426,16 +436,32 @@ export default {
   "stash.remove.message":
     "Voulez-vous vraiment retirer cette édition de votre collection ?\nLes informations associées seront perdues.",
   "stash.library": "Bibliothèque",
+  "stash.activity": "Activité",
+  "stash.overview": "Vue d'ensemble",
+  "stash.highlights": "Faits marquants",
+  "stash.chart.range": "Période",
+  "stash.chart.range.year": "12 derniers mois",
+  "stash.chart.range.all": "Tout",
+  "stash.chart.empty": "Aucune donnée sur cette période",
   // -- Prices
   "stash.prices": "Prix",
   "stash.prices.cost": "Coût",
   "stash.prices.savings.value": "Economies",
   "stash.prices.savings.reduction": "Réduction",
+  "stash.prices.view": "Affichage",
+  "stash.prices.view.edition": "Par édition",
+  "stash.prices.view.serie": "Par série",
+  "stash.prices.serie.owned": "Tomes possédés",
   // -- Bookshelf
   "stash.bookshelf": "Mon étagère",
   "stash.bookshelf.sortBySerie": "Trier par série",
   "stash.bookshelf.sortByHeight": "Trier par hauteur",
   "stash.bookshelf.sortByThickness": "Trier par épaisseur",
+  "stash.bookshelf.sortAscending": "Ordre croissant",
+  "stash.bookshelf.sortDescending": "Ordre décroissant",
+  "stash.bookshelf.count": "%n% livres",
+  "stash.bookshelf.selectHint": "Sélectionnez un livre sur l'étagère pour afficher ses détails",
+  "stash.bookshelf.empty": "Votre étagère est vide, ajoutez des éditions à votre collection pour la remplir",
   "stash.statistics": "Statistiques",
   // -- Toread Pile
   "stash.toReadPile": "Pile à lire",
@@ -484,6 +510,11 @@ export default {
   "stash.reading.booksReadWithoutADate":
     "Nombre de livres lus sans date de lecture: %nbooks%",
   "stash.reading.dataToShow": "Données à afficher",
+  "stash.reading.read": "Lus",
+  "stash.reading.notRead": "À lire",
+  "stash.reading.books": "Livres",
+  "stash.reading.issues": "Issues",
+  "stash.reading.pages": "Pages",
   // Contribute
   "contribute.loginRequired": "Veuillez vous connecter",
   "contribute.loginRequiredDesc": "Vous devez être connecté pour contribuer",
