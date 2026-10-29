@@ -1,20 +1,13 @@
-import dayjs from "dayjs";
-import { useState } from "react";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { SelectInput } from "~/components/forms/fields/SelectInput";
-import { ChartTooltipContentWithTotal } from "~/components/misc/ChartTooltipContentWithTotal";
-import {
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  type ChartConfig,
-} from "~/components/shadcn/ui/chart";
+import { useState, type ReactNode } from "react";
+import { MdAutoStories, MdMenuBook } from "react-icons/md";
+import { PiFileTextBold } from "react-icons/pi";
+import { MonthlyBarChart } from "~/components/misc/MonthlyBarChart";
+import { SegmentedControl } from "~/components/misc/SegmentedControl";
 import { SideContentTemplate } from "~/components/templates/SideContentTemplate";
 import {
-  NumericalStatisticCard,
+  ProgressStatisticCard,
   StatisticCard,
-  StatisticPageTemplate,
+  StatisticSection,
 } from "~/components/templates/StatisticPageTemplate";
 import { useTranslation } from "~/i18n/i18n";
 import { useAppSelector } from "~/store/hooks";
@@ -23,7 +16,6 @@ import {
   useCollectionReadingStatsQuery,
 } from "~/store/services/api";
 import { formatCurrency } from "~/utils/currency";
-import { compareDates, dateToShortMonthYearString } from "~/utils/date";
 import { convertToDistance } from "~/utils/strings";
 import type { Route } from "../../+types/root";
 
@@ -34,7 +26,7 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export default function StashBookshelfPage() {
+export default function StashReadingPage() {
   const { t, locale } = useTranslation();
   const { user } = useAppSelector((state) => state.user);
 
@@ -43,235 +35,149 @@ export default function StashBookshelfPage() {
     { skip: !user },
   );
   const stats = data?.stats;
+  const isLoading = isFetching && !stats;
+  const eur = (amount?: number) => formatCurrency(amount ?? 0, "EUR", locale);
+  const nb = (n?: number) => (n ?? 0).toLocaleString(locale);
 
-  const totalBooks =
-    (stats?.totalBooksRead ?? 0) + (stats?.totalBooksNotRead ?? 0);
-  const totalIssues =
-    (stats?.totalIssuesRead ?? 0) + (stats?.totalIssuesNotRead ?? 0);
-  const totalPages =
-    (stats?.totalPagesRead ?? 0) + (stats?.totalPagesNotRead ?? 0);
+  const booksRead = stats?.totalBooksRead ?? 0;
+  const booksNotRead = stats?.totalBooksNotRead ?? 0;
+  const issuesRead = stats?.totalIssuesRead ?? 0;
+  const issuesNotRead = stats?.totalIssuesNotRead ?? 0;
+  const pagesRead = stats?.totalPagesRead ?? 0;
+  const pagesNotRead = stats?.totalPagesNotRead ?? 0;
 
   return (
     <SideContentTemplate title={t("stash.reading")}>
-      <StatisticPageTemplate>
-        <NumericalStatisticCard
-          colSpan={1}
-          title={t("stash.reading.totalBooksRead")}
-          value={stats?.totalBooksRead}
-          additionalInfo={t("stash.reading.totalBooksRead.info", {
-            parameters: {
-              amount: formatCurrency(stats?.valueRead ?? 0, "EUR", locale),
-            },
-          })}
+      {/* Progress through the collection */}
+      <StatisticSection
+        title={t("stash.overview")}
+        className="grid-cols-1 md:grid-cols-3"
+      >
+        <ProgressStatisticCard
+          icon={MdMenuBook}
+          title={t("stash.reading.totalBooks")}
+          value={booksRead}
+          total={booksRead + booksNotRead}
+          valueLabel={`${nb(booksRead)} / ${nb(booksRead + booksNotRead)}`}
+          additionalInfo={
+            <ReadSplit
+              read={`${nb(booksRead)} · ${eur(stats?.valueRead)}`}
+              notRead={`${nb(booksNotRead)} · ${eur(stats?.valueNotRead)}`}
+            />
+          }
+          isLoading={isLoading}
         />
-        <NumericalStatisticCard
-          colSpan={1}
-          title={t("stash.reading.totalIssuesRead")}
-          value={stats?.totalIssuesRead}
+        <ProgressStatisticCard
+          icon={MdAutoStories}
+          title={t("stash.reading.totalIssues")}
+          value={issuesRead}
+          total={issuesRead + issuesNotRead}
+          valueLabel={`${nb(issuesRead)} / ${nb(issuesRead + issuesNotRead)}`}
+          additionalInfo={
+            <ReadSplit read={nb(issuesRead)} notRead={nb(issuesNotRead)} />
+          }
+          isLoading={isLoading}
         />
-        <NumericalStatisticCard
-          colSpan={1}
-          title={t("stash.reading.totalPagesRead")}
-          value={stats?.totalPagesRead}
-          additionalInfo={t("stash.reading.totalPagesRead.info", {
-            parameters: {
-              // Convert to km
-              distance: convertToDistance(stats?.distanceRead ?? 0),
-            },
-          })}
+        <ProgressStatisticCard
+          icon={PiFileTextBold}
+          title={t("stash.reading.totalPages")}
+          value={pagesRead}
+          total={pagesRead + pagesNotRead}
+          valueLabel={`${nb(pagesRead)} / ${nb(pagesRead + pagesNotRead)}`}
+          additionalInfo={
+            <ReadSplit
+              read={`${nb(pagesRead)} · ${convertToDistance(stats?.distanceRead ?? 0)}`}
+              notRead={`${nb(pagesNotRead)} · ${convertToDistance(stats?.distanceNotRead ?? 0)}`}
+            />
+          }
+          isLoading={isLoading}
         />
-        {/* Readings per month */}
-        <StatisticCard
-          colSpan={3}
-          rowSpan={4}
-          title={t("stash.reading.readingPerMonth")}
-        >
-          <ReadingPerMonthChart />
-        </StatisticCard>
-        <NumericalStatisticCard
-          colSpan={1}
-          title={t("stash.reading.totalBooksToRead")}
-          value={stats?.totalBooksNotRead}
-          additionalInfo={t("stash.reading.totalBooksToRead.info", {
-            parameters: {
-              amount: formatCurrency(stats?.valueNotRead ?? 0, "EUR", locale),
-            },
-          })}
-        />
-        <NumericalStatisticCard
-          colSpan={1}
-          title={t("stash.reading.totalIssuesToRead")}
-          value={stats?.totalIssuesNotRead}
-        />
-        <NumericalStatisticCard
-          colSpan={1}
-          title={t("stash.reading.totalPagesToRead")}
-          value={stats?.totalPagesNotRead}
-          additionalInfo={t("stash.reading.totalPagesToRead.info", {
-            parameters: {
-              // Convert to km
-              distance: convertToDistance(stats?.distanceNotRead ?? 0),
-            },
-          })}
-        />
-        <NumericalStatisticCard
-          colSpan={1}
-          title={t("stash.reading.proportionReadByBook")}
-          value={`${(((stats?.totalBooksRead ?? 0) / totalBooks) * 100).toFixed(2)}%`}
-          additionalInfo={t("stash.reading.proportionReadByBook.info", {
-            parameters: {
-              read: stats?.totalBooksRead,
-              total: totalBooks,
-            },
-          })}
-        />
-        <NumericalStatisticCard
-          colSpan={1}
-          title={t("stash.reading.proportionReadByIssue")}
-          value={`${(((stats?.totalIssuesRead ?? 0) / totalIssues) * 100).toFixed(2)}%`}
-          additionalInfo={t("stash.reading.proportionReadByIssue.info", {
-            parameters: {
-              read: stats?.totalIssuesRead,
-              total: totalIssues,
-            },
-          })}
-        />
-        <NumericalStatisticCard
-          colSpan={1}
-          title={t("stash.reading.proportionReadByPage")}
-          value={`${(((stats?.totalPagesRead ?? 0) / totalPages) * 100).toFixed(2)}%`}
-          additionalInfo={t("stash.reading.proportionReadByPage.info", {
-            parameters: {
-              read: stats?.totalPagesRead,
-              total: totalPages,
-            },
-          })}
-        />
-      </StatisticPageTemplate>
+      </StatisticSection>
+
+      {/* Readings per month */}
+      <ReadingPerMonthChart />
     </SideContentTemplate>
   );
 }
 
-interface ReadingPerMonthChartProps {}
+// Read / still to read values under a progress bar
+function ReadSplit({ read, notRead }: { read: ReactNode; notRead: ReactNode }) {
+  const { t } = useTranslation();
+  return (
+    <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 tabular-nums">
+      <dt className="flex items-center gap-1.5">
+        <span className="size-2 rounded-full bg-stash-400/80" aria-hidden />
+        {t("stash.reading.read")}
+      </dt>
+      <dd className="text-right text-white/60">{read}</dd>
+      <dt className="flex items-center gap-1.5">
+        <span className="size-2 rounded-full bg-white/15" aria-hidden />
+        {t("stash.reading.notRead")}
+      </dt>
+      <dd className="text-right text-white/60">{notRead}</dd>
+    </dl>
+  );
+}
 
 type ReadingPerMonthChartMode = "book" | "issue" | "page";
 
-function ReadingPerMonthChart({}: ReadingPerMonthChartProps) {
-  const { t, locale } = useTranslation();
+function ReadingPerMonthChart() {
+  const { t } = useTranslation();
   const { user } = useAppSelector((state) => state.user);
+  const [mode, setMode] = useState<ReadingPerMonthChartMode>("book");
 
   const { data, isFetching } = useCollectionMonthlyReadingStatsQuery(
     user ? { id: user.id } : { id: 0 },
     { skip: !user },
   );
+  const nBooksWithoutDate = data?.stats?.nBooksReadWithNoDate ?? 0;
 
-  const readingPerMonth = Object.entries(data?.stats?.readingPerMonth ?? {})
-    // Convert datestring to date
-    .map(([month, monthStats]) => ({
-      month: month,
-      numberOfBooksRead: monthStats.numberOfBooksRead,
-      numberOfIssuesRead: monthStats.numberOfIssuesRead,
-      numberOfPagesRead: monthStats.numberOfPagesRead,
-    }))
-    // Sort by date
-    .sort((a, b) => compareDates(a.month, b.month));
+  const months = Object.entries(data?.stats?.readingPerMonth ?? {}).map(
+    ([month, monthStats]) => ({
+      month,
+      values: {
+        book: monthStats.numberOfBooksRead,
+        issue: monthStats.numberOfIssuesRead,
+        page: monthStats.numberOfPagesRead,
+      },
+    }),
+  );
 
-  // Fill in empty months between first and last month
-  const chartData = (() => {
-    if (readingPerMonth.length === 0) return [];
-
-    const firstMonth = readingPerMonth[0].month;
-    const lastMonth = dayjs();
-    const filledData = [];
-
-    // Iterate on all the months
-    for (
-      let d = dayjs(firstMonth);
-      d.valueOf() <= lastMonth.valueOf();
-      d = d.add(1, "month")
-    ) {
-      // Find month data
-      const existing = readingPerMonth.find(
-        (item) =>
-          dayjs(item.month).year() === dayjs(d).year() &&
-          dayjs(item.month).month() === dayjs(d).month(),
-      );
-
-      // If month data exists, assign foudn values. If not found, assign empty values
-      filledData.push({
-        month: dateToShortMonthYearString(d.format()),
-        booksRead: existing?.numberOfBooksRead ?? 0,
-        issuesRead: existing?.numberOfIssuesRead ?? 0,
-        pagesRead: existing?.numberOfPagesRead ?? 0,
-      });
-    }
-    return filledData;
-  })();
-
-  // Config for the chart, mapping data keys to labels and colors
-  const chartConfig = {
-    booksRead: {
-      label: t("stash.reading.totalBooksRead"),
-      color: "blue",
-    },
-    issuesRead: {
-      label: t("stash.reading.totalIssuesRead"),
-      color: "blue",
-    },
-    pagesRead: {
-      label: t("stash.reading.totalPagesRead"),
-      color: "blue",
-    },
-  } satisfies ChartConfig;
-
-  const [mode, setMode] = useState<ReadingPerMonthChartMode>("book");
+  const labels: Record<ReadingPerMonthChartMode, string> = {
+    book: t("stash.reading.totalBooksRead"),
+    issue: t("stash.reading.totalIssuesRead"),
+    page: t("stash.reading.totalPagesRead"),
+  };
 
   return (
-    <>
-      <div className="flex my-2 gap-2 items-center">
-        <SelectInput
-          placeholder={t("stash.reading.dataToShow")}
-          defaultValue="book"
+    <StatisticCard
+      title={t("stash.reading.readingPerMonth")}
+      actions={
+        <SegmentedControl
+          label={t("stash.reading.dataToShow")}
+          value={mode}
+          onChange={setMode}
           options={[
-            { label: t("stash.reading.totalBooks"), value: "book" },
-            { label: t("stash.reading.totalIssues"), value: "issue" },
-            { label: t("stash.reading.totalPages"), value: "page" },
+            { label: t("stash.reading.books"), value: "book" },
+            { label: t("stash.reading.issues"), value: "issue" },
+            { label: t("stash.reading.pages"), value: "page" },
           ]}
-          onValueChange={(v) => setMode(v as ReadingPerMonthChartMode)}
         />
-        <p className="text-sm text-muted-foreground">
+      }
+    >
+      <MonthlyBarChart
+        data={months}
+        isLoading={isFetching && !data}
+        series={[{ key: mode, label: labels[mode], color: "var(--chart-1)" }]}
+      />
+      {/* These books can't be placed on the chart */}
+      {nBooksWithoutDate > 0 && (
+        <p className="text-xs text-white/35">
           {t("stash.reading.booksReadWithoutADate", {
-            parameters: { nbooks: data?.stats?.nBooksReadWithNoDate },
+            parameters: { nbooks: nBooksWithoutDate },
           })}
         </p>
-      </div>
-      <ChartContainer config={chartConfig}>
-        <BarChart accessibilityLayer data={chartData}>
-          <CartesianGrid vertical={false} />
-          <YAxis />
-          <XAxis
-            dataKey="month"
-            tickLine={true}
-            tickMargin={10}
-            axisLine={true}
-            angle={-45}
-            textAnchor="end"
-            height={60}
-            interval={1}
-          />
-          <ChartTooltip content={<ChartTooltipContentWithTotal />} />
-          <ChartLegend content={<ChartLegendContent />} />
-          {mode === "book" && (
-            <Bar dataKey="booksRead" fill="blue" radius={[4, 4, 4, 4]} />
-          )}
-          {mode === "issue" && (
-            <Bar dataKey="issuesRead" fill="blue" radius={[4, 4, 4, 4]} />
-          )}
-          {mode === "page" && (
-            <Bar dataKey="pagesRead" fill="blue" radius={[4, 4, 4, 4]} />
-          )}
-        </BarChart>
-      </ChartContainer>
-    </>
+      )}
+    </StatisticCard>
   );
 }

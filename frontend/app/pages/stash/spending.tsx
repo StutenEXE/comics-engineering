@@ -1,22 +1,19 @@
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { useState } from "react";
+import { FaWallet } from "react-icons/fa6";
+import { MdAutoStories } from "react-icons/md";
+import { PiPiggyBankBold } from "react-icons/pi";
 import { OwnedEditionCard } from "~/components/cards/OwnedEditionCard";
-import { ChartTooltipContentWithTotal } from "~/components/misc/ChartTooltipContentWithTotal";
-import {
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  type ChartConfig,
-} from "~/components/shadcn/ui/chart";
+import { MonthlyBarChart } from "~/components/misc/MonthlyBarChart";
+import { SegmentedControl } from "~/components/misc/SegmentedControl";
+import { Skeleton } from "~/components/misc/Skeleton";
 import { SideContentTemplate } from "~/components/templates/SideContentTemplate";
 import {
-  EmptyStatisticCard,
   NumericalStatisticCard,
   StatisticCard,
-  StatisticPageTemplate,
+  StatisticSection,
 } from "~/components/templates/StatisticPageTemplate";
 import { useTranslation } from "~/i18n/i18n";
-import type { OwnedEdition, SimpleOwnedEdition } from "~/models/ownedEdition";
+import type { SimpleOwnedEdition } from "~/models/ownedEdition";
 import { useAppSelector } from "~/store/hooks";
 import {
   useCollectionMonthlySpendingStatsQuery,
@@ -28,11 +25,7 @@ import {
   calcSavings,
   formatCurrency,
 } from "~/utils/currency";
-import { compareDates, dateToShortMonthYearString } from "~/utils/date";
 import type { Route } from "../../+types/root";
-import { SelectInput } from "~/components/forms/fields/SelectInput";
-import { useState } from "react";
-import dayjs from "dayjs";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -41,7 +34,7 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export default function StashBookshelfPage() {
+export default function StashSpendingPage() {
   const { t, locale } = useTranslation();
   const { user } = useAppSelector((state) => state.user);
 
@@ -50,109 +43,97 @@ export default function StashBookshelfPage() {
     { skip: !user },
   );
   const stats = data?.stats;
+  const isLoading = isFetching && !stats;
+  const eur = (amount?: number) => formatCurrency(amount ?? 0, "EUR", locale);
 
   return (
     <SideContentTemplate title={t("stash.spending")}>
-      <StatisticPageTemplate>
+      {/* Totals */}
+      <StatisticSection
+        title={t("stash.overview")}
+        className="grid-cols-1 sm:grid-cols-3"
+      >
         <NumericalStatisticCard
-          colSpan={1}
+          icon={FaWallet}
           title={t("stash.spending.totalSpent")}
-          value={formatCurrency(stats?.totalSpent ?? 0, "EUR", locale)}
+          value={eur(stats?.totalSpent)}
           additionalInfo={t("stash.spending.totalSpent.info", {
             parameters: {
-              purchasePrice: formatCurrency(
-                stats?.totalPurchasePrice ?? 0,
-                "EUR",
-                locale,
-              ),
-              fees: formatCurrency(stats?.totalFees ?? 0, "EUR", locale),
+              purchasePrice: eur(stats?.totalPurchasePrice),
+              fees: eur(stats?.totalFees),
             },
           })}
+          isLoading={isLoading}
         />
         <NumericalStatisticCard
-          colSpan={1}
+          icon={MdAutoStories}
           title={t("stash.spending.totalRetailPrice")}
-          value={formatCurrency(stats?.totalRetailPrice ?? 0, "EUR", locale)}
+          value={eur(stats?.totalRetailPrice)}
+          isLoading={isLoading}
         />
         <NumericalStatisticCard
-          colSpan={1}
+          icon={PiPiggyBankBold}
           title={t("stash.spending.totalSavings")}
-          value={formatCurrency(stats?.totalSavings ?? 0, "EUR", locale)}
+          value={eur(stats?.totalSavings)}
+          valueClassName={
+            (stats?.totalSavings ?? 0) > 0 ? "text-emerald-400" : undefined
+          }
           additionalInfo={t("stash.spending.totalSavings.info", {
             parameters: {
-              percentage: stats?.totalSavingsPercentage.toFixed(2),
+              percentage: (stats?.totalSavingsPercentage ?? 0).toFixed(1),
             },
           })}
+          isLoading={isLoading}
         />
-        <EmptyStatisticCard colSpan={1} />
+      </StatisticSection>
+
+      {/* Spendings per month */}
+      <SpendingPerMonthChart />
+
+      {/* Remarkable editions */}
+      <StatisticSection
+        title={t("stash.highlights")}
+        className="grid-cols-2 lg:grid-cols-4"
+      >
         <EditionStatisticCard
+          title={t("stash.spending.mostExpensive")}
           oedition={stats?.mostCostlyEdition}
           value={t("stash.spending.costed", {
-            parameters: {
-              amount: formatCurrency(
-                calcCost(stats?.mostCostlyEdition),
-                "EUR",
-                locale,
-              ),
-            },
+            parameters: { amount: eur(calcCost(stats?.mostCostlyEdition)) },
           })}
-          colSpan={1}
-          rowSpan={2}
-          title={t("stash.spending.mostExpensive")}
+          isLoading={isLoading}
         />
         <EditionStatisticCard
+          title={t("stash.spending.mostValuable")}
           oedition={stats?.mostValuableEdition}
           value={t("stash.spending.retailsAt", {
-            parameters: {
-              amount: formatCurrency(
-                stats?.mostValuableEdition?.retailPrice ?? 0,
-                "EUR",
-                locale,
-              ),
-            },
+            parameters: { amount: eur(stats?.mostValuableEdition?.retailPrice) },
           })}
-          colSpan={1}
-          rowSpan={2}
-          title={t("stash.spending.mostValuable")}
+          isLoading={isLoading}
         />
-        {/* Spendings per month */}
-        <StatisticCard
-          colSpan={4}
-          rowSpan={2}
-          title={t("stash.spending.spendingPerMonth")}
-        >
-          <SpendingPerMonthChart />
-        </StatisticCard>
-
         <EditionStatisticCard
+          title={t("stash.spending.bestDealByPrice")}
           oedition={stats?.bestDealObtainedByPrice}
           value={t("stash.spending.saved", {
             parameters: {
-              amount: formatCurrency(
-                calcSavings(stats?.bestDealObtainedByPrice),
-                "EUR",
-                locale,
-              ),
+              amount: eur(calcSavings(stats?.bestDealObtainedByPrice)),
             },
           })}
-          colSpan={1}
-          rowSpan={2}
-          title={t("stash.spending.bestDealByPrice")}
+          isLoading={isLoading}
         />
         <EditionStatisticCard
+          title={t("stash.spending.bestDealByReduction")}
           oedition={stats?.bestDealObtainedByReduction}
           value={t("stash.spending.ofReduction", {
             parameters: {
               percentage: calcReduction(
                 stats?.bestDealObtainedByReduction,
-              ).toFixed(2),
+              ).toFixed(1),
             },
           })}
-          colSpan={1}
-          rowSpan={2}
-          title={t("stash.spending.bestDealByReduction")}
+          isLoading={isLoading}
         />
-      </StatisticPageTemplate>
+      </StatisticSection>
     </SideContentTemplate>
   );
 }
@@ -160,197 +141,126 @@ export default function StashBookshelfPage() {
 interface EditionStatisticCardProps {
   title: string;
   oedition?: SimpleOwnedEdition;
-  value?: string | number;
-  colSpan?: number;
-  rowSpan?: number;
-  className?: string;
+  value?: string;
+  isLoading?: boolean;
 }
 
 function EditionStatisticCard({
   title,
   oedition,
   value,
-  colSpan = 1,
-  rowSpan = 1,
-  className = "",
+  isLoading,
 }: EditionStatisticCardProps) {
   const { t } = useTranslation();
 
   return (
-    <StatisticCard
-      colSpan={colSpan}
-      rowSpan={rowSpan}
-      title={title}
-      className={className}
-    >
-      <div className="flex flex-col items-center gap-3">
-        {!oedition && (
-          <p className="text-muted-foreground">{t("edition.nonefound")}</p>
-        )}
-        {oedition && (
-          <>
-            <p className="text-sm whitespace-nowrap">{value}</p>
-            <OwnedEditionCard
-              simpleOedition={oedition}
-              className="max-w-[100px]"
-            />
-          </>
-        )}
-      </div>
+    <StatisticCard title={title}>
+      {isLoading && (
+        <div className="flex flex-col items-center gap-3">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="aspect-[2/3] w-full max-w-28 rounded-lg" />
+        </div>
+      )}
+      {!isLoading && !oedition && (
+        <p className="py-6 text-center text-sm text-white/30">
+          {t("edition.nonefound")}
+        </p>
+      )}
+      {!isLoading && oedition && (
+        <div className="flex flex-1 flex-col items-center gap-3">
+          <p className="text-center text-sm font-medium text-stash-200/90">
+            {value}
+          </p>
+          <div className="w-full max-w-28">
+            <OwnedEditionCard simpleOedition={oedition} />
+          </div>
+        </div>
+      )}
     </StatisticCard>
   );
 }
 
-interface SpendingPerMonthChartProps {}
-
 type SpendingPerMonthChartMode = "money" | "book";
 
-function SpendingPerMonthChart({}: SpendingPerMonthChartProps) {
+function SpendingPerMonthChart() {
   const { t, locale } = useTranslation();
   const { user } = useAppSelector((state) => state.user);
+  const [mode, setMode] = useState<SpendingPerMonthChartMode>("money");
 
   const { data, isFetching } = useCollectionMonthlySpendingStatsQuery(
     user ? { id: user.id } : { id: 0 },
     { skip: !user },
   );
 
-  const spendingPerMonth = Object.entries(data?.stats?.spendingPerMonth ?? {})
-    // Convert datestring to date
-    .map(([month, monthStats]) => ({
-      month: month,
-      totalPurchasePrice: monthStats.totalPurchasePrice,
-      totalFees: monthStats.totalFees,
-      totalSpent: monthStats.totalSpent,
-      totalBooksBought: monthStats.totalBooksBought,
-      totalBooksGifted: monthStats.totalBooksGifted,
-      totalBooksAdded: monthStats.totalBooksAdded,
-    }))
-    // Sort by date
-    .sort((a, b) => compareDates(a.month, b.month));
-  // Fill in empty months between first and last month
-  const chartData = (() => {
-    if (spendingPerMonth.length === 0) return [];
+  const months = Object.entries(data?.stats?.spendingPerMonth ?? {}).map(
+    ([month, monthStats]) => ({
+      month,
+      values: {
+        purchasePrice: monthStats.totalPurchasePrice,
+        fees: monthStats.totalFees,
+        booksBought: monthStats.totalBooksBought,
+        booksGifted: monthStats.totalBooksGifted,
+      },
+    }),
+  );
 
-    const firstMonth = spendingPerMonth[0].month;
-    const lastMonth = dayjs();
-    const filledData = [];
-
-    // Iterate on all the months
-    for (
-      let d = dayjs(firstMonth);
-      d.valueOf() <= lastMonth.valueOf();
-      d = d.add(1, "month")
-    ) {
-      // Find month data
-      const existing = spendingPerMonth.find(
-        (item) =>
-          dayjs(item.month).year() === dayjs(d).year() &&
-          dayjs(item.month).month() === dayjs(d).month(),
-      );
-
-      // If month data exists, assign foudn values. If not found, assign empty values
-      filledData.push({
-        month: dateToShortMonthYearString(d.format()),
-        purchasePrice: existing?.totalPurchasePrice ?? 0,
-        fees: existing?.totalFees ?? 0,
-        totalSpent: existing?.totalSpent ?? 0,
-        booksBought: existing?.totalBooksBought ?? 0,
-        booksGifted: existing?.totalBooksGifted ?? 0,
-        booksAdded: existing?.totalBooksAdded ?? 0,
-      });
-    }
-    return filledData;
-  })();
-
-  // Config for the chart, mapping data keys to labels and colors
-  const chartConfig = {
-    purchasePrice: {
-      label: t("oedition.purchasePrice"),
-      color: "blue",
-    },
-    fees: {
-      label: t("oedition.fees"),
-      color: "lightblue",
-    },
-    booksBought: {
-      label: t("stash.spending.booksBought"),
-      color: "blue",
-    },
-    booksGifted: {
-      label: t("stash.spending.booksGifted"),
-      color: "lightblue",
-    },
-  } satisfies ChartConfig;
-
-  const [mode, setMode] = useState<SpendingPerMonthChartMode>("money");
+  // Axis labels without cents to save space
+  const compactEur = new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  });
 
   return (
-    <>
-      <div className="my-2">
-        <SelectInput
-          placeholder={t("stash.reading.dataToShow")} // Reading i18n ref here
-          defaultValue="money"
+    <StatisticCard
+      title={t("stash.spending.spendingPerMonth")}
+      actions={
+        <SegmentedControl
+          label={t("stash.reading.dataToShow")}
+          value={mode}
+          onChange={setMode}
           options={[
             { label: t("stash.spending.money"), value: "money" },
             { label: t("stash.spending.book"), value: "book" },
           ]}
-          onValueChange={(v) => setMode(v as SpendingPerMonthChartMode)}
         />
-      </div>
-      <ChartContainer config={chartConfig}>
-        <BarChart accessibilityLayer data={chartData}>
-          <CartesianGrid vertical={false} />
-          <YAxis
-            tickFormatter={(value) =>
-              mode === "money" ? formatCurrency(value, "EUR", locale) : value
-            }
-          />
-          <XAxis
-            dataKey="month"
-            tickLine={true}
-            tickMargin={10}
-            axisLine={true}
-            angle={-45}
-            textAnchor="end"
-            height={60}
-            interval={1}
-          />
-          <ChartTooltip content={<ChartTooltipContentWithTotal />} />
-          <ChartLegend content={<ChartLegendContent />} />
-          {mode === "money" && (
-            <>
-              <Bar
-                dataKey="purchasePrice"
-                stackId="a"
-                fill="blue"
-                radius={[0, 0, 4, 4]}
-              />
-              <Bar
-                dataKey="fees"
-                stackId="a"
-                fill="lightblue"
-                radius={[4, 4, 0, 0]}
-              />
-            </>
-          )}
-          {mode === "book" && (
-            <>
-              <Bar
-                dataKey="booksBought"
-                stackId="a"
-                fill="blue"
-                radius={[0, 0, 4, 4]}
-              />
-              <Bar
-                dataKey="booksGifted"
-                stackId="a"
-                fill="lightblue"
-                radius={[4, 4, 0, 0]}
-              />
-            </>
-          )}
-        </BarChart>
-      </ChartContainer>
-    </>
+      }
+    >
+      {mode === "money" ? (
+        <MonthlyBarChart
+          data={months}
+          stacked
+          isLoading={isFetching && !data}
+          series={[
+            {
+              key: "purchasePrice",
+              label: t("oedition.purchasePrice"),
+              color: "var(--chart-1)",
+            },
+            { key: "fees", label: t("oedition.fees"), color: "var(--chart-2)" },
+          ]}
+          valueFormatter={(v) => formatCurrency(v, "EUR", locale)}
+          axisFormatter={(v) => compactEur.format(v)}
+        />
+      ) : (
+        <MonthlyBarChart
+          data={months}
+          stacked
+          isLoading={isFetching && !data}
+          series={[
+            {
+              key: "booksBought",
+              label: t("stash.spending.booksBought"),
+              color: "var(--chart-1)",
+            },
+            {
+              key: "booksGifted",
+              label: t("stash.spending.booksGifted"),
+              color: "var(--chart-2)",
+            },
+          ]}
+        />
+      )}
+    </StatisticCard>
   );
 }

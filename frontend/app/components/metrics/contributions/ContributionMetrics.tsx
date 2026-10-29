@@ -19,7 +19,7 @@ export function ContributionMetrics({
 
   return (
     <div className={twMerge("flex flex-col gap-6", className)}>
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-6">
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
         <MetricCard
           val={metrics?.total}
           label={t("contribution.stats.total")}
@@ -72,14 +72,21 @@ function MetricCard({ val, label, valClassName, isLoading }: MetricCardProps) {
   return (
     <div
       className={twMerge(
-        "bg-neutral-900 p-6 rounded-lg border border-neutral-800 text-center",
+        "flex flex-col items-center gap-1 rounded-xl border border-white/8 bg-white/3 px-2 py-4 text-center sm:p-5",
         isLoading && "animate-pulse",
       )}
     >
-      <p className={twMerge("text-3xl font-bold", valClassName)}>
+      <p
+        className={twMerge(
+          "text-2xl font-semibold tabular-nums sm:text-3xl",
+          valClassName,
+        )}
+      >
         {isLoading ? <>&nbsp;</> : val}
       </p>
-      <p className="text-gray-400">{isLoading ? <>&nbsp;</> : label}</p>
+      <p className="text-xs text-white/40 sm:text-sm">
+        {isLoading ? <>&nbsp;</> : label}
+      </p>
     </div>
   );
 }

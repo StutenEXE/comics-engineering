@@ -1,6 +1,5 @@
 import { createColumnHelper } from "@tanstack/react-table";
 import { useEffect, useMemo, useState } from "react";
-import { MdDelete, MdModeEdit } from "react-icons/md";
 import { useTranslation } from "~/i18n/i18n";
 import { type OwnedEdition } from "~/models/ownedEdition";
 import { useAppSelector } from "~/store/hooks";
@@ -10,16 +9,21 @@ import {
 } from "~/store/services/api";
 import { compareDates, toDDmmYYYY } from "~/utils/date";
 import { createError, translateApiError } from "~/utils/error";
+import {
+  OwnedEditionActions,
+  OwnedEditionListItem,
+} from "../cards/OwnedEditionListItem";
 import { useConfirm } from "../modals/ConfirmModalProvider";
 import { EditOwnedEditionModal } from "../modals/EditOwnedEditionModal";
 import { OwnedEditionModal } from "../modals/OwnedEditionModal";
 import { useToast } from "../toast/Toast";
-import { BooleanCellRenderer, GenericTable } from "./GenericTable";
+import { GenericTable } from "./GenericTable";
 import {
   calcCost,
   calcReduction,
   calcSavings,
   formatCurrency,
+  savingsClassName,
 } from "~/utils/currency";
 
 interface OwnedEditionPricesTableProps {
@@ -45,18 +49,12 @@ export function OwnedEditionPricesTable({}: OwnedEditionPricesTableProps) {
   );
   // Handles modal open/close state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const openModal = () => {
-    setIsEditModalOpen(true);
-  };
   const closeModal = () => {
     setIsEditModalOpen(false);
   };
 
   // Handles edition details modal
   const [isOeditionModalOpen, setIsEditionModalOpen] = useState(false);
-  const openOeditionModal = () => {
-    setIsEditionModalOpen(true);
-  };
   const closeOeditionModal = () => {
     setIsEditionModalOpen(false);
   };
@@ -80,6 +78,26 @@ export function OwnedEditionPricesTable({}: OwnedEditionPricesTableProps) {
     refetch();
   };
 
+  // Row actions, shared by the table and the cards
+  const showOedition = (oe: OwnedEdition) => {
+    setEditionToShow(oe);
+    setIsEditionModalOpen(true);
+  };
+  const editOedition = (oe: OwnedEdition) => {
+    setEditedOwnedEdition(oe);
+    setIsEditModalOpen(true);
+  };
+  const removeOedition = (oe: OwnedEdition) =>
+    confirm({
+      title: t("stash.remove.title"),
+      message: t("stash.remove.message"),
+      onConfirm: () => {
+        removeFromCollection({ id: oe.id });
+      },
+    });
+
+  const eur = (amount: number) => formatCurrency(amount, "EUR", locale);
+
   // Define columns
   const col = createColumnHelper<OwnedEdition>();
   const columns = useMemo(
@@ -89,19 +107,18 @@ export function OwnedEditionPricesTable({}: OwnedEditionPricesTableProps) {
         id: "cover",
         header: t("oedition.cover"),
         cell: ({ row }) => (
-          <div
-            className="cursor-pointer"
-            onClick={() => {
-              setEditionToShow(row.original);
-              openOeditionModal();
-            }}
+          <button
+            type="button"
+            className="cursor-pointer overflow-hidden rounded border border-white/8 transition-colors hover:border-stash-400/40"
+            onClick={() => showOedition(row.original)}
+            aria-label={row.original.edition.book?.name}
           >
             <img
               src={row.original.edition.imgUrl}
-              alt={row.original.edition.book?.name}
+              alt=""
               className="max-h-[75px]"
             />
-          </div>
+          </button>
         ),
       }),
       // Add Date (use raw date accessor so range filtering works)
@@ -115,25 +132,26 @@ export function OwnedEditionPricesTable({}: OwnedEditionPricesTableProps) {
       col.accessor("purchasePrice", {
         header: t("oedition.purchasePrice"),
         meta: { filterType: "numrange" },
-        cell: (info) => formatCurrency(info.getValue(), "EUR", locale),
+        cell: (info) => eur(info.getValue()),
       }),
       // Fees
       col.accessor("fees", {
         header: t("oedition.fees"),
         meta: { filterType: "numrange" },
-        cell: (info) => formatCurrency(info.getValue(), "EUR", locale),
+        cell: (info) => eur(info.getValue()),
       }),
       // Total cost
       col.accessor((oe) => calcCost(oe), {
+        id: "cost",
         header: t("stash.prices.cost"),
         meta: { filterType: "numrange" },
         cell: (info) => (
           <div>
-            <p>{formatCurrency(info.getValue(), "EUR", locale)}</p>
-            <p>
-              ({formatCurrency(info.row.original.purchasePrice, "EUR", locale)}
+            <p className="font-medium text-white/85">{eur(info.getValue())}</p>
+            <p className="text-xs text-white/40">
+              ({eur(info.row.original.purchasePrice)}
               &nbsp;+&nbsp;
-              {formatCurrency(info.row.original.fees, "EUR", locale)})
+              {eur(info.row.original.fees)})
             </p>
           </div>
         ),
@@ -142,47 +160,38 @@ export function OwnedEditionPricesTable({}: OwnedEditionPricesTableProps) {
       col.accessor("retailPrice", {
         header: t("oedition.retailPrice"),
         meta: { filterType: "numrange" },
-        cell: (info) => formatCurrency(info.getValue(), "EUR", locale),
+        cell: (info) => eur(info.getValue()),
       }),
       // Savings (€)
       col.accessor((oe) => calcSavings(oe), {
+        id: "savings",
         header: t("stash.prices.savings.value"),
         meta: { filterType: "numrange" },
-        cell: (info) => formatCurrency(info.getValue(), "EUR", locale),
+        cell: (info) => (
+          <span className={savingsClassName(info.getValue())}>
+            {eur(info.getValue())}
+          </span>
+        ),
       }),
       // Reduction (%)
       col.accessor((oe) => calcReduction(oe), {
+        id: "reduction",
         header: t("stash.prices.savings.reduction"),
         meta: { filterType: "numrange" },
-        cell: (info) => <p>{info.getValue().toFixed(2)}%</p>,
+        cell: (info) => (
+          <span className={savingsClassName(info.getValue())}>
+            {info.getValue().toFixed(2)}%
+          </span>
+        ),
       }),
       // Actions
       col.display({
         id: "actions",
         cell: ({ row }) => (
-          <div className="w-min flex gap-2 justify-center items-center">
-            <MdModeEdit
-              size={20}
-              onClick={() => {
-                setEditedOwnedEdition(row.original);
-                openModal();
-              }}
-              className="cursor-pointer hover:text-blue-500"
-            />
-            <MdDelete
-              size={20}
-              onClick={() => {
-                confirm({
-                  title: t("stash.remove.title"),
-                  message: t("stash.remove.message"),
-                  onConfirm: () => {
-                    removeFromCollection({ id: row.original.id });
-                  },
-                });
-              }}
-              className="cursor-pointer hover:text-red-500"
-            />
-          </div>
+          <OwnedEditionActions
+            onEdit={() => editOedition(row.original)}
+            onRemove={() => removeOedition(row.original)}
+          />
         ),
       }),
     ],
@@ -196,6 +205,54 @@ export function OwnedEditionPricesTable({}: OwnedEditionPricesTableProps) {
         columns={columns}
         isLoading={isFetching}
         error={err}
+        renderCard={(oe) => {
+          const savings = calcSavings(oe);
+          return (
+            <OwnedEditionListItem
+              oedition={oe}
+              onOpen={() => showOedition(oe)}
+              onEdit={() => editOedition(oe)}
+              onRemove={() => removeOedition(oe)}
+            >
+              <dl className="mt-1 grid grid-cols-3 gap-2 text-xs">
+                <div>
+                  <dt className="text-white/35">{t("stash.prices.cost")}</dt>
+                  <dd className="tabular-nums text-white/85">
+                    {eur(calcCost(oe))}
+                  </dd>
+                  {oe.fees > 0 && (
+                    <dd className="tabular-nums text-white/35">
+                      +{eur(oe.fees)} {t("oedition.fees").toLowerCase()}
+                    </dd>
+                  )}
+                </div>
+                <div>
+                  <dt className="text-white/35">
+                    {t("oedition.retailPrice")}
+                  </dt>
+                  <dd className="tabular-nums text-white/70">
+                    {eur(oe.retailPrice)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-white/35">
+                    {t("stash.prices.savings.value")}
+                  </dt>
+                  <dd
+                    className={`tabular-nums ${savingsClassName(savings) || "text-white/70"}`}
+                  >
+                    {eur(savings)}
+                    {oe.retailPrice > 0 && (
+                      <span className="ml-1 opacity-70">
+                        ({calcReduction(oe).toFixed(0)}%)
+                      </span>
+                    )}
+                  </dd>
+                </div>
+              </dl>
+            </OwnedEditionListItem>
+          );
+        }}
       />
       <EditOwnedEditionModal
         ownedEdition={editedOwnedEdition!}

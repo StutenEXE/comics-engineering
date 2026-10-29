@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SerieSpendingSummaryDisplay } from "~/components/datadisplay/SerieSpendingSummaryDisplay";
 import { InfoPageHeaderComponent } from "~/components/headers/InfoPageHeader";
 import { BookList } from "~/components/lists/booklists/BookList";
 import { SerieContributionModal } from "~/components/modals/contribution/SerieContributionModal";
@@ -107,6 +108,9 @@ export default function SeriePage({ params }: { params: { id: number } }) {
           }}
           isLoading={isFetching}
         />
+
+        {/* Only shown to logged users owning editions of the serie */}
+        <SerieSpendingSummaryDisplay serie={serie} />
 
         <InfoPageSection
           label={`${t("serie.books")} (${serie?.books.length}/${serie?.nvolumes})`}
