@@ -366,12 +366,13 @@ export const publicApi = createApi({
         issues: Issue[];
         issueseries: IssueSerie[];
       },
-      { query: string, types: string[] }
+      // limit : maximum number of results per type (all of them if omitted)
+      { query: string, types: string[], limit?: number }
     >({
-      query: ({ query, types }) => ({
+      query: ({ query, types, limit }) => ({
         url: "/search/all",
         method: "GET",
-        params: { query: query.trim().toLowerCase(), types: types },
+        params: { query: query.trim().toLowerCase(), types: types, limit },
       }),
       transformResponse: (resp: {
         editions: Edition[];
@@ -457,7 +458,7 @@ export const {
   useIssueSerieCoverageQuery,
   useIssueByIdQuery,
   useIssueByBookIdQuery,
-  useLazyIssueBySerieIdQuery,
+  useIssueBySerieIdQuery,
   useIssueNeighboursQuery,
   usePublisherByIdQuery,
   useSerieByIdQuery,
@@ -465,6 +466,7 @@ export const {
   useLazySearchSeriesByNameQuery,
   useLazySearchPublishersByNameQuery,
   useLazySearchIssueSeriesByNameQuery,
+  useSearchAllByNameQuery,
   useLazySearchAllByNameQuery,
   useContributionStatsQuery,
   useContributionBySubmitterIdQuery,

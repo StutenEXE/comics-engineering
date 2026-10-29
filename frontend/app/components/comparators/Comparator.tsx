@@ -1,308 +1,224 @@
-import dayjs from "dayjs";
-import { useEffect, useState } from "react";
-import { MdDelete } from "react-icons/md";
-import { twMerge } from "tailwind-merge";
+import type { ReactNode } from "react";
+import {
+  MdClose,
+  MdCompareArrows,
+  MdSwapHoriz,
+  MdSwapVert,
+} from "react-icons/md";
+import { Link } from "react-router";
 import { useTranslation } from "~/i18n/i18n.js";
 import type { Book } from "~/models/book.js";
 import type { IssueSerie } from "~/models/issue-serie.js";
-import {
-  issueToSimpleIssue,
-  type Issue,
-  type SimpleIssue,
-} from "~/models/issue.js";
+import type { Issue } from "~/models/issue.js";
 import type { Serie } from "~/models/serie.js";
-import { useLazyIssueBySerieIdQuery } from "~/store/services/api.js";
-import { toDDmmYYYY } from "~/utils/date.js";
+import { BookComparator } from "./BookComparator";
+import { SlotMarker, type Slot } from "./ComparatorParts";
+import { IssueComparator } from "./IssueComparator";
+import { IssueContentComparator } from "./IssueContentComparator";
+import { IssueSerieComparator } from "./IssueSerieComparator";
+import { SerieComparator } from "./SerieComparator";
 
-export type Comparable = {
-  label: string;
-  type: "edition" | "book" | "serie" | "issueserie" | "issue";
-  data: Record<string, any>;
-};
+// The full items given by the search : they hold (almost) everything the comparators need
+export type Comparable =
+  | { type: "book"; data: Book }
+  | { type: "serie"; data: Serie }
+  | { type: "issue"; data: Issue }
+  | { type: "issueserie"; data: IssueSerie };
+
+export type ComparableType = Comparable["type"];
+
+export function isSameComparable(x?: Comparable, y?: Comparable): boolean {
+  return !!x && !!y && x.type === y.type && x.data.id === y.data.id;
+}
+
+type Translate = ReturnType<typeof useTranslation>["t"];
+
+/**
+ * Title and context line of an item (ex : a book's serie and volume)
+ */
+export function describeComparable(
+  item: Comparable,
+  t: Translate,
+): { title: string; subtitle?: string } {
+  switch (item.type) {
+    case "book": {
+      const serie = item.data.serie;
+      const volume = serie?.oneshot
+        ? t("serie.oneshot")
+        : `${t("generic.volume", { capitalize: true })} ${item.data.number}`;
+      return {
+        title: item.data.name,
+        subtitle: serie ? `${serie.name} · ${volume}` : undefined,
+      };
+    }
+    case "serie":
+      return {
+        title: item.data.name,
+        subtitle: `${item.data.nvolumes ?? "?"} ${t("generic.volumes")}`,
+      };
+    case "issue":
+      return {
+        title: `${item.data.issueSerie?.name ?? ""} #${item.data.number}`,
+        subtitle: item.data.name,
+      };
+    case "issueserie": {
+      const start = item.data.startDate?.slice(0, 4);
+      const end = item.data.endDate?.slice(0, 4) ?? t("generic.present");
+      return {
+        title: item.data.name,
+        subtitle: start ? `${start} – ${end}` : undefined,
+      };
+    }
+  }
+}
 
 interface ComparatorProps {
   itemA?: Comparable;
   itemB?: Comparable;
-  removeItemA: () => void;
-  removeItemB: () => void;
+  onRemove: (slot: Slot) => void;
+  onSwap: () => void;
 }
 
-type RowState = "equal" | "added" | "missing";
-
-type IssueRow = {
-  key: number;
-  left: {
-    issue?: SimpleIssue;
-    state: RowState;
-  };
-  right: {
-    issue?: SimpleIssue;
-    state: RowState;
-  };
-  diff: "left+1" | "right+1" | "none";
-};
-
-type IssueBySerieQueryTrigger = (args: {
-  id: number;
-}) => Promise<{ data?: { issues?: Issue[] } } | undefined>;
-
-function formatIssueLabel(
-  issue: SimpleIssue | undefined,
-  locale: string,
-): string {
-  if (!issue) return "";
-  return `${issue.issueSerieName} #${issue.number} (${toDDmmYYYY(issue.parutionDate, locale)})`;
-}
-
-async function getIssues(
-  item?: Comparable,
-  getIssuesBySerie?: IssueBySerieQueryTrigger,
-): Promise<SimpleIssue[]> {
-  if (!item) return [];
-  switch (item.type) {
-    case "edition":
-      return [];
-    case "book":
-      return (item.data as Book).issues;
-    case "serie": {
-      const serieId = (item.data as Serie).id;
-      if (!getIssuesBySerie) return [];
-      const response = await getIssuesBySerie({ id: serieId });
-      return response?.data?.issues?.map((is) => issueToSimpleIssue(is)) || [];
-    }
-    case "issueserie":
-      return (item.data as IssueSerie).issues;
-    case "issue":
-      return [item.data as Issue];
-    default:
-      return [];
-  }
-}
-
-async function getIssueSummaryRows(
-  itemA?: Comparable,
-  itemB?: Comparable,
-  getIssuesBySerie?: IssueBySerieQueryTrigger,
-): Promise<IssueRow[]> {
-  const leftIssues = await getIssues(itemA, getIssuesBySerie);
-  const rightIssues = await getIssues(itemB, getIssuesBySerie);
-  const leftMap = new Map<number, SimpleIssue>();
-  const rightMap = new Map<number, SimpleIssue>();
-
-  leftIssues.forEach((issue) => leftMap.set(issue.id, issue));
-  rightIssues.forEach((issue) => rightMap.set(issue.id, issue));
-
-  const allKeys = new Set([...leftMap.keys(), ...rightMap.keys()]);
-  const allIssues: SimpleIssue[] = [];
-  allKeys.forEach((key: number) => {
-    const issue = leftMap.get(key) ?? rightMap.get(key);
-    if (!issue) return;
-    allIssues.push(issue);
-  });
-
-  return [...allIssues]
-    .sort((a, b) => dayjs(a.parutionDate).diff(dayjs(b.parutionDate)))
-    .map((issue) => {
-      const left = leftMap.get(issue.id);
-      const right = rightMap.get(issue.id);
-
-      const getState = (self?: SimpleIssue, other?: SimpleIssue) => {
-        // !self && !other = impossible
-        if (!self) return "missing";
-        if (!other) return "added";
-        return "equal";
-      };
-
-      return {
-        key: issue.id,
-        left: {
-          issue: left,
-          state: getState(left, right),
-        },
-        right: {
-          issue: right,
-          state: getState(right, left),
-        },
-        diff: right && !left ? "right+1" : left && !right ? "left+1" : "none",
-      };
-    });
-}
-
-function buildSummary(rows: IssueRow[]) {
-  const summary = { totalDiff: 0, moreInLeft: 0, moreInRight: 0, nCommon: 0 };
-
-  rows.forEach((row) => {
-    if (row.diff === "none") {
-      summary.nCommon++;
-      return;
-    }
-    summary.totalDiff++;
-    if (row.diff == "left+1") summary.moreInLeft++;
-    else summary.moreInRight++;
-  });
-
-  return summary;
-}
-
-function getIssueRowClassName(state: RowState) {
-  switch (state) {
-    case "added":
-      return "border border-green-500/30 bg-green-400/30 text-green-400";
-    case "equal":
-      return "bg-transparent text-white";
-    case "missing":
-      return "bg-transparent";
-  }
-}
-
-export function Comparator({
-  itemA,
-  itemB,
-  removeItemA,
-  removeItemB,
-}: ComparatorProps) {
+export function Comparator({ itemA, itemB, onRemove, onSwap }: ComparatorProps) {
   const { t } = useTranslation();
-  const [getIssuesBySerie] = useLazyIssueBySerieIdQuery();
 
-  const sameType = itemA?.type === itemB?.type;
-  const [issueRows, setIssueRows] = useState<IssueRow[]>([]);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadIssues = async () => {
-      const issues = await getIssueSummaryRows(itemA, itemB, getIssuesBySerie);
-      if (isMounted) setIssueRows(issues);
-    };
-
-    void loadIssues();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [itemA, itemB, getIssuesBySerie]);
-
-  const summary = buildSummary(issueRows);
+  let body: ReactNode;
+  if (!itemA || !itemB) {
+    body = <Notice icon={<MdCompareArrows size={22} />}>{t("compare.pickBoth")}</Notice>;
+  } else if (itemA.type !== itemB.type) {
+    // Different types only share their issue content
+    body = (
+      <>
+        <p className="text-xs italic text-white/35">
+          {t("compare.typeMismatch", {
+            parameters: {
+              a: t(`compare.type.${itemA.type}`),
+              b: t(`compare.type.${itemB.type}`),
+            },
+          })}
+        </p>
+        <IssueContentComparator
+          key={`${itemA.type}-${itemA.data.id}-${itemB.type}-${itemB.data.id}`}
+          a={itemA}
+          b={itemB}
+        />
+      </>
+    );
+  } else {
+    body = (
+      <>
+        {isSameComparable(itemA, itemB) && (
+          <p className="text-xs italic text-white/35">{t("compare.sameItem")}</p>
+        )}
+        {/* Keyed so that the filters reset when an item changes */}
+        <TypedComparator
+          key={`${itemA.type}-${itemA.data.id}-${itemB.data.id}`}
+          a={itemA}
+          b={itemB}
+        />
+      </>
+    );
+  }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-white/30">
-      <div className="grid grid-cols-2 border-b border-white/30 text-sm font-semibold">
-        <div className="flex justify-between items-center border-r border-white/30 px-3 py-2">
-          {itemA ? t(itemA.type) : t("compare.missingA")}
-          <MdDelete
-            onClick={removeItemA}
-            size={18}
-            className={twMerge(
-              "text-red-500 hover:text-red-400 cursor-pointer transition-colors cursor-pointer",
-              itemA === undefined &&
-                "text-muted hover:text-red-muted cursor-not-allowed",
-            )}
-          />
-        </div>
-        <div className="flex justify-between px-3 py-2">
-          {itemB ? t(itemB.type) : t("compare.missingB")}
-          <MdDelete
-            onClick={removeItemB}
-            size={18}
-            className={twMerge(
-              "text-red-500 hover:text-red-400 cursor-pointer transition-colors cursor-pointer",
-              itemB === undefined &&
-                "text-muted hover:text-red-muted cursor-not-allowed",
-            )}
-          />
-        </div>
+    <div className="flex flex-col gap-6">
+      <div className="grid grid-cols-1 items-stretch gap-2 sm:grid-cols-[1fr_auto_1fr]">
+        <SlotCard slot="A" item={itemA} onRemove={() => onRemove("A")} />
+        <button
+          type="button"
+          onClick={onSwap}
+          disabled={!itemA && !itemB}
+          aria-label={t("compare.swap")}
+          title={t("compare.swap")}
+          className="mx-auto flex cursor-pointer items-center justify-center rounded-md p-1.5 text-white/35 transition-colors hover:bg-white/5 hover:text-white/80 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
+        >
+          <MdSwapVert size={20} className="sm:hidden" />
+          <MdSwapHoriz size={20} className="hidden sm:block" />
+        </button>
+        <SlotCard slot="B" item={itemB} onRemove={() => onRemove("B")} />
       </div>
-
-      <div className="p-3">
-        {/*  Comparaison */}
-        TO CREATE
-      </div>
-
-      <div className="border-t border-white/30 p-3">
-        <div className="mb-2 text-white font-bold text-ms">Issues</div>
-
-        <div className="overflow-hidden min-h-[36px] rounded-md border border-gray-500/30">
-          <div className="grid grid-cols-2 bg-neutral-900 border-b border-gray-500/30 text-sm font-semibold">
-            <div className="border-r border-gray-500/30 px-3 py-2">
-              {itemA?.label}
-            </div>
-            <div className="px-3 py-2">{itemB?.label}</div>
-          </div>
-
-          {issueRows.length === 0 ? (
-            <div className="px-3 py-3 text-sm">
-              No issues available for comparison.
-            </div>
-          ) : (
-            issueRows.map((row) => <IssueRowComp key={row.key} row={row} />)
-          )}
-        </div>
-        <div className="px-2 py-2.5 text-sm">
-          <div className="mb-1 font-bold">Recap</div>
-          <div className="text-xs">
-            Total difference: {summary.totalDiff} · Left additions:{" "}
-            {summary.moreInLeft} · Right additions: {summary.moreInRight} ·
-            Common: {summary.nCommon}
-          </div>
-        </div>
-      </div>
+      {body}
     </div>
   );
 }
 
-function IssueRowComp({ row }: { row: IssueRow }) {
-  const { locale } = useTranslation();
-  const lRowClassName = getIssueRowClassName(row.left.state);
-  const rRowClassName = getIssueRowClassName(row.right.state);
+/**
+ * Comparator of the type of the items, A and B must be of the same type
+ */
+function TypedComparator({ a, b }: { a: Comparable; b: Comparable }) {
+  switch (a.type) {
+    case "book":
+      return <BookComparator a={a.data} b={b.data as Book} />;
+    case "serie":
+      return <SerieComparator a={a.data} b={b.data as Serie} />;
+    case "issue":
+      return <IssueComparator a={a.data} b={b.data as Issue} />;
+    case "issueserie":
+      return <IssueSerieComparator a={a.data} b={b.data as IssueSerie} />;
+  }
+}
 
+function SlotCard({
+  slot,
+  item,
+  onRemove,
+}: {
+  slot: Slot;
+  item?: Comparable;
+  onRemove: () => void;
+}) {
+  const { t } = useTranslation();
+
+  if (!item) {
+    return (
+      <div className="flex min-h-20 items-center gap-3 rounded-lg border border-dashed border-white/10 px-3 py-3 text-sm text-white/30">
+        <SlotMarker slot={slot} present={false} />
+        {t("compare.pickItem")}
+      </div>
+    );
+  }
+
+  const { title, subtitle } = describeComparable(item, t);
   return (
-    <div
-      key={row.key}
-      className="grid min-h-[24px] grid-cols-2 items-center gap-0 border-b border-[#30363d] text-xs leading-[1.4]"
-    >
-      {row.left.state === "missing" ? (
-        <MissingRow />
-      ) : (
-        <div
-          className={`flex min-h-full items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap pl-2 ${lRowClassName}`}
-        >
-          {row.left.state === "added" ? (
-            <span className="font-bold">+</span>
-          ) : (
-            <span className="text-[#8b949e]">=</span>
-          )}
-          <span>{formatIssueLabel(row.left.issue, locale)}</span>
-        </div>
+    <div className="flex min-h-20 min-w-0 items-start gap-3 rounded-lg border border-white/8 bg-white/3 p-3">
+      <SlotMarker slot={slot} className="mt-0.5" />
+      {item.type === "book" && (
+        <img
+          src={item.data.imgUrl || "/placeholder.jpg"}
+          alt=""
+          className="w-10 aspect-[2/3] shrink-0 rounded-sm border border-white/8 object-cover"
+        />
       )}
-      {row.right.state === "missing" ? (
-        <MissingRow />
-      ) : (
-        <div
-          className={`flex min-h-full items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap pl-2 ${rRowClassName}`}
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="text-[11px] uppercase tracking-wider text-white/35">
+          {t(`compare.type.${item.type}`)}
+        </span>
+        <Link
+          to={`/${item.type}/${item.data.id}`}
+          className="line-clamp-2 text-sm font-medium text-white/85 transition-colors hover:text-indigo-300"
         >
-          {row.right.state === "added" ? (
-            <span className="font-bold">+</span>
-          ) : (
-            <span className="text-[#8b949e]">=</span>
-          )}
-          <span>{formatIssueLabel(row.right.issue, locale)}</span>
-        </div>
-      )}
+          {title}
+        </Link>
+        {subtitle && <p className="truncate text-xs text-white/40">{subtitle}</p>}
+      </div>
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={t("compare.remove")}
+        title={t("compare.remove")}
+        className="cursor-pointer rounded-md p-1 text-white/30 transition-colors hover:bg-white/5 hover:text-red-400"
+      >
+        <MdClose size={16} />
+      </button>
     </div>
   );
 }
 
-function MissingRow() {
+function Notice({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   return (
-    <span
-      className="block min-h-full w-full border border-[#30363d]"
-      style={{
-        display: "block",
-        height: "1.5em",
-        backgroundImage:
-          "repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1) 5px, transparent 5px, transparent 10px)",
-        backgroundColor: "rgba(255, 255, 255, 0.05)",
-      }}
-    ></span>
+    <div className="flex flex-col items-center gap-2 rounded-lg border border-white/8 px-4 py-10 text-center">
+      <span className="text-white/15">{icon}</span>
+      <p className="max-w-md text-sm text-white/40">{children}</p>
+    </div>
   );
 }

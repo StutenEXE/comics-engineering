@@ -417,8 +417,34 @@ export default {
   // == PAGES
   // ============================
   // Compare
-  "compare.missingA": "Item A absent",
-  "compare.missingB": "Item B absent",
+  "compare.subtitle":
+    "Comparez le contenu en issues de deux livres, séries, issues ou séries d'issues",
+  "compare.pickItem": "Choisissez un élément dans la recherche",
+  "compare.pickBoth": "Assignez un élément à A et à B pour les comparer",
+  "compare.setAs": "Mettre en %slot%",
+  "compare.remove": "Retirer",
+  "compare.swap": "Inverser A et B",
+  "compare.typeMismatch":
+    "%a% et %b% ne sont pas du même type : seul leur contenu en issues est comparé",
+  "compare.sameItem": "Le même élément est sélectionné des deux côtés",
+  "compare.type.book": "Livre",
+  "compare.type.serie": "Série",
+  "compare.type.issue": "Issue",
+  "compare.type.issueserie": "Série d'issues",
+  "compare.details": "Détails",
+  "compare.differs": "Valeurs différentes",
+  "compare.content": "Contenu",
+  "compare.publishers": "Éditeurs",
+  "compare.status": "Statut",
+  "compare.finished": "terminée",
+  "compare.numbers": "Numéros",
+  "compare.collectedIn": "Livres les contenant",
+  "compare.filter.common": "En commun",
+  "compare.filter.onlyA": "Seulement A",
+  "compare.filter.onlyB": "Seulement B",
+  "compare.overlap": "Recouvrement",
+  "compare.nothingToCompare": "Rien à comparer",
+  "compare.emptyFilter": "Aucun élément dans cette catégorie",
   // Landing
   "landing.title": "Bienvenue sur Know Your Stash",
   "landing.subtitle": "Bibliothèque de comics collaborative et gratuite !",
