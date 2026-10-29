@@ -215,6 +215,17 @@ export const publicApi = createApi({
         issueSerie: parseToIssueSerie(resp.issueSerie),
       }),
     }),
+    // Get which issues of an issue serie each book contains
+    issueSerieCoverage: build.query<
+      { coverage: { bookId: number; issueIds: number[] }[] },
+      { id: number }
+    >({
+      query: (params) => ({
+        url: "/issueseries/coverage",
+        method: "GET",
+        params: params,
+      }),
+    }),
 
     /****************
      * ISSUES
@@ -443,6 +454,7 @@ export const {
   useEditionByIdQuery,
   useEditionRelationToUserQuery,
   useIssueSerieByIdQuery,
+  useIssueSerieCoverageQuery,
   useIssueByIdQuery,
   useIssueByBookIdQuery,
   useLazyIssueBySerieIdQuery,

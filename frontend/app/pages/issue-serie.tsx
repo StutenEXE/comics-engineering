@@ -15,13 +15,12 @@ import {
   ContributionTypeEnum,
 } from "~/models/contribution";
 import { useHistoryTab } from "~/components/timelines/ContributionHistoryTimeline";
-import {
-  BookRelationGroup,
-  useRelationsTab,
-} from "~/components/misc/RelationsPanel";
+import { useRelationsTab } from "~/components/misc/RelationsPanel";
+import { IssueSerieCoverageTimeline } from "~/components/timelines/IssueSerieCoverageTimeline";
 import { useAppSelector } from "~/store/hooks";
 import {
   useIssueSerieByIdQuery,
+  useIssueSerieCoverageQuery,
   useSubmitContributionBundleMutation,
 } from "~/store/services/api";
 import { compareDates, dateToMonthYearString } from "~/utils/date";
@@ -81,11 +80,21 @@ export default function IssueSeriePage({ params }: { params: { id: number } }) {
 
   const books: SimpleBook[] | undefined = issueSerie?.books;
 
+  // Issues contained in each book
+  const { data: coverageData, isFetching: isFetchingCoverage } =
+    useIssueSerieCoverageQuery({ id: params.id });
+
   // Side panel
   const relationsTab = useRelationsTab({
     count: books?.length ?? 0,
-    isLoading: isFetching,
-    children: <BookRelationGroup label={t("relations.books")} books={books} />,
+    isLoading: isFetching || isFetchingCoverage,
+    children: (
+      <IssueSerieCoverageTimeline
+        issues={issueSerie?.issues ?? []}
+        books={books ?? []}
+        coverage={coverageData?.coverage ?? []}
+      />
+    ),
   });
   const historyTab = useHistoryTab(
     ContributionTypeEnum.ISSUE_SERIE,
