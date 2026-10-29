@@ -32,6 +32,7 @@ import {
 import { useUpdateContributionStatusMutation } from "~/store/services/api";
 import { translateApiError, type Error } from "~/utils/error";
 import { GenericList } from "../GenericList";
+import { formatIssueRanges } from "~/utils/issues";
 import {
   isSimpleIssue,
   type ContributionIssue,
@@ -41,6 +42,7 @@ import {
 interface LinkedIssue {
   id?: number;
   name?: string;
+  number?: number;
   localRef?: string;
   issueSerieId?: number;
   issueSerieName?: string;
@@ -77,6 +79,7 @@ function mapSimpleIssueToLinkedIssue(i: SimpleIssue): LinkedIssue {
   return {
     id: i.id >= 0 ? i.id : undefined,
     name: i.name,
+    number: i.number,
     localRef: isLocalEntityId(i.id) ? String(i.id) : undefined,
     issueSerieId: i.issueSerieId! >= 0 ? i.issueSerieId : undefined,
     issueSerieName: i.issueSerieName,
@@ -90,6 +93,7 @@ function mapContributionIssueToLinkedIssue(i: ContributionIssue): LinkedIssue {
   return {
     id: i.id! >= 0 ? i.id : undefined,
     name: i.name,
+    number: i.number,
     localRef: isLocalEntityId(i.id) ? String(i.id) : undefined,
     issueSerieId: i.issueSerie.id! >= 0 ? i.issueSerie.id : undefined,
     issueSerieName: i.issueSerie.name,
@@ -151,44 +155,27 @@ function getCriticalIssueList(c: SimpleContribution): LinkedIssue[] {
   return getIssueList(c).filter((issue) => issue.localRef !== undefined);
 }
 
-function formatIssueReference(
-  issue: LinkedIssue,
-  t: TranslationHook["t"],
-): string {
-  return issue.localRef
-    ? `${t("generic.local")}: ${issue.name ?? issue.localRef}`
-    : `#${issue.id} ${issue.name ?? ""}`;
-}
-
-function groupIssuesBySerie(
+// Condensed linked issues, one entry per issue serie, ex : ["Batman #1–5 + #8", "Nightwing #1"]
+function formatLinkedIssuesBySerie(
   issues: LinkedIssue[],
-  t: ReturnType<typeof useTranslation>["t"],
-) {
-  const groups = new Map<string, { title: string; items: LinkedIssue[] }>();
-
-  issues.forEach((issue) => {
-    const key =
-      issue.issueSerieId != null
-        ? `serie-${issue.issueSerieId}`
-        : issue.issueSerieLocalRef != null
-          ? `local-${issue.issueSerieLocalRef}`
-          : "other";
-
-    const title =
+  t: TranslationHook["t"],
+): string[] {
+  const issuesBySerie = new Map<string, { number: number; issueSerieName: string }[]>();
+  for (const issue of issues) {
+    if (issue.number == null) continue;
+    const serie =
       issue.issueSerieName ??
       (issue.issueSerieLocalRef
         ? `${t("generic.local")} ${t("issue.form.serie")}`
         : t("book.form.issueSerieUnknown"));
-
-    const existing = groups.get(key);
-    if (existing) {
-      existing.items.push(issue);
-    } else {
-      groups.set(key, { title, items: [issue] });
-    }
-  });
-
-  return Array.from(groups.values());
+    issuesBySerie.set(serie, [
+      ...(issuesBySerie.get(serie) ?? []),
+      { number: issue.number, issueSerieName: serie },
+    ]);
+  }
+  return [...issuesBySerie.values()].map((serieIssues) =>
+    formatIssueRanges(serieIssues),
+  );
 }
 
 function parseContributionList(
@@ -219,8 +206,6 @@ const addChildLabelKeys: Partial<Record<ContributionTypeEnum, TranslationKeys>> 
     [ContributionTypeEnum.ISSUE]: "cbundle.form.addNextIssue",
   };
 
-const ISSUES_PREVIEW_COUNT = 3;
-
 interface IconActionProps {
   label: string;
   onClick: () => void;
@@ -239,7 +224,7 @@ function IconAction({ label, onClick, className, children }: IconActionProps) {
           aria-label={label}
           onClick={onClick}
           className={twMerge(
-            "flex size-6 pointer-coarse:size-10 items-center justify-center rounded text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors cursor-pointer focus-visible:outline-1 focus-visible:outline-indigo-400",
+            "flex size-5 pointer-coarse:size-10 items-center justify-center rounded-md text-white/40 hover:bg-white/8 hover:text-white/90 transition-colors cursor-pointer focus-visible:outline-1 focus-visible:outline-indigo-400",
             className,
           )}
         >
@@ -296,42 +281,36 @@ function ContributionTreeRow({
   const addChildLabelKey = addChildLabelKeys[contribution.entityType];
 
   const renderLinkedIssues = () => {
-    if (displayedIssues.length === 0) return null;
+    const serieRanges = formatLinkedIssuesBySerie(displayedIssues, t);
+    if (serieRanges.length === 0) return null;
 
-    return (
-      <div
-        className={twMerge(
-          "flex w-full min-w-0 items-center gap-1 pl-[22px] text-xs",
-          adminActions ? "text-amber-300" : "text-zinc-400",
-        )}
-      >
-        {adminActions ? (
-          <MdWarningAmber size={12} className="shrink-0" />
-        ) : (
-          <MdLink size={12} className="shrink-0" />
-        )}
-        <span className="min-w-0 truncate">
+    // Admins : one line per issue serie to create first
+    if (adminActions) {
+      return (
+        <div className="flex flex-col pl-6 sm:pl-32 pb-0.5 text-[11px] text-amber-300/80">
           <span className="font-medium">
-            {adminActions
-              ? t("contribution.book.criticalIssues")
-              : t("contribution.book.linkedIssues")}
-            {" : "}
+            {t("contribution.book.criticalIssues")}
           </span>
-          {groupIssuesBySerie(displayedIssues, t)
-            .map((group) => {
-              const names = group.items
-                .slice(0, ISSUES_PREVIEW_COUNT)
-                .map((issue) => issue.name ?? formatIssueReference(issue, t));
-              const more = group.items.length - ISSUES_PREVIEW_COUNT;
-              return `${group.title} (${names.join(", ")}${
-                more > 0
-                  ? `, ${t("generic.andMore", { parameters: { n: more } })}`
-                  : ""
-              })`;
-            })
-            .join(" · ")}
+          {serieRanges.map((ranges) => (
+            <p key={ranges} className="flex min-w-0 items-center gap-1.5">
+              <MdWarningAmber size={13} className="shrink-0" />
+              <span className="min-w-0 truncate" title={ranges}>
+                {ranges}
+              </span>
+            </p>
+          ))}
+        </div>
+      );
+    }
+
+    const issueRanges = serieRanges.join(" · ");
+    return (
+      <p className="flex min-w-0 items-center gap-1.5 pl-6 sm:pl-32 pb-0.5 text-[11px] text-indigo-300/60">
+        <MdLink size={13} className="shrink-0" />
+        <span className="min-w-0 truncate" title={issueRanges}>
+          {issueRanges}
         </span>
-      </div>
+      </p>
     );
   };
 
@@ -339,7 +318,7 @@ function ContributionTreeRow({
     if (!adminActions || isClosed) return null;
 
     return (
-      <div className="flex items-center gap-0.5 pointer-coarse:gap-1 pr-1 mr-1 border-r border-zinc-800">
+      <div className="flex items-center gap-0.5 pointer-coarse:gap-1 pl-1 ml-1 border-l border-white/10">
         <IconAction
           label={t("contribution.review.approve")}
           onClick={() =>
@@ -393,7 +372,7 @@ function ContributionTreeRow({
           <button
             type="button"
             onClick={() => onAdd(contribution)}
-            className="flex h-6 pointer-coarse:h-10 items-center gap-0.5 rounded border border-zinc-700 px-1.5 pointer-coarse:px-3 text-xs font-medium text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition-colors cursor-pointer focus-visible:outline-1 focus-visible:outline-indigo-400"
+            className="flex h-5 pointer-coarse:h-10 items-center gap-1 rounded border border-white/10 px-1.5 pointer-coarse:px-3 text-[11px] font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-colors cursor-pointer focus-visible:outline-1 focus-visible:outline-indigo-400"
           >
             <MdAdd size={12} />
             {t(addChildLabelKey)}
@@ -422,8 +401,8 @@ function ContributionTreeRow({
 
   return (
     <div>
-      <div className="group/row flex flex-wrap items-center gap-x-2 gap-y-0.5 rounded px-1 py-0.5 hover:bg-zinc-900 focus-within:bg-zinc-900 transition-colors">
-        <div className="flex min-w-0 flex-1 items-center gap-1.5">
+      <div className="group/row flex flex-col rounded px-1.5 py-0.5 hover:bg-white/4 focus-within:bg-white/4 transition-colors">
+        <div className="flex h-6 pointer-coarse:h-10 min-w-0 items-center gap-2">
           {/* Collapse toggle (or spacer to keep names aligned) */}
           {hasChildren ? (
             <button
@@ -431,7 +410,7 @@ function ContributionTreeRow({
               onClick={() => setCollapsed((c) => !c)}
               aria-expanded={!collapsed}
               aria-label={t(collapsed ? "generic.expand" : "generic.collapse")}
-              className="relative flex size-4 shrink-0 items-center justify-center rounded text-zinc-400 hover:text-zinc-200 cursor-pointer after:absolute after:-inset-1 after:content-[''] pointer-coarse:after:-inset-3"
+              className="relative flex size-4 shrink-0 items-center justify-center rounded text-white/35 hover:text-white/70 cursor-pointer after:absolute after:-inset-1 after:content-[''] pointer-coarse:after:-inset-3"
             >
               <MdExpandMore
                 size={16}
@@ -445,16 +424,15 @@ function ContributionTreeRow({
             <span className="size-4 shrink-0" />
           )}
 
-          <span
-            className="shrink-0 rounded border border-sky-400/25 bg-sky-500/10 px-1 text-[11px] leading-4 font-medium text-sky-300"
-          >
+          {/* Fixed width : names stay aligned between siblings */}
+          <span className="w-24 shrink-0 truncate text-xs text-white/40">
             {t(`contribution.enum.type.${contribution.entityType}`)}
           </span>
-          <span className="truncate text-sm text-zinc-100">
+          <span className="min-w-0 truncate text-[13px] text-white/75">
             {getContributionName(contribution, locale)}
           </span>
           {/* Meta, muted */}
-          <span className="shrink-0 text-xs text-zinc-400">
+          <span className="hidden sm:inline shrink-0 text-xs text-white/25">
             {t(`contribution.enum.action.${contribution.action}`)}
             {contribution.id && (
               <span className="font-mono"> · #{contribution.id}</span>
@@ -468,25 +446,25 @@ function ContributionTreeRow({
               </>
             )}
           </span>
-        </div>
 
-        {/* Status + actions */}
-        <div className="ml-auto flex shrink-0 items-center gap-1">
-          {contribution.status && (
-            <ContributionStatusBadge
-              status={contribution.status}
-              className="py-0 text-[11px] leading-4"
-            />
-          )}
-          {renderAdminStatusActions()}
-          {renderActionButtons()}
+          {/* Status + actions */}
+          <div className="ml-auto flex shrink-0 items-center gap-1 pl-2">
+            {contribution.status && (
+              <ContributionStatusBadge
+                status={contribution.status}
+                className="py-0 text-[11px] leading-4"
+              />
+            )}
+            {renderAdminStatusActions()}
+            {renderActionButtons()}
+          </div>
         </div>
 
         {renderLinkedIssues()}
       </div>
 
       {!collapsed && hasChildren && (
-        <div className="ml-[11px] border-l border-zinc-800 pl-1.5">
+        <div className="ml-3.5 border-l border-white/8 pl-1.5">
           {children
             .sort((a, b) => (b.localRef || b.id) - (a.localRef || a.id))
             .map((child) => (
@@ -634,7 +612,7 @@ export function IndentedContributionList({
         />
       )}
       vertical
-      className={twMerge("gap-0.5 p-1", className)}
+      className={twMerge("gap-0 p-1.5", className)}
     />
   );
 }
